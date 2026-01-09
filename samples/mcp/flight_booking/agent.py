@@ -2,25 +2,20 @@ import logging
 import json
 from typing import Any, Dict, List, Optional
 from google.adk.agents.llm_agent import LlmAgent
-from google.adk.models.lite_llm import LiteLlm
+from google.adk.models import Gemini
 from google.adk.tools.tool_context import ToolContext
 import mcp.types as types
 from mcp.client.session import ClientSession
 
 logger = logging.getLogger(__name__)
 
-class FlightAgent:
-    def __init__(self, mcp_session: ClientSession, model_name: str = "gemini/gemini-2.0-flash-exp"):
-        self.mcp_session = mcp_session
-        self.agent = LlmAgent(
-            model=LiteLlm(model=model_name),
-# RE-WRITING CLASS with async tools for now.
+
 
 class FlightAgent:
-    def __init__(self, mcp_session: ClientSession, model_name: str = "gemini/gemini-2.0-flash-exp"):
+    def __init__(self, mcp_session: ClientSession, model_name: str = "gemini-2.0-flash-exp"):
         self.mcp_session = mcp_session
         self.agent = LlmAgent(
-            model=LiteLlm(model=model_name),
+            model=Gemini(model=model_name),
             name="flight_agent",
             description="A helpful flight booking agent that can search and book flights.",
             instruction="You are a flight booking assistant. Use the available tools to search for flights and book them. When you search for flights, you will receive a UI to show to the user. Always present this UI. When booking, use the information provided in the UI context.",

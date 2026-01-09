@@ -8,7 +8,7 @@ from typing import Optional
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
 from sse_starlette.sse import EventSourceResponse
 from jsonrpc import JSONRPCResponseManager, dispatcher
@@ -18,6 +18,7 @@ from google.adk.artifacts import InMemoryArtifactService
 from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
+import mcp.types as mcp_types
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
@@ -37,6 +38,33 @@ chat_queue = asyncio.Queue()
 a2ui_queue = asyncio.Queue()
 
 # Helper to manage global MCP connection
+class ADKClientSession(ClientSession):
+    async def _received_notification(self, notification: mcp_types.ServerNotification) -> None:
+        # Intercept resource updates
+        logger.info(f"Received Notification: {notification}")
+        if notification.method == "notifications/resources/updated":
+             uri = notification.params.uri
+             logger.info(f"Resource Updated: {uri}, fetching new content...")
+             try:
+                # We need to spawn a task because we can't block the read loop?
+                # Actually _received_notification is awaited in the read loop.
+                # read_resource sends a request and waits for response.
+                # If we do it HERE, we might deadlock if read_resource needs the read loop to process response?
+                # YES. If _received_notification is called by the read loop, and we call read_resource which waits for a response provided by the read loop...
+                # WE WILL DEADLOCK.
+                asyncio.create_task(self.fetch_and_broadcast(uri))
+             except Exception as e:
+                logger.error(f"Error handling notification: {e}")
+
+    async def fetch_and_broadcast(self, uri):
+        try:
+             res = await self.read_resource(uri)
+             if res.contents:
+                content = res.contents[0].text
+                await a2ui_queue.put({"type": "a2ui_update", "uri": uri, "content": content})
+        except Exception as e:
+             logger.error(f"Failed to fetch updated resource {uri}: {e}")
+
 class MCPClientManager:
     def __init__(self):
         self.exit_stack = None
@@ -53,33 +81,16 @@ class MCPClientManager:
         from contextlib import AsyncExitStack
         self.exit_stack = AsyncExitStack()
 
-        stdio_transport = await self.exit_stack.enter_async_context(stdio_client(server_params))
-        self.session = await self.exit_stack.enter_async_context(ClientSession(stdio_transport, stdio_transport))
+        read_stream, write_stream = await self.exit_stack.enter_async_context(stdio_client(server_params))
+        self.session = await self.exit_stack.enter_async_context(ADKClientSession(read_stream, write_stream))
 
         await self.session.initialize()
         logger.info("MCP Client Initialized and Connected to Backend")
 
-        # Start notification listener
-        asyncio.create_task(self.listen_for_notifications())
-
-    async def listen_for_notifications(self):
-        async for notification in self.session.notifications:
-            logger.info(f"Received Notification: {notification}")
-            if notification.method == "notifications/resources/updated":
-                uri = notification.params.uri
-                logger.info(f"Resource Updated: {uri}, fetching new content...")
-                try:
-                    res = await self.session.read_resource(uri)
-                    if res.contents:
-                        content = res.contents[0].text
-                        # Push to A2UI Queue
-                        await a2ui_queue.put({"type": "a2ui_update", "uri": uri, "content": content})
-                except Exception as e:
-                    logger.error(f"Failed to fetch updated resource {uri}: {e}")
-
     async def stop(self):
         if self.exit_stack:
             await self.exit_stack.aclose()
+
 
 mcp_manager = MCPClientManager()
 
@@ -87,9 +98,9 @@ mcp_manager = MCPClientManager()
 
 async def rpc_endpoint(request):
     """Handle JSON-RPC requests."""
-    payload = await request.json()
-    response = await JSONRPCResponseManager.handle(payload, dispatcher)
-    return JSONResponse(response.json)
+    body = await request.body()
+    response = JSONRPCResponseManager.handle(body.decode("utf-8"), dispatcher)
+    return Response(response.json, media_type="application/json")
 
 @dispatcher.add_method
 def sendMessage(message: str, session_id: str = "default"):
@@ -207,11 +218,18 @@ middleware = [
     Middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 ]
 
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app):
+    await startup()
+    yield
+    await shutdown()
+
 app = Starlette(
     routes=routes,
     middleware=middleware,
-    on_startup=[startup],
-    on_shutdown=[shutdown]
+    lifespan=lifespan
 )
 
 if __name__ == "__main__":

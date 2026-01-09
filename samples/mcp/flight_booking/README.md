@@ -31,7 +31,10 @@ This demo showcases an ADK Agent that wraps an MCP Server to provide a rich UI f
 Run the server:
 
 ```bash
-python -m samples.mcp.flight_booking
+# Run from the flight_booking directory
+python .
+# OR
+python __main__.py
 ```
 
 ## Usage
