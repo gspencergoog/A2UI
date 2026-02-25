@@ -34,7 +34,7 @@ export class Validator {
   ) {
     // Set strict: false to be lenient with unknown keywords, if any.
     this.ajv = new Ajv({ allErrors: true, strict: false });
-    addFormats(this.ajv as any);
+    addFormats(this.ajv);
     for (const [name, schema] of Object.entries(schemas)) {
       this.ajv.addSchema(schema, name);
     }
