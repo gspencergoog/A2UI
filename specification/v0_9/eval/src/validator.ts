@@ -121,7 +121,12 @@ export class Validator {
             // Map out every component generated in the message to perform targeted validation
             // and eliminate `oneOf` noise entirely.
             const pathToObject = new Map<string, any>();
+            const visited = new Set<any>();
             const traverse = (obj: any, currentPath: string = '') => {
+              if (typeof obj !== "object" || obj === null || visited.has(obj)) {
+                return;
+              }
+              visited.add(obj);
               if (Array.isArray(obj)) {
                 obj.forEach((item, index) => traverse(item, `${currentPath}/${index}`));
               } else if (typeof obj === 'object' && obj !== null) {
