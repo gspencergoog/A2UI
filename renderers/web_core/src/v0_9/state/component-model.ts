@@ -3,8 +3,8 @@ import { EventEmitter, EventSource } from '../common/events.js';
 export class ComponentModel {
   private _properties: Record<string, any>;
   private readonly _onUpdated = new EventEmitter<ComponentModel>();
-  
-  /** 
+
+  /**
    * Fires whenever the component's properties are updated.
    */
   readonly onUpdated: EventSource<ComponentModel> = this._onUpdated;
@@ -12,7 +12,7 @@ export class ComponentModel {
   constructor(
     readonly id: string,
     readonly type: string,
-    initialProperties: Record<string, any>
+    initialProperties: Record<string, any>,
   ) {
     this._properties = initialProperties;
   }
@@ -28,5 +28,13 @@ export class ComponentModel {
 
   dispose(): void {
     this._onUpdated.dispose();
+  }
+
+  get componentTree(): any {
+    return {
+      id: this.id,
+      type: this.type,
+      ...this._properties,
+    };
   }
 }

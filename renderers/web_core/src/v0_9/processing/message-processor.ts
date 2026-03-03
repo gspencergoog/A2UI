@@ -1,10 +1,10 @@
-import { SurfaceModel, ActionListener } from '../state/surface-model.js';
-import { Catalog, ComponentApi } from '../catalog/types.js';
-import { SurfaceGroupModel } from '../state/surface-group-model.js';
-import { ComponentModel } from '../state/component-model.js';
-import { Subscription } from '../common/events.js';
+import { SurfaceModel, ActionListener } from "../state/surface-model.js";
+import { Catalog, ComponentApi } from "../catalog/types.js";
+import { SurfaceGroupModel } from "../state/surface-group-model.js";
+import { ComponentModel } from "../state/component-model.js";
+import { Subscription } from "../common/events.js";
 
-import { A2uiMessage } from '../schema/server-to-client.js';
+import { A2uiMessage } from "../schema/server-to-client.js";
 
 /**
  * The central processor for A2UI messages.
@@ -19,10 +19,12 @@ export class MessageProcessor<T extends ComponentApi> {
    */
   constructor(
     private catalogs: Catalog<T>[],
-    private actionHandler: ActionListener
+    private actionHandler?: ActionListener,
   ) {
     this.model = new SurfaceGroupModel<T>();
-    this.model.onAction.subscribe(this.actionHandler);
+    if (this.actionHandler) {
+      this.model.onAction.subscribe(this.actionHandler);
+    }
   }
 
   /**
@@ -51,9 +53,15 @@ export class MessageProcessor<T extends ComponentApi> {
       return;
     }
 
-    const updateTypes = ['updateComponents', 'updateDataModel', 'deleteSurface'].filter(k => (message as any)[k]);
+    const updateTypes = [
+      "updateComponents",
+      "updateDataModel",
+      "deleteSurface",
+    ].filter((k) => (message as any)[k]);
     if (updateTypes.length > 1) {
-      console.warn(`Message contains multiple update types: ${updateTypes.join(', ')}. Ignoring.`);
+      console.warn(
+        `Message contains multiple update types: ${updateTypes.join(", ")}. Ignoring.`,
+      );
       return;
     }
 
@@ -78,7 +86,7 @@ export class MessageProcessor<T extends ComponentApi> {
     const { surfaceId, catalogId, theme } = payload;
 
     // Find catalog
-    const catalog = this.catalogs.find(c => c.id === catalogId);
+    const catalog = this.catalogs.find((c) => c.id === catalogId);
     if (!catalog) {
       console.warn(`Catalog not found: ${catalogId}`);
       return;
@@ -143,8 +151,49 @@ export class MessageProcessor<T extends ComponentApi> {
       return;
     }
 
-    const path = payload.path || '/';
+    const path = payload.path || "/";
     const value = payload.value;
+    surface.dataModel.set(path, value);
+  }
+
+  getData(
+    _component: { id: string },
+    path: string,
+    surfaceId?: string,
+  ): unknown {
+    if (!surfaceId) {
+      // Try to find surface by component? Or assume active surface?
+      // Without surfaceId, we can't reliably find the data model unless we search all (inefficient/ambiguous).
+      // For now returning undefined if no surfaceId.
+      return undefined;
+    }
+    const surface = this.model.getSurface(surfaceId);
+    if (!surface) return undefined;
+
+    return surface.dataModel.get(path);
+  }
+
+  resolvePath(path: string, contextPath?: string): string {
+    if (path.startsWith("/")) {
+      return path;
+    }
+    if (contextPath) {
+      const base = contextPath.endsWith("/") ? contextPath : `${contextPath}/`;
+      return `${base}${path}`;
+    }
+    return `/${path}`;
+  }
+
+  setData(
+    _component: { id: string },
+    path: string,
+    value: unknown,
+    surfaceId?: string | null,
+  ): void {
+    if (!surfaceId) return;
+    const surface = this.model.getSurface(surfaceId);
+    if (!surface) return;
+
     surface.dataModel.set(path, value);
   }
 }

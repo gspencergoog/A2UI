@@ -5,7 +5,7 @@
   "main": "./dist/src/v0_8/index.js",
   "types": "./dist/src/v0_8/index.d.ts",
   "exports": {
-    ".": {
+    "./v0_8": {
       "types": "./dist/src/v0_8/index.d.ts",
       "default": "./dist/src/v0_8/index.js"
     },
@@ -13,20 +13,17 @@
       "types": "./dist/src/v0_9/index.d.ts",
       "default": "./dist/src/v0_9/index.js"
     },
+    "./v0_9/basic_catalog": {
+      "types": "./dist/src/v0_9/basic_catalog/index.d.ts",
+      "default": "./dist/src/v0_9/basic_catalog/index.js"
+    },
     "./types/*": {
       "types": "./dist/src/v0_8/types/*.d.ts",
       "default": "./dist/src/v0_8/types/*.js"
     },
-    "./data/*": {
-      "types": "./dist/src/v0_8/data/*.d.ts",
-      "default": "./dist/src/v0_8/data/*.js"
-    },
     "./styles/*": {
       "types": "./dist/src/v0_8/styles/*.d.ts",
       "default": "./dist/src/v0_8/styles/*.js"
-    },
-    "./schemas/*": {
-      "default": "./dist/src/v0_8/schemas/*"
     }
   },
   "type": "module",
@@ -70,7 +67,7 @@
       "clean": "if-file-deleted"
     },
     "test": {
-      "command": "node --test dist/**/*.test.js",
+      "command": "node --test dist",
       "dependencies": [
         "build"
       ]
@@ -84,6 +81,7 @@
     "wireit": "^0.15.0-pre.2"
   },
   "dependencies": {
+    "rxjs": "^7.8.2",
     "zod": "^3.25.76",
     "zod-to-json-schema": "^3.25.1"
   }

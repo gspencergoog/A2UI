@@ -1,12 +1,12 @@
-import { ComponentModel } from './component-model.js';
-import { EventEmitter, EventSource } from '../common/events.js';
+import { ComponentModel } from "./component-model.js";
+import { EventEmitter, EventSource } from "../common/events.js";
 
 /**
  * Manages the collection of components for a specific surface.
  */
 export class SurfaceComponentsModel {
   private components: Map<string, ComponentModel> = new Map();
-  
+
   private readonly _onCreated = new EventEmitter<ComponentModel>();
   private readonly _onDeleted = new EventEmitter<string>();
 
@@ -17,6 +17,10 @@ export class SurfaceComponentsModel {
 
   get(id: string): ComponentModel | undefined {
     return this.components.get(id);
+  }
+
+  get entries(): IterableIterator<[string, ComponentModel]> {
+    return this.components.entries();
   }
 
   addComponent(component: ComponentModel): void {
