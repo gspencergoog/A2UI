@@ -33,7 +33,7 @@ describe("A2uiMessageProcessor", () => {
         beginRendering: {
           surfaceId: "s1",
           root: "root",
-          styles: { Text: "text-style" },
+          styles: { font: "Arial" },
         },
       },
     ]);
@@ -42,7 +42,7 @@ describe("A2uiMessageProcessor", () => {
     const surface = surfaces.get("s1");
     assert.ok(surface);
     assert.strictEqual(surface.rootComponentId, "root");
-    assert.deepStrictEqual(surface.styles, { Text: "text-style" });
+    assert.deepStrictEqual(surface.styles, { font: "Arial" });
     // The component tree remains null until components are added via surfaceUpdate.
     assert.strictEqual(surface.componentTree, null);
   });
@@ -61,7 +61,9 @@ describe("A2uiMessageProcessor", () => {
           components: [
             {
               id: "root",
-              component: { Text: { text: { literal: "Hello" } } } as any,
+              component: {
+                Text: { text: { literal: "Hello" }, usageHint: "body" },
+              } as any,
             },
           ],
         },
@@ -126,11 +128,15 @@ describe("A2uiMessageProcessor", () => {
             },
             {
               id: "t1",
-              component: { Text: { text: { literal: "One" } } } as any,
+              component: {
+                Text: { text: { literal: "One" }, usageHint: "body" },
+              } as any,
             },
             {
               id: "t2",
-              component: { Text: { text: { literal: "Two" } } } as any,
+              component: {
+                Text: { text: { literal: "Two" }, usageHint: "body" },
+              } as any,
             },
           ],
         },
@@ -188,7 +194,7 @@ describe("A2uiMessageProcessor", () => {
             {
               id: "item",
               component: {
-                Text: { text: { path: "." } },
+                Text: { text: { path: "." }, usageHint: "body" },
               } as any,
             },
           ],

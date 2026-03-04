@@ -21,19 +21,42 @@ export {
 export { type Action } from "./components.js";
 
 import {
+  Action,
   AudioPlayer,
   Button,
+  Card,
   Checkbox,
+  Column,
   DateTimeInput,
   Divider,
   Icon,
   Image,
+  List,
+  Modal,
   MultipleChoice,
+  Row,
   Slider,
+  Tabs,
   Text,
   TextField,
   Video,
 } from "./components";
+
+import type { z } from "zod";
+import type {
+  A2uiMessageSchema,
+  BeginRenderingMessageSchema,
+  ComponentInstanceSchema,
+  ComponentPropertiesSchema,
+  DataModelUpdateMessageSchema,
+  DeleteSurfaceMessageSchema,
+  SurfaceUpdateMessageSchema,
+  ValueMapSchema,
+} from "../schema/server-to-client.js";
+import type {
+  ComponentArrayReferenceSchema,
+  ComponentArrayTemplateSchema,
+} from "../schema/common-types.js";
 import { StringValue } from "./primitives";
 
 export type MessageProcessor = {
@@ -234,69 +257,33 @@ export declare type DataMap = Map<string, DataValue>;
 export declare type DataArray = DataValue[];
 
 /** A template for creating components from a list in the data model. */
-export declare interface ComponentArrayTemplate {
-  componentId: string;
-  dataBinding: string;
-}
+export type ComponentArrayTemplate = z.infer<
+  typeof ComponentArrayTemplateSchema
+>;
 
 /** Defines a list of child components, either explicitly or via a template. */
-export declare interface ComponentArrayReference {
-  explicitList?: string[];
-  template?: ComponentArrayTemplate;
-}
+export type ComponentArrayReference = z.infer<
+  typeof ComponentArrayReferenceSchema
+>;
 
 /** Represents the general shape of a component's properties. */
-export declare type ComponentProperties = {
-  // Allow any property, but define known structural ones for type safety.
-  children?: ComponentArrayReference;
-  child?: string;
-  [k: string]: unknown;
-};
+export type ComponentProperties = z.infer<typeof ComponentPropertiesSchema>;
 
 /** A raw component instance from a SurfaceUpdate message. */
-export declare interface ComponentInstance {
-  id: string;
-  weight?: number;
-  component?: ComponentProperties;
-}
+export type ComponentInstance = z.infer<typeof ComponentInstanceSchema>;
 
-export declare interface BeginRenderingMessage {
-  surfaceId: string;
-  root: string;
-  styles?: Record<string, string>;
-}
+export type BeginRenderingMessage = z.infer<typeof BeginRenderingMessageSchema>;
 
-export declare interface SurfaceUpdateMessage {
-  surfaceId: string;
-  components: ComponentInstance[];
-}
+export type SurfaceUpdateMessage = z.infer<typeof SurfaceUpdateMessageSchema>;
 
-export declare interface DataModelUpdate {
-  surfaceId: string;
-  path?: string;
-  contents: ValueMap[];
-}
+export type DataModelUpdate = z.infer<typeof DataModelUpdateMessageSchema>;
 
 // ValueMap is a type of DataObject for passing to the data model.
-export declare type ValueMap = DataObject & {
-  key: string;
-  /** May be JSON */
-  valueString?: string;
-  valueNumber?: number;
-  valueBoolean?: boolean;
-  valueMap?: ValueMap[];
-};
+export type ValueMap = z.infer<typeof ValueMapSchema>;
 
-export declare interface DeleteSurfaceMessage {
-  surfaceId: string;
-}
+export type DeleteSurfaceMessage = z.infer<typeof DeleteSurfaceMessageSchema>;
 
-export declare interface ServerToClientMessage {
-  beginRendering?: BeginRenderingMessage;
-  surfaceUpdate?: SurfaceUpdateMessage;
-  dataModelUpdate?: DataModelUpdate;
-  deleteSurface?: DeleteSurfaceMessage;
-}
+export type ServerToClientMessage = z.infer<typeof A2uiMessageSchema>;
 
 /**
  * A recursive type for any value that can appear within a resolved component

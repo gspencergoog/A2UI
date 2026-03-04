@@ -31,7 +31,8 @@ import {
   MessageProcessor,
   ValueMap,
   DataObject,
-} from "../types/types";
+} from "../types/types.js";
+import { A2uiMessageSchema } from "../schema/server-to-client.js";
 import {
   isComponentArrayReference,
   isObject,
@@ -95,7 +96,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
   }
 
   processMessages(messages: ServerToClientMessage[]): void {
-    for (const message of messages) {
+    for (const rawMessage of messages) {
+      const message = A2uiMessageSchema.parse(rawMessage);
+
       if (message.beginRendering) {
         this.handleBeginRendering(
           message.beginRendering,

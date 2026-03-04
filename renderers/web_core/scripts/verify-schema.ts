@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { readFileSync } from "fs";
 import { resolve, join, dirname } from "path";
@@ -10,30 +11,19 @@ import {
   DeleteSurfaceMessageSchema,
 } from "../src/v0_9/schema/server-to-client.js";
 
+import {
+  A2uiMessageSchema as V08A2uiMessageSchema,
+  BeginRenderingMessageSchema as V08BeginRenderingMessageSchema,
+  SurfaceUpdateMessageSchema as V08SurfaceUpdateMessageSchema,
+  DataModelUpdateMessageSchema as V08DataModelUpdateMessageSchema,
+  DeleteSurfaceMessageSchema as V08DeleteSurfaceMessageSchema,
+} from "../src/v0_8/schema/server-to-client.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const SPEC_DIR = resolve(__dirname, "../../../specification/v0_9/json");
-
-// Generate JSON Schema from Zod
-const jsonSchemaString = JSON.stringify(
-  zodToJsonSchema(A2uiMessageSchema, {
-    target: "jsonSchema2019-09", // Better matches draft 2020-12
-    definitions: {
-      CreateSurfaceMessage: CreateSurfaceMessageSchema,
-      UpdateComponentsMessage: UpdateComponentsMessageSchema,
-      UpdateDataModelMessage: UpdateDataModelMessageSchema,
-      DeleteSurfaceMessage: DeleteSurfaceMessageSchema,
-    },
-    name: "A2uiMessage",
-  }),
-  null,
-  2,
-);
-
-// Load the official schema
-const officialSchemaPath = join(SPEC_DIR, "server_to_client.json");
-const officialSchemaString = readFileSync(officialSchemaPath, "utf-8");
+const SPEC_DIR_V0_9 = resolve(__dirname, "../../../specification/v0_9/json");
+const SPEC_DIR_V0_8 = resolve(__dirname, "../../../specification/v0_8/json");
 
 // Parse both so we can do structural comparison rather than formatting
 // Compare definitions specifically, ignoring descriptions
@@ -140,55 +130,111 @@ function getObjectDiff(obj1: any, obj2: any, path = ""): Record<string, any> {
   return diff;
 }
 
-// Extract the definitions
-const generatedSchema = JSON.parse(jsonSchemaString);
-const officialSchema = JSON.parse(officialSchemaString);
-
-console.log("Generated Schema Root Keys:", Object.keys(generatedSchema));
-if (generatedSchema.definitions) {
-  console.log("Found .definitions");
-}
-if (generatedSchema.$defs) {
-  console.log("Found .$defs");
-}
-
-const zodDefs = generatedSchema.$defs || generatedSchema.definitions || {};
-const jsonDefs = officialSchema.$defs || officialSchema.definitions || {};
-
-const diffs = compareDefinitions(zodDefs, jsonDefs);
-
-if (Object.keys(diffs).length > 0) {
-  console.error(
-    "Zod schema definitions do not structurally match the v0.9 JSON spec.",
+function verifySchema(
+  version: string,
+  zodSchemaSpec: any,
+  jsonSpecPath: string,
+  definitionsMap?: Record<string, any>,
+) {
+  console.log(`\nVerifying Zod schema for ${version}...`);
+  // Generate JSON Schema from Zod
+  const jsonSchemaString = JSON.stringify(
+    zodToJsonSchema(zodSchemaSpec, {
+      target: "jsonSchema2019-09", // Better matches draft 2020-12
+      definitions: definitionsMap || {},
+      name: "A2uiMessage",
+    }),
+    null,
+    2,
   );
-  console.error("Differences:");
-  console.error(JSON.stringify(diffs, null, 2));
-  process.exit(1);
-}
 
-// Compare top-level oneOf
-// Zod outputs the root A2uiMessage as an anyOf array under definitions.
-const rootZodSchema = (generatedSchema.definitions || {})["A2uiMessage"] || {};
-const zodOneOf = rootZodSchema.anyOf || rootZodSchema.oneOf || [];
+  // Load the official schema
+  const officialSchemaString = readFileSync(jsonSpecPath, "utf-8");
 
-const normalizedGeneratedOneOf = zodOneOf.map((schema: any) => {
-  if (schema.$ref && schema.$ref.startsWith("#/definitions/")) {
-    return { $ref: schema.$ref.replace("#/definitions/", "#/$defs/") };
+  // Extract the definitions
+  const generatedSchema = JSON.parse(jsonSchemaString);
+  const officialSchema = JSON.parse(officialSchemaString);
+
+  if (definitionsMap) {
+    const zodDefs = generatedSchema.$defs || generatedSchema.definitions || {};
+    const jsonDefs = officialSchema.$defs || officialSchema.definitions || {};
+
+    const diffs = compareDefinitions(zodDefs, jsonDefs);
+
+    if (Object.keys(diffs).length > 0) {
+      console.error(
+        `Zod schema definitions do not structurally match the ${version} JSON spec.`,
+      );
+      console.error("Differences:");
+      console.error(JSON.stringify(diffs, null, 2));
+      process.exit(1);
+    }
   }
-  return schema;
-});
 
-const topLevelDiff = getObjectDiff(
-  normalizedGeneratedOneOf,
-  officialSchema.oneOf,
-);
-if (Object.keys(topLevelDiff).length > 0) {
-  console.error(
-    "Zod schema top-level oneOf does not match the v0.9 JSON spec.",
-  );
-  console.error(JSON.stringify(topLevelDiff, null, 2));
-  process.exit(1);
+  const rootZodSchema =
+    (generatedSchema.definitions || generatedSchema.$defs || {})[
+      "A2uiMessage"
+    ] || {};
+
+  if (officialSchema.oneOf || officialSchema.anyOf) {
+    const zodOneOf = rootZodSchema.anyOf || rootZodSchema.oneOf || [];
+    const normalizedGeneratedOneOf = zodOneOf.map((schema: any) => {
+      if (schema.$ref && schema.$ref.startsWith("#/definitions/")) {
+        return { $ref: schema.$ref.replace("#/definitions/", "#/$defs/") };
+      }
+      return schema;
+    });
+
+    const topLevelDiff = getObjectDiff(
+      normalizedGeneratedOneOf,
+      officialSchema.oneOf || officialSchema.anyOf,
+    );
+    if (Object.keys(topLevelDiff).length > 0) {
+      console.error(
+        `Zod schema top-level oneOf does not match the ${version} JSON spec.`,
+      );
+      console.error(JSON.stringify(topLevelDiff, null, 2));
+      process.exit(1);
+    }
+  } else if (officialSchema.properties) {
+    const topLevelDiff = getObjectDiff(
+      rootZodSchema.properties,
+      officialSchema.properties,
+    );
+    if (Object.keys(topLevelDiff).length > 0) {
+      console.error(
+        `Zod schema top-level properties do not match the ${version} JSON spec.`,
+      );
+      console.error(JSON.stringify(topLevelDiff, null, 2));
+      process.exit(1);
+    }
+  }
+
+  console.log(`Zod schema structurally matches the ${version} JSON spec!`);
 }
 
-console.log("Zod schema structurally matches the v0.9 JSON spec!");
+// ----------------------------------------------------
+// VERIFY v0.9
+// ----------------------------------------------------
+verifySchema(
+  "v0.9",
+  A2uiMessageSchema,
+  join(SPEC_DIR_V0_9, "server_to_client.json"),
+  {
+    CreateSurfaceMessage: CreateSurfaceMessageSchema,
+    UpdateComponentsMessage: UpdateComponentsMessageSchema,
+    UpdateDataModelMessage: UpdateDataModelMessageSchema,
+    DeleteSurfaceMessage: DeleteSurfaceMessageSchema,
+  },
+);
+
+// ----------------------------------------------------
+// VERIFY v0.8
+// ----------------------------------------------------
+verifySchema(
+  "v0.8",
+  V08A2uiMessageSchema,
+  join(SPEC_DIR_V0_8, "server_to_client_with_standard_catalog.json"),
+);
+
 process.exit(0);
