@@ -49,14 +49,14 @@ export type MessageProcessor = {
   getData(
     node: AnyComponentNode,
     relativePath: string,
-    surfaceId: string
+    surfaceId: string,
   ): DataValue | null;
 
   setData(
     node: AnyComponentNode | null,
     relativePath: string,
     value: DataValue,
-    surfaceId: string
+    surfaceId: string,
   ): void;
 
   resolvePath(path: string, dataContextPath?: string): string;
@@ -465,24 +465,24 @@ export declare type ResolvedSlider = Slider;
 export declare interface ResolvedRow {
   children: AnyComponentNode[];
   distribution?:
-  | "start"
-  | "center"
-  | "end"
-  | "spaceBetween"
-  | "spaceAround"
-  | "spaceEvenly";
+    | "start"
+    | "center"
+    | "end"
+    | "spaceBetween"
+    | "spaceAround"
+    | "spaceEvenly";
   alignment?: "start" | "center" | "end" | "stretch";
 }
 
 export declare interface ResolvedColumn {
   children: AnyComponentNode[];
   distribution?:
-  | "start"
-  | "center"
-  | "end"
-  | "spaceBetween"
-  | "spaceAround"
-  | "spaceEvenly";
+    | "start"
+    | "center"
+    | "end"
+    | "spaceBetween"
+    | "spaceAround"
+    | "spaceEvenly";
   alignment?: "start" | "center" | "end" | "stretch";
 }
 
@@ -536,7 +536,10 @@ export declare interface Surface {
  * Renders `markdown` using `options`.
  * @returns The rendered HTML as a string.
  */
-export declare type MarkdownRenderer = (markdown: string, options?: MarkdownRendererOptions) => string;
+export declare type MarkdownRenderer = (
+  markdown: string,
+  options?: MarkdownRendererOptions,
+) => string;
 
 /**
  * A map of tag names to a list of classnames to be applied to a tag.
@@ -554,4 +557,4 @@ export declare type MarkdownRendererTagClassMap = Record<string, string[]>;
  */
 export declare type MarkdownRendererOptions = {
   tagClassMap?: MarkdownRendererTagClassMap;
-}
+};

@@ -76,7 +76,7 @@ export class A2uiMessageProcessor implements MessageProcessor {
       arrayCtor: ArrayConstructor;
       setCtor: SetConstructor;
       objCtor: ObjectConstructor;
-    } = { mapCtor: Map, arrayCtor: Array, setCtor: Set, objCtor: Object }
+    } = { mapCtor: Map, arrayCtor: Array, setCtor: Set, objCtor: Object },
   ) {
     this.arrayCtor = opts.arrayCtor;
     this.mapCtor = opts.mapCtor;
@@ -99,21 +99,21 @@ export class A2uiMessageProcessor implements MessageProcessor {
       if (message.beginRendering) {
         this.handleBeginRendering(
           message.beginRendering,
-          message.beginRendering.surfaceId
+          message.beginRendering.surfaceId,
         );
       }
 
       if (message.surfaceUpdate) {
         this.handleSurfaceUpdate(
           message.surfaceUpdate,
-          message.surfaceUpdate.surfaceId
+          message.surfaceUpdate.surfaceId,
         );
       }
 
       if (message.dataModelUpdate) {
         this.handleDataModelUpdate(
           message.dataModelUpdate,
-          message.dataModelUpdate.surfaceId
+          message.dataModelUpdate.surfaceId,
         );
       }
 
@@ -131,7 +131,7 @@ export class A2uiMessageProcessor implements MessageProcessor {
   getData(
     node: AnyComponentNode,
     relativePath: string,
-    surfaceId = A2uiMessageProcessor.DEFAULT_SURFACE_ID
+    surfaceId = A2uiMessageProcessor.DEFAULT_SURFACE_ID,
   ): DataValue | null {
     const surface = this.getOrCreateSurface(surfaceId);
     if (!surface) return null;
@@ -154,7 +154,7 @@ export class A2uiMessageProcessor implements MessageProcessor {
     node: AnyComponentNode | null,
     relativePath: string,
     value: DataValue,
-    surfaceId = A2uiMessageProcessor.DEFAULT_SURFACE_ID
+    surfaceId = A2uiMessageProcessor.DEFAULT_SURFACE_ID,
   ): void {
     if (!node) {
       console.warn("No component node set");
@@ -213,9 +213,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
         console.warn(
           `Failed to parse potential JSON string: "${value.substring(
             0,
-            50
+            50,
           )}..."`,
-          e
+          e,
         );
         return value; // Return original string
       }
@@ -404,7 +404,7 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
   private handleBeginRendering(
     message: BeginRenderingMessage,
-    surfaceId: SurfaceID
+    surfaceId: SurfaceID,
   ): void {
     const surface = this.getOrCreateSurface(surfaceId);
     surface.rootComponentId = message.root;
@@ -414,7 +414,7 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
   private handleSurfaceUpdate(
     message: SurfaceUpdateMessage,
-    surfaceId: SurfaceID
+    surfaceId: SurfaceID,
   ): void {
     const surface = this.getOrCreateSurface(surfaceId);
     for (const component of message.components) {
@@ -423,14 +423,13 @@ export class A2uiMessageProcessor implements MessageProcessor {
     this.rebuildComponentTree(surface);
   }
 
-  private handleDataModelUpdate(message: DataModelUpdate, surfaceId: SurfaceID): void {
+  private handleDataModelUpdate(
+    message: DataModelUpdate,
+    surfaceId: SurfaceID,
+  ): void {
     const surface = this.getOrCreateSurface(surfaceId);
     const path = message.path ?? "/";
-    this.setDataByPath(
-      surface.dataModel,
-      path,
-      message.contents
-    );
+    this.setDataByPath(surface.dataModel, path, message.contents);
     this.rebuildComponentTree(surface);
   }
 
@@ -459,7 +458,7 @@ export class A2uiMessageProcessor implements MessageProcessor {
       surface,
       visited,
       "/",
-      "" // Initial idSuffix.
+      "", // Initial idSuffix.
     );
   }
 
@@ -476,7 +475,7 @@ export class A2uiMessageProcessor implements MessageProcessor {
     surface: Surface,
     visited: Set<string>,
     dataContextPath: string,
-    idSuffix = ""
+    idSuffix = "",
   ): AnyComponentNode | null {
     const fullId = `${baseComponentId}${idSuffix}`; // Construct the full ID
     const { components } = surface;
@@ -507,7 +506,7 @@ export class A2uiMessageProcessor implements MessageProcessor {
           surface,
           visited,
           dataContextPath,
-          idSuffix
+          idSuffix,
         );
       }
     }
@@ -725,7 +724,7 @@ export class A2uiMessageProcessor implements MessageProcessor {
     surface: Surface,
     visited: Set<string>,
     dataContextPath: string,
-    idSuffix = ""
+    idSuffix = "",
   ): ResolvedValue {
     // 1. If it's a string that matches a component ID, build that node.
     if (typeof value === "string" && surface.components.has(value)) {
@@ -734,7 +733,7 @@ export class A2uiMessageProcessor implements MessageProcessor {
         surface,
         visited,
         dataContextPath,
-        idSuffix
+        idSuffix,
       );
     }
 
@@ -748,15 +747,15 @@ export class A2uiMessageProcessor implements MessageProcessor {
             surface,
             visited,
             dataContextPath,
-            idSuffix
-          )
+            idSuffix,
+          ),
         );
       }
 
       if (value.template) {
         const fullDataPath = this.resolvePath(
           value.template.dataBinding,
-          dataContextPath
+          dataContextPath,
         );
         const data = this.getDataByPath(surface.dataModel, fullDataPath);
 
@@ -779,7 +778,7 @@ export class A2uiMessageProcessor implements MessageProcessor {
               surface,
               visited,
               childDataContextPath,
-              newSuffix // new suffix
+              newSuffix, // new suffix
             );
           });
         }
@@ -796,7 +795,7 @@ export class A2uiMessageProcessor implements MessageProcessor {
               surface,
               visited,
               childDataContextPath,
-              newSuffix // new suffix
+              newSuffix, // new suffix
             );
           });
         }
@@ -814,8 +813,8 @@ export class A2uiMessageProcessor implements MessageProcessor {
           surface,
           visited,
           dataContextPath,
-          idSuffix
-        )
+          idSuffix,
+        ),
       );
     }
 
@@ -843,7 +842,7 @@ export class A2uiMessageProcessor implements MessageProcessor {
           surface,
           visited,
           dataContextPath,
-          idSuffix
+          idSuffix,
         );
       }
       return newObj;
