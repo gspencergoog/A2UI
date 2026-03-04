@@ -28,7 +28,14 @@ export const BASIC_FUNCTIONS: Record<string, FunctionImplementation> = {
   add: (args) => (Number(args["a"]) || 0) + (Number(args["b"]) || 0),
   subtract: (args) => (Number(args["a"]) || 0) - (Number(args["b"]) || 0),
   multiply: (args) => (Number(args["a"]) || 0) * (Number(args["b"]) || 0),
-  divide: (args) => (Number(args["a"]) || 0) / (Number(args["b"]) || 1),
+  divide: (args) => {
+    const numerator = Number(args["a"]) || 0;
+    let denominator = Number(args["b"]);
+    if (args["b"] == null) { // Catches null and undefined
+      denominator = 1;
+    }
+    return numerator / denominator;
+  },
 
   // Comparison
   equals: (args) => args["a"] === args["b"],
