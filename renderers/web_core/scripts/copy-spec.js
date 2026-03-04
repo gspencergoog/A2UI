@@ -24,11 +24,17 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, "..");
-const srcDir = join(rootDir, "..", "..", "specification", "v0_8", "json");
-const destDir = join(rootDir, "src", "v0_8", "schemas");
 
-mkdirSync(destDir, { recursive: true });
+function copySchemas(version) {
+  const srcDir = join(rootDir, "..", "..", "specification", version, "json");
+  const destDir = join(rootDir, "src", version, "schemas");
 
-readdirSync(srcDir)
-  .filter((file) => file.endsWith(".json"))
-  .forEach((file) => cpSync(join(srcDir, file), join(destDir, file)));
+  mkdirSync(destDir, { recursive: true });
+
+  readdirSync(srcDir)
+    .filter((file) => file.endsWith(".json"))
+    .forEach((file) => cpSync(join(srcDir, file), join(destDir, file)));
+}
+
+copySchemas("v0_8");
+copySchemas("v0_9");
