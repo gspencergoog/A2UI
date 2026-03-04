@@ -263,24 +263,6 @@ describe("MessageProcessor", () => {
     assert.strictEqual(comp?.properties.label, undefined);
   });
 
-  it("getData and setData interact with data model", () => {
-    processor.processMessages([
-      {
-        createSurface: { surfaceId: "s1", catalogId: "test-catalog" },
-      },
-    ]);
-
-    processor.setData({ id: "comp1" }, "/test", "value", "s1");
-    assert.strictEqual(
-      processor.getData({ id: "comp1" }, "/test", "s1"),
-      "value",
-    );
-
-    // Test without surfaceId (should return undefined/do nothing)
-    processor.setData({ id: "comp1" }, "/test2", "value");
-    assert.strictEqual(processor.getData({ id: "comp1" }, "/test2"), undefined);
-  });
-
   it("warns when catalog not found", (t) => {
     const warn = t.mock.method(console, "warn");
     processor.processMessages([

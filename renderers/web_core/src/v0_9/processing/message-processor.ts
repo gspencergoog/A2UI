@@ -180,30 +180,6 @@ export class MessageProcessor<T extends ComponentApi> {
   }
 
   /**
-   * Retrieves data from the data model of a specific surface.
-   *
-   * @param _component Unused component context.
-   * @param path The JSON Pointer path to the data.
-   * @param surfaceId The ID of the surface.
-   */
-  getData(
-    _component: { id: string },
-    path: string,
-    surfaceId?: string,
-  ): unknown {
-    if (!surfaceId) {
-      // Try to find surface by component? Or assume active surface?
-      // Without surfaceId, we can't reliably find the data model unless we search all (inefficient/ambiguous).
-      // For now returning undefined if no surfaceId.
-      return undefined;
-    }
-    const surface = this.model.getSurface(surfaceId);
-    if (!surface) return undefined;
-
-    return surface.dataModel.get(path);
-  }
-
-  /**
    * Resolves a relative path against a context path.
    *
    * @param path The path to resolve.
@@ -218,26 +194,5 @@ export class MessageProcessor<T extends ComponentApi> {
       return `${base}${path}`;
     }
     return `/${path}`;
-  }
-
-  /**
-   * Updates data in the data model of a specific surface.
-   *
-   * @param _component Unused component context.
-   * @param path The JSON Pointer path where data should be written.
-   * @param value The value to write.
-   * @param surfaceId The ID of the surface.
-   */
-  setData(
-    _component: { id: string },
-    path: string,
-    value: unknown,
-    surfaceId?: string | null,
-  ): void {
-    if (!surfaceId) return;
-    const surface = this.model.getSurface(surfaceId);
-    if (!surface) return;
-
-    surface.dataModel.set(path, value);
   }
 }
