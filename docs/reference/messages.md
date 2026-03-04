@@ -75,7 +75,7 @@ Signals the client to initialize and render a surface.
       version: "v0.9";
       createSurface: {
         surfaceId: string;      // Required: Unique surface identifier
-        catalogId?: string;     // Optional: URL of component catalog
+        catalogId: string;      // Required: URL of component catalog
         theme?: object;         // Optional: Theme configuration
         sendDataModel?: boolean; // Optional: Request client to send data model updates
       }
@@ -87,7 +87,7 @@ Signals the client to initialize and render a surface.
     | Property        | Type    | Required | Description                                                     |
     | --------------- | ------- | -------- | --------------------------------------------------------------- |
     | `surfaceId`     | string  | ✅        | Unique identifier for this surface.                             |
-    | `catalogId`     | string  | ❌        | Identifier for the component catalog.                           |
+    | `catalogId`     | string  | ✅        | Identifier for the component catalog.                           |
     | `theme`         | object  | ❌        | Theme configuration (e.g., `primaryColor`).                     |
     | `sendDataModel` | boolean | ❌        | If true, client sends data model changes back to the server.    |
 
@@ -97,7 +97,7 @@ Signals the client to initialize and render a surface.
     {"version": "v0.9", "createSurface": {"surfaceId": "main", "catalogId": "https://a2ui.org/specification/v0_9/basic_catalog.json"}}
     ```
 
-    In v0.9, `createSurface` replaces `beginRendering`. There is no `root` property — components self-organize via the adjacency list. The surface renders as soon as components are received.
+    In v0.9, `createSurface` replaces `beginRendering`. The root is determined by convention: one component in `updateComponents` must have `"id": "root"`. The `catalogId` is required.
 
 ---
 
@@ -284,7 +284,7 @@ Add or update components within a surface.
             "id": "greeting",
             "component": "Text",
             "text": "Hello, World!",
-            "usageHint": "h1"
+            "variant": "h1"
           }
         ]
       }
@@ -317,7 +317,7 @@ Add or update components within a surface.
           {
             "id": "content",
             "component": "Text",
-            "text": {"$data": "/message"}
+            "text": {"path": "/message"}
           }
         ]
       }
@@ -336,7 +336,7 @@ Add or update components within a surface.
             "id": "greeting",
             "component": "Text",
             "text": "Hello, Alice!",
-            "usageHint": "h1"
+            "variant": "h1"
           }
         ]
       }
@@ -345,10 +345,10 @@ Add or update components within a surface.
 
     ### Usage Notes
 
-    - No `root` designation needed — components self-organize via the adjacency list.
+    - One component must have `"id": "root"` to serve as the tree root (convention, not a separate message field).
     - Component type is a string (`"component": "Text"`) instead of a wrapper object.
     - Properties are flat on the component object (no nesting under type key).
-    - Data binding uses `{"$data": "/path"}` syntax instead of `{"path": "/path"}`.
+    - Data binding uses `{"path": "/pointer"}` (JSON Pointer) — same key name as v0.8 but with standard JSON Pointer paths.
     - Components can be added incrementally (streaming).
 
 ### Errors
@@ -453,8 +453,8 @@ Update the data model that components bind to.
       version: "v0.9";
       updateDataModel: {
         surfaceId: string;      // Required: Target surface
-        path: string;           // Required: JSON Pointer path
-        value: any;             // Required: The value to set
+        path?: string;          // Optional: JSON Pointer path (defaults to "/")
+        value?: any;            // Optional: Value to set (omit to delete)
       }
     }
     ```
@@ -464,8 +464,8 @@ Update the data model that components bind to.
     | Property    | Type   | Required | Description                                           |
     | ----------- | ------ | -------- | ----------------------------------------------------- |
     | `surfaceId` | string | ✅        | ID of the surface to update.                          |
-    | `path`      | string | ✅        | JSON Pointer path (e.g., `/user/email`).              |
-    | `value`     | any    | ✅        | The value to set at the given path (any JSON value).  |
+    | `path`      | string | ❌        | JSON Pointer path (e.g., `/user/email`). Defaults to `/` (root). |
+    | `value`     | any    | ❌        | The value to set. If omitted, the key at `path` is removed. |
 
     ### Examples
 
@@ -504,10 +504,10 @@ Update the data model that components bind to.
     ### Usage Notes
 
     - v0.9 uses standard JSON Pointer paths and plain JSON values — no typed wrappers.
-    - `path` is required (use `"/"` for root).
-    - `value` can be any JSON type (string, number, boolean, object, array, null).
+    - `path` defaults to `"/"` (root) if omitted.
+    - `value` can be any JSON type (string, number, boolean, object, array, null). Omit to delete.
     - Simpler than v0.8's `contents` adjacency list — closer to standard JSON Patch semantics.
-    - Components referencing `{"$data": "/user/email"}` auto-update when that path changes.
+    - Components referencing `{"path": "/user/email"}` auto-update when that path changes.
 
 ---
 
