@@ -55,10 +55,11 @@ describe('ExpressionParser', () => {
 
   beforeEach(() => {
     context = new MockDataContext({
-      foo: 'bar',
+      foo: "bar",
       num: 42,
-      nested: 'foo'
+      nested: "foo",
     });
+    // @ts-ignore
     evaluator = new MockEvaluator();
     parser = new ExpressionParser(context, evaluator);
   });
@@ -119,17 +120,60 @@ describe('ExpressionParser', () => {
     });
   });
 
-  it('throws on max depth exceeded', () => {
-    assert.throws(() => {
-      parser.parse('depth', 11);
-    }, /Max recursion depth reached/);
+  it("returns error on max depth exceeded", (_t, done) => {
+    parser.parse("depth", 11).subscribe({
+      next: () => {
+        assert.fail("Should have returned an error");
+      },
+      error: (err) => {
+        assert.match(err.message, /Max recursion depth reached/);
+        done();
+      },
+    });
   });
 
-  it('handles deep recursion gracefully or throws', (_t, done) => {
-     // Verify it works for reasonable depth.
-     parser.parse('${${${"hello"}}}').subscribe(result => {
-       assert.strictEqual(result, 'hello');
-       done();
-     });
+  it("handles deep recursion gracefully", (_t, done) => {
+    parser.parse('${${"hello"}}').subscribe((result) => {
+      assert.strictEqual(result, "hello");
+      done();
+    });
+  });
+
+  it("returns error on unclosed interpolation", (_t, done) => {
+    parser.parse("hello ${world").subscribe({
+      next: () => {
+        assert.fail("Should have returned an error");
+      },
+      error: (err) => {
+        assert.match(err.message, /Unclosed interpolation/);
+        done();
+      },
+    });
+  });
+
+  it("returns error on invalid function syntax", (_t, done) => {
+    // Missing closing parenthesis
+    parser.parse("${add(a: 1, b: 2}").subscribe({
+      next: () => {
+        assert.fail("Should have returned an error");
+      },
+      error: (err) => {
+        assert.match(err.message, /Expected '\)'/);
+        done();
+      },
+    });
+  });
+
+  it("returns error on unexpected characters at end", (_t, done) => {
+    // Extra garbage after valid expression inside interpolation
+    parser.parse("${true false}").subscribe({
+      next: () => {
+        assert.fail("Should have returned an error");
+      },
+      error: (err) => {
+        assert.match(err.message, /Unexpected characters/);
+        done();
+      },
+    });
   });
 });

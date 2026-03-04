@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { combineLatest, Observable, of } from "rxjs";
+import { combineLatest, Observable, of, throwError } from "rxjs";
 import { map, switchMap } from "rxjs/operators";
 import { ExpressionEvaluator, EvaluationContext } from "./expression_evaluator";
 
@@ -32,64 +32,68 @@ export class ExpressionParser {
   ) {}
 
   public parse(input: string, depth = 0): Observable<string> {
-    if (depth > ExpressionParser.MAX_DEPTH) {
-      throw new Error("Max recursion depth reached in parse");
-    }
-    if (!input || !input.includes("${")) {
-      return of(input);
-    }
-
-    const parts: Observable<string>[] = [];
-    const scanner = new Scanner(input);
-
-    while (!scanner.isAtEnd()) {
-      if (scanner.matches("${")) {
-        scanner.advance(2);
-        const content = this.extractInterpolationContent(scanner);
-        parts.push(
-          this.evaluateExpression(content, depth + 1).pipe(
-            map((val) =>
-              val === null || val === undefined ? "" : String(val),
-            ),
-          ),
-        );
-      } else if (
-        scanner.peek() === "\\" &&
-        scanner.peek(1) === "$" &&
-        scanner.peek(2) === "{"
-      ) {
-        // Escaped \${
-        // Consume \
-        scanner.advance();
-        // Literal ${
-        parts.push(of("${"));
-        // Consume ${ (2 chars)
-        scanner.advance(2);
-      } else {
-        // Literal text
-        // Advance until we see ${ BUT check if it's escaped
-        // A simple loop is safer than advanceUntil
-        const start = scanner.pos;
-        while (!scanner.isAtEnd()) {
-          if (scanner.matches("${")) {
-            break;
-          }
-          if (
-            scanner.peek() === "\\" &&
-            scanner.peek(1) === "$" &&
-            scanner.peek(2) === "{"
-          ) {
-            break;
-          }
-          scanner.advance();
-        }
-        parts.push(of(scanner.input.substring(start, scanner.pos)));
+    try {
+      if (depth > ExpressionParser.MAX_DEPTH) {
+        throw new Error("Max recursion depth reached in parse");
       }
-    }
+      if (!input || !input.includes("${")) {
+        return of(input);
+      }
 
-    return combineLatest(parts).pipe(
-      map((resolved: string[]) => resolved.join("")),
-    );
+      const parts: Observable<string>[] = [];
+      const scanner = new Scanner(input);
+
+      while (!scanner.isAtEnd()) {
+        if (scanner.matches("${")) {
+          scanner.advance(2);
+          const content = this.extractInterpolationContent(scanner);
+          parts.push(
+            this.evaluateExpression(content, depth + 1).pipe(
+              map((val) =>
+                val === null || val === undefined ? "" : String(val),
+              ),
+            ),
+          );
+        } else if (
+          scanner.peek() === "\\" &&
+          scanner.peek(1) === "$" &&
+          scanner.peek(2) === "{"
+        ) {
+          // Escaped \${
+          // Consume \
+          scanner.advance();
+          // Literal ${
+          parts.push(of("${"));
+          // Consume ${ (2 chars)
+          scanner.advance(2);
+        } else {
+          // Literal text
+          // Advance until we see ${ BUT check if it's escaped
+          // A simple loop is safer than advanceUntil
+          const start = scanner.pos;
+          while (!scanner.isAtEnd()) {
+            if (scanner.matches("${")) {
+              break;
+            }
+            if (
+              scanner.peek() === "\\" &&
+              scanner.peek(1) === "$" &&
+              scanner.peek(2) === "{"
+            ) {
+              break;
+            }
+            scanner.advance();
+          }
+          parts.push(of(scanner.input.substring(start, scanner.pos)));
+        }
+      }
+
+      return combineLatest(parts).pipe(
+        map((resolved: string[]) => resolved.join("")),
+      );
+    } catch (e) {
+      return throwError(() => e);
+    }
   }
 
   private extractInterpolationContent(scanner: Scanner): string {
@@ -115,6 +119,10 @@ export class ExpressionParser {
       }
     }
 
+    if (braceBalance > 0) {
+      throw new Error("Unclosed interpolation: missing '}'");
+    }
+
     return scanner.input.substring(start, scanner.pos - 1);
   }
 
@@ -123,7 +131,15 @@ export class ExpressionParser {
     if (!expr) return of(null);
 
     const scanner = new Scanner(expr);
-    return this.parseExpression(scanner, depth);
+    const result = this.parseExpression(scanner, depth);
+    if (!scanner.isAtEnd()) {
+      throw new Error(
+        `Unexpected characters at end of expression: '${scanner.input.substring(
+          scanner.pos,
+        )}'`,
+      );
+    }
+    return result;
   }
 
   private parseExpression(scanner: Scanner, depth: number): Observable<any> {
