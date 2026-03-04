@@ -21,7 +21,6 @@ Several projects have built A2UI renderers and integrations:
 
 - **[json-render](https://json-render.dev/docs/a2ui)** — Vercel's React library for rendering A2UI component catalogs via Zod schemas. Maps A2UI's declarative JSON to React components. See [json-render vs. A2UI comparison](https://dipjyotimetia.medium.com/vercels-json-render-vs-google-s-a2ui-the-head-to-head-6f213cf1a23b) for an in-depth technical breakdown of the "monolith vs. protocol" tradeoff.
 - **[OpenClaw Canvas](https://docs.openclaw.ai/platforms/mac/canvas)** — OpenClaw uses A2UI to render agent-generated UI on connected devices (Mac, iOS, Android) via its canvas system and native node apps. See [OpenClaw architecture overview](https://ppaolo.substack.com/p/openclaw-system-architecture-overview) for how A2UI fits into their agent runtime.
-- **AG UI** — CopilotKit's AG UI protocol includes A2UI as a supported format for generative UI payloads, enabling agents to send A2UI blueprints through the AG UI transport layer.
 
 !!! tip "A2UI + MCP Apps Bridge"
     We are actively working on bridging A2UI and MCP Apps, enabling MCP servers to provide A2UI component blueprints as an alternative to HTML resources. This would let MCP tools return native, styled UI that renders in any A2UI-capable client. Follow progress on [GitHub](https://github.com/google/A2UI).
