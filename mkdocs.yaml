@@ -33,12 +33,14 @@ extra:
 # Navigation
 nav:
   - Home: index.md
-  - Getting Started:
+  - Introduction & FAQ:
       - What is A2UI?: introduction/what-is-a2ui.md
       - Who is it For?: introduction/who-is-it-for.md
       - How Can I Use It?: introduction/how-to-use.md
-      - Quickstart: quickstart.md
-      - A2UI Composer ⭐: composer.md
+      - Where is it Used?: introduction/where-is-it-used.md
+      - Agent UI Ecosystem: introduction/agent-ui-ecosystem.md
+  - Quickstart: quickstart.md
+  - A2UI Composer ⭐: composer.md
   - Concepts:
       - Overview: concepts/overview.md
       - Data Flow: concepts/data-flow.md
