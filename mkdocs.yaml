@@ -54,7 +54,7 @@ nav:
       - Custom Components: guides/custom-components.md
       - Theming & Styling: guides/theming.md
   - Reference:
-      - Component Reference: reference/components.md
+      - Component Gallery: reference/components.md
       - Message Reference: reference/messages.md
       - Renderers (Clients): renderers.md
       - Agents (Server-side): agents.md
