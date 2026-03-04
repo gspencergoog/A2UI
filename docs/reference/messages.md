@@ -55,13 +55,24 @@ Signals the client to initialize and render a surface.
     ### Example
 
     ```json
-    {"beginRendering": {"surfaceId": "main", "root": "root-component"}}
+    {
+      "beginRendering": {
+        "surfaceId": "main",
+        "root": "root-component"
+      }
+    }
     ```
 
     **With a custom catalog:**
 
     ```json
-    {"beginRendering": {"surfaceId": "custom-ui", "root": "root-custom", "catalogId": "https://my-company.com/a2ui/v0.8/my_custom_catalog.json"}}
+    {
+      "beginRendering": {
+        "surfaceId": "custom-ui",
+        "root": "root-custom",
+        "catalogId": "https://my-company.com/a2ui/v0.8/my_custom_catalog.json"
+      }
+    }
     ```
 
     Must be sent after component definitions. The client buffers `surfaceUpdate` and `dataModelUpdate` messages until `beginRendering` is received.
@@ -94,7 +105,13 @@ Signals the client to initialize and render a surface.
     ### Example
 
     ```json
-    {"version": "v0.9", "createSurface": {"surfaceId": "main", "catalogId": "https://a2ui.org/specification/v0_9/basic_catalog.json"}}
+    {
+      "version": "v0.9",
+      "createSurface": {
+        "surfaceId": "main",
+        "catalogId": "https://a2ui.org/specification/v0_9/basic_catalog.json"
+      }
+    }
     ```
 
     In v0.9, `createSurface` replaces `beginRendering`. The root is determined by convention: one component in `updateComponents` must have `"id": "root"`. The `catalogId` is required.
@@ -530,7 +547,11 @@ Remove a surface and all its components and data.
     ### Example
 
     ```json
-    {"deleteSurface": {"surfaceId": "modal"}}
+    {
+      "deleteSurface": {
+        "surfaceId": "modal"
+      }
+    }
     ```
 
 === "v0.9 — `deleteSurface`"
@@ -549,7 +570,12 @@ Remove a surface and all its components and data.
     ### Example
 
     ```json
-    {"version": "v0.9", "deleteSurface": {"surfaceId": "modal"}}
+    {
+      "version": "v0.9",
+      "deleteSurface": {
+        "surfaceId": "modal"
+      }
+    }
     ```
 
 ### Properties
@@ -583,17 +609,17 @@ Remove a surface and all its components and data.
 === "v0.8"
 
     ```jsonl
-    {"surfaceUpdate": {"surfaceId": "main", "components": [...]}}
-    {"dataModelUpdate": {"surfaceId": "main", "contents": {...}}}
-    {"beginRendering": {"surfaceId": "main", "root": "root-id"}}
+    { "surfaceUpdate":    { "surfaceId": "main", "components": [...] } }
+    { "dataModelUpdate":  { "surfaceId": "main", "contents": {...} } }
+    { "beginRendering":   { "surfaceId": "main", "root": "root-id" } }
     ```
 
 === "v0.9"
 
     ```jsonl
-    {"version": "v0.9", "createSurface": {"surfaceId": "main", "catalogId": "..."}}
-    {"version": "v0.9", "updateComponents": {"surfaceId": "main", "components": [...]}}
-    {"version": "v0.9", "updateDataModel": {"surfaceId": "main", "path": "/", "value": {...}}}
+    { "version": "v0.9", "createSurface":    { "surfaceId": "main", "catalogId": "..." } }
+    { "version": "v0.9", "updateComponents": { "surfaceId": "main", "components": [...] } }
+    { "version": "v0.9", "updateDataModel":  { "surfaceId": "main", "path": "/", "value": {...} } }
     ```
 
 ### Progressive Building
@@ -601,20 +627,20 @@ Remove a surface and all its components and data.
 === "v0.8"
 
     ```jsonl
-    {"surfaceUpdate": {"surfaceId": "main", "components": [...]}}  // Header
-    {"surfaceUpdate": {"surfaceId": "main", "components": [...]}}  // Body
-    {"beginRendering": {"surfaceId": "main", "root": "root-id"}} // Initial render
-    {"surfaceUpdate": {"surfaceId": "main", "components": [...]}}  // Footer (after initial render)
-    {"dataModelUpdate": {"surfaceId": "main", "contents": {...}}}   // Populate data
+    { "surfaceUpdate":   { "surfaceId": "main", "components": [...] } }  // Header
+    { "surfaceUpdate":   { "surfaceId": "main", "components": [...] } }  // Body
+    { "beginRendering":  { "surfaceId": "main", "root": "root-id" } }   // Render
+    { "surfaceUpdate":   { "surfaceId": "main", "components": [...] } }  // Footer
+    { "dataModelUpdate": { "surfaceId": "main", "contents": {...} } }    // Data
     ```
 
 === "v0.9"
 
     ```jsonl
-    {"version": "v0.9", "createSurface": {"surfaceId": "main", "catalogId": "..."}}
-    {"version": "v0.9", "updateComponents": {"surfaceId": "main", "components": [...]}}  // Header
-    {"version": "v0.9", "updateComponents": {"surfaceId": "main", "components": [...]}}  // Body + Footer
-    {"version": "v0.9", "updateDataModel": {"surfaceId": "main", "path": "/", "value": {...}}}
+    { "version": "v0.9", "createSurface":    { "surfaceId": "main", "catalogId": "..." } }
+    { "version": "v0.9", "updateComponents": { "surfaceId": "main", "components": [...] } }  // Header
+    { "version": "v0.9", "updateComponents": { "surfaceId": "main", "components": [...] } }  // Body + Footer
+    { "version": "v0.9", "updateDataModel":  { "surfaceId": "main", "path": "/", "value": {...} } }
     ```
 
 ## Validation
