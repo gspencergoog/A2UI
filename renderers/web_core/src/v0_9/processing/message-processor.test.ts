@@ -35,6 +35,7 @@ describe("MessageProcessor", () => {
   it("creates surface", () => {
     processor.processMessages([
       {
+        version: "v0.9",
         createSurface: {
           surfaceId: "s1",
           catalogId: "test-catalog",
@@ -50,12 +51,14 @@ describe("MessageProcessor", () => {
   it("updates components on correct surface", () => {
     processor.processMessages([
       {
+        version: "v0.9",
         createSurface: { surfaceId: "s1", catalogId: "test-catalog" },
       },
     ]);
 
     processor.processMessages([
       {
+        version: "v0.9",
         updateComponents: {
           surfaceId: "s1",
           components: [{ id: "root", component: "Box" }],
@@ -70,6 +73,7 @@ describe("MessageProcessor", () => {
   it("updates existing components via message", () => {
     processor.processMessages([
       {
+        version: "v0.9",
         createSurface: { surfaceId: "s1", catalogId: "test-catalog" },
       },
     ]);
@@ -77,6 +81,7 @@ describe("MessageProcessor", () => {
     // Verify component creation.
     processor.processMessages([
       {
+        version: "v0.9",
         updateComponents: {
           surfaceId: "s1",
           components: [{ id: "btn", component: "Button", label: "Initial" }],
@@ -91,6 +96,7 @@ describe("MessageProcessor", () => {
     // Verify component update.
     processor.processMessages([
       {
+        version: "v0.9",
         updateComponents: {
           surfaceId: "s1",
           components: [{ id: "btn", component: "Button", label: "Updated" }],
@@ -104,6 +110,7 @@ describe("MessageProcessor", () => {
   it("deletes surface", () => {
     processor.processMessages([
       {
+        version: "v0.9",
         createSurface: { surfaceId: "s1", catalogId: "test-catalog" },
       },
     ]);
@@ -111,6 +118,7 @@ describe("MessageProcessor", () => {
 
     processor.processMessages([
       {
+        version: "v0.9",
         deleteSurface: { surfaceId: "s1" },
       },
     ]);
@@ -120,12 +128,14 @@ describe("MessageProcessor", () => {
   it("routes data model updates", () => {
     processor.processMessages([
       {
+        version: "v0.9",
         createSurface: { surfaceId: "s1", catalogId: "test-catalog" },
       },
     ]);
 
     processor.processMessages([
       {
+        version: "v0.9",
         updateDataModel: {
           surfaceId: "s1",
           path: "/foo",
@@ -152,6 +162,7 @@ describe("MessageProcessor", () => {
     // Verify creation notification.
     processor.processMessages([
       {
+        version: "v0.9",
         createSurface: { surfaceId: "s1", catalogId: "test-catalog" },
       },
     ]);
@@ -161,6 +172,7 @@ describe("MessageProcessor", () => {
     // Verify deletion notification.
     processor.processMessages([
       {
+        version: "v0.9",
         deleteSurface: { surfaceId: "s1" },
       },
     ]);
@@ -171,6 +183,7 @@ describe("MessageProcessor", () => {
     sub.unsubscribe();
     processor.processMessages([
       {
+        version: "v0.9",
         createSurface: { surfaceId: "s2", catalogId: "test-catalog" },
       },
     ]);
@@ -182,12 +195,14 @@ describe("MessageProcessor", () => {
     const warn = t.mock.method(console, "warn");
     processor.processMessages([
       {
+        version: "v0.9",
         createSurface: { surfaceId: "s1", catalogId: "test-catalog" },
       },
     ]);
 
     processor.processMessages([
       {
+        version: "v0.9",
         updateComponents: { surfaceId: "s1", components: [] },
         updateDataModel: { surfaceId: "s1", path: "/", value: {} },
       } as any,
@@ -204,12 +219,14 @@ describe("MessageProcessor", () => {
     const warn = t.mock.method(console, "warn");
     processor.processMessages([
       {
+        version: "v0.9",
         createSurface: { surfaceId: "s1", catalogId: "test-catalog" },
       },
     ]);
 
     processor.processMessages([
       {
+        version: "v0.9",
         updateComponents: {
           surfaceId: "s1",
           components: [{ id: "comp1", label: "No Type" } as any],
@@ -229,12 +246,14 @@ describe("MessageProcessor", () => {
   it("recreates component when type changes", () => {
     processor.processMessages([
       {
+        version: "v0.9",
         createSurface: { surfaceId: "s1", catalogId: "test-catalog" },
       },
     ]);
 
     processor.processMessages([
       {
+        version: "v0.9",
         updateComponents: {
           surfaceId: "s1",
           components: [{ id: "comp1", component: "Button", label: "Btn" }],
@@ -249,6 +268,7 @@ describe("MessageProcessor", () => {
     // Change type to Label
     processor.processMessages([
       {
+        version: "v0.9",
         updateComponents: {
           surfaceId: "s1",
           components: [{ id: "comp1", component: "Label", text: "Lbl" }],
@@ -267,6 +287,7 @@ describe("MessageProcessor", () => {
     const warn = t.mock.method(console, "warn");
     processor.processMessages([
       {
+        version: "v0.9",
         createSurface: {
           surfaceId: "s1",
           catalogId: "unknown-catalog",
@@ -284,12 +305,14 @@ describe("MessageProcessor", () => {
     const warn = t.mock.method(console, "warn");
     processor.processMessages([
       {
+        version: "v0.9",
         createSurface: { surfaceId: "s1", catalogId: "test-catalog" },
       },
     ]);
 
     processor.processMessages([
       {
+        version: "v0.9",
         createSurface: { surfaceId: "s1", catalogId: "test-catalog" },
       },
     ]);
@@ -302,9 +325,10 @@ describe("MessageProcessor", () => {
     const warn = t.mock.method(console, "warn");
     processor.processMessages([
       {
+        version: "v0.9",
         updateComponents: {
           surfaceId: "unknown-s",
-          components: [],
+          components: [] as any,
         },
       },
     ]);

@@ -173,6 +173,18 @@ export type AccessibilityAttributes = z.infer<
   typeof AccessibilityAttributesSchema
 >;
 
+export const AnyComponentSchema = z
+  .object({
+    component: z.string().describe("The type name of the component."),
+    id: ComponentIdSchema.optional(),
+    weight: z.number().optional(),
+  })
+  .passthrough()
+  .describe("A generic A2UI component definition.");
+
+/** A generic A2UI component definition. */
+export type AnyComponent = z.infer<typeof AnyComponentSchema>;
+
 export const CommonSchemas = {
   ComponentId: ComponentIdSchema,
   ChildList: ChildListSchema,
@@ -188,4 +200,5 @@ export const CommonSchemas = {
   Checkable: CheckableSchema,
   Action: ActionSchema,
   AccessibilityAttributes: AccessibilityAttributesSchema,
+  AnyComponent: AnyComponentSchema,
 };

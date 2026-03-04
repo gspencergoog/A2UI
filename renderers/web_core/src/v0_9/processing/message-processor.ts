@@ -20,7 +20,13 @@ import { SurfaceGroupModel } from "../state/surface-group-model.js";
 import { ComponentModel } from "../state/component-model.js";
 import { Subscription } from "../common/events.js";
 
-import { A2uiMessage } from "../schema/server-to-client.js";
+import {
+  A2uiMessage,
+  CreateSurfaceMessage,
+  UpdateComponentsMessage,
+  UpdateDataModelMessage,
+  DeleteSurfaceMessage,
+} from "../schema/server-to-client.js";
 
 /**
  * The central processor for A2UI messages.
@@ -71,16 +77,13 @@ export class MessageProcessor<T extends ComponentApi> {
   }
 
   private processMessage(message: A2uiMessage): void {
-    if (message.createSurface) {
-      this.processCreateSurfaceMessage(message);
-      return;
-    }
-
     const updateTypes = [
+      "createSurface",
       "updateComponents",
       "updateDataModel",
       "deleteSurface",
-    ].filter((k) => (message as any)[k]);
+    ].filter((k) => k in message);
+
     if (updateTypes.length > 1) {
       console.warn(
         `Message contains multiple update types: ${updateTypes.join(", ")}. Ignoring.`,
@@ -88,24 +91,29 @@ export class MessageProcessor<T extends ComponentApi> {
       return;
     }
 
-    if (message.deleteSurface) {
+    if ("createSurface" in message) {
+      this.processCreateSurfaceMessage(message);
+      return;
+    }
+
+    if ("deleteSurface" in message) {
       this.processDeleteSurfaceMessage(message);
       return;
     }
 
-    if (message.updateComponents) {
+    if ("updateComponents" in message) {
       this.processUpdateComponentsMessage(message);
       return;
     }
 
-    if (message.updateDataModel) {
+    if ("updateDataModel" in message) {
       this.processUpdateDataModelMessage(message);
       return;
     }
   }
 
-  private processCreateSurfaceMessage(message: A2uiMessage): void {
-    const payload = message.createSurface!;
+  private processCreateSurfaceMessage(message: CreateSurfaceMessage): void {
+    const payload = message.createSurface;
     const { surfaceId, catalogId, theme } = payload;
 
     // Find catalog
@@ -124,14 +132,16 @@ export class MessageProcessor<T extends ComponentApi> {
     this.model.addSurface(surface);
   }
 
-  private processDeleteSurfaceMessage(message: A2uiMessage): void {
-    const payload = message.deleteSurface!;
+  private processDeleteSurfaceMessage(message: DeleteSurfaceMessage): void {
+    const payload = message.deleteSurface;
     if (!payload.surfaceId) return;
     this.model.deleteSurface(payload.surfaceId);
   }
 
-  private processUpdateComponentsMessage(message: A2uiMessage): void {
-    const payload = message.updateComponents!;
+  private processUpdateComponentsMessage(
+    message: UpdateComponentsMessage,
+  ): void {
+    const payload = message.updateComponents;
     if (!payload.surfaceId) return;
 
     const surface = this.model.getSurface(payload.surfaceId);
@@ -142,6 +152,11 @@ export class MessageProcessor<T extends ComponentApi> {
 
     for (const comp of payload.components) {
       const { id, component, ...properties } = comp;
+
+      if (!id) {
+        console.warn(`Component '${component}' is missing an 'id', ignoring.`);
+        continue;
+      }
 
       const existing = surface.componentsModel.get(id);
       if (existing) {
@@ -164,8 +179,8 @@ export class MessageProcessor<T extends ComponentApi> {
     }
   }
 
-  private processUpdateDataModelMessage(message: A2uiMessage): void {
-    const payload = message.updateDataModel!;
+  private processUpdateDataModelMessage(message: UpdateDataModelMessage): void {
+    const payload = message.updateDataModel;
     if (!payload.surfaceId) return;
 
     const surface = this.model.getSurface(payload.surfaceId);
