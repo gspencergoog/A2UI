@@ -2,13 +2,15 @@
 
 This page showcases all A2UI components with examples and usage patterns.
 
-=== "v0.8"
+!!! abstract "Schema Files"
 
-    For the complete technical specification, see the [Standard Catalog Definition](https://a2ui.org/specification/v0_8/standard_catalog_definition.json).
+    === "v0.8"
 
-=== "v0.9"
+        [:material-code-json: Standard Catalog Definition (JSON Schema)](https://a2ui.org/specification/v0_8/standard_catalog_definition.json)
 
-    For the complete technical specification, see the [Basic Catalog Definition](https://a2ui.org/specification/v0_9/basic_catalog.json).
+    === "v0.9"
+
+        [:material-code-json: Basic Catalog Definition (JSON Schema)](https://a2ui.org/specification/v0_9/basic_catalog.json)
 
 ---
 
@@ -18,9 +20,9 @@ This page showcases all A2UI components with examples and usage patterns.
 
 Horizontal layout container. Children are arranged left-to-right.
 
-**Properties:** `children`, `justify` / `distribution`, `align` / `alignment`
-
 === "v0.8"
+
+    **Properties:** `children` (`explicitList` or `template`), `distribution`, `alignment`
 
     ```json
     {
@@ -28,6 +30,7 @@ Horizontal layout container. Children are arranged left-to-right.
       "component": {
         "Row": {
           "children": { "explicitList": ["btn1", "btn2", "btn3"] },
+          "distribution": "spaceBetween",
           "alignment": "center"
         }
       }
@@ -36,11 +39,14 @@ Horizontal layout container. Children are arranged left-to-right.
 
 === "v0.9"
 
+    **Properties:** `children` (array or template), `justify`, `align`
+
     ```json
     {
       "id": "toolbar",
       "component": "Row",
       "children": ["btn1", "btn2", "btn3"],
+      "justify": "spaceBetween",
       "align": "center"
     }
     ```
@@ -49,16 +55,18 @@ Horizontal layout container. Children are arranged left-to-right.
 
 Vertical layout container. Children are arranged top-to-bottom.
 
-**Properties:** `children`, `justify` / `distribution`, `align` / `alignment`
-
 === "v0.8"
+
+    **Properties:** `children` (`explicitList` or `template`), `distribution`, `alignment`
 
     ```json
     {
       "id": "content",
       "component": {
         "Column": {
-          "children": { "explicitList": ["header", "body", "footer"] }
+          "children": { "explicitList": ["header", "body", "footer"] },
+          "distribution": "start",
+          "alignment": "stretch"
         }
       }
     }
@@ -66,21 +74,25 @@ Vertical layout container. Children are arranged top-to-bottom.
 
 === "v0.9"
 
+    **Properties:** `children` (array or template), `justify`, `align`
+
     ```json
     {
       "id": "content",
       "component": "Column",
-      "children": ["header", "body", "footer"]
+      "children": ["header", "body", "footer"],
+      "justify": "start",
+      "align": "stretch"
     }
     ```
 
 ### List
 
-Scrollable list of items. Supports both static children and dynamic templates.
-
-**Properties:** `children`, `direction` (`horizontal` / `vertical`), `alignment`
+Scrollable list of items. Supports static children and dynamic templates.
 
 === "v0.8"
+
+    **Properties:** `children` (`explicitList` or `template`), `direction`, `alignment`
 
     ```json
     {
@@ -92,13 +104,16 @@ Scrollable list of items. Supports both static children and dynamic templates.
               "dataBinding": "/messages",
               "componentId": "message-item"
             }
-          }
+          },
+          "direction": "vertical"
         }
       }
     }
     ```
 
 === "v0.9"
+
+    **Properties:** `children` (array or template), `direction`, `align`
 
     ```json
     {
@@ -107,7 +122,8 @@ Scrollable list of items. Supports both static children and dynamic templates.
       "children": {
         "componentId": "message-item",
         "path": "/messages"
-      }
+      },
+      "direction": "vertical"
     }
     ```
 
@@ -119,9 +135,11 @@ Scrollable list of items. Supports both static children and dynamic templates.
 
 Display text content with styling hints.
 
-**Properties:** `text`, `variant` (v0.9) / `usageHint` (v0.8) — values: `h1`–`h5`, `caption`, `body`
-
 === "v0.8"
+
+    **Properties:** `text` (BoundValue), `usageHint`
+
+    `usageHint` values: `h1`, `h2`, `h3`, `h4`, `h5`, `caption`, `body`
 
     ```json
     {
@@ -137,6 +155,10 @@ Display text content with styling hints.
 
 === "v0.9"
 
+    **Properties:** `text` (string or DataBinding), `variant`
+
+    `variant` values: `h1`, `h2`, `h3`, `h4`, `h5`, `caption`, `body`
+
     ```json
     {
       "id": "title",
@@ -150,16 +172,18 @@ Display text content with styling hints.
 
 Display images from URLs.
 
-**Properties:** `url`, `fit` (`cover`, `contain`, etc.), `variant` (`avatar`, `hero`, etc.)
-
 === "v0.8"
+
+    **Properties:** `url` (BoundValue), `fit`, `usageHint`
 
     ```json
     {
-      "id": "logo",
+      "id": "hero",
       "component": {
         "Image": {
-          "url": { "literalString": "https://example.com/logo.png" }
+          "url": { "literalString": "https://example.com/hero.png" },
+          "fit": "cover",
+          "usageHint": "hero"
         }
       }
     }
@@ -167,11 +191,15 @@ Display images from URLs.
 
 === "v0.9"
 
+    **Properties:** `url` (string or DataBinding), `fit`, `variant`
+
     ```json
     {
-      "id": "logo",
+      "id": "hero",
       "component": "Image",
-      "url": "https://example.com/logo.png"
+      "url": "https://example.com/hero.png",
+      "fit": "cover",
+      "variant": "hero"
     }
     ```
 
@@ -179,9 +207,9 @@ Display images from URLs.
 
 Display icons from the standard set defined in the catalog.
 
-**Properties:** `name`
-
 === "v0.8"
+
+    **Properties:** `name` (BoundValue)
 
     ```json
     {
@@ -196,6 +224,8 @@ Display icons from the standard set defined in the catalog.
 
 === "v0.9"
 
+    **Properties:** `name` (string or DataBinding)
+
     ```json
     {
       "id": "check-icon",
@@ -208,20 +238,24 @@ Display icons from the standard set defined in the catalog.
 
 Visual separator line.
 
-**Properties:** `axis` (`horizontal`, `vertical`)
-
 === "v0.8"
+
+    **Properties:** `axis`
 
     ```json
     {
       "id": "separator",
       "component": {
-        "Divider": { "axis": "horizontal" }
+        "Divider": {
+          "axis": "horizontal"
+        }
       }
     }
     ```
 
 === "v0.9"
+
+    **Properties:** `axis`
 
     ```json
     {
@@ -239,9 +273,9 @@ Visual separator line.
 
 Clickable button that triggers an action.
 
-**Properties:** `child` (component ID to display), `variant` (v0.9) / `primary` (v0.8), `action`
-
 === "v0.8"
+
+    **Properties:** `child` (component ID), `primary` (boolean), `action`
 
     ```json
     {
@@ -250,13 +284,17 @@ Clickable button that triggers an action.
         "Button": {
           "child": "submit-text",
           "primary": true,
-          "action": { "name": "submit_form" }
+          "action": {
+            "name": "submit_form"
+          }
         }
       }
     }
     ```
 
 === "v0.9"
+
+    **Properties:** `child` (component ID), `variant`, `action`
 
     ```json
     {
@@ -265,7 +303,9 @@ Clickable button that triggers an action.
       "child": "submit-text",
       "variant": "primary",
       "action": {
-        "event": { "name": "submit_form" }
+        "event": {
+          "name": "submit_form"
+        }
       }
     }
     ```
@@ -274,9 +314,11 @@ Clickable button that triggers an action.
 
 Text input field with optional validation.
 
-**Properties:** `label`, `text` / `value` (data-bound), `textFieldType` (`shortText`, `longText`, `number`, `obscured`, `date`), `validationRegexp`
-
 === "v0.8"
+
+    **Properties:** `label` (BoundValue), `text` (BoundValue), `textFieldType`, `validationRegexp`
+
+    `textFieldType` values: `shortText`, `longText`, `number`, `obscured`, `date`
 
     ```json
     {
@@ -293,6 +335,10 @@ Text input field with optional validation.
 
 === "v0.9"
 
+    **Properties:** `label` (string), `value` (string or DataBinding), `textFieldType`, `validationRegexp`
+
+    `textFieldType` values: `shortText`, `longText`, `number`, `obscured`, `date`
+
     ```json
     {
       "id": "email-input",
@@ -307,9 +353,9 @@ Text input field with optional validation.
 
 Boolean toggle.
 
-**Properties:** `label`, `value` (data-bound boolean)
-
 === "v0.8"
+
+    **Properties:** `label` (BoundValue), `value` (BoundValue, boolean)
 
     ```json
     {
@@ -325,6 +371,8 @@ Boolean toggle.
 
 === "v0.9"
 
+    **Properties:** `label` (string), `value` (DataBinding, boolean)
+
     ```json
     {
       "id": "terms-checkbox",
@@ -338,9 +386,9 @@ Boolean toggle.
 
 Numeric range input.
 
-**Properties:** `value` (data-bound), `minValue`, `maxValue`
-
 === "v0.8"
+
+    **Properties:** `value` (BoundValue), `minValue`, `maxValue`
 
     ```json
     {
@@ -357,6 +405,8 @@ Numeric range input.
 
 === "v0.9"
 
+    **Properties:** `value` (DataBinding), `minValue`, `maxValue`
+
     ```json
     {
       "id": "volume",
@@ -371,9 +421,9 @@ Numeric range input.
 
 Date and/or time picker.
 
-**Properties:** `value` (data-bound), `enableDate`, `enableTime`
-
 === "v0.8"
+
+    **Properties:** `value` (BoundValue), `enableDate`, `enableTime`
 
     ```json
     {
@@ -390,6 +440,8 @@ Date and/or time picker.
 
 === "v0.9"
 
+    **Properties:** `value` (DataBinding), `enableDate`, `enableTime`
+
     ```json
     {
       "id": "date-picker",
@@ -400,16 +452,13 @@ Date and/or time picker.
     }
     ```
 
-### ChoicePicker / MultipleChoice
+### MultipleChoice (v0.8) / ChoicePicker (v0.9)
 
 Select one or more options from a list.
 
-!!! note "Renamed in v0.9"
-    `MultipleChoice` in v0.8 → `ChoicePicker` in v0.9
-
-**Properties:** `options` (array of label/value pairs), `selections` (data-bound), `maxAllowedSelections`
-
 === "v0.8"
+
+    **Properties:** `options` (array), `selections` (BoundValue), `maxAllowedSelections`
 
     ```json
     {
@@ -428,6 +477,8 @@ Select one or more options from a list.
     ```
 
 === "v0.9"
+
+    **Properties:** `options` (array), `selections` (DataBinding), `maxAllowedSelections`
 
     ```json
     {
@@ -450,20 +501,24 @@ Select one or more options from a list.
 
 Container with elevation/border and padding.
 
-**Properties:** `child` (component ID)
-
 === "v0.8"
+
+    **Properties:** `child` (component ID)
 
     ```json
     {
       "id": "info-card",
       "component": {
-        "Card": { "child": "card-content" }
+        "Card": {
+          "child": "card-content"
+        }
       }
     }
     ```
 
 === "v0.9"
+
+    **Properties:** `child` (component ID)
 
     ```json
     {
@@ -477,9 +532,9 @@ Container with elevation/border and padding.
 
 Overlay dialog triggered by an entry point component.
 
-**Properties:** `entryPointChild` (trigger component ID), `contentChild` (dialog content ID)
-
 === "v0.8"
+
+    **Properties:** `entryPointChild` (component ID), `contentChild` (component ID)
 
     ```json
     {
@@ -495,6 +550,8 @@ Overlay dialog triggered by an entry point component.
 
 === "v0.9"
 
+    **Properties:** `entryPointChild` (component ID), `contentChild` (component ID)
+
     ```json
     {
       "id": "confirmation-modal",
@@ -508,9 +565,9 @@ Overlay dialog triggered by an entry point component.
 
 Tabbed interface for organizing content into switchable panels.
 
-**Properties:** `tabItems` (array of `{ title, child }`)
-
 === "v0.8"
+
+    **Properties:** `tabItems` (array of `{ title, child }`)
 
     ```json
     {
@@ -527,6 +584,8 @@ Tabbed interface for organizing content into switchable panels.
     ```
 
 === "v0.9"
+
+    **Properties:** `tabItems` (array of `{ title, child }`)
 
     ```json
     {
@@ -551,7 +610,7 @@ All components share:
 
 ## Version Differences Summary
 
-The component *names* and *properties* are largely the same across versions. The structural differences are:
+The component names and properties are largely the same across versions. The structural differences are:
 
 | Aspect | v0.8 | v0.9 |
 |--------|------|------|
@@ -559,9 +618,12 @@ The component *names* and *properties* are largely the same across versions. The
 | String values | `{ "literalString": "Hello" }` | `"Hello"` |
 | Children | `{ "explicitList": ["a", "b"] }` | `["a", "b"]` |
 | Data binding | `{ "path": "/data" }` | `{ "path": "/data" }` (same) |
-| Text styling | `usageHint` | `variant` |
+| Text/Image styling | `usageHint` | `variant` |
 | Button styling | `primary: true` | `variant: "primary"` |
+| Action format | `{ "name": "..." }` | `{ "event": { "name": "..." } }` |
 | Choice component | `MultipleChoice` | `ChoicePicker` |
+| Layout alignment | `distribution`, `alignment` | `justify`, `align` |
+| TextField value | `text` | `value` |
 
 ## Live Examples
 
@@ -574,13 +636,15 @@ npm start -- gallery
 
 ## Further Reading
 
-=== "v0.8"
+!!! abstract "Schema Files"
 
-    - **[Standard Catalog Definition](https://a2ui.org/specification/v0_8/standard_catalog_definition.json)**: Complete v0.8 component schemas
+    === "v0.8"
 
-=== "v0.9"
+        [:material-code-json: Standard Catalog Definition (JSON Schema)](https://a2ui.org/specification/v0_8/standard_catalog_definition.json)
 
-    - **[Basic Catalog Definition](https://a2ui.org/specification/v0_9/basic_catalog.json)**: Complete v0.9 component schemas
+    === "v0.9"
+
+        [:material-code-json: Basic Catalog Definition (JSON Schema)](https://a2ui.org/specification/v0_9/basic_catalog.json)
 
 - **[Custom Components Guide](../guides/custom-components.md)**: Build your own components
 - **[Theming Guide](../guides/theming.md)**: Style components to match your brand
