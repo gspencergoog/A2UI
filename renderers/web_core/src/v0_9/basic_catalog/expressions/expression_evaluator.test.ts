@@ -92,4 +92,9 @@ describe('ExpressionEvaluator', () => {
     // Based on implementation viewed earlier, it logs warn and returns null
     assert.strictEqual(result, null);
   });
+
+  it('passes through unknown objects', () => {
+    const unknownObj = { someKey: 'someValue' };
+    assert.strictEqual(evaluator.evaluate(unknownObj, context), unknownObj);
+  });
 });

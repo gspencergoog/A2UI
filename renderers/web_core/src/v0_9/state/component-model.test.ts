@@ -22,29 +22,40 @@ describe('ComponentModel', () => {
 
   it('notifies listeners on update', () => {
     let updatedComponent: ComponentModel | undefined;
-    
+
     component.onUpdated.subscribe((c: ComponentModel) => {
       updatedComponent = c;
     });
-    
+
     component.properties = { label: 'New' };
-    
+
     assert.strictEqual(updatedComponent, component);
     assert.strictEqual(updatedComponent?.properties.label, 'New');
   });
 
   it('unsubscribes listeners', () => {
     let callCount = 0;
-    
+
     const sub = component.onUpdated.subscribe(() => {
       callCount++;
     });
-    
+
     component.properties = { label: '1' };
     assert.strictEqual(callCount, 1);
-    
+
     sub.unsubscribe();
     component.properties = { label: '2' };
     assert.strictEqual(callCount, 1);
+    component.properties = { label: '2' };
+    assert.strictEqual(callCount, 1);
+  });
+
+  it('returns component tree representation', () => {
+    const tree = component.componentTree;
+    assert.deepStrictEqual(tree, {
+      id: 'c1',
+      type: 'Button',
+      label: 'Click Me'
+    });
   });
 });

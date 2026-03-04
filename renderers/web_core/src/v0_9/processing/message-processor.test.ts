@@ -207,4 +207,42 @@ describe('MessageProcessor', () => {
     processor.setData({ id: 'comp1' }, '/test2', 'value');
     assert.strictEqual(processor.getData({ id: 'comp1' }, '/test2'), undefined);
   });
+
+  it('warns when catalog not found', (t) => {
+    const warn = t.mock.method(console, 'warn');
+    processor.processMessages([{
+      createSurface: {
+        surfaceId: 's1',
+        catalogId: 'unknown-catalog'
+      }
+    }]);
+    assert.strictEqual(warn.mock.callCount(), 1);
+    assert.match(warn.mock.calls[0].arguments[0], /Catalog not found: unknown-catalog/);
+  });
+
+  it('warns when duplicate surface created', (t) => {
+    const warn = t.mock.method(console, 'warn');
+    processor.processMessages([{
+      createSurface: { surfaceId: 's1', catalogId: 'test-catalog' }
+    }]);
+
+    processor.processMessages([{
+      createSurface: { surfaceId: 's1', catalogId: 'test-catalog' }
+    }]);
+
+    assert.strictEqual(warn.mock.callCount(), 1);
+    assert.match(warn.mock.calls[0].arguments[0], /Surface s1 already exists/);
+  });
+
+  it('warns when updating non-existent surface', (t) => {
+    const warn = t.mock.method(console, 'warn');
+    processor.processMessages([{
+      updateComponents: {
+        surfaceId: 'unknown-s',
+        components: []
+      }
+    }]);
+    assert.strictEqual(warn.mock.callCount(), 1);
+    assert.match(warn.mock.calls[0].arguments[0], /Surface not found for message: unknown-s/);
+  });
 });

@@ -114,7 +114,7 @@ describe('DataModel', () => {
     assert.strictEqual(sub.value, 1);
 
     let updatedValue: number | undefined;
-    
+
 
     model.set('/a', 2);
     assert.strictEqual(sub.value, 2);
@@ -253,5 +253,12 @@ describe('DataModel', () => {
     assert.throws(() => {
       model.set('/items/foo', 'bar');
     }, /Cannot use non-numeric segment/);
+  });
+
+  it('throws when path is null or undefined', () => {
+    assert.throws(() => model.get(null as any), /Path cannot be null or undefined/);
+    assert.throws(() => model.get(undefined as any), /Path cannot be null or undefined/);
+    assert.throws(() => model.set(null as any, 'value'), /Path cannot be null or undefined/);
+    assert.throws(() => model.set(undefined as any, 'value'), /Path cannot be null or undefined/);
   });
 });
