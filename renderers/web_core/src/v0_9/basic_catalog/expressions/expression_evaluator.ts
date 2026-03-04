@@ -23,6 +23,31 @@ export namespace Types {
     call: string;
     args: Record<string, unknown>;
   }
+
+  export interface DataBinding {
+    path: string;
+  }
+}
+
+export function isFunctionCall(value: unknown): value is Types.FunctionCall {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "call" in value &&
+    "args" in value &&
+    typeof (value as any).call === "string" &&
+    typeof (value as any).args === "object" &&
+    (value as any).args !== null
+  );
+}
+
+export function isDataBinding(value: unknown): value is Types.DataBinding {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "path" in value &&
+    typeof (value as any).path === "string"
+  );
 }
 
 /**
@@ -54,6 +79,7 @@ export interface EvaluationContext {
  */
 export class ExpressionEvaluator {
   private functions = new Map<string, FunctionImplementation>();
+  private maxRecursionDepth = 50;
 
   /**
    * Creates a new evaluator.
@@ -106,50 +132,55 @@ export class ExpressionEvaluator {
    * @param context The context for evaluation.
    */
   evaluate(expression: unknown, context: EvaluationContext): unknown {
+    return this.evaluateInternal(expression, context, 0);
+  }
+
+  private evaluateInternal(
+    expression: unknown,
+    context: EvaluationContext,
+    depth: number,
+  ): unknown {
+    if (depth > this.maxRecursionDepth) {
+      console.warn("Max recursion depth reached in ExpressionEvaluator");
+      return null;
+    }
+
     if (expression === null || expression === undefined) {
       return expression;
     }
 
     // Check if it's a FunctionCall
-    if (
-      typeof expression === "object" &&
-      expression !== null &&
-      "call" in expression &&
-      "args" in expression
-    ) {
-      return this.evaluateFunctionCall(
-        expression as any as Types.FunctionCall,
-        context,
-      );
+    if (isFunctionCall(expression)) {
+      return this.evaluateFunctionCall(expression, context, depth + 1);
     }
 
     // Check if it's a DataBinding (v0.9)
-    if (
-      typeof expression === "object" &&
-      expression !== null &&
-      "path" in expression
-    ) {
-      return context.resolveData((expression as any).path);
+    if (isDataBinding(expression)) {
+      return context.resolveData(expression.path);
     }
 
-    // Check if it's a Primitive Wrapper (A2UI specific)
-    if (typeof expression === "object" && expression !== null) {
-      if ("literal" in expression) return (expression as any).literal;
-      if ("literalString" in expression)
-        return (expression as any).literalString;
-      if ("literalNumber" in expression)
-        return (expression as any).literalNumber;
-      if ("literalBoolean" in expression)
-        return (expression as any).literalBoolean;
+    if (Array.isArray(expression)) {
+      return expression.map((item) =>
+        this.evaluateInternal(item, context, depth + 1),
+      );
     }
 
-    // Check if it's a Reference (conceptually, though v0.9 uses strings often)
+    if (typeof expression === "object") {
+      const result: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(expression)) {
+        result[key] = this.evaluateInternal(value, context, depth + 1);
+      }
+      return result;
+    }
+
+    // Primitives return as is
     return expression;
   }
 
   private evaluateFunctionCall(
     call: Types.FunctionCall,
     context: EvaluationContext,
+    depth: number,
   ): any {
     const fn = this.functions.get(call.call);
     if (!fn) {
@@ -160,7 +191,7 @@ export class ExpressionEvaluator {
     // Evaluate args
     const resolvedArgs: Record<string, any> = {};
     for (const [key, value] of Object.entries(call.args)) {
-      resolvedArgs[key] = this.evaluate(value, context);
+      resolvedArgs[key] = this.evaluateInternal(value, context, depth + 1);
     }
 
     return fn(resolvedArgs, context);
