@@ -85,10 +85,9 @@ export class MessageProcessor<T extends ComponentApi> {
     ].filter((k) => k in message);
 
     if (updateTypes.length > 1) {
-      console.warn(
-        `Message contains multiple update types: ${updateTypes.join(", ")}. Ignoring.`,
+      throw new Error(
+        `Message contains multiple update types: ${updateTypes.join(", ")}.`,
       );
-      return;
     }
 
     if ("createSurface" in message) {
@@ -119,13 +118,11 @@ export class MessageProcessor<T extends ComponentApi> {
     // Find catalog
     const catalog = this.catalogs.find((c) => c.id === catalogId);
     if (!catalog) {
-      console.warn(`Catalog not found: ${catalogId}`);
-      return;
+      throw new Error(`Catalog not found: ${catalogId}`);
     }
 
     if (this.model.getSurface(surfaceId)) {
-      console.warn(`Surface ${surfaceId} already exists. Ignoring.`);
-      return;
+      throw new Error(`Surface ${surfaceId} already exists.`);
     }
 
     const surface = new SurfaceModel<T>(surfaceId, catalog, theme);
@@ -146,16 +143,14 @@ export class MessageProcessor<T extends ComponentApi> {
 
     const surface = this.model.getSurface(payload.surfaceId);
     if (!surface) {
-      console.warn(`Surface not found for message: ${payload.surfaceId}`);
-      return;
+      throw new Error(`Surface not found for message: ${payload.surfaceId}`);
     }
 
     for (const comp of payload.components) {
       const { id, component, ...properties } = comp;
 
       if (!id) {
-        console.warn(`Component '${component}' is missing an 'id', ignoring.`);
-        continue;
+        throw new Error(`Component '${component}' is missing an 'id'.`);
       }
 
       const existing = surface.componentsModel.get(id);
@@ -170,8 +165,7 @@ export class MessageProcessor<T extends ComponentApi> {
         }
       } else {
         if (!component) {
-          console.warn(`Cannot create component ${id} without a type.`);
-          continue;
+          throw new Error(`Cannot create component ${id} without a type.`);
         }
         const newComponent = new ComponentModel(id, component, properties);
         surface.componentsModel.addComponent(newComponent);
@@ -185,8 +179,7 @@ export class MessageProcessor<T extends ComponentApi> {
 
     const surface = this.model.getSurface(payload.surfaceId);
     if (!surface) {
-      console.warn(`Surface not found for message: ${payload.surfaceId}`);
-      return;
+      throw new Error(`Surface not found for message: ${payload.surfaceId}`);
     }
 
     const path = payload.path || "/";

@@ -191,8 +191,7 @@ describe("MessageProcessor", () => {
 
     sub2.unsubscribe();
   });
-  it("warns and ignores message with multiple update types", (t) => {
-    const warn = t.mock.method(console, "warn");
+  it("throws on message with multiple update types", () => {
     processor.processMessages([
       {
         version: "v0.9",
@@ -200,23 +199,18 @@ describe("MessageProcessor", () => {
       },
     ]);
 
-    processor.processMessages([
-      {
-        version: "v0.9",
-        updateComponents: { surfaceId: "s1", components: [] },
-        updateDataModel: { surfaceId: "s1", path: "/", value: {} },
-      } as any,
-    ]);
-
-    assert.strictEqual(warn.mock.callCount(), 1);
-    assert.match(
-      warn.mock.calls[0].arguments[0],
-      /Message contains multiple update types/,
-    );
+    assert.throws(() => {
+      processor.processMessages([
+        {
+          version: "v0.9",
+          updateComponents: { surfaceId: "s1", components: [] },
+          updateDataModel: { surfaceId: "s1", path: "/", value: {} },
+        } as any,
+      ]);
+    }, /Message contains multiple update types/);
   });
 
-  it("warns when creating component without type", (t) => {
-    const warn = t.mock.method(console, "warn");
+  it("throws when creating component without type", () => {
     processor.processMessages([
       {
         version: "v0.9",
@@ -224,21 +218,17 @@ describe("MessageProcessor", () => {
       },
     ]);
 
-    processor.processMessages([
-      {
-        version: "v0.9",
-        updateComponents: {
-          surfaceId: "s1",
-          components: [{ id: "comp1", label: "No Type" } as any],
+    assert.throws(() => {
+      processor.processMessages([
+        {
+          version: "v0.9",
+          updateComponents: {
+            surfaceId: "s1",
+            components: [{ id: "comp1", label: "No Type" } as any],
+          },
         },
-      },
-    ]);
-
-    assert.strictEqual(warn.mock.callCount(), 1);
-    assert.match(
-      warn.mock.calls[0].arguments[0],
-      /Cannot create component comp1 without a type/,
-    );
+      ]);
+    }, /Cannot create component comp1 without a type/);
     const surface = processor.model.getSurface("s1");
     assert.strictEqual(surface?.componentsModel.get("comp1"), undefined);
   });
@@ -283,26 +273,21 @@ describe("MessageProcessor", () => {
     assert.strictEqual(comp?.properties.label, undefined);
   });
 
-  it("warns when catalog not found", (t) => {
-    const warn = t.mock.method(console, "warn");
-    processor.processMessages([
-      {
-        version: "v0.9",
-        createSurface: {
-          surfaceId: "s1",
-          catalogId: "unknown-catalog",
+  it("throws when catalog not found", () => {
+    assert.throws(() => {
+      processor.processMessages([
+        {
+          version: "v0.9",
+          createSurface: {
+            surfaceId: "s1",
+            catalogId: "unknown-catalog",
+          },
         },
-      },
-    ]);
-    assert.strictEqual(warn.mock.callCount(), 1);
-    assert.match(
-      warn.mock.calls[0].arguments[0],
-      /Catalog not found: unknown-catalog/,
-    );
+      ]);
+    }, /Catalog not found: unknown-catalog/);
   });
 
-  it("warns when duplicate surface created", (t) => {
-    const warn = t.mock.method(console, "warn");
+  it("throws when duplicate surface created", () => {
     processor.processMessages([
       {
         version: "v0.9",
@@ -310,32 +295,27 @@ describe("MessageProcessor", () => {
       },
     ]);
 
-    processor.processMessages([
-      {
-        version: "v0.9",
-        createSurface: { surfaceId: "s1", catalogId: "test-catalog" },
-      },
-    ]);
-
-    assert.strictEqual(warn.mock.callCount(), 1);
-    assert.match(warn.mock.calls[0].arguments[0], /Surface s1 already exists/);
+    assert.throws(() => {
+      processor.processMessages([
+        {
+          version: "v0.9",
+          createSurface: { surfaceId: "s1", catalogId: "test-catalog" },
+        },
+      ]);
+    }, /Surface s1 already exists/);
   });
 
-  it("warns when updating non-existent surface", (t) => {
-    const warn = t.mock.method(console, "warn");
-    processor.processMessages([
-      {
-        version: "v0.9",
-        updateComponents: {
-          surfaceId: "unknown-s",
-          components: [] as any,
+  it("throws when updating non-existent surface", () => {
+    assert.throws(() => {
+      processor.processMessages([
+        {
+          version: "v0.9",
+          updateComponents: {
+            surfaceId: "unknown-s",
+            components: [] as any,
+          },
         },
-      },
-    ]);
-    assert.strictEqual(warn.mock.callCount(), 1);
-    assert.match(
-      warn.mock.calls[0].arguments[0],
-      /Surface not found for message: unknown-s/,
-    );
+      ]);
+    }, /Surface not found for message: unknown-s/);
   });
 });

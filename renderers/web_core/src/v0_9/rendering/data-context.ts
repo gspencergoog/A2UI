@@ -87,8 +87,9 @@ export class DataContext {
       // Note: sync resolution of async functions returns the Observable itself
       if (!this.functionInvoker) {
         // TODO(error-handling): pipe errors up to surfaces and all the way to MessageProcessor and the agent
-        console.warn(`Function not found: ${call.call}`);
-        return undefined as unknown as V;
+        throw new Error(
+          `Failed to resolve dynamic value: Function invoker is not configured for call '${call.call}'.`,
+        );
       }
 
       const result = this.functionInvoker(call.call, args, this);
@@ -96,8 +97,7 @@ export class DataContext {
     }
 
     // TODO(error-handling): pipe errors up to surfaces and all the way to MessageProcessor and the agent
-    console.warn(`Invalid DynamicValue format: ${JSON.stringify(value)}`);
-    return undefined as unknown as V;
+    throw new Error(`Invalid DynamicValue format: ${JSON.stringify(value)}`);
   }
 
   /**
@@ -174,8 +174,9 @@ export class DataContext {
     args: Record<string, any>,
   ): Observable<V> {
     if (!this.functionInvoker) {
-      console.warn(`Function not found: ${name}`);
-      return of(null as unknown as V);
+      throw new Error(
+        `Failed to resolve dynamic value: Function invoker is not configured for call '${name}'.`,
+      );
     }
     const result = this.functionInvoker(name, args, this);
 
