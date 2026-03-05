@@ -15,7 +15,7 @@
  */
 
 import { Observable, of, combineLatest, isObservable } from "rxjs";
-import { map, switchMap, skip } from "rxjs/operators";
+import { switchMap } from "rxjs/operators";
 import { DataModel, DataSubscription } from "../state/data-model.js";
 import type {
   DynamicValue,
@@ -33,12 +33,18 @@ export type FunctionInvoker = (
 /**
  * A contextual view of the main DataModel, serving as the unified interface for resolving
  * DynamicValues (literals, data paths, function calls) within a specific scope.
+ *
+ * Components use `DataContext` instead of interacting with the `DataModel` directly.
+ * It automatically handles resolving relative paths against the component's current scope
+ * and provides tools for evaluating complex, reactive expressions.
  */
 export class DataContext {
   /**
-   * @param dataModel The shared DataModel instance.
-   * @param path The absolute path this context is currently pointing to.
-   * @param functionInvoker An optional invoker for resolving function calls against a catalog.
+   * Initializes a new DataContext.
+   *
+   * @param dataModel The shared, global DataModel instance for the entire UI surface.
+   * @param path The absolute path in the DataModel that this context is scoped to (its "current working directory").
+   * @param functionInvoker An optional callback for executing function calls defined in the A2UI component tree against a UI catalog.
    */
   constructor(
     readonly dataModel: DataModel,
@@ -47,8 +53,13 @@ export class DataContext {
   ) {}
 
   /**
-   * Updates the data model at the specified path, resolving it against the current context.
-   * This is the only method for mutating the data model.
+   * Mutates the underlying DataModel at the specified path.
+   *
+   * This is the primary method for components to push state changes (e.g. user input)
+   * back up to the global model.
+   *
+   * @param path A JSON pointer path. If relative, it is resolved against this context's `path`.
+   * @param value The new value to store in the DataModel.
    */
   set(path: string, value: any): void {
     const absolutePath = this.resolvePath(path);
@@ -56,8 +67,15 @@ export class DataContext {
   }
 
   /**
-   * Resolves a DynamicValue to its current evaluation.
-   * Does not set up any subscriptions.
+   * Synchronously evaluates a `DynamicValue` (a literal, a path binding, or a function call)
+   * into its concrete runtime value.
+   *
+   * **Note:** This method evaluates the value *once* at the current moment in time.
+   * It does not create any reactive subscriptions. If the underlying data changes later,
+   * this result will not automatically update. Use `subscribeDynamicValue` for reactive updates.
+   *
+   * @param value The DynamicValue object from the A2UI JSON payload.
+   * @returns The synchronously resolved value.
    */
   resolveDynamicValue<V>(value: DynamicValue): V {
     // 1. Literal Check
@@ -86,7 +104,6 @@ export class DataContext {
       // Evaluate function
       // Note: sync resolution of async functions returns the Observable itself
       if (!this.functionInvoker) {
-        // TODO(error-handling): pipe errors up to surfaces and all the way to MessageProcessor and the agent
         throw new Error(
           `Failed to resolve dynamic value: Function invoker is not configured for call '${call.call}'.`,
         );
@@ -96,13 +113,20 @@ export class DataContext {
       return result as V;
     }
 
-    // TODO(error-handling): pipe errors up to surfaces and all the way to MessageProcessor and the agent
     throw new Error(`Invalid DynamicValue format: ${JSON.stringify(value)}`);
   }
 
   /**
-   * Subscribes to changes in a DynamicValue.
-   * Returns a Subscription object that provides the current value and allows listening for updates.
+   * Reactively listens to changes in a `DynamicValue`.
+   *
+   * This is the core reactive binding mechanism. Whenever the underlying data changes
+   * (or if a function call's dependencies change), the `onChange` callback will be fired
+   * with the freshly evaluated result.
+   *
+   * @template V The expected type of the resolved value.
+   * @param value The DynamicValue to evaluate and observe.
+   * @param onChange A callback fired whenever the evaluated result changes.
+   * @returns A `DataSubscription` containing the initial synchronously-resolved value, along with an `unsubscribe` method to clean up the listener.
    */
   subscribeDynamicValue<V>(
     value: DynamicValue,
@@ -187,9 +211,13 @@ export class DataContext {
   }
 
   /**
-   * Creates a nested data context at the given relative path.
+   * Creates a new, child `DataContext` scoped to a deeper path.
    *
-   * @param relativePath The path relative to the current context.
+   * This is used when a component (like a List or a Card) wants to provide a targeted
+   * data scope for its children, so children can use relative paths like `./title`.
+   *
+   * @param relativePath The path relative to the *current* context's path.
+   * @returns A new `DataContext` instance pointing to the resolved absolute path.
    */
   nested(relativePath: string): DataContext {
     const newPath = this.resolvePath(relativePath);

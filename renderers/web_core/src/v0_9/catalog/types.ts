@@ -15,6 +15,16 @@
  */
 
 import { z } from "zod";
+import { DataContext } from "../rendering/data-context.js";
+import { Observable } from "rxjs";
+
+/**
+ * A function implementation that can be registered with the evaluator or basic catalog.
+ */
+export type FunctionImplementation = (
+  args: Record<string, unknown>,
+  context: DataContext,
+) => unknown | Observable<unknown>;
 
 /**
  * A definition of a UI component's API.
@@ -49,7 +59,7 @@ export class Catalog<T extends ComponentApi> {
   /**
    * Optional map of functions provided by this catalog.
    */
-  readonly functions?: ReadonlyMap<string, any>;
+  readonly functions?: ReadonlyMap<string, FunctionImplementation>;
 
   constructor(id: string, components: T[], functions?: Record<string, any>) {
     this.id = id;

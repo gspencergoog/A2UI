@@ -15,9 +15,9 @@
  */
 
 import { ExpressionParser } from "../expressions/expression_parser.js";
-import { DataContext } from "../../rendering/data-context.js";
-import { Observable } from "rxjs";
-import { FunctionImplementation } from "../../schema/common-types.js";
+import { Observable, combineLatest, of } from "rxjs";
+import { map } from "rxjs/operators";
+import { FunctionImplementation } from "../../catalog/types.js";
 
 /**
  * Standard function implementations for the Basic Catalog.
@@ -141,6 +141,7 @@ export const BASIC_FUNCTIONS: Record<string, FunctionImplementation> = {
   email: (args) => {
     const val = String(args["value"] || "");
     // Simple email regex
+    // TODO: Use "real" email validation.
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
   },
 
@@ -148,10 +149,38 @@ export const BASIC_FUNCTIONS: Record<string, FunctionImplementation> = {
   /**
    * Formats a string using a template and the current context.
    */
-  formatString: (args) => {
+  formatString: (args, context) => {
     const template = String(args["value"] || "");
     const parser = new ExpressionParser();
-    return parser.parse(template);
+    const parts = parser.parse(template);
+
+    if (parts.length === 0) return "";
+
+    const observables = parts.map((part) => {
+      // If it's a literal string (or number/boolean/etc), wrap it in 'of'
+      if (typeof part !== "object" || part === null || Array.isArray(part)) {
+        return of(part);
+      }
+
+      // Otherwise, it's a dynamic value we need to subscribe to
+      return new Observable<unknown>((subscriber) => {
+        let isSync = true;
+        const sub = context.subscribeDynamicValue(part, (val) => {
+          if (!isSync) {
+            subscriber.next(val);
+          }
+        });
+
+        // Emit the initial synchronously-resolved value
+        subscriber.next(sub.value);
+        isSync = false;
+
+        return () => sub.unsubscribe();
+      });
+    });
+
+    // Combine all parts and join them into a single string whenever any part changes
+    return combineLatest(observables).pipe(map((values) => values.join("")));
   },
 
   /**

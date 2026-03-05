@@ -202,14 +202,4 @@ export const CommonSchemas = {
   AccessibilityAttributes: AccessibilityAttributesSchema,
   AnyComponent: AnyComponentSchema,
 };
-import { DataContext } from "../rendering/data-context.js";
-import { Observable } from "rxjs";
-
-/**
- * A function implementation that can be registered with the evaluator or basic catalog.
- */
-export type FunctionImplementation = (
-  args: Record<string, unknown>,
-  context: DataContext,
-) => unknown | Observable<unknown>;
 

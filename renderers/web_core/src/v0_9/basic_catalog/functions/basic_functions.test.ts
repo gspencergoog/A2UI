@@ -227,6 +227,60 @@ describe("BASIC_FUNCTIONS", () => {
   });
 
   describe("Formatting", () => {
+    it("formatString (static literal)", (_, done) => {
+      const result = BASIC_FUNCTIONS.formatString(
+        { value: "hello world" },
+        context,
+      ) as import("rxjs").Observable<string>;
+
+      result.subscribe((val) => {
+        assert.strictEqual(val, "hello world");
+        done();
+      });
+    });
+
+    it("formatString (with data binding)", (_, done) => {
+      // Assuming dataModel has { "a": 10 } from setup
+      const result = BASIC_FUNCTIONS.formatString(
+        { value: "Value: ${a}" },
+        context,
+      ) as import("rxjs").Observable<string>;
+
+      let emitCount = 0;
+      const sub = result.subscribe((val) => {
+        if (emitCount === 0) {
+          assert.strictEqual(val, "Value: 10");
+          // Trigger a change
+          dataModel.set("/a", 42);
+        } else if (emitCount === 1) {
+          assert.strictEqual(val, "Value: 42");
+          sub.unsubscribe();
+          done();
+        }
+        emitCount++;
+      });
+    });
+
+    it("formatString (with function call)", (_, done) => {
+      // Need a functionInvoker for function calls
+      const ctxWithInvoker = new DataContext(dataModel, "/", (name, args) => {
+        if (name === "add") {
+          return Number(args["a"]) + Number(args["b"]);
+        }
+        return null;
+      });
+
+      const result = BASIC_FUNCTIONS.formatString(
+        { value: "Result: ${add(a: 5, b: 7)}" },
+        ctxWithInvoker,
+      ) as import("rxjs").Observable<string>;
+
+      result.subscribe((val) => {
+        assert.strictEqual(val, "Result: 12");
+        done();
+      });
+    });
+
     it("formatNumber", () => {
       // Test basic output as Intl behavior varies by environment.
       const result = BASIC_FUNCTIONS.formatNumber(
