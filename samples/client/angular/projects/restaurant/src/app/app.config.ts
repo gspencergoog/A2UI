@@ -14,7 +14,13 @@
  limitations under the License.
  */
 
-import { DEFAULT_CATALOG, provideA2UI, provideMarkdownRenderer } from '@a2ui/angular';
+import {
+  MessageProcessor,
+  V0_9_CATALOG,
+  provideA2UI,
+  provideMarkdownRenderer,
+} from '@a2ui/angular';
+import { BASIC_FUNCTIONS, ExpressionEvaluator } from '@a2ui/web_core/v0_9/basic_catalog';
 import { IMAGE_CONFIG } from '@angular/common';
 import {
   ApplicationConfig,
@@ -31,8 +37,10 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideClientHydration(withEventReplay()),
     provideA2UI({
-      catalog: DEFAULT_CATALOG,
+      catalog: V0_9_CATALOG,
       theme: theme,
+      evaluator: new ExpressionEvaluator(BASIC_FUNCTIONS),
+      processor: new MessageProcessor(V0_9_CATALOG),
     }),
     provideMarkdownRenderer(renderMarkdown),
     {

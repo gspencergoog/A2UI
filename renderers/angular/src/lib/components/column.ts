@@ -15,18 +15,14 @@
  */
 
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { Types } from '../types';
 import { DynamicComponent } from '../rendering/dynamic-component';
 import { Renderer } from '../rendering/renderer';
-import * as Types from '@a2ui/web_core/types/types';
 
 @Component({
-  selector: 'a2ui-row',
+  selector: 'a2ui-column',
   imports: [Renderer],
   changeDetection: ChangeDetectionStrategy.Eager,
-  host: {
-    '[attr.alignment]': 'alignment()',
-    '[attr.distribution]': 'distribution()',
-  },
   styles: `
     :host {
       display: flex;
@@ -35,9 +31,9 @@ import * as Types from '@a2ui/web_core/types/types';
 
     section {
       display: flex;
-      flex-direction: row;
-      width: 100%;
-      min-height: 100%;
+      flex-direction: column;
+      min-width: 100%;
+      height: 100%;
       box-sizing: border-box;
     }
 
@@ -82,19 +78,19 @@ import * as Types from '@a2ui/web_core/types/types';
     }
   `,
   template: `
-    <section [class]="classes()" [style]="theme.additionalStyles?.Row">
+    <section [class]="classes()" [style]="theme.additionalStyles?.Column">
       @for (child of component().properties.children; track child) {
         <ng-container a2ui-renderer [surfaceId]="surfaceId()!" [component]="child" />
       }
     </section>
   `,
 })
-export class Row extends DynamicComponent<Types.RowNode> {
-  readonly alignment = input<Types.ResolvedRow['alignment']>('stretch');
-  readonly distribution = input<Types.ResolvedRow['distribution']>('start');
+export class Column extends DynamicComponent<Types.ColumnNode> {
+  readonly alignment = input<Types.ResolvedColumn['alignment']>('stretch');
+  readonly distribution = input<Types.ResolvedColumn['distribution']>('start');
 
   protected readonly classes = computed(() => ({
-    ...this.theme.components.Row,
+    ...this.theme.components.Column,
     [`align-${this.alignment()}`]: true,
     [`distribute-${this.distribution()}`]: true,
   }));

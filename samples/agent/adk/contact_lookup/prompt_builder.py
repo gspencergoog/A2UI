@@ -27,7 +27,9 @@ To generate the response, you MUST follow these rules:
 2.  The first part is your conversational text response (e.g., "Here is the contact you requested...").
 3.  The second part is a single, raw JSON object which is a list of A2UI messages.
 4.  The JSON part MUST validate against the A2UI JSON SCHEMA provided below.
-5.  Buttons that represent the main action on a card or view (e.g., 'Follow', 'Email', 'Search') SHOULD include the `"primary": true` attribute.
+5.  Buttons that represent the main action on a card or view (e.g., 'Follow', 'Email', 'Search') SHOULD use `"variant": "primary"`.
+6.  For the `Icon` component, use the `name` property with the correct camelCase enum value (e.g., "calendarToday"). Do NOT use "icon" or snake_case names.
+7.  For `Action` definitions (in Buttons, etc.), you MUST wrap the action details in an `event` object: `{ "event": { "name": "...", "context": { ... } } }`. Do NOT use flattened `name` or `params`.
 """
 
 UI_DESCRIPTION = """

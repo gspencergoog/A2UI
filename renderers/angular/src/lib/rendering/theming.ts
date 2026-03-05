@@ -14,9 +14,17 @@
  limitations under the License.
  */
 
-import * as Types from '@a2ui/web_core/types/types';
+import { Types } from '../types';
 import { InjectionToken } from '@angular/core';
 
+/**
+ * Injection token for the A2UI Theme.
+ * Provide this token to configure the global theme for A2UI components.
+ */
 export const Theme = new InjectionToken<Theme>('Theme');
 
+/**
+ * Defines the theme structure for A2UI components.
+ * This is an alias for the protocol's Theme type.
+ */
 export type Theme = Types.Theme;

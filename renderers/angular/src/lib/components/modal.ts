@@ -23,7 +23,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { DynamicComponent } from '../rendering/dynamic-component';
-import * as Types from '@a2ui/web_core/types/types';
+import { Types } from '../types';
 import { Renderer } from '../rendering';
 
 @Component({

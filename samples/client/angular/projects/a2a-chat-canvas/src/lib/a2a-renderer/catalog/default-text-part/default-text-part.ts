@@ -15,9 +15,9 @@
  */
 
 import { TextPart } from '@a2a-js/sdk';
-import { RendererComponent } from '@a2a_chat_canvas/a2a-renderer/types';
-import { MARKDOWN_RENDERER_SERVICE } from '@a2a_chat_canvas/interfaces/markdown-renderer-service';
-import { UiMessageContent } from '@a2a_chat_canvas/types/ui-message';
+import { RendererComponent } from '../../types';
+import { MARKDOWN_RENDERER_SERVICE } from '../../../interfaces/markdown-renderer-service';
+import { UiMessageContent } from '../../../types/ui-message';
 import {
   ChangeDetectionStrategy,
   Component,

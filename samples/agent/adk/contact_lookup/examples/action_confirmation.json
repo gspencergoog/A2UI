@@ -1,112 +1,79 @@
 [
   {
-    "beginRendering": {
+    "version": "v0.9",
+    "createSurface": {
       "surfaceId": "action-modal",
-      "root": "modal-wrapper",
-      "styles": {
-        "primaryColor": "#007BFF",
-        "font": "Roboto"
-      }
+      "catalogId": "default"
     }
   },
   {
-    "surfaceUpdate": {
+    "version": "v0.9",
+    "updateComponents": {
       "surfaceId": "action-modal",
       "components": [
         {
-          "id": "modal-wrapper",
-          "component": {
-            "Modal": {
-              "entryPointChild": "hidden-entry-point",
-              "contentChild": "modal-content-column"
-            }
-          }
+          "id": "root",
+          "component": "Modal",
+          "trigger": "hidden-entry-point",
+          "content": "modal-content-column"
         },
         {
           "id": "hidden-entry-point",
-          "component": {
-            "Text": {
-              "text": {
-                "literalString": ""
-              }
-            }
-          }
+          "component": "Text",
+          "text": ""
         },
         {
           "id": "modal-content-column",
-          "component": {
-            "Column": {
-              "children": {
-                "explicitList": [
-                  "modal-title",
-                  "modal-message",
-                  "dismiss-button"
-                ]
-              },
-              "alignment": "center"
-            }
-          }
+          "component": "Column",
+          "children": [
+            "modal-title",
+            "modal-message",
+            "dismiss-button"
+          ],
+          "align": "center"
         },
         {
           "id": "modal-title",
-          "component": {
-            "Text": {
-              "usageHint": "h2",
-              "text": {
-                "path": "/actionTitle"
-              }
-            }
-          }
+          "component": "Text",
+          "text": {
+            "path": "/actionTitle"
+          },
+          "variant": "h2"
         },
         {
           "id": "modal-message",
-          "component": {
-            "Text": {
-              "text": {
-                "path": "/actionMessage"
-              }
+          "component": "Text",
+          "text": {
+            "path": "/actionMessage"
+          }
+        },
+        {
+          "id": "dismiss-button",
+          "component": "Button",
+          "child": "dismiss-button-text",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "dismiss_modal"
             }
           }
         },
         {
           "id": "dismiss-button-text",
-          "component": {
-            "Text": {
-              "text": {
-                "literalString": "Dismiss"
-              }
-            }
-          }
-        },
-        {
-          "id": "dismiss-button",
-          "component": {
-            "Button": {
-              "child": "dismiss-button-text",
-              "primary": true,
-              "action": {
-                "name": "dismiss_modal"
-              }
-            }
-          }
+          "component": "Text",
+          "text": "Dismiss"
         }
       ]
     }
   },
   {
-    "dataModelUpdate": {
+    "version": "v0.9",
+    "updateDataModel": {
       "surfaceId": "action-modal",
-      "path": "/",
-      "contents": [
-        {
-          "key": "actionTitle",
-          "valueString": "Action Confirmation"
-        },
-        {
-          "key": "actionMessage",
-          "valueString": "Your action has been processed."
-        }
-      ]
+      "value": {
+        "actionTitle": "Action Confirmation",
+        "actionMessage": "Your action has been processed."
+      }
     }
   }
 ]

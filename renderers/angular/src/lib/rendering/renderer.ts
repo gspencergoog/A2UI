@@ -33,6 +33,7 @@ import * as Styles from '@a2ui/web_core/styles/index';
 import * as Types from '@a2ui/web_core/types/types';
 import { Catalog } from './catalog';
 import { isPlatformBrowser } from '@angular/common';
+import { A2UI_EVALUATOR, A2UI_PROCESSOR } from '../config';
 
 @Directive({
   selector: 'ng-container[a2ui-renderer]',
@@ -40,19 +41,37 @@ import { isPlatformBrowser } from '@angular/common';
 export class Renderer implements OnDestroy {
   private viewContainerRef = inject(ViewContainerRef);
   private catalog = inject(Catalog);
+  private evaluator = inject(A2UI_EVALUATOR);
+  private processor = inject(A2UI_PROCESSOR);
   private static hasInsertedStyles = false;
 
   private currentRef: ComponentRef<unknown> | null = null;
   private isDestroyed = false;
 
   readonly surfaceId = input.required<Types.SurfaceID>();
-  readonly component = input.required<Types.AnyComponentNode>();
+  readonly component = input.required<Types.AnyComponentNode | string>();
 
   constructor() {
     effect(() => {
       const surfaceId = this.surfaceId();
-      const component = this.component();
-      untracked(() => this.render(surfaceId, component));
+      const componentInput = this.component();
+      let component: Types.AnyComponentNode | undefined;
+
+      if (typeof componentInput === 'string') {
+        // Resolve ID to component node
+        const surface = (this.processor as any).getSurfaces().get(surfaceId);
+        if (surface && surface.componentsModel) {
+          component = surface.componentsModel.get(componentInput);
+        }
+      } else {
+        component = componentInput;
+      }
+
+      if (component) {
+        untracked(() => this.render(surfaceId, component!));
+      } else {
+        untracked(() => this.clear());
+      }
     });
 
     const platformId = inject(PLATFORM_ID);

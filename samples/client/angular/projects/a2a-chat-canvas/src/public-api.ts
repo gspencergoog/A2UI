@@ -14,7 +14,7 @@
  limitations under the License.
  */
 
-export * from './lib/a2a-chat-canvas';
-export * from './lib/interfaces/a2a-service';
-export * from './lib/services/canvas-service';
+// export * from './lib/a2a-chat-canvas';
+// export * from './lib/interfaces/a2a-service';
+// export * from './lib/services/canvas-service';
 export * from './lib/config';

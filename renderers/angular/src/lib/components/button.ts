@@ -15,7 +15,7 @@
  */
 
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import * as Types from '@a2ui/web_core/types/types';
+import { Types } from '../types';
 import { DynamicComponent } from '../rendering/dynamic-component';
 import { Renderer } from '../rendering/renderer';
 
@@ -29,11 +29,9 @@ import { Renderer } from '../rendering/renderer';
       [style]="theme.additionalStyles?.Button"
       (click)="handleClick()"
     >
-      <ng-container
-        a2ui-renderer
-        [surfaceId]="surfaceId()!"
-        [component]="component().properties.child"
-      />
+      @if (component().properties.child; as child) {
+        <ng-container a2ui-renderer [surfaceId]="surfaceId()!" [component]="child" />
+      }
     </button>
   `,
   styles: `

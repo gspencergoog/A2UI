@@ -14,16 +14,29 @@
  limitations under the License.
  */
 
-import * as Types from '@a2ui/web_core/types/types';
+import { Types } from '../types';
+export type { Types };
 
+/**
+ * Represents a text chunk in the stream.
+ */
 export interface A2TextPayload {
   kind: 'text';
+  /** The text content. */
   text: string;
 }
 
+/**
+ * Represents a structural data chunk in the stream.
+ */
 export interface A2DataPayload {
   kind: 'data';
+  /** The A2UI protocol message. */
   data: Types.ServerToClientMessage;
 }
 
+/**
+ * Union type for payloads received from the server stream.
+ * Can be a list of text/data chunks or an error object.
+ */
 export type A2AServerPayload = Array<A2DataPayload | A2TextPayload> | { error: string };

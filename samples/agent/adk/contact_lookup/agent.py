@@ -32,7 +32,7 @@ from a2a.types import AgentCapabilities, AgentCard, AgentSkill
 from google.genai import types
 from prompt_builder import get_text_prompt, ROLE_DESCRIPTION, WORKFLOW_DESCRIPTION, UI_DESCRIPTION
 from tools import get_contact_info
-from a2ui.core.schema.constants import VERSION_0_8
+from a2ui.core.schema.constants import VERSION_0_9
 from a2ui.core.schema.manager import A2uiSchemaManager
 from a2ui.basic_catalog.provider import BasicCatalog
 from a2ui.a2a import get_a2ui_agent_extension
@@ -50,9 +50,9 @@ class ContactAgent:
     self.use_ui = use_ui
     self._schema_manager = (
         A2uiSchemaManager(
-            version=VERSION_0_8,
+            version=VERSION_0_9,
             catalogs=[
-                BasicCatalog.get_config(version=VERSION_0_8, examples_path="examples")
+                BasicCatalog.get_config(version=VERSION_0_9, examples_path="examples")
             ],
         )
         if use_ui
@@ -134,7 +134,7 @@ class ContactAgent:
     )
 
   async def stream(self, query, session_id) -> AsyncIterable[dict[str, Any]]:
-    session_state = {"base_url": self.base_url}
+    session_state = {"base_url": self.base_url, "expression": "{{expression}}"}
 
     session = await self._runner.session_service.get_session(
         app_name=self._agent.name,
@@ -151,26 +151,31 @@ class ContactAgent:
     elif "base_url" not in session.state:
       session.state["base_url"] = self.base_url
 
+    if "expression" not in session.state:
+      session.state["expression"] = "{{expression}}"
+
     # --- Begin: UI Validation and Retry Logic ---
     max_retries = 1  # Total 2 attempts
     attempt = 0
     current_query_text = query
 
-    # Ensure catalog schema was loaded
-    selected_catalog = self._schema_manager.get_selected_catalog()
-    if self.use_ui and not selected_catalog.catalog_schema:
-      logger.error(
-          "--- ContactAgent.stream: A2UI_SCHEMA is not loaded. "
-          "Cannot perform UI validation. ---"
-      )
-      yield {
-          "is_task_complete": True,
-          "content": (
-              "I'm sorry, I'm facing an internal configuration error with my UI"
-              " components. Please contact support."
-          ),
-      }
-      return
+    effective_catalog = None
+    if self.use_ui:
+      # Ensure catalog schema was loaded
+      effective_catalog = self._schema_manager.get_selected_catalog()
+      if not effective_catalog.catalog_schema:
+        logger.error(
+            "--- ContactAgent.stream: A2UI_SCHEMA is not loaded. "
+            "Cannot perform UI validation. ---"
+        )
+        yield {
+            "is_task_complete": True,
+            "content": (
+                "I'm sorry, I'm facing an internal configuration error with my UI"
+                " components. Please contact support."
+            ),
+        }
+        return
 
     while attempt <= max_retries:
       attempt += 1
@@ -231,6 +236,7 @@ class ContactAgent:
             f" {attempt})... ---"
         )
         try:
+          json_string_cleaned = ""
           if "---a2ui_JSON---" not in final_response_content:
             raise ValueError("Delimiter '---a2ui_JSON---' not found.")
 
@@ -260,7 +266,7 @@ class ContactAgent:
             logger.info(
                 "--- ContactAgent.stream: Validating against A2UI_SCHEMA... ---"
             )
-            selected_catalog.validator.validate(parsed_json_data)
+            effective_catalog.validator.validate(parsed_json_data)
             # --- End New Validation Steps ---
 
             logger.info(
@@ -274,11 +280,11 @@ class ContactAgent:
             json.JSONDecodeError,
             jsonschema.exceptions.ValidationError,
         ) as e:
-          logger.warning(
+          logger.error(
               f"--- ContactAgent.stream: A2UI validation failed: {e} (Attempt"
               f" {attempt}) ---"
           )
-          logger.warning(
+          logger.error(
               f"--- Failed response content: {final_response_content[:500]}... ---"
           )
           error_message = f"Validation failed: {e}."

@@ -77,8 +77,14 @@ class ContactAgentExecutor(AgentExecutor):
       for i, part in enumerate(context.message.parts):
         if isinstance(part.root, DataPart):
           if "userAction" in part.root.data:
-            logger.info(f"  Part {i}: Found a2ui UI ClientEvent payload.")
+            logger.info(f"  Part {i}: Found a2ui UI ClientEvent payload (wrapped userAction).")
             ui_event_part = part.root.data["userAction"]
+          elif "action" in part.root.data:
+            logger.info(f"  Part {i}: Found a2ui UI ClientEvent payload (wrapped action).")
+            ui_event_part = part.root.data["action"]
+          elif part.root.data.get("kind") == "clientEvent":
+            logger.info(f"  Part {i}: Found a2ui UI ClientEvent payload (unwrapped).")
+            ui_event_part = part.root.data
           else:
             logger.info(f"  Part {i}: DataPart (data: {part.root.data})")
         elif isinstance(part.root, TextPart):
@@ -88,9 +94,9 @@ class ContactAgentExecutor(AgentExecutor):
 
     if ui_event_part:
       logger.info(f"Received a2ui ClientEvent: {ui_event_part}")
-      # Fix: Check both 'actionName' and 'name'
-      action = ui_event_part.get("name")
-      ctx = ui_event_part.get("context", {})
+      # Fix: Check both 'actionName' and 'name' and 'event'
+      action = ui_event_part.get("name") or ui_event_part.get("event")
+      ctx = ui_event_part.get("context", {}) or ui_event_part.get("args", {})
 
       if action == "view_profile":
         contact_name = ctx.get("contactName", "Unknown")
@@ -107,7 +113,8 @@ class ContactAgentExecutor(AgentExecutor):
         query = f"USER_WANTS_TO_MESSAGE: {contact_name}"
 
       elif action == "follow_contact":
-        query = "ACTION: follow_contact"
+        contact_name = ctx.get("contactName", "Unknown")
+        query = f"ACTION: follow_contact {contact_name}"
 
       elif action == "view_full_profile":
         contact_name = ctx.get("contactName", "Unknown")

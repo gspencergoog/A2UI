@@ -18,7 +18,7 @@ import { ChangeDetectionStrategy, Component, computed, input, signal } from '@an
 import { DynamicComponent } from '../rendering/dynamic-component';
 import { Renderer } from '../rendering/renderer';
 import * as Styles from '@a2ui/web_core/styles/index';
-import * as Types from '@a2ui/web_core/types/types';
+import { Types } from '../types';
 
 @Component({
   selector: 'a2ui-tabs',
@@ -36,7 +36,7 @@ import * as Types from '@a2ui/web_core/types/types';
             [disabled]="selectedIndex === $index"
             [class]="buttonClasses()[selectedIndex]"
           >
-            {{ resolvePrimitive(tab.title) }}
+            {{ tab.title }}
           </button>
         }
       </div>

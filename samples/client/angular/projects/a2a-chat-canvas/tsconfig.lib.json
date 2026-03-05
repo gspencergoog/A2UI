@@ -8,12 +8,11 @@
     "declarationMap": true,
     "inlineSources": true,
     "inlineSourceMap": true,
-    "types": []
+    "types": [],
+    "paths": {
+      "@a2ui/angular": ["../../dist/lib"]
+    }
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "**/*.spec.ts"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["**/*.spec.ts"]
 }

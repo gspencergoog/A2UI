@@ -1,58 +1,40 @@
 [
   {
-    "beginRendering": {
+    "version": "v0.9",
+    "createSurface": {
       "surfaceId": "contact-card",
-      "root": "success_card"
+      "catalogId": "default"
     }
   },
   {
-    "surfaceUpdate": {
+    "version": "v0.9",
+    "updateComponents": {
       "surfaceId": "contact-card",
       "components": [
         {
           "id": "success_icon",
-          "component": {
-            "Icon": {
-              "name": {
-                "literalString": "check_circle"
-              },
-              "size": 48.0,
-              "color": "#4CAF50"
-            }
-          }
+          "component": "Icon",
+          "name": "check"
         },
         {
           "id": "success_text",
-          "component": {
-            "Text": {
-              "text": {
-                "literalString": "Successfully Followed"
-              },
-              "usageHint": "h2"
-            }
-          }
+          "component": "Text",
+          "text": "Successfully Followed",
+          "variant": "h2"
         },
         {
           "id": "success_column",
-          "component": {
-            "Column": {
-              "children": {
-                "explicitList": [
-                  "success_icon",
-                  "success_text"
-                ]
-              },
-              "alignment": "center"
-            }
-          }
+          "component": "Column",
+          "children": [
+            "success_icon",
+            "success_text"
+          ],
+          "align": "center"
         },
         {
-          "id": "success_card",
-          "component": {
-            "Card": {
-              "child": "success_column"
-            }
-          }
+          "id": "root",
+          "component": "Card",
+          "child": "success_column"
         }
       ]
     }

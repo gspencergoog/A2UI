@@ -20,6 +20,14 @@
             }
           },
           "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "polyfills": ["zone.js", "zone.js/testing"],
+            "tsConfig": "projects/lib/tsconfig.spec.json",
+            "preserveSymlinks": true
+          }
         }
       }
     },
@@ -122,9 +130,7 @@
                 "input": "projects/rizzcharts/public"
               }
             ],
-            "styles": [
-              "projects/rizzcharts/src/styles.scss"
-            ],
+            "styles": ["projects/rizzcharts/src/styles.scss"],
             "server": "projects/rizzcharts/src/main.server.ts",
             "outputMode": "server",
             "ssr": {
@@ -180,9 +186,7 @@
                 "input": "projects/rizzcharts/public"
               }
             ],
-            "styles": [
-              "projects/rizzcharts/src/styles.css"
-            ]
+            "styles": ["projects/rizzcharts/src/styles.css"]
           }
         }
       }
@@ -206,9 +210,7 @@
                 "input": "projects/contact/public"
               }
             ],
-            "styles": [
-              "projects/contact/src/styles.css"
-            ],
+            "styles": ["projects/contact/src/styles.css"],
             "server": "projects/contact/src/main.server.ts",
             "outputMode": "server",
             "ssr": {
@@ -249,7 +251,10 @@
               "buildTarget": "contact:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",
+          "options": {
+            "proxyConfig": "projects/contact/proxy.conf.json"
+          }
         },
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n"
@@ -264,16 +269,14 @@
                 "input": "projects/contact/public"
               }
             ],
-            "styles": [
-              "projects/contact/src/styles.css"
-            ]
+            "styles": ["projects/contact/src/styles.css"]
           }
         }
       }
     },
     "gallery": {
       "projectType": "application",
-      "schematics": { },
+      "schematics": {},
       "root": "projects/gallery",
       "sourceRoot": "projects/gallery/src",
       "prefix": "app",
@@ -290,9 +293,7 @@
                 "input": "projects/gallery/public"
               }
             ],
-            "styles": [
-              "projects/gallery/src/styles.css"
-            ]
+            "styles": ["projects/gallery/src/styles.css"]
           },
           "configurations": {
             "production": {
@@ -343,9 +344,7 @@
                 "input": "projects/gallery/public"
               }
             ],
-            "styles": [
-              "projects/gallery/src/styles.css"
-            ]
+            "styles": ["projects/gallery/src/styles.css"]
           }
         }
       }
@@ -429,9 +428,7 @@
                 "input": "projects/orchestrator/public"
               }
             ],
-            "styles": [
-              "projects/orchestrator/src/styles.scss"
-            ],
+            "styles": ["projects/orchestrator/src/styles.scss"],
             "server": "projects/orchestrator/src/main.server.ts",
             "outputMode": "server",
             "ssr": {
@@ -489,9 +486,7 @@
                 "input": "projects/orchestrator/public"
               }
             ],
-            "styles": [
-              "projects/orchestrator/src/styles.scss"
-            ]
+            "styles": ["projects/orchestrator/src/styles.scss"]
           }
         }
       }

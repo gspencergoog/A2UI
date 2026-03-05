@@ -14,7 +14,7 @@
  limitations under the License.
  */
 
-import { CanvasService } from '@a2a_chat_canvas/services/canvas-service';
+import { CanvasService } from '../../services/canvas-service';
 import { DynamicComponent } from '@a2ui/angular';
 import * as Types from '@a2ui/web_core/types/types';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
@@ -33,7 +33,10 @@ import { MatCard, MatCardContent } from '@angular/material/card';
   imports: [MatButton, MatCard, MatCardContent],
   changeDetection: ChangeDetectionStrategy.Eager,
 })
-export class Canvas extends DynamicComponent<Types.CustomNode> implements OnInit {
+export class Canvas
+  extends DynamicComponent<Types.CustomNode & { component: string }>
+  implements OnInit
+{
   /** Service for managing the canvas state. */
   private readonly canvasService = inject(CanvasService);
 

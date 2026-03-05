@@ -36,7 +36,7 @@ export class Client {
     });
   }
 
-  async makeRequest(request: Types.A2UIClientEventMessage | string) {
+  async makeRequest(request: Types.A2UIClientEventMessage | string | any) {
     let messages: Types.ServerToClientMessage[];
 
     try {
@@ -70,9 +70,12 @@ export class Client {
       if ('error' in data) {
         throw new Error(data.error);
       } else {
-        for (const item of data) {
-          if (item.kind === 'text') continue;
-          messages.push(item.data);
+        // A2AServerPayload is Array<A2DataPayload | A2TextPayload>
+        if (Array.isArray(data)) {
+          for (const item of data) {
+            if (item.kind === 'text') continue;
+            messages.push(item.data);
+          }
         }
       }
       return messages;

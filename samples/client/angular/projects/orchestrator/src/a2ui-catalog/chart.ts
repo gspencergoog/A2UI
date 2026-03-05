@@ -131,13 +131,13 @@ ChartJS.register(ChartDataLabels);
     </div>
   `,
 })
-export class Chart extends DynamicComponent<Types.CustomNode> {
+export class Chart extends DynamicComponent<Types.CustomNode & { component: string }> {
   readonly type = input.required<string>();
   protected readonly chartType = computed(() => this.type() as ChartType);
 
   readonly title = input<Primitives.StringValue | null>();
-  protected readonly resolvedTitle: Signal<string | null> = computed(() =>
-    super.resolvePrimitive(this.title() ?? null),
+  protected readonly resolvedTitle: Signal<string | null> = computed(
+    () => super.resolve(this.title() ?? null) as string | null,
   );
 
   readonly chartData = input.required<Primitives.StringValue | null>();
@@ -211,8 +211,8 @@ export class Chart extends DynamicComponent<Types.CustomNode> {
         const itemPrefix = `${pathPrefix.path}[${index}]`;
         const labelPath: Primitives.StringValue = { path: `${itemPrefix}.label` };
         const valuePath: Primitives.NumberValue = { path: `${itemPrefix}.value` };
-        const label = super.resolvePrimitive(labelPath);
-        const value = super.resolvePrimitive(valuePath);
+        const label = super.resolve(labelPath) as string | null;
+        const value = super.resolve(valuePath) as number | null;
         if (label === null || value === null) {
           break;
         }
@@ -230,8 +230,8 @@ export class Chart extends DynamicComponent<Types.CustomNode> {
           const drilldownValuePath: Primitives.NumberValue = {
             path: `${drilldownItemPrefix}.value`,
           };
-          const drilldownLabel = super.resolvePrimitive(drilldownLabelPath);
-          const drilldownValue = super.resolvePrimitive(drilldownValuePath);
+          const drilldownLabel = super.resolve(drilldownLabelPath) as string | null;
+          const drilldownValue = super.resolve(drilldownValuePath) as number | null;
           if (drilldownLabel === null || drilldownValue === null) {
             break;
           }

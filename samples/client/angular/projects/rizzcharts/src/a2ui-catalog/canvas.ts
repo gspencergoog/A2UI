@@ -38,7 +38,10 @@ import { CanvasService } from '@a2a_chat_canvas/services/canvas-service';
   `,
   template: `<section></section>`,
 })
-export class Canvas extends DynamicComponent<Types.CustomNode> implements OnInit {
+export class Canvas
+  extends DynamicComponent<Types.CustomNode & { component: string }>
+  implements OnInit
+{
   private readonly canvasService = inject(CanvasService);
 
   readonly isCanvasOpened = computed(() => this.canvasService.surfaceId() === this.surfaceId());

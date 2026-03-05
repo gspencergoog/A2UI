@@ -121,13 +121,13 @@ import { BaseChartDirective } from 'ng2-charts';
     </div>
   `,
 })
-export class Chart extends DynamicComponent<Types.CustomNode> {
+export class Chart extends DynamicComponent<Types.CustomNode & { component: string }> {
   readonly type = input.required<string>();
   protected readonly chartType = computed(() => this.type() as ChartType);
 
   readonly title = input<Primitives.StringValue | null>();
   protected readonly resolvedTitle: Signal<string | null> = computed(() =>
-    super.resolvePrimitive(this.title() ?? null),
+    this.resolvePrimitive(this.title() ?? null),
   );
 
   readonly chartData = input.required<Primitives.StringValue | null>();
@@ -201,8 +201,8 @@ export class Chart extends DynamicComponent<Types.CustomNode> {
         const itemPrefix = `${pathPrefix.path}[${index}]`;
         const labelPath: Primitives.StringValue = { path: `${itemPrefix}.label` };
         const valuePath: Primitives.NumberValue = { path: `${itemPrefix}.value` };
-        const label = super.resolvePrimitive(labelPath);
-        const value = super.resolvePrimitive(valuePath);
+        const label = this.resolvePrimitive(labelPath);
+        const value = this.resolvePrimitive(valuePath);
         if (label === null || value === null) {
           break;
         }
@@ -220,8 +220,8 @@ export class Chart extends DynamicComponent<Types.CustomNode> {
           const drilldownValuePath: Primitives.NumberValue = {
             path: `${drilldownItemPrefix}.value`,
           };
-          const drilldownLabel = super.resolvePrimitive(drilldownLabelPath);
-          const drilldownValue = super.resolvePrimitive(drilldownValuePath);
+          const drilldownLabel = this.resolvePrimitive(drilldownLabelPath);
+          const drilldownValue = this.resolvePrimitive(drilldownValuePath);
           if (drilldownLabel === null || drilldownValue === null) {
             break;
           }

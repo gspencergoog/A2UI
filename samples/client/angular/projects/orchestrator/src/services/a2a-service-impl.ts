@@ -45,7 +45,7 @@ export class A2aServiceImpl implements A2aService {
     if (!response.ok) {
       throw new Error('Failed to fetch agent card');
     }
-    const card = await response.json() as AgentCard;
+    const card = (await response.json()) as AgentCard;
     return card;
   }
 }

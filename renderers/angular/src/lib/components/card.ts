@@ -17,7 +17,7 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { DynamicComponent } from '../rendering/dynamic-component';
 import { Renderer } from '../rendering/renderer';
-import * as Types from '@a2ui/web_core/types/types';
+import { Types } from '../types';
 
 @Component({
   selector: 'a2ui-card',
@@ -46,7 +46,7 @@ import * as Types from '@a2ui/web_core/types/types';
   `,
   template: `
     @let properties = component().properties;
-    @let children = properties.children || [properties.child];
+    @let children = properties.children || (properties.child ? [properties.child] : []);
 
     <section [class]="theme.components.Card" [style]="theme.additionalStyles?.Card">
       @for (child of children; track child) {

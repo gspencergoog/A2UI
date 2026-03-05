@@ -14,6 +14,13 @@
  limitations under the License.
  */
 
+/**
+ * @module @a2ui/angular/rendering
+ *
+ * Contains the core rendering logic, including the `Renderer` directive,
+ * `DynamicComponent` base class, and catalog definitions.
+ */
+
 export * from './catalog';
 export * from './dynamic-component';
 export * from './renderer';

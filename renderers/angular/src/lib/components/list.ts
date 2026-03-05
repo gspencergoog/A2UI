@@ -14,8 +14,8 @@
  limitations under the License.
  */
 
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import * as Types from '@a2ui/web_core/types/types';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { Types } from '../types';
 import { DynamicComponent } from '../rendering/dynamic-component';
 import { Renderer } from '../rendering/renderer';
 
@@ -53,7 +53,7 @@ import { Renderer } from '../rendering/renderer';
   `,
   template: `
     <section [class]="theme.components.List" [style]="theme.additionalStyles?.List">
-      @for (child of component().properties.children; track child) {
+      @for (child of childrenArray(); track child) {
         <ng-container a2ui-renderer [surfaceId]="surfaceId()!" [component]="child" />
       }
     </section>
@@ -61,4 +61,9 @@ import { Renderer } from '../rendering/renderer';
 })
 export class List extends DynamicComponent<Types.ListNode> {
   readonly direction = input<'vertical' | 'horizontal'>('vertical');
+
+  protected readonly childrenArray = computed(() => {
+    const children = this.component().properties.children;
+    return Array.isArray(children) ? children : [];
+  });
 }

@@ -14,9 +14,9 @@
  limitations under the License.
  */
 
-import { Canvas } from '@a2a_chat_canvas/components/canvas/canvas';
-import { Chat } from '@a2a_chat_canvas/components/chat/chat';
-import { MessageDecorator } from '@a2a_chat_canvas/components/chat/chat-history/message-decorator/types';
+import { Canvas } from './components/canvas/canvas';
+import { Chat } from './components/chat/chat';
+import { MessageDecorator } from './components/chat/chat-history/message-decorator/types';
 import {
   ChangeDetectionStrategy,
   Component,

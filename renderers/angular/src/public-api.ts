@@ -14,8 +14,17 @@
  limitations under the License.
  */
 
+/**
+ * @module @a2ui/angular
+ *
+ * The main entry point for the Angular renderer of the A2UI protocol.
+ * This package provides components and services to render A2UI surfaces in Angular applications.
+ */
+
 export * from './lib/rendering/index';
 export * from './lib/data/index';
 export * from './lib/config';
-export * from './lib/catalog/default';
-export { Surface } from './lib/catalog/surface';
+export * from './lib/components/surface';
+export { CATALOG as V0_8_CATALOG } from './lib/v0_8/catalog';
+export { CATALOG as V0_9_CATALOG } from './lib/v0_9/catalog';
+

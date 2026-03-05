@@ -1,156 +1,105 @@
 [
   {
-    "beginRendering": {
+    "version": "v0.9",
+    "createSurface": {
       "surfaceId": "contact-list",
-      "root": "root-column",
-      "styles": {
-        "primaryColor": "#007BFF",
-        "font": "Roboto"
-      }
+      "catalogId": "default"
     }
   },
   {
-    "surfaceUpdate": {
+    "version": "v0.9",
+    "updateComponents": {
       "surfaceId": "contact-list",
       "components": [
         {
-          "id": "root-column",
-          "component": {
-            "Column": {
-              "children": {
-                "explicitList": [
-                  "title-heading",
-                  "item-list"
-                ]
-              }
-            }
-          }
+          "id": "root",
+          "component": "Column",
+          "children": [
+            "title-heading",
+            "item-list"
+          ]
         },
         {
           "id": "title-heading",
-          "component": {
-            "Text": {
-              "usageHint": "h1",
-              "text": {
-                "literalString": "Found Contacts"
-              }
-            }
-          }
+          "component": "Text",
+          "text": "Found Contacts",
+          "variant": "h1"
         },
         {
           "id": "item-list",
-          "component": {
-            "List": {
-              "direction": "vertical",
-              "children": {
-                "template": {
-                  "componentId": "item-card-template",
-                  "dataBinding": "/contacts"
-                }
-              }
-            }
+          "component": "List",
+          "direction": "vertical",
+          "children": {
+            "componentId": "item-card-template",
+            "path": "/contacts"
           }
         },
         {
           "id": "item-card-template",
-          "component": {
-            "Card": {
-              "child": "card-layout"
-            }
-          }
+          "component": "Card",
+          "child": "card-layout"
         },
         {
           "id": "card-layout",
-          "component": {
-            "Row": {
-              "children": {
-                "explicitList": [
-                  "template-image",
-                  "card-details",
-                  "view-button"
-                ]
-              },
-              "alignment": "center"
-            }
-          }
+          "component": "Row",
+          "children": [
+            "template-image",
+            "card-details",
+            "view-button"
+          ],
+          "align": "center"
         },
         {
           "id": "template-image",
-          "component": {
-            "Image": {
-              "url": {
-                "path": "/imageUrl"
-              },
-              "fit": "cover"
-            }
-          }
+          "component": "Image",
+          "url": {
+            "path": "/imageUrl"
+          },
+          "fit": "cover"
         },
         {
           "id": "card-details",
-          "component": {
-            "Column": {
-              "children": {
-                "explicitList": [
-                  "template-name",
-                  "template-title"
-                ]
-              }
-            }
-          }
+          "component": "Column",
+          "children": [
+            "template-name",
+            "template-title"
+          ]
         },
         {
           "id": "template-name",
-          "component": {
-            "Text": {
-              "usageHint": "h3",
-              "text": {
-                "path": "/name"
-              }
-            }
-          }
+          "component": "Text",
+          "text": {
+            "path": "/name"
+          },
+          "variant": "h3"
         },
         {
           "id": "template-title",
-          "component": {
-            "Text": {
-              "text": {
-                "path": "/title"
-              }
-            }
+          "component": "Text",
+          "text": {
+            "path": "/title"
           }
         },
         {
           "id": "view-button-text",
-          "component": {
-            "Text": {
-              "text": {
-                "literalString": "View"
-              }
-            }
-          }
+          "component": "Text",
+          "text": "View"
         },
         {
           "id": "view-button",
-          "component": {
-            "Button": {
-              "child": "view-button-text",
-              "primary": true,
-              "action": {
-                "name": "view_profile",
-                "context": [
-                  {
-                    "key": "contactName",
-                    "value": {
-                      "path": "/name"
-                    }
-                  },
-                  {
-                    "key": "department",
-                    "value": {
-                      "path": "/department"
-                    }
-                  }
-                ]
+          "component": "Button",
+          "child": "view-button-text",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "view_profile",
+              "context": {
+                "contactName": {
+                  "path": "/name"
+                },
+                "department": {
+                  "path": "/department"
+                }
               }
             }
           }
@@ -159,74 +108,28 @@
     }
   },
   {
-    "dataModelUpdate": {
+    "version": "v0.9",
+    "updateDataModel": {
       "surfaceId": "contact-list",
-      "path": "/",
-      "contents": [
-        {
-          "key": "contacts",
-          "valueMap": [
-            {
-              "key": "contact1",
-              "valueMap": [
-                {
-                  "key": "name",
-                  "valueString": "Alice Wonderland"
-                },
-                {
-                  "key": "phone",
-                  "valueString": "+1-555-123-4567"
-                },
-                {
-                  "key": "email",
-                  "valueString": "alice@example.com"
-                },
-                {
-                  "key": "imageUrl",
-                  "valueString": "https://example.com/alice.jpg"
-                },
-                {
-                  "key": "title",
-                  "valueString": "Mad Hatter"
-                },
-                {
-                  "key": "department",
-                  "valueString": "Wonderland"
-                }
-              ]
-            },
-            {
-              "key": "contact2",
-              "valueMap": [
-                {
-                  "key": "name",
-                  "valueString": "Bob The Builder"
-                },
-                {
-                  "key": "phone",
-                  "valueString": "+1-555-765-4321"
-                },
-                {
-                  "key": "email",
-                  "valueString": "bob@example.com"
-                },
-                {
-                  "key": "imageUrl",
-                  "valueString": "https://example.com/bob.jpg"
-                },
-                {
-                  "key": "title",
-                  "valueString": "Construction"
-                },
-                {
-                  "key": "department",
-                  "valueString": "Building"
-                }
-              ]
-            }
-          ]
-        }
-      ]
+      "path": "/contacts",
+      "value": [
+          {
+            "name": "Alice Wonderland",
+            "phone": "+1-555-123-4567",
+            "email": "alice@example.com",
+            "imageUrl": "https://example.com/alice.jpg",
+            "title": "Mad Hatter",
+            "department": "Wonderland"
+          },
+          {
+            "name": "Bob The Builder",
+            "phone": "+1-555-765-4321",
+            "email": "bob@example.com",
+            "imageUrl": "https://example.com/bob.jpg",
+            "title": "Construction",
+            "department": "Building"
+          }
+        ]
     }
   }
 ]

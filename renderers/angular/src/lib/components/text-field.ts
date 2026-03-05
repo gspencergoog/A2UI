@@ -16,7 +16,7 @@
 
 import { computed, Component, input, ChangeDetectionStrategy } from '@angular/core';
 import * as Primitives from '@a2ui/web_core/types/primitives';
-import * as Types from '@a2ui/web_core/types/types';
+import { Types } from '../types';
 import { DynamicComponent } from '../rendering/dynamic-component';
 
 @Component({
@@ -83,6 +83,11 @@ export class TextField extends DynamicComponent {
       return;
     }
 
-    this.processor.setData(this.component(), path, event.target.value, this.surfaceId());
+    const surfaceId = this.surfaceId();
+    if (surfaceId) {
+      const surface = this.processor.model.getSurface(surfaceId);
+      const dataPath = this.processor.resolvePath(path, (this.component() as any)['dataContextPath']);
+      surface?.dataModel.set(dataPath, event.target.value);
+    }
   }
 }

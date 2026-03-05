@@ -25,7 +25,7 @@ import {
 import { DynamicComponent } from '../rendering/dynamic-component';
 import * as Primitives from '@a2ui/web_core/types/primitives';
 import * as Styles from '@a2ui/web_core/styles/index';
-import * as Types from '@a2ui/web_core/types/types';
+import { Types } from '../types';
 import { MarkdownRenderer } from '../data/markdown';
 
 interface HintedStyles {
@@ -104,7 +104,7 @@ export class Text extends DynamicComponent {
 
     return this.markdownRenderer.render(
       value, {
-        tagClassMap: Styles.appendToAll(this.theme.markdown, ['ol', 'ul', 'li'], {}),
+        tagClassMap: Styles.appendToAll(this.theme['markdown'], ['ol', 'ul', 'li'], {}),
       },
     );
   });
@@ -113,14 +113,14 @@ export class Text extends DynamicComponent {
     const usageHint = this.usageHint();
 
     return Styles.merge(
-      this.theme.components.Text.all,
-      usageHint ? this.theme.components.Text[usageHint] : {},
+      this.theme['components'].Text.all,
+      usageHint ? this.theme['components'].Text[usageHint] : {},
     );
   });
 
   protected additionalStyles = computed(() => {
     const usageHint = this.usageHint();
-    const styles = this.theme.additionalStyles?.Text;
+    const styles = this.theme['additionalStyles']?.Text;
 
     if (!styles) {
       return null;
@@ -129,7 +129,7 @@ export class Text extends DynamicComponent {
     let additionalStyles: Record<string, string> = {};
 
     if (this.areHintedStyles(styles)) {
-      additionalStyles = styles[usageHint ?? 'body'];
+      additionalStyles = styles[(usageHint ?? 'body') as keyof HintedStyles];
     } else {
       additionalStyles = styles;
     }

@@ -308,7 +308,7 @@ export const theme: Types.Theme = {
       h4: {},
       h5: {},
       caption: {},
-      body: {}
+      body: {},
     },
     TextField: {
       container: {

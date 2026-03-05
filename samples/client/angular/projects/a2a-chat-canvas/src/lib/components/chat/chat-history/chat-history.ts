@@ -14,10 +14,10 @@
  limitations under the License.
  */
 
-import { MessageDecorator } from '@a2a_chat_canvas/components/chat/chat-history/message-decorator/types';
-import { Message } from '@a2a_chat_canvas/components/chat/message/message';
-import { ChatService } from '@a2a_chat_canvas/services/chat-service';
-import { UiMessage } from '@a2a_chat_canvas/types/ui-message';
+import { MessageDecorator } from './message-decorator/types';
+import { Message } from '../message/message';
+import { ChatService } from '../../../services/chat-service';
+import { UiMessage } from '../../../types/ui-message';
 import { NgComponentOutlet, NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,

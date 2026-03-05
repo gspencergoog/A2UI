@@ -15,13 +15,13 @@
  */
 
 import { AgentCard, SendMessageSuccessResponse } from '@a2a-js/sdk';
-import { PART_RESOLVERS } from '@a2a_chat_canvas/a2a-renderer/tokens';
-import { A2A_SERVICE } from '@a2a_chat_canvas/interfaces/a2a-service';
-import { UiAgent, UiMessage, UiMessageContent } from '@a2a_chat_canvas/types/ui-message';
-import { extractA2aPartsFromResponse } from '@a2a_chat_canvas/utils/a2a';
-import { extractA2uiDataParts } from '@a2a_chat_canvas/utils/a2ui';
-import { convertPartToUiMessageContent } from '@a2a_chat_canvas/utils/ui-message-utils';
-import { MessageProcessor, DispatchedEvent } from '@a2ui/angular';
+import { PART_RESOLVERS } from '../a2a-renderer/tokens';
+import { A2A_SERVICE } from '../interfaces/a2a-service';
+import { UiAgent, UiMessage, UiMessageContent } from '../types/ui-message';
+import { extractA2aPartsFromResponse } from '../utils/a2a';
+import { extractA2uiDataParts } from '../utils/a2ui';
+import { convertPartToUiMessageContent } from '../utils/ui-message-utils';
+import { MessageProcessor, DispatchedEvent, Types } from '@a2ui/angular';
 import { inject, Injectable, resource, signal } from '@angular/core';
 import { v4 as uuid } from 'uuid';
 
@@ -65,6 +65,7 @@ export class ChatService {
   readonly isA2aStreamOpen = signal(false);
   /** Signal holding the current A2UI surfaces managed by the A2UI MessageProcessor. */
   readonly a2uiSurfaces = signal(new Map(this.a2uiMessageProcessor.getSurfaces()));
+  // readonly a2uiSurfaces = signal(new Map());
 
   /**
    * Subscribes to events dispatched from the A2UI MessageProcessor.
@@ -77,11 +78,21 @@ export class ChatService {
       try {
         // TODO: Replace this with a more robust event handling mechanism.
         // Currently, it just sends the event message back to the agent.
-        await this.sendMessage(JSON.stringify(event.message));
-        event.completion.next([]);
-        event.completion.complete();
+        const action = event.message.action;
+        if (!('event' in action)) {
+          return;
+        }
+
+        const message = {
+          kind: 'clientEvent',
+          surfaceId: event.message.surfaceId,
+          id: 'unknown',
+          event: action.event.name,
+          args: action.event.context,
+        };
+        await this.sendMessage(JSON.stringify(message));
       } catch (err) {
-        event.completion.error(err);
+        console.error('Error processing event', err);
       }
     });
   }
@@ -155,7 +166,10 @@ export class ChatService {
     }));
 
     // Let A2UI Renderer process the A2UI data parts in agent response.
-    this.a2uiMessageProcessor.processMessages(extractA2uiDataParts(agentResponseParts));
+    // Let A2UI Renderer process the A2UI data parts in agent response.
+    extractA2uiDataParts(agentResponseParts).forEach((msg: unknown) =>
+      this.a2uiMessageProcessor.processMessages([msg as Types.ServerToClientMessage]),
+    );
     this.a2uiSurfaces.set(new Map(this.a2uiMessageProcessor.getSurfaces()));
   }
 
@@ -275,7 +289,7 @@ export class ChatService {
     const agentRole: UiAgent = {
       ...rootagentRole,
       subagentName: (subagentCard as AgentCard).name,
-    }
+    };
 
     return agentRole;
   }

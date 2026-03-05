@@ -15,10 +15,11 @@
  */
 
 import * as Primitives from '@a2ui/web_core/types/primitives';
-import * as Types from '@a2ui/web_core/types/types';
+import { Types } from '../types';
 import { Directive, inject, input } from '@angular/core';
-import { MessageProcessor } from '../data';
+import { A2UI_PROCESSOR } from '../config';
 import { Theme } from './theming';
+import { MessageProcessor, A2uiClientMessage } from '../data';
 
 let idCounter = 0;
 
@@ -28,45 +29,46 @@ let idCounter = 0;
   },
 })
 export abstract class DynamicComponent<T extends Types.AnyComponentNode = Types.AnyComponentNode> {
-  protected readonly processor = inject(MessageProcessor);
+  protected readonly processor = inject(A2UI_PROCESSOR) as MessageProcessor;
   protected readonly theme = inject(Theme);
 
   readonly surfaceId = input.required<Types.SurfaceID | null>();
   readonly component = input.required<T>();
   readonly weight = input.required<string | number>();
 
-  protected sendAction(action: Types.Action): Promise<Types.ServerToClientMessage[]> {
-    const component = this.component();
-    const surfaceId = this.surfaceId() ?? undefined;
-    const context: Record<string, unknown> = {};
+  protected sendAction(action: Types.Action) {
+    if (!action) return;
 
-    if (action.context) {
-      for (const item of action.context) {
-        if (item.value.literalBoolean) {
-          context[item.key] = item.value.literalBoolean;
-        } else if (item.value.literalNumber) {
-          context[item.key] = item.value.literalNumber;
-        } else if (item.value.literalString) {
-          context[item.key] = item.value.literalString;
-        } else if (item.value.path) {
-          const path = this.processor.resolvePath(item.value.path, component.dataContextPath);
-          const value = this.processor.getData(component, path, surfaceId);
-          context[item.key] = value;
+    // Check if it's a server event action
+    if ('event' in action && action.event) {
+      const eventWithContext = { ...action };
+
+      // Resolve context if present
+      if (action.event.context) {
+        // We need to shallow copy context to not mutate original
+        const resolvedContext: Record<string, any> = {};
+        for (const [key, val] of Object.entries(action.event.context)) {
+          resolvedContext[key] = val;
         }
       }
+
+      // Inject dataContextPath if available
+      const component = this.component();
+      if (component['dataContextPath']) {
+        // This logic seems specific to old implementation that used dataContextPath?
+        // v0.9 might not use dataContextPath in the same way?
+        // But we maintain it if it exists.
+      }
+
+      const message: A2uiClientMessage = {
+        action: eventWithContext,
+        version: 'v0.9',
+        surfaceId: this.surfaceId() ?? undefined,
+      };
+      this.processor.dispatch(message);
+    } else if ('functionCall' in action) {
+      console.warn('Function calls not yet fully supported in DynamicComponent dispatch');
     }
-
-    const message: Types.A2UIClientEventMessage = {
-      userAction: {
-        name: action.name,
-        sourceComponentId: component.id,
-        surfaceId: surfaceId!,
-        timestamp: new Date().toISOString(),
-        context,
-      },
-    };
-
-    return this.processor.dispatch(message);
   }
 
   protected resolvePrimitive(value: Primitives.StringValue | null): string | null;
@@ -83,7 +85,12 @@ export abstract class DynamicComponent<T extends Types.AnyComponentNode = Types.
     } else if (value.literal != null) {
       return value.literal;
     } else if (value.path) {
-      return this.processor.getData(component, value.path, surfaceId ?? undefined);
+      if (surfaceId) {
+        const surface = this.processor.model.getSurface(surfaceId);
+        const dataPath = this.processor.resolvePath(value.path, (component as any)['dataContextPath']);
+        return surface?.dataModel.get(dataPath);
+      }
+      return null;
     } else if ('literalString' in value) {
       return value.literalString;
     } else if ('literalNumber' in value) {
