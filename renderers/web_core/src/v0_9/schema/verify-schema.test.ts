@@ -1,4 +1,5 @@
-/// <reference types="node" />
+import { test, describe, it } from "node:test";
+import * as assert from "node:assert";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { readFileSync } from "fs";
 import { resolve, join, dirname } from "path";
@@ -9,21 +10,16 @@ import {
   UpdateComponentsMessageSchema,
   UpdateDataModelMessageSchema,
   DeleteSurfaceMessageSchema,
-} from "../src/v0_9/schema/server-to-client.js";
-
-import {
-  A2uiMessageSchema as V08A2uiMessageSchema,
-  BeginRenderingMessageSchema as V08BeginRenderingMessageSchema,
-  SurfaceUpdateMessageSchema as V08SurfaceUpdateMessageSchema,
-  DataModelUpdateMessageSchema as V08DataModelUpdateMessageSchema,
-  DeleteSurfaceMessageSchema as V08DeleteSurfaceMessageSchema,
-} from "../src/v0_8/schema/server-to-client.js";
+} from "./server-to-client.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const SPEC_DIR_V0_9 = resolve(__dirname, "../../../specification/v0_9/json");
-const SPEC_DIR_V0_8 = resolve(__dirname, "../../../specification/v0_8/json");
+// `__dirname` will be `dist/src/v0_9/schema` when run via `node --test dist/**/*.test.js`
+const SPEC_DIR_V0_9 = resolve(
+  __dirname,
+  "../../../../../../specification/v0_9/json",
+);
 
 // Parse both so we can do structural comparison rather than formatting
 // Compare definitions specifically, ignoring descriptions
@@ -162,12 +158,11 @@ function verifySchema(
     const diffs = compareDefinitions(zodDefs, jsonDefs);
 
     if (Object.keys(diffs).length > 0) {
-      console.error(
+      assert.deepStrictEqual(
+        diffs,
+        {},
         `Zod schema definitions do not structurally match the ${version} JSON spec.`,
       );
-      console.error("Differences:");
-      console.error(JSON.stringify(diffs, null, 2));
-      process.exit(1);
     }
   }
 
@@ -190,11 +185,11 @@ function verifySchema(
       officialSchema.oneOf || officialSchema.anyOf,
     );
     if (Object.keys(topLevelDiff).length > 0) {
-      console.error(
+      assert.deepStrictEqual(
+        topLevelDiff,
+        {},
         `Zod schema top-level oneOf does not match the ${version} JSON spec.`,
       );
-      console.error(JSON.stringify(topLevelDiff, null, 2));
-      process.exit(1);
     }
   } else if (officialSchema.properties) {
     const topLevelDiff = getObjectDiff(
@@ -202,39 +197,29 @@ function verifySchema(
       officialSchema.properties,
     );
     if (Object.keys(topLevelDiff).length > 0) {
-      console.error(
+      assert.deepStrictEqual(
+        topLevelDiff,
+        {},
         `Zod schema top-level properties do not match the ${version} JSON spec.`,
       );
-      console.error(JSON.stringify(topLevelDiff, null, 2));
-      process.exit(1);
     }
   }
 
   console.log(`Zod schema structurally matches the ${version} JSON spec!`);
 }
 
-// ----------------------------------------------------
-// VERIFY v0.9
-// ----------------------------------------------------
-verifySchema(
-  "v0.9",
-  A2uiMessageSchema,
-  join(SPEC_DIR_V0_9, "server_to_client.json"),
-  {
-    CreateSurfaceMessage: CreateSurfaceMessageSchema,
-    UpdateComponentsMessage: UpdateComponentsMessageSchema,
-    UpdateDataModelMessage: UpdateDataModelMessageSchema,
-    DeleteSurfaceMessage: DeleteSurfaceMessageSchema,
-  },
-);
-
-// ----------------------------------------------------
-// VERIFY v0.8
-// ----------------------------------------------------
-verifySchema(
-  "v0.8",
-  V08A2uiMessageSchema,
-  join(SPEC_DIR_V0_8, "server_to_client_with_standard_catalog.json"),
-);
-
-process.exit(0);
+describe("A2UI Schema Verification v0.9", () => {
+  it("verifies v0.9 schema", () => {
+    verifySchema(
+      "v0.9",
+      A2uiMessageSchema,
+      join(SPEC_DIR_V0_9, "server_to_client.json"),
+      {
+        CreateSurfaceMessage: CreateSurfaceMessageSchema,
+        UpdateComponentsMessage: UpdateComponentsMessageSchema,
+        UpdateDataModelMessage: UpdateDataModelMessageSchema,
+        DeleteSurfaceMessage: DeleteSurfaceMessageSchema,
+      },
+    );
+  });
+});

@@ -14,83 +14,61 @@
  * limitations under the License.
  */
 
-import { combineLatest, Observable, of, throwError } from "rxjs";
-import { map, switchMap } from "rxjs/operators";
-import { ExpressionEvaluator, EvaluationContext } from "./expression_evaluator";
-
-import { DataContext } from "../../rendering/data-context";
+import { DynamicValue } from "../../schema/common-types.js";
 
 export class ExpressionParser {
   private static readonly MAX_DEPTH = 10;
 
-  constructor(
-    private context: DataContext,
-    private evaluator: ExpressionEvaluator,
-  ) {}
-
-  public parse(input: string, depth = 0): Observable<string> {
-    try {
-      if (depth > ExpressionParser.MAX_DEPTH) {
-        throw new Error("Max recursion depth reached in parse");
-      }
-      if (!input || !input.includes("${")) {
-        return of(input);
-      }
-
-      const parts: Observable<string>[] = [];
-      const scanner = new Scanner(input);
-
-      while (!scanner.isAtEnd()) {
-        if (scanner.matches("${")) {
-          scanner.advance(2);
-          const content = this.extractInterpolationContent(scanner);
-          parts.push(
-            this.evaluateExpression(content, depth + 1).pipe(
-              map((val) =>
-                val === null || val === undefined ? "" : String(val),
-              ),
-            ),
-          );
-        } else if (
-          scanner.peek() === "\\" &&
-          scanner.peek(1) === "$" &&
-          scanner.peek(2) === "{"
-        ) {
-          // Escaped \${
-          // Consume \
-          scanner.advance();
-          // Literal ${
-          parts.push(of("${"));
-          // Consume ${ (2 chars)
-          scanner.advance(2);
-        } else {
-          // Literal text
-          // Advance until we see ${ BUT check if it's escaped
-          // A simple loop is safer than advanceUntil
-          const start = scanner.pos;
-          while (!scanner.isAtEnd()) {
-            if (scanner.matches("${")) {
-              break;
-            }
-            if (
-              scanner.peek() === "\\" &&
-              scanner.peek(1) === "$" &&
-              scanner.peek(2) === "{"
-            ) {
-              break;
-            }
-            scanner.advance();
-          }
-          parts.push(of(scanner.input.substring(start, scanner.pos)));
-        }
-      }
-
-      return combineLatest(parts).pipe(
-        map((resolved: string[]) => resolved.join("")),
-      );
-    } catch (e) {
-      return throwError(() => e);
+  /**
+   * Parses an input string into an array of DynamicValues.
+   * If the input contains no interpolation, it returns the raw string as a single literal.
+   */
+  public parse(input: string, depth = 0): DynamicValue[] {
+    if (depth > ExpressionParser.MAX_DEPTH) {
+      throw new Error("Max recursion depth reached in parse");
     }
+    if (!input || !input.includes("${")) {
+      return [input];
+    }
+
+    const parts: DynamicValue[] = [];
+    const scanner = new Scanner(input);
+
+    while (!scanner.isAtEnd()) {
+      if (scanner.matches("${")) {
+        scanner.advance(2);
+        const content = this.extractInterpolationContent(scanner);
+        const parsed = this.parseExpression(content, depth + 1);
+        if (parsed !== null) {
+          parts.push(parsed);
+        }
+      } else if (
+        scanner.peek() === "\\" &&
+        scanner.peek(1) === "$" &&
+        scanner.peek(2) === "{"
+      ) {
+        scanner.advance();
+        parts.push("${");
+        scanner.advance(2);
+      } else {
+        const start = scanner.pos;
+        while (!scanner.isAtEnd()) {
+          if (scanner.matches("${")) {
+            break;
+          }
+          if (
+            scanner.peek() === "\\" &&
+            scanner.peek(1) === "$" &&
+            scanner.peek(2) === "{"
+          ) {
+            break;
+          }
+          scanner.advance();
+        }
+        parts.push(scanner.input.substring(start, scanner.pos));
+      }
+    }
+    return parts.filter((p) => p !== null && p !== "") as DynamicValue[];
   }
 
   private extractInterpolationContent(scanner: Scanner): string {
@@ -123,12 +101,15 @@ export class ExpressionParser {
     return scanner.input.substring(start, scanner.pos - 1);
   }
 
-  private evaluateExpression(expr: string, depth: number): Observable<any> {
+  /**
+   * Parses a single expression string into a DynamicValue.
+   */
+  public parseExpression(expr: string, depth = 0): DynamicValue {
     expr = expr.trim();
-    if (!expr) return of(null);
+    if (!expr) return "";
 
     const scanner = new Scanner(expr);
-    const result = this.parseExpression(scanner, depth);
+    const result = this.parseExpressionInternal(scanner, depth);
     if (!scanner.isAtEnd()) {
       throw new Error(
         `Unexpected characters at end of expression: '${scanner.input.substring(
@@ -139,27 +120,30 @@ export class ExpressionParser {
     return result;
   }
 
-  private parseExpression(scanner: Scanner, depth: number): Observable<any> {
+  private parseExpressionInternal(
+    scanner: Scanner,
+    depth: number,
+  ): DynamicValue {
     scanner.skipWhitespace();
-    if (scanner.isAtEnd()) return of(null);
+    if (scanner.isAtEnd()) return "";
 
     // 0. Nested Interpolation (Block)
     if (scanner.matches("${")) {
       scanner.advance(2);
       const content = this.extractInterpolationContent(scanner);
-      return this.evaluateExpression(content, depth + 1);
+      return this.parseExpression(content, depth + 1);
     }
 
     // 1. Literals
     if (scanner.matchesString("'") || scanner.matchesString('"')) {
-      return of(this.parseStringLiteral(scanner));
+      return this.parseStringLiteral(scanner);
     }
     if (this.isDigit(scanner.peek())) {
-      return of(this.parseNumberLiteral(scanner));
+      return this.parseNumberLiteral(scanner);
     }
-    if (scanner.matchesKeyword("true")) return of(true);
-    if (scanner.matchesKeyword("false")) return of(false);
-    if (scanner.matchesKeyword("null")) return of(null);
+    if (scanner.matchesKeyword("true")) return true;
+    if (scanner.matchesKeyword("false")) return false;
+    if (scanner.matchesKeyword("null")) return "";
 
     // 2. Identifiers (Function calls or Path starts)
     const token = this.scanPathOrIdentifier(scanner);
@@ -169,9 +153,9 @@ export class ExpressionParser {
       return this.parseFunctionCall(token, scanner, depth);
     } else {
       if (!token) {
-        return of(null);
+        return "";
       }
-      return this.resolvePath(token);
+      return { path: token };
     }
   }
 
@@ -192,11 +176,11 @@ export class ExpressionParser {
     funcName: string,
     scanner: Scanner,
     depth: number,
-  ): Observable<any> {
+  ): { call: string; args: Record<string, any>; returnType: "any" } {
     scanner.match("(");
     scanner.skipWhitespace();
 
-    const args: Record<string, Observable<any>> = {};
+    const args: Record<string, any> = {};
 
     while (!scanner.isAtEnd() && scanner.peek() !== ")") {
       const argName = this.scanIdentifier(scanner);
@@ -208,7 +192,7 @@ export class ExpressionParser {
       }
       scanner.skipWhitespace();
 
-      args[argName] = this.parseExpression(scanner, depth);
+      args[argName] = this.parseExpressionInternal(scanner, depth);
 
       scanner.skipWhitespace();
       if (scanner.peek() === ",") {
@@ -223,19 +207,7 @@ export class ExpressionParser {
       );
     }
 
-    return combineLatest(args).pipe(
-      switchMap((resolvedArgs: Record<string, unknown>) => {
-        const evalContext: EvaluationContext = this.context;
-        const result = this.evaluator.evaluate(
-          { call: funcName, args: resolvedArgs } as any,
-          evalContext,
-        );
-        if (result instanceof Observable) {
-          return result;
-        }
-        return of(result);
-      }),
-    );
+    return { call: funcName, args, returnType: "any" };
   }
 
   private scanIdentifier(scanner: Scanner): string {
@@ -279,16 +251,6 @@ export class ExpressionParser {
       scanner.advance();
     }
     return Number(scanner.input.substring(start, scanner.pos));
-  }
-
-  private resolvePath(path: string): Observable<any> {
-    return new Observable((sub) => {
-      const observer = this.context.subscribeDynamicValue({ path }, (val) =>
-        sub.next(val),
-      );
-      sub.next(observer.value);
-      return () => observer.unsubscribe();
-    });
   }
 
   private isAlnum(c: string): boolean {
@@ -375,3 +337,4 @@ class Scanner {
     return res;
   }
 }
+

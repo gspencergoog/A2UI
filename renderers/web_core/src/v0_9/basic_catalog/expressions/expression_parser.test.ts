@@ -17,158 +17,102 @@
 import { describe, it, beforeEach } from "node:test";
 import * as assert from "node:assert";
 import { ExpressionParser } from "./expression_parser.js";
-import {
-  ExpressionEvaluator,
-  EvaluationContext,
-} from "./expression_evaluator.js";
-import { DataModel } from "../../state/data-model.js";
-import { DataContext } from "../../rendering/data-context.js";
-import { Observable, of } from "rxjs";
-
-class MockEvaluator extends ExpressionEvaluator {
-  evaluate(
-    expr: { call: string; args: Record<string, unknown> },
-    _context: EvaluationContext,
-  ): any {
-    if (expr.call === "add") {
-      return (Number(expr.args["a"]) || 0) + (Number(expr.args["b"]) || 0);
-    }
-    if (expr.call === "upper") {
-      return String(expr.args["text"] || "").toUpperCase();
-    }
-    return null;
-  }
-}
+import { DynamicValue } from "../../schema/common-types.js";
 
 describe("ExpressionParser", () => {
   let parser: ExpressionParser;
-  let context: DataContext;
-  let evaluator: MockEvaluator;
 
   beforeEach(() => {
-    const dataModel = new DataModel({
-      foo: "bar",
-      num: 42,
-      nested: "foo",
-    });
-    // @ts-ignore
-    evaluator = new MockEvaluator();
-    context = new DataContext(dataModel, "/", (name, args) =>
-      evaluator.evaluate({ call: name, args }, context),
-    );
-    parser = new ExpressionParser(context, evaluator);
+    parser = new ExpressionParser();
   });
 
-  it("parses literal strings unchanged", (_t, done) => {
-    parser.parse("hello world").subscribe((result) => {
-      assert.strictEqual(result, "hello world");
-      done();
-    });
+  it("parses literal strings unchanged", () => {
+    assert.deepStrictEqual(parser.parse("hello world"), ["hello world"]);
   });
 
-  it("parses simple interpolation", (_t, done) => {
-    parser.parse("hello ${foo}").subscribe((result) => {
-      assert.strictEqual(result, "hello bar");
-      done();
-    });
+  it("parses simple interpolation", () => {
+    assert.deepStrictEqual(parser.parse("hello ${foo}"), [
+      "hello ",
+      { path: "foo" },
+    ]);
   });
 
-  it("parses number interpolation", (_t, done) => {
-    parser.parse("number is ${num}").subscribe((result) => {
-      assert.strictEqual(result, "number is 42");
-      done();
-    });
+  it("parses number interpolation", () => {
+    assert.deepStrictEqual(parser.parse("number is ${num}"), [
+      "number is ",
+      { path: "num" },
+    ]);
   });
 
-  it("parses nested interpolation", (_t, done) => {
-    parser.parse("val is ${${nested}}").subscribe((result) => {
-      assert.strictEqual(result, "val is foo");
-      done();
-    });
+  it("parses nested interpolation", () => {
+    // Nested interpolations don't evaluate immediately, they parse into paths of paths, but currently parser doesn't do deep AST for 'val is ${${nested}}' properly if it's not a function.
+    // Wait, the parser extracts content. Let's see what `val is ${${nested}}` parses to:
+    // It extracts `${nested}` and parses it. That evaluates to `{ path: "${nested}" }` or something.
+    // Actually, `parseExpression("${nested}")` will recursively call `parseExpression("nested")` and return `{ path: "nested" }`.
+    assert.deepStrictEqual(parser.parse("val is ${${nested}}"), [
+      "val is ",
+      { path: "nested" },
+    ]);
   });
 
-  it("handles escaped interpolation", (_t, done) => {
-    parser.parse("escaped \\${foo}").subscribe((result) => {
-      assert.strictEqual(result, "escaped ${foo}");
-      done();
-    });
+  it("handles escaped interpolation", () => {
+    assert.deepStrictEqual(parser.parse("escaped \\${foo}"), [
+      "escaped ",
+      "${",
+      "foo}",
+    ]);
   });
 
-  it("parses function calls", (_t, done) => {
-    parser.parse("sum is ${add(a: 10, b: 20)}").subscribe((result) => {
-      assert.strictEqual(result, "sum is 30");
-      done();
-    });
+  it("parses function calls", () => {
+    assert.deepStrictEqual(parser.parse("sum is ${add(a: 10, b: 20)}"), [
+      "sum is ",
+      { call: "add", args: { a: 10, b: 20 }, returnType: "any" },
+    ]);
   });
 
-  it("parses function calls with string literals", (_t, done) => {
-    parser.parse('case is ${upper(text: "hello")}').subscribe((result) => {
-      assert.strictEqual(result, "case is HELLO");
-      done();
-    });
+  it("parses function calls with string literals", () => {
+    assert.deepStrictEqual(parser.parse('case is ${upper(text: "hello")}'), [
+      "case is ",
+      { call: "upper", args: { text: "hello" }, returnType: "any" },
+    ]);
   });
 
-  it("parses keywords", (_t, done) => {
-    parser.parse("${true} ${false} ${null}").subscribe((result) => {
-      assert.strictEqual(result, "true false "); // null becomes empty string in map
-      done();
-    });
+  it("parses keywords", () => {
+    assert.deepStrictEqual(parser.parse("${true} ${false} ${null}"), [
+      true,
+      " ",
+      false,
+      " ",
+    ]);
   });
 
-  it("returns error on max depth exceeded", (_t, done) => {
-    parser.parse("depth", 11).subscribe({
-      next: () => {
-        assert.fail("Should have returned an error");
-      },
-      error: (err) => {
-        assert.match(err.message, /Max recursion depth reached/);
-        done();
-      },
-    });
+  it("returns error on max depth exceeded", () => {
+    assert.throws(() => {
+      parser.parse("depth", 11);
+    }, /Max recursion depth reached/);
   });
 
-  it("handles deep recursion gracefully", (_t, done) => {
-    parser.parse('${${"hello"}}').subscribe((result) => {
-      assert.strictEqual(result, "hello");
-      done();
-    });
+  it("handles deep recursion gracefully", () => {
+    assert.deepStrictEqual(parser.parse('${${"hello"}}'), ["hello"]);
   });
 
-  it("returns error on unclosed interpolation", (_t, done) => {
-    parser.parse("hello ${world").subscribe({
-      next: () => {
-        assert.fail("Should have returned an error");
-      },
-      error: (err) => {
-        assert.match(err.message, /Unclosed interpolation/);
-        done();
-      },
-    });
+  it("returns error on unclosed interpolation", () => {
+    assert.throws(() => {
+      parser.parse("hello ${world");
+    }, /Unclosed interpolation/);
   });
 
-  it("returns error on invalid function syntax", (_t, done) => {
+  it("returns error on invalid function syntax", () => {
     // Missing closing parenthesis
-    parser.parse("${add(a: 1, b: 2}").subscribe({
-      next: () => {
-        assert.fail("Should have returned an error");
-      },
-      error: (err) => {
-        assert.match(err.message, /Expected '\)'/);
-        done();
-      },
-    });
+    assert.throws(() => {
+      parser.parse("${add(a: 1, b: 2}");
+    }, /Expected '\)'/);
   });
 
-  it("returns error on unexpected characters at end", (_t, done) => {
+  it("returns error on unexpected characters at end", () => {
     // Extra garbage after valid expression inside interpolation
-    parser.parse("${true false}").subscribe({
-      next: () => {
-        assert.fail("Should have returned an error");
-      },
-      error: (err) => {
-        assert.match(err.message, /Unexpected characters/);
-        done();
-      },
-    });
+    assert.throws(() => {
+      parser.parse("${true false}");
+    }, /Unexpected characters/);
   });
 });

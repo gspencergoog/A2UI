@@ -35,8 +35,6 @@ export type FunctionInvoker = (
  * DynamicValues (literals, data paths, function calls) within a specific scope.
  */
 export class DataContext {
-  private readonly _errors: string[] = [];
-
   /**
    * @param dataModel The shared DataModel instance.
    * @param path The absolute path this context is currently pointing to.
@@ -47,21 +45,6 @@ export class DataContext {
     readonly path: string,
     readonly functionInvoker?: FunctionInvoker,
   ) {}
-
-  /** Returns any resolution errors encountered by this context. */
-  get errors(): readonly string[] {
-    return this._errors;
-  }
-
-  /** Appends an error to the resolution context. */
-  reportError(error: string): void {
-    this._errors.push(error);
-  }
-
-  /** Clears all accumulated errors. */
-  clearErrors(): void {
-    this._errors.length = 0;
-  }
 
   /**
    * Updates the data model at the specified path, resolving it against the current context.
@@ -103,7 +86,8 @@ export class DataContext {
       // Evaluate function
       // Note: sync resolution of async functions returns the Observable itself
       if (!this.functionInvoker) {
-        this.reportError(`Function not found: ${call.call}`);
+        // TODO(error-handling): pipe errors up to surfaces and all the way to MessageProcessor and the agent
+        console.warn(`Function not found: ${call.call}`);
         return undefined as unknown as V;
       }
 
@@ -111,7 +95,8 @@ export class DataContext {
       return result as V;
     }
 
-    this.reportError(`Invalid DynamicValue format: ${JSON.stringify(value)}`);
+    // TODO(error-handling): pipe errors up to surfaces and all the way to MessageProcessor and the agent
+    console.warn(`Invalid DynamicValue format: ${JSON.stringify(value)}`);
     return undefined as unknown as V;
   }
 

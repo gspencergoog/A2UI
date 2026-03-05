@@ -17,7 +17,6 @@
 import { describe, it } from "node:test";
 import * as assert from "node:assert";
 import { BASIC_FUNCTIONS } from "./basic_functions.js";
-import { EvaluationContext } from "../expressions/expression_evaluator.js";
 import { DataModel } from "../../state/data-model.js";
 import { DataContext } from "../../rendering/data-context.js";
 

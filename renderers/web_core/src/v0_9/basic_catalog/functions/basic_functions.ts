@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { FunctionImplementation } from "../expressions/expression_evaluator.js";
 import { ExpressionParser } from "../expressions/expression_parser.js";
-import { ExpressionEvaluator } from "../expressions/expression_evaluator.js";
 import { DataContext } from "../../rendering/data-context.js";
 import { Observable } from "rxjs";
+import { FunctionImplementation } from "../../schema/common-types.js";
 
 /**
  * Standard function implementations for the Basic Catalog.
@@ -149,12 +148,9 @@ export const BASIC_FUNCTIONS: Record<string, FunctionImplementation> = {
   /**
    * Formats a string using a template and the current context.
    */
-  formatString: (args, context: DataContext) => {
+  formatString: (args) => {
     const template = String(args["value"] || "");
-    const parser = new ExpressionParser(
-      context,
-      new ExpressionEvaluator(BASIC_FUNCTIONS), // A local evaluator config for the parser
-    );
+    const parser = new ExpressionParser();
     return parser.parse(template);
   },
 
