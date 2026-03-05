@@ -19,6 +19,7 @@ import assert from "node:assert";
 import { describe, it, beforeEach } from "node:test";
 import { v0_8 } from "@a2ui/lit";
 import * as Types from "@a2ui/web_core/types/types";
+import { A2uiStateError } from "@a2ui/web_core/v0_9";
 
 // Helper function to strip reactivity for clean comparisons.
 const toPlainObject = (value: unknown): ReturnType<typeof JSON.parse> => {
@@ -400,7 +401,7 @@ describe("A2uiMessageProcessor", () => {
             },
           },
         ]);
-      }, new Error(`Circular dependency for component "a".`));
+      }, new A2uiStateError(`Circular dependency for component "a".`));
 
       const tree = processor.getSurfaces().get("@default")?.componentTree;
       assert.strictEqual(
@@ -730,7 +731,7 @@ describe("A2uiMessageProcessor", () => {
               {
                 id: "title-heading",
                 component: {
-                  Text: { usageHint: "body", 
+                  Text: { usageHint: "body",
                     text: {
                       literalString: "Top Restaurants",
                     },
@@ -773,7 +774,7 @@ describe("A2uiMessageProcessor", () => {
                 id: "template-image",
                 weight: 1,
                 component: {
-                  Image: { usageHint: "largeFeature", 
+                  Image: { usageHint: "largeFeature",
                     url: {
                       path: "imageUrl",
                     },
@@ -800,7 +801,7 @@ describe("A2uiMessageProcessor", () => {
               {
                 id: "template-name",
                 component: {
-                  Text: { usageHint: "body", 
+                  Text: { usageHint: "body",
                     text: {
                       path: "name",
                     },
@@ -810,7 +811,7 @@ describe("A2uiMessageProcessor", () => {
               {
                 id: "template-rating",
                 component: {
-                  Text: { usageHint: "body", 
+                  Text: { usageHint: "body",
                     text: {
                       path: "rating",
                     },
@@ -820,7 +821,7 @@ describe("A2uiMessageProcessor", () => {
               {
                 id: "template-detail",
                 component: {
-                  Text: { usageHint: "body", 
+                  Text: { usageHint: "body",
                     text: {
                       path: "detail",
                     },
@@ -830,7 +831,7 @@ describe("A2uiMessageProcessor", () => {
               {
                 id: "template-link",
                 component: {
-                  Text: { usageHint: "body", 
+                  Text: { usageHint: "body",
                     text: {
                       path: "infoLink",
                     },
@@ -871,7 +872,7 @@ describe("A2uiMessageProcessor", () => {
               {
                 id: "book-now-text",
                 component: {
-                  Text: { usageHint: "body", 
+                  Text: { usageHint: "body",
                     text: {
                       literalString: "Book Now",
                     },
