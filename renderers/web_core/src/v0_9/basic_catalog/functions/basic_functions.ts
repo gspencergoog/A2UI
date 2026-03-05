@@ -164,16 +164,12 @@ export const BASIC_FUNCTIONS: Record<string, FunctionImplementation> = {
 
       // Otherwise, it's a dynamic value we need to subscribe to
       return new Observable<unknown>((subscriber) => {
-        let isSync = true;
         const sub = context.subscribeDynamicValue(part, (val) => {
-          if (!isSync) {
-            subscriber.next(val);
-          }
+          subscriber.next(val);
         });
 
         // Emit the initial synchronously-resolved value
         subscriber.next(sub.value);
-        isSync = false;
 
         return () => sub.unsubscribe();
       });

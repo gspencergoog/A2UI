@@ -19,6 +19,7 @@ import { ComponentModel } from "../state/component-model.js";
 import type { SurfaceModel } from "../state/surface-model.js";
 import type { ComponentApi } from "../catalog/types.js";
 import type { SurfaceComponentsModel } from "../state/surface-components-model.js";
+import { A2uiStateError } from "../errors.js";
 
 /**
  * Context provided to components during rendering.
@@ -46,7 +47,7 @@ export class ComponentContext {
   ) {
     const model = surface.componentsModel.get(componentId);
     if (!model) {
-      throw new Error(`Component not found: ${componentId}`);
+      throw new A2uiStateError(`Component not found: ${componentId}`);
     }
     this.componentModel = model;
     this.surfaceComponents = surface.componentsModel;

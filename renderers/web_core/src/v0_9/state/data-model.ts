@@ -15,6 +15,7 @@
  */
 
 import { Subscription as BaseSubscription } from "../common/events.js";
+import { A2uiDataError } from "../errors.js";
 
 /**
  * Represents a reactive connection to a specific path in the data model.
@@ -87,7 +88,7 @@ export class DataModel {
    */
   set(path: string, value: any): this {
     if (path === null || path === undefined) {
-      throw new Error("Path cannot be null or undefined.");
+      throw new A2uiDataError("Path cannot be null or undefined.");
     }
     if (path === "/" || path === "") {
       this.data = value;
@@ -103,8 +104,9 @@ export class DataModel {
       const segment = segments[i];
 
       if (Array.isArray(current) && !isNumeric(segment)) {
-        throw new Error(
+        throw new A2uiDataError(
           `Cannot use non-numeric segment '${segment}' on an array in path '${path}'.`,
+          path,
         );
       }
 
@@ -115,8 +117,9 @@ export class DataModel {
         current[segment] !== null &&
         typeof current[segment] !== "object"
       ) {
-        throw new Error(
+        throw new A2uiDataError(
           `Cannot set path '${path}': segment '${segment}' is a primitive value.`,
+          path,
         );
       }
 
@@ -129,8 +132,9 @@ export class DataModel {
     }
 
     if (Array.isArray(current) && !isNumeric(lastSegment)) {
-      throw new Error(
+      throw new A2uiDataError(
         `Cannot use non-numeric segment '${lastSegment}' on an array in path '${path}'.`,
+        path,
       );
     }
 
@@ -156,7 +160,7 @@ export class DataModel {
    */
   get(path: string): any {
     if (path === null || path === undefined) {
-      throw new Error("Path cannot be null or undefined.");
+      throw new A2uiDataError("Path cannot be null or undefined.");
     }
     if (path === "/" || path === "") {
       return this.data;

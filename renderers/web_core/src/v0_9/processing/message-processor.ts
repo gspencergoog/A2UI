@@ -27,6 +27,7 @@ import {
   UpdateDataModelMessage,
   DeleteSurfaceMessage,
 } from "../schema/server-to-client.js";
+import { A2uiStateError, A2uiValidationError } from "../errors.js";
 
 /**
  * The central processor for A2UI messages.
@@ -85,7 +86,7 @@ export class MessageProcessor<T extends ComponentApi> {
     ].filter((k) => k in message);
 
     if (updateTypes.length > 1) {
-      throw new Error(
+      throw new A2uiValidationError(
         `Message contains multiple update types: ${updateTypes.join(", ")}.`,
       );
     }
@@ -118,11 +119,11 @@ export class MessageProcessor<T extends ComponentApi> {
     // Find catalog
     const catalog = this.catalogs.find((c) => c.id === catalogId);
     if (!catalog) {
-      throw new Error(`Catalog not found: ${catalogId}`);
+      throw new A2uiStateError(`Catalog not found: ${catalogId}`);
     }
 
     if (this.model.getSurface(surfaceId)) {
-      throw new Error(`Surface ${surfaceId} already exists.`);
+      throw new A2uiStateError(`Surface ${surfaceId} already exists.`);
     }
 
     const surface = new SurfaceModel<T>(surfaceId, catalog, theme);
@@ -143,14 +144,18 @@ export class MessageProcessor<T extends ComponentApi> {
 
     const surface = this.model.getSurface(payload.surfaceId);
     if (!surface) {
-      throw new Error(`Surface not found for message: ${payload.surfaceId}`);
+      throw new A2uiStateError(
+        `Surface not found for message: ${payload.surfaceId}`,
+      );
     }
 
     for (const comp of payload.components) {
       const { id, component, ...properties } = comp;
 
       if (!id) {
-        throw new Error(`Component '${component}' is missing an 'id'.`);
+        throw new A2uiValidationError(
+          `Component '${component}' is missing an 'id'.`,
+        );
       }
 
       const existing = surface.componentsModel.get(id);
@@ -165,7 +170,9 @@ export class MessageProcessor<T extends ComponentApi> {
         }
       } else {
         if (!component) {
-          throw new Error(`Cannot create component ${id} without a type.`);
+          throw new A2uiValidationError(
+            `Cannot create component ${id} without a type.`,
+          );
         }
         const newComponent = new ComponentModel(id, component, properties);
         surface.componentsModel.addComponent(newComponent);
@@ -179,7 +186,9 @@ export class MessageProcessor<T extends ComponentApi> {
 
     const surface = this.model.getSurface(payload.surfaceId);
     if (!surface) {
-      throw new Error(`Surface not found for message: ${payload.surfaceId}`);
+      throw new A2uiStateError(
+        `Surface not found for message: ${payload.surfaceId}`,
+      );
     }
 
     const path = payload.path || "/";

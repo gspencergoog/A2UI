@@ -22,6 +22,7 @@ import type {
   DataBinding,
   FunctionCall,
 } from "../schema/common-types.js";
+import { A2uiExpressionError } from "../errors.js";
 
 /** A function that invokes a catalog function by name and returns its result synchronously or as an Observable. */
 export type FunctionInvoker = (
@@ -104,7 +105,7 @@ export class DataContext {
       // Evaluate function
       // Note: sync resolution of async functions returns the Observable itself
       if (!this.functionInvoker) {
-        throw new Error(
+        throw new A2uiExpressionError(
           `Failed to resolve dynamic value: Function invoker is not configured for call '${call.call}'.`,
         );
       }
@@ -113,7 +114,9 @@ export class DataContext {
       return result as V;
     }
 
-    throw new Error(`Invalid DynamicValue format: ${JSON.stringify(value)}`);
+    throw new A2uiExpressionError(
+      `Invalid DynamicValue format: ${JSON.stringify(value)}`,
+    );
   }
 
   /**
@@ -198,7 +201,7 @@ export class DataContext {
     args: Record<string, any>,
   ): Observable<V> {
     if (!this.functionInvoker) {
-      throw new Error(
+      throw new A2uiExpressionError(
         `Failed to resolve dynamic value: Function invoker is not configured for call '${name}'.`,
       );
     }

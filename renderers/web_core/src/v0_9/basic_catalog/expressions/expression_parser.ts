@@ -15,6 +15,7 @@
  */
 
 import { DynamicValue } from "../../schema/common-types.js";
+import { A2uiExpressionError } from "../../errors.js";
 
 export class ExpressionParser {
   private static readonly MAX_DEPTH = 10;
@@ -25,7 +26,7 @@ export class ExpressionParser {
    */
   public parse(input: string, depth = 0): DynamicValue[] {
     if (depth > ExpressionParser.MAX_DEPTH) {
-      throw new Error("Max recursion depth reached in parse");
+      throw new A2uiExpressionError("Max recursion depth reached in parse");
     }
     if (!input || !input.includes("${")) {
       return [input];
@@ -95,7 +96,7 @@ export class ExpressionParser {
     }
 
     if (braceBalance > 0) {
-      throw new Error("Unclosed interpolation: missing '}'");
+      throw new A2uiExpressionError("Unclosed interpolation: missing '}'");
     }
 
     return scanner.input.substring(start, scanner.pos - 1);
@@ -111,7 +112,7 @@ export class ExpressionParser {
     const scanner = new Scanner(expr);
     const result = this.parseExpressionInternal(scanner, depth);
     if (!scanner.isAtEnd()) {
-      throw new Error(
+      throw new A2uiExpressionError(
         `Unexpected characters at end of expression: '${scanner.input.substring(
           scanner.pos,
         )}'`,
@@ -186,7 +187,7 @@ export class ExpressionParser {
       const argName = this.scanIdentifier(scanner);
       scanner.skipWhitespace();
       if (!scanner.match(":")) {
-        throw new Error(
+        throw new A2uiExpressionError(
           `Expected ':' after argument name '${argName}' in function '${funcName}'`,
         );
       }
@@ -202,7 +203,7 @@ export class ExpressionParser {
     }
 
     if (!scanner.match(")")) {
-      throw new Error(
+      throw new A2uiExpressionError(
         `Expected ')' after function arguments for '${funcName}'`,
       );
     }
@@ -337,4 +338,3 @@ class Scanner {
     return res;
   }
 }
-

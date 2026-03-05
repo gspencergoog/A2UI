@@ -202,4 +202,3 @@ export const CommonSchemas = {
   AccessibilityAttributes: AccessibilityAttributesSchema,
   AnyComponent: AnyComponentSchema,
 };
-

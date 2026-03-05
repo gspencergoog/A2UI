@@ -16,6 +16,7 @@
 
 import { ComponentModel } from "./component-model.js";
 import { EventEmitter, EventSource } from "../common/events.js";
+import { A2uiStateError } from "../errors.js";
 
 /**
  * Manages the collection of components for a specific surface.
@@ -57,7 +58,9 @@ export class SurfaceComponentsModel {
    */
   addComponent(component: ComponentModel): void {
     if (this.components.has(component.id)) {
-      throw new Error(`Component with id '${component.id}' already exists.`);
+      throw new A2uiStateError(
+        `Component with id '${component.id}' already exists.`,
+      );
     }
 
     this.components.set(component.id, component);

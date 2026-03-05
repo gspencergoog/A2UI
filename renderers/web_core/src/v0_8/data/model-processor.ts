@@ -33,6 +33,7 @@ import {
   DataObject,
 } from "../types/types.js";
 import { A2uiMessageSchema } from "../schema/server-to-client.js";
+import { A2uiStateError, A2uiValidationError } from "../../v0_9/errors.js";
 import {
   isComponentArrayReference,
   isObject,
@@ -488,7 +489,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
     }
 
     if (visited.has(fullId)) {
-      throw new Error(`Circular dependency for component "${fullId}".`);
+      throw new A2uiStateError(
+        `Circular dependency for component "${fullId}".`,
+      );
     }
 
     visited.add(fullId);
@@ -527,7 +530,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
     switch (componentType) {
       case "Text":
         if (!isResolvedText(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
         return new this.objCtor({
           ...baseNode,
@@ -537,7 +542,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
       case "Image":
         if (!isResolvedImage(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
         return new this.objCtor({
           ...baseNode,
@@ -547,7 +554,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
       case "Icon":
         if (!isResolvedIcon(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
         return new this.objCtor({
           ...baseNode,
@@ -557,7 +566,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
       case "Video":
         if (!isResolvedVideo(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
         return new this.objCtor({
           ...baseNode,
@@ -567,7 +578,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
       case "AudioPlayer":
         if (!isResolvedAudioPlayer(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
         return new this.objCtor({
           ...baseNode,
@@ -577,7 +590,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
       case "Row":
         if (!isResolvedRow(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
 
         return new this.objCtor({
@@ -588,7 +603,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
       case "Column":
         if (!isResolvedColumn(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
 
         return new this.objCtor({
@@ -599,7 +616,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
       case "List":
         if (!isResolvedList(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
         return new this.objCtor({
           ...baseNode,
@@ -609,7 +628,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
       case "Card":
         if (!isResolvedCard(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
         return new this.objCtor({
           ...baseNode,
@@ -619,7 +640,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
       case "Tabs":
         if (!isResolvedTabs(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
         return new this.objCtor({
           ...baseNode,
@@ -629,7 +652,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
       case "Divider":
         if (!isResolvedDivider(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
         return new this.objCtor({
           ...baseNode,
@@ -639,7 +664,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
       case "Modal":
         if (!isResolvedModal(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
         return new this.objCtor({
           ...baseNode,
@@ -649,7 +676,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
       case "Button":
         if (!isResolvedButton(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
         return new this.objCtor({
           ...baseNode,
@@ -659,7 +688,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
       case "CheckBox":
         if (!isResolvedCheckbox(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
         return new this.objCtor({
           ...baseNode,
@@ -669,7 +700,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
       case "TextField":
         if (!isResolvedTextField(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
         return new this.objCtor({
           ...baseNode,
@@ -679,7 +712,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
       case "DateTimeInput":
         if (!isResolvedDateTimeInput(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
         return new this.objCtor({
           ...baseNode,
@@ -689,7 +724,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
       case "MultipleChoice":
         if (!isResolvedMultipleChoice(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
         return new this.objCtor({
           ...baseNode,
@@ -699,7 +736,9 @@ export class A2uiMessageProcessor implements MessageProcessor {
 
       case "Slider":
         if (!isResolvedSlider(resolvedProperties)) {
-          throw new Error(`Invalid data; expected ${componentType}`);
+          throw new A2uiValidationError(
+            `Invalid data; expected ${componentType}`,
+          );
         }
         return new this.objCtor({
           ...baseNode,

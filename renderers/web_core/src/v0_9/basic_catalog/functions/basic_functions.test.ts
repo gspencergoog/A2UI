@@ -247,17 +247,29 @@ describe("BASIC_FUNCTIONS", () => {
       ) as import("rxjs").Observable<string>;
 
       let emitCount = 0;
-      const sub = result.subscribe((val) => {
-        if (emitCount === 0) {
-          assert.strictEqual(val, "Value: 10");
-          // Trigger a change
-          dataModel.set("/a", 42);
-        } else if (emitCount === 1) {
-          assert.strictEqual(val, "Value: 42");
-          sub.unsubscribe();
-          done();
-        }
-        emitCount++;
+      const sub = result.subscribe({
+        next: (val) => {
+          try {
+            if (emitCount === 0) {
+              assert.strictEqual(val, "Value: 10");
+              emitCount++;
+              // Trigger a change in the next tick to avoid uninitialized sub
+              setTimeout(() => {
+                dataModel.set("/a", 42);
+              }, 0);
+            } else if (emitCount === 1) {
+              assert.strictEqual(val, "Value: 42");
+              emitCount++;
+              sub.unsubscribe();
+              done();
+            }
+          } catch (e) {
+            done(e);
+          }
+        },
+        error: (e) => {
+          done(e);
+        },
       });
     });
 
