@@ -23,16 +23,13 @@ User interactions from the client can be treated as new user input.
 
 The A2UI repository includes sample agents you can learn from:
 
-- [Restaurant Finder](https://github.com/google/A2UI/tree/main/samples/agent/adk/restaurant_finder) 
+- [Restaurant Finder](https://github.com/google/A2UI/tree/main/samples/agent/adk/restaurant_finder)
     - Table reservations with forms
     - Written with the ADK
-- [Contact Lookup](https://github.com/google/A2UI/tree/main/samples/agent/adk/contact_lookup) 
+- [Contact Lookup](https://github.com/google/A2UI/tree/main/samples/agent/adk/contact_lookup)
     - Search with result lists
     - Written with the ADK
-- [Rizzcharts](https://github.com/google/A2UI/tree/main/samples/agent/adk/rizzcharts) 
-    - A2UI Custom components demo
-    - Written with the ADK
-- [Orchestrator](https://github.com/google/A2UI/tree/main/samples/agent/adk/orchestrator) 
+- [Orchestrator](https://github.com/google/A2UI/tree/main/samples/agent/adk/orchestrator)
     - Passes A2UI messages from remote subagents
     - Written with the ADK
 
@@ -40,7 +37,7 @@ The A2UI repository includes sample agents you can learn from:
 
 ### 1. User Facing Agent (standalone)
 
-A user facing agent is one that is directly interacted with by the user. 
+A user facing agent is one that is directly interacted with by the user.
 
 ### 2. User Facing Agent as a host for a Remote Agent
 

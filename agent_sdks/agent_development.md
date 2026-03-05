@@ -105,7 +105,7 @@ selected_catalog = schema_manager.get_selected_catalog()
 try:
     # Parse the LLM's JSON part
     parsed_json = json.loads(json_string)
-    
+
     # Validate and fix against the schema
     selected_catalog.payload_fixer.validate_and_fix(parsed_json)
 except Exception as e:
@@ -146,8 +146,6 @@ agent = LlmAgent(instruction=instruction, ...)
 
 Some agents may need to attach different catalogs or examples depending on the user's request, client capabilities, or conversational context. This is common for dashboard-style agents that support multiple distinct visualization types (e.g., Charts vs. Maps).
 
-**Example Sample:** [rizzcharts](../../../samples/agent/adk/rizzcharts)
-
 #### 2a. Injecting Catalogs into Session State
 In a dynamic scenario, you don't provide a static catalog to the agent. Instead, you resolve the selected catalog at runtime (e.g., during session preparation) and store it in the session state.
 
@@ -155,10 +153,10 @@ In a dynamic scenario, you don't provide a static catalog to the agent. Instead,
 # In your AgentExecutor subclass
 async def _prepare_session(self, context, run_request, runner):
     session = await super()._prepare_session(context, run_request, runner)
-    
+
     # 1. Determine client capabilities from metadata
     capabilities = context.message.metadata.get("a2ui_client_capabilities")
-    
+
     # 2. Get selected catalog and load examples
     a2ui_catalog = self.schema_manager.get_selected_catalog(
         client_ui_capabilities=capabilities
