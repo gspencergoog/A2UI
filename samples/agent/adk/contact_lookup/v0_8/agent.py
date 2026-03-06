@@ -27,16 +27,23 @@ from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
 from google.adk.models.lite_llm import LiteLlm
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
-from a2a.types import AgentCapabilities, AgentCard, AgentSkill
+from a2a.types import (
+    AgentCapabilities,
+    AgentCard,
+    AgentSkill,
+    DataPart,
+    Part,
+    TextPart,
+)
 
 from google.genai import types
 from .prompt_builder import get_text_prompt, ROLE_DESCRIPTION, WORKFLOW_DESCRIPTION, UI_DESCRIPTION
 from .tools import get_contact_info
-from a2ui.core.schema.constants import VERSION_0_8, A2UI_DELIMITER
+from a2ui.core.schema.constants import VERSION_0_8, A2UI_OPEN_TAG, A2UI_CLOSE_TAG
 from a2ui.core.schema.manager import A2uiSchemaManager
-from a2ui.core.parser import parse_response
+from a2ui.core.parser.parser import parse_response, ResponsePart
 from a2ui.basic_catalog.provider import BasicCatalog
-from a2ui.a2a import get_a2ui_agent_extension
+from a2ui.a2a import create_a2ui_part, get_a2ui_agent_extension, parse_response_to_parts
 
 logger = logging.getLogger(__name__)
 
@@ -166,10 +173,16 @@ class ContactAgent:
       )
       yield {
           "is_task_complete": True,
-          "content": (
-              "I'm sorry, I'm facing an internal configuration error with my UI"
-              " components. Please contact support."
-          ),
+          "parts": [
+              Part(
+                  root=TextPart(
+                      text=(
+                          "I'm sorry, I'm facing an internal configuration error with"
+                          " my UI components. Please contact support."
+                      )
+                  )
+              )
+          ],
       }
       return
 
@@ -232,7 +245,13 @@ class ContactAgent:
             f" {attempt})... ---"
         )
         try:
-          text_part, parsed_json_data = parse_response(final_response_content)
+          response_parts = parse_response(final_response_content)
+
+          for part in response_parts:
+            if not part.a2ui_json:
+              continue
+
+            parsed_json_data = part.a2ui_json
 
           # Handle the "no results found" or empty JSON case
           if parsed_json_data == []:
@@ -247,11 +266,11 @@ class ContactAgent:
             logger.info("--- ContactAgent.stream: Validating against A2UI_SCHEMA... ---")
             selected_catalog.validator.validate(parsed_json_data)
 
-            logger.info(
-                "--- ContactAgent.stream: UI JSON successfully parsed AND validated"
-                f" against schema. Validation OK (Attempt {attempt}). ---"
-            )
-            is_valid = True
+                logger.info(
+                    "--- ContactAgent.stream: UI JSON successfully parsed AND validated"
+                    f" against schema. Validation OK (Attempt {attempt}). ---"
+                )
+                is_valid = True
         except (
             ValueError,
             json.JSONDecodeError,
@@ -274,10 +293,13 @@ class ContactAgent:
             "--- ContactAgent.stream: Response is valid. Sending final response"
             f" (Attempt {attempt}). ---"
         )
-        logger.info(f"Final response: {final_response_content}")
+        final_parts = parse_response_to_parts(
+            final_response_content, fallback_text="OK."
+        )
+
         yield {
             "is_task_complete": True,
-            "content": final_response_content,
+            "parts": final_parts,
         }
         return  # We're done, exit the generator
 
@@ -291,8 +313,8 @@ class ContactAgent:
         current_query_text = (
             f"Your previous response was invalid. {error_message} You MUST generate a"
             " valid response that strictly follows the A2UI JSON SCHEMA. The response"
-            " MUST be a JSON list of A2UI messages. Ensure the response is split by"
-            f" '{A2UI_DELIMITER}' and the JSON part is well-formed. Please retry the"
+            " MUST be a JSON list of A2UI messages. Ensure each JSON part is wrapped in"
+            f" '{A2UI_OPEN_TAG}' and '{A2UI_CLOSE_TAG}' tags. Please retry the"
             f" original request: '{query}'"
         )
         # Loop continues...
@@ -303,9 +325,15 @@ class ContactAgent:
     )
     yield {
         "is_task_complete": True,
-        "content": (
-            "I'm sorry, I'm having trouble generating the interface for that request"
-            " right now. Please try again in a moment."
-        ),
+        "parts": [
+            Part(
+                root=TextPart(
+                    text=(
+                        "I'm sorry, I'm having trouble generating the interface for"
+                        " that request right now. Please try again in a moment."
+                    )
+                )
+            )
+        ],
     }
     # --- End: UI Validation and Retry Logic ---

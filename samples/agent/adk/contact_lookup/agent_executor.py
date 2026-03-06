@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import logging
 
 from a2a.server.agent_execution import AgentExecutor, RequestContext
@@ -32,8 +31,7 @@ from a2a.utils import (
     new_task,
 )
 from a2a.utils.errors import ServerError
-from a2ui.a2a import create_a2ui_part, A2UI_EXTENSION_URI_V0_8, A2UI_EXTENSION_URI_V0_9
-from a2ui.core.parser import parse_response
+from a2ui.a2a import A2UI_EXTENSION_URI_V0_8, A2UI_EXTENSION_URI_V0_9
 
 logger = logging.getLogger(__name__)
 
@@ -168,39 +166,7 @@ class ContactAgentExecutor(AgentExecutor):
       if action in ["send_email", "send_message", "view_full_profile"]:
         final_state = TaskState.completed
 
-      content = item["content"]
-      final_parts = []
-
-      try:
-        text_part, json_data = parse_response(content)
-
-        if text_part.strip():
-          final_parts.append(Part(root=TextPart(text=text_part.strip())))
-
-        if json_data:
-          if isinstance(json_data, list):
-            # Handle empty JSON list (e.g., no results)
-            if len(json_data) == 0:
-              logger.info("Received empty list. Skipping DataPart.")
-            else:
-              logger.info(
-                  f"Found {len(json_data)} messages. Creating individual DataParts."
-              )
-              for message in json_data:
-                final_parts.append(create_a2ui_part(message))
-          else:
-            logger.info("Received a single JSON object. Creating a DataPart.")
-            final_parts.append(create_a2ui_part(json_data))
-
-      except (ValueError, json.JSONDecodeError) as e:
-        logger.warning(f"Failed to parse A2UI response: {e}. Falling back to text.")
-        final_parts.append(Part(root=TextPart(text=content.strip())))
-
-      # If after all that, we only have empty parts, add a default text response
-      if not final_parts or all(
-          isinstance(p.root, TextPart) and not p.root.text for p in final_parts
-      ):
-        final_parts = [Part(root=TextPart(text="OK."))]
+      final_parts = item["parts"]
 
       logger.info("--- FINAL PARTS TO BE SENT ---")
       for i, part in enumerate(final_parts):

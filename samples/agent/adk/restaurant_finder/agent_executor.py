@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import logging
 
 from a2a.server.agent_execution import AgentExecutor, RequestContext
@@ -32,8 +31,7 @@ from a2a.utils import (
     new_task,
 )
 from a2a.utils.errors import ServerError
-from a2ui.a2a import create_a2ui_part, A2UI_EXTENSION_URI_V0_8, A2UI_EXTENSION_URI_V0_9
-from a2ui.core.parser import parse_response
+from a2ui.a2a import A2UI_EXTENSION_URI_V0_8, A2UI_EXTENSION_URI_V0_9
 from v0_8.agent import RestaurantAgent as RestaurantAgentV08
 from v0_9.agent import RestaurantAgent as RestaurantAgentV09
 
@@ -165,9 +163,11 @@ class RestaurantAgentExecutor(AgentExecutor):
         )
         continue
 
-      final_state = TaskState.input_required  # Default
-      if action == "submit_booking":
-        final_state = TaskState.completed
+      final_state = (
+          TaskState.completed
+          if action == "submit_booking"
+          else TaskState.input_required
+      )
 
       content = item["content"]
       final_parts = []

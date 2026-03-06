@@ -28,7 +28,7 @@ from a2ui.adk.a2a_extension.send_a2ui_to_client_toolset import (
     SendA2uiToClientToolset,
 )
 from a2ui.core.schema.catalog import A2uiCatalog
-from a2ui.core.schema.constants import A2UI_DELIMITER
+from a2ui.core.schema.constants import A2UI_OPEN_TAG, A2UI_CLOSE_TAG
 from google.adk.agents.readonly_context import ReadonlyContext
 from google.adk.tools.tool_context import ToolContext
 from google.genai import types as genai_types
@@ -364,7 +364,7 @@ def test_converter_class_convert_text_with_a2ui():
   valid_a2ui = [{"type": "Text", "text": "Hello"}]
   catalog_mock.validator.validate.return_value = None
 
-  text = f"Here is the UI:{A2UI_DELIMITER}{json.dumps(valid_a2ui)}"
+  text = f"Here is the UI:\n{A2UI_OPEN_TAG}\n{json.dumps(valid_a2ui)}\n{A2UI_CLOSE_TAG}"
   part = genai_types.Part(text=text)
 
   a2a_parts = converter.convert(part)
@@ -376,24 +376,6 @@ def test_converter_class_convert_text_with_a2ui():
   catalog_mock.validator.validate.assert_called_once_with(valid_a2ui)
 
 
-def test_converter_class_convert_text_multiple_segments():
-  catalog_mock = MagicMock(spec=A2uiCatalog)
-  converter = A2uiPartConverter(catalog_mock)
-
-  ui1 = [{"type": "Text", "text": "one"}]
-  ui2 = [{"type": "Text", "text": "two"}]
-
-  text = f"Intro{A2UI_DELIMITER}{json.dumps(ui1)}{A2UI_DELIMITER}Middle{A2UI_DELIMITER}{json.dumps(ui2)}"
-
-  part = genai_types.Part(text=text)
-  a2a_parts = converter.convert(part)
-
-  # parse_response with single segment assumption will fail to parse the whole trailing string as JSON.
-  # But our robust _convert_text_with_a2ui will still return the leading text part.
-  assert len(a2a_parts) == 1
-  assert a2a_parts[0].root.text == "Intro"
-
-
 def test_converter_class_convert_text_empty_leading():
   catalog_mock = MagicMock(spec=A2uiCatalog)
   converter = A2uiPartConverter(catalog_mock)
@@ -401,7 +383,7 @@ def test_converter_class_convert_text_empty_leading():
   ui = [{"type": "Text", "text": "Top"}]
   catalog_mock.validator.validate.return_value = None
 
-  text = f"{A2UI_DELIMITER}{json.dumps(ui)}"
+  text = f"\n{A2UI_OPEN_TAG}\n{json.dumps(ui)}\n{A2UI_CLOSE_TAG}"
   part = genai_types.Part(text=text)
   a2a_parts = converter.convert(part)
 
@@ -417,7 +399,7 @@ def test_converter_class_convert_text_markdown_wrapped():
   catalog_mock.validator.validate.return_value = None
 
   # Text containing JSON wrapped in markdown tags
-  text = f"Behold:{A2UI_DELIMITER}```json\n{json.dumps(ui)}\n```"
+  text = f"Behold:\n{A2UI_OPEN_TAG}\n```json\n{json.dumps(ui)}\n```\n{A2UI_CLOSE_TAG}"
   part = genai_types.Part(text=text)
   a2a_parts = converter.convert(part)
 
@@ -431,14 +413,11 @@ def test_converter_class_convert_text_with_invalid_a2ui():
   catalog_mock = MagicMock(spec=A2uiCatalog)
   converter = A2uiPartConverter(catalog_mock)
 
-  text = f"Here is the UI:{A2UI_DELIMITER}invalid_json"
+  text = f"Here is the UI:\n{A2UI_OPEN_TAG}\ninvalid_json\n{A2UI_CLOSE_TAG}"
   part = genai_types.Part(text=text)
 
   a2a_parts = converter.convert(part)
-
-  # Expect only 1 part: the leading TextPart. The invalid A2UI is skipped.
-  assert len(a2a_parts) == 1
-  assert a2a_parts[0].root.text == "Here is the UI:"
+  assert len(a2a_parts) == 0
 
 
 def test_converter_class_convert_other_part():
