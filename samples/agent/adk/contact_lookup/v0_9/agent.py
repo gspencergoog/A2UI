@@ -30,8 +30,8 @@ from google.adk.sessions import InMemorySessionService
 from a2a.types import AgentCapabilities, AgentCard, AgentSkill
 
 from google.genai import types
-from prompt_builder import get_text_prompt, ROLE_DESCRIPTION, WORKFLOW_DESCRIPTION, UI_DESCRIPTION
-from tools import get_contact_info
+from .prompt_builder import get_text_prompt, ROLE_DESCRIPTION, WORKFLOW_DESCRIPTION, UI_DESCRIPTION
+from .tools import get_contact_info
 from a2ui.core.schema.constants import VERSION_0_9, A2UI_DELIMITER
 from a2ui.core.schema.manager import A2uiSchemaManager
 from a2ui.core.parser import parse_response

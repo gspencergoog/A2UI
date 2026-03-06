@@ -33,7 +33,7 @@ from a2a.utils import (
 )
 from a2a.utils.errors import ServerError
 from agent import ContactAgent
-from a2ui.a2a import create_a2ui_part, try_activate_a2ui_extension
+from a2ui.a2a import create_a2ui_part, A2UI_EXTENSION_URI_V0_8, A2UI_EXTENSION_URI_V0_9
 from a2ui.core.parser import parse_response
 
 logger = logging.getLogger(__name__)
@@ -42,10 +42,11 @@ logger = logging.getLogger(__name__)
 class ContactAgentExecutor(AgentExecutor):
   """Contact AgentExecutor Example."""
 
-  def __init__(self, ui_agent: ContactAgent, text_agent: ContactAgent):
-    # Instantiate two agents: one for UI and one for text-only.
+  def __init__(self, ui_agent_v0_8, ui_agent_v0_9, text_agent):
+    # Instantiate two agents for UI (one per version) and one for text-only.
     # The appropriate one will be chosen at execution time.
-    self.ui_agent = ui_agent
+    self.ui_agent_v0_8 = ui_agent_v0_8
+    self.ui_agent_v0_9 = ui_agent_v0_9
     self.text_agent = text_agent
 
   async def execute(
@@ -58,12 +59,31 @@ class ContactAgentExecutor(AgentExecutor):
     action = None
 
     logger.info(f"--- Client requested extensions: {context.requested_extensions} ---")
-    use_ui = try_activate_a2ui_extension(context)
+
+    use_ui = False
+    requested_version = None
+
+    if A2UI_EXTENSION_URI_V0_9 in context.requested_extensions or (
+        context.message and context.message.extensions and A2UI_EXTENSION_URI_V0_9 in context.message.extensions
+    ):
+      context.add_activated_extension(A2UI_EXTENSION_URI_V0_9)
+      use_ui = True
+      requested_version = "v0.9"
+    elif A2UI_EXTENSION_URI_V0_8 in context.requested_extensions or (
+        context.message and context.message.extensions and A2UI_EXTENSION_URI_V0_8 in context.message.extensions
+    ):
+      context.add_activated_extension(A2UI_EXTENSION_URI_V0_8)
+      use_ui = True
+      requested_version = "v0.8"
 
     # Determine which agent to use based on whether the a2ui extension is active.
     if use_ui:
-      agent = self.ui_agent
-      logger.info("--- AGENT_EXECUTOR: A2UI extension is active. Using UI agent. ---")
+      if requested_version == "v0.8":
+        agent = self.ui_agent_v0_8
+        logger.info("--- AGENT_EXECUTOR: A2UI extension v0.8 is active. Using v0.8 UI agent. ---")
+      else:
+        agent = self.ui_agent_v0_9
+        logger.info("--- AGENT_EXECUTOR: A2UI extension v0.9 is active. Using v0.9 UI agent. ---")
     else:
       agent = self.text_agent
       logger.info(
