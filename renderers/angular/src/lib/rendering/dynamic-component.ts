@@ -35,6 +35,7 @@ export abstract class DynamicComponent<T extends Types.AnyComponentNode = Types.
   readonly surfaceId = input.required<Types.SurfaceID | null>();
   readonly component = input.required<T>();
   readonly weight = input.required<string | number>();
+  readonly themeOverride = input<any>();
 
   protected sendAction(action: Types.Action) {
     if (!action) return;

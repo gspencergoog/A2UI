@@ -50,11 +50,13 @@ export class Renderer implements OnDestroy {
 
   readonly surfaceId = input.required<Types.SurfaceID>();
   readonly component = input.required<Types.AnyComponentNode | string>();
+  readonly themeOverride = input<any>();
 
   constructor() {
     effect(() => {
       const surfaceId = this.surfaceId();
       const componentInput = this.component();
+      const themeOverride = this.themeOverride();
       let component: Types.AnyComponentNode | undefined;
 
       if (typeof componentInput === 'string') {
@@ -68,7 +70,7 @@ export class Renderer implements OnDestroy {
       }
 
       if (component) {
-        untracked(() => this.render(surfaceId, component!));
+        untracked(() => this.render(surfaceId, component!, themeOverride));
       } else {
         untracked(() => this.clear());
       }
@@ -90,7 +92,7 @@ export class Renderer implements OnDestroy {
     this.clear();
   }
 
-  private async render(surfaceId: Types.SurfaceID, component: Types.AnyComponentNode) {
+  private async render(surfaceId: Types.SurfaceID, component: Types.AnyComponentNode, themeOverride?: any) {
     const config = this.catalog[component.type];
     let newComponent: Type<unknown> | null = null;
     let componentBindings: Binding[] | null = null;
@@ -110,6 +112,10 @@ export class Renderer implements OnDestroy {
         inputBinding('component', () => component),
         inputBinding('weight', () => component.weight ?? 'initial'),
       ];
+
+      if (themeOverride) {
+          bindings.push(inputBinding('themeOverride', () => themeOverride));
+      }
 
       if (componentBindings) {
         bindings.push(...componentBindings);

@@ -33,6 +33,7 @@ export namespace Types {
     label?: Primitives.StringValue;
     child?: string;
     action?: Action;
+    variant?: string;
   }
   export type ButtonNode = Component<ButtonProps>;
   export type ResolvedButton = ButtonProps;

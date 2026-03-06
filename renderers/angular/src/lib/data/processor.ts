@@ -44,7 +44,7 @@ export class MessageProcessor extends A2uiMessageProcessor<any> {
     super(
       [
         {
-          id: 'default',
+          id: 'https://a2ui.org/specification/v0_9/basic_catalog.json',
           components: new Map(),
           functions: BASIC_FUNCTIONS,
         } as any,

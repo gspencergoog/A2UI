@@ -109,32 +109,76 @@ export class Text extends DynamicComponent {
     });
   });
 
+  protected overrideThemeStyles = computed(() => {
+    const override = this.themeOverride();
+    if (override && override.components && override.components.Text) {
+        return override.components.Text;
+    }
+    return null;
+  });
+
+  protected overrideAdditionalStyles = computed(() => {
+    const override = this.themeOverride();
+    if (override && override.additionalStyles && override.additionalStyles.Text) {
+        return override.additionalStyles.Text;
+    }
+    return null;
+  });
+
   protected classes = computed(() => {
     const usageHint = this.usageHint();
+    const baseTextTheme = this.theme['components']?.Text;
+    const overrideTextTheme = this.overrideThemeStyles();
+
+    let textTheme = baseTextTheme;
+
+    if (overrideTextTheme) {
+        if (!baseTextTheme) {
+            textTheme = overrideTextTheme;
+        } else if (typeof baseTextTheme === 'string' || Array.isArray(baseTextTheme)) {
+            textTheme = Styles.merge(baseTextTheme as any, overrideTextTheme as any);
+        } else {
+            textTheme = {
+                ...baseTextTheme,
+                all: Styles.merge(baseTextTheme.all || {}, overrideTextTheme as any)
+            };
+        }
+    }
+
+    if (!textTheme) {
+      return {};
+    }
+
+    if (typeof textTheme === 'string' || Array.isArray(textTheme)) {
+      return textTheme;
+    }
 
     return Styles.merge(
-      this.theme['components'].Text.all,
-      usageHint ? this.theme['components'].Text[usageHint] : {},
+      textTheme.all,
+      usageHint ? textTheme[usageHint] : {},
     );
   });
 
   protected additionalStyles = computed(() => {
     const usageHint = this.usageHint();
-    const styles = this.theme['additionalStyles']?.Text;
-
-    if (!styles) {
-      return null;
-    }
+    const baseStyles = this.theme['additionalStyles']?.Text;
+    const overrideStyles = this.overrideAdditionalStyles();
 
     let additionalStyles: Record<string, string> = {};
 
-    if (this.areHintedStyles(styles)) {
-      additionalStyles = styles[(usageHint ?? 'body') as keyof HintedStyles];
-    } else {
-      additionalStyles = styles;
+    if (baseStyles) {
+        if (this.areHintedStyles(baseStyles)) {
+            additionalStyles = baseStyles[(usageHint ?? 'body') as keyof HintedStyles] || {};
+        } else {
+            additionalStyles = baseStyles;
+        }
     }
 
-    return additionalStyles;
+    if (overrideStyles) {
+        additionalStyles = { ...additionalStyles, ...overrideStyles } as Record<string, string>;
+    }
+
+    return Object.keys(additionalStyles).length > 0 ? additionalStyles : null;
   });
 
   private areHintedStyles(styles: unknown): styles is HintedStyles {

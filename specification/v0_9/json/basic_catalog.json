@@ -1142,8 +1142,7 @@
           "type": "object",
           "properties": {
             "url": {
-              "type": "string",
-              "format": "uri",
+              "$ref": "common_types.json#/$defs/DynamicString",
               "description": "The URL to open."
             }
           },

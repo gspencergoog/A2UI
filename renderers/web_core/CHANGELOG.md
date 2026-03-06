@@ -1,6 +1,6 @@
 ## 0.8.3
 
-* The `MarkdownRenderer` type is now async and returns a `Promise<string>`.
+- The `MarkdownRenderer` type is now async and returns a `Promise<string>`.
 
 ## 0.8.2
 

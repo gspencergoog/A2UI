@@ -22,25 +22,30 @@ ROLE_DESCRIPTION = (
 )
 
 WORKFLOW_DESCRIPTION = """
-Buttons that represent the main action on a card or view (e.g., 'Follow', 'Email', 'Search') SHOULD use `"variant": "primary"`.
+1.  EVERY A2UI message object MUST include `"version": "v0.9"`. This is a strict protocol requirement.
+2.  You MUST ALWAYS start with a `createSurface` message to initialize the view before sending `updateComponents` or `updateDataModel`. Do not assume the surface already exists.
+3.  When initially responding with a new UI, you MUST include the `updateComponents` message from the relevant example to define the layout.
+4.  You MUST use the exact `surfaceId` corresponding to the template you are rendering (e.g. "contact-card", "contact-list", "action-modal"). Do NOT make up your own `surfaceId`.
+5.  Buttons that represent the main action on a card or view (e.g., 'Follow', 'Email', 'Search') SHOULD use `"variant": "primary"`.
 6.  For the `Icon` component, use the `name` property with the correct camelCase enum value (e.g., "calendarToday"). Do NOT use "icon" or snake_case names.
 7.  For `Action` definitions (in Buttons, etc.), you MUST wrap the action details in an `event` object: `{ "event": { "name": "...", "context": { ... } } }`. Do NOT use flattened `name` or `params`.
+8. String interpolation (e.g. "${/email}") ONLY works within arguments to the `formatString` function, do NOT use it anywhere else.
 """
 
 UI_DESCRIPTION = f"""
 -   **For finding contacts (e.g., "Who is Alex Jordan?"):**
     a.  You MUST call the `get_contact_info` tool.
-    b.  If the tool returns a **single contact**, you MUST use the `CONTACT_CARD_EXAMPLE` template. Populate the `dataModelUpdate.contents` with the contact's details (name, title, email, etc.).
-    c.  If the tool returns **multiple contacts**, you MUST use the `CONTACT_LIST_EXAMPLE` template. Populate the `dataModelUpdate.contents` with the list of contacts for the "contacts" key.
+    b.  If the tool returns a **single contact**, you MUST use the `CONTACT_CARD_EXAMPLE` template. You MUST include its `updateComponents` array exactly as shown in the example, and populate the `updateDataModel.value` with the contact's details (name, title, email, etc.).
+    c.  If the tool returns **multiple contacts**, you MUST use the `CONTACT_LIST_EXAMPLE` template. You MUST include its `updateComponents` array exactly as shown in the example, and populate the `updateDataModel.value` with the list of contacts for the "contacts" key.
     d.  If the tool returns an **empty list**, respond with text only and an empty JSON list: "I couldn't find anyone by that name.{A2UI_DELIMITER}[]"
 
 -   **For handling a profile view (e.g., "WHO_IS: Alex Jordan..."):**
     a.  You MUST call the `get_contact_info` tool with the specific name.
-    b.  This will return a single contact. You MUST use the `CONTACT_CARD_EXAMPLE` template.
+    b.  This will return a single contact. You MUST use the `CONTACT_CARD_EXAMPLE` template, including the `updateComponents` array.
 
 -   **For handling actions (e.g., "follow_contact"):**
     a.  You MUST use the `FOLLOW_SUCCESS_EXAMPLE` template.
-    b.  This will render a new card with a "Successfully Followed" message.
+    b.  This will render a new card with a "Successfully Followed" message. Include its `updateComponents` array.
     c.  Respond with a text confirmation like "You are now following this contact." along with the JSON.
 """
 

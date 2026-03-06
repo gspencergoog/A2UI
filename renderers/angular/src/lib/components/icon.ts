@@ -17,6 +17,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { DynamicComponent } from '../rendering/dynamic-component';
 import * as Primitives from '@a2ui/web_core/types/primitives';
+import * as Styles from '@a2ui/web_core/styles/index';
 
 @Component({
   selector: 'a2ui-icon',
@@ -37,7 +38,7 @@ import * as Primitives from '@a2ui/web_core/types/primitives';
     @let resolvedName = this.resolvedName();
 
     @if (resolvedName) {
-      <section [class]="theme.components.Icon" [style]="theme.additionalStyles?.Icon">
+      <section [class]="finalIconTheme()" [style]="finalIconStyles()">
         <span class="g-icon">{{ resolvedName }}</span>
       </section>
     }
@@ -46,4 +47,33 @@ import * as Primitives from '@a2ui/web_core/types/primitives';
 export class Icon extends DynamicComponent {
   readonly name = input.required<Primitives.StringValue | null>();
   protected readonly resolvedName = computed(() => this.resolvePrimitive(this.name()));
+
+  protected overrideThemeStyles = computed(() => {
+    const override = this.themeOverride();
+    if (override && override.components && override.components.Icon) {
+        return override.components.Icon;
+    }
+    return null;
+  });
+
+  protected overrideAdditionalStyles = computed(() => {
+    const override = this.themeOverride();
+    if (override && override.additionalStyles && override.additionalStyles.Icon) {
+        return override.additionalStyles.Icon;
+    }
+    return null;
+  });
+
+  protected finalIconTheme = computed(() => {
+      const base = this.theme.components?.Icon || {};
+      const override = this.overrideThemeStyles();
+      return override ? Styles.merge(base, override) : base;
+  });
+
+  protected finalIconStyles = computed(() => {
+      const base = this.theme.additionalStyles?.Icon || {};
+      const override = this.overrideAdditionalStyles();
+      const merged = override ? { ...base, ...override } as Record<string, string> : base;
+      return Object.keys(merged).length > 0 ? merged : null;
+  });
 }

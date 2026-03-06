@@ -22,7 +22,7 @@ describe('MessageProcessor', () => {
     const initMsg: Types.ServerToClientMessage = {
       createSurface: {
         surfaceId,
-        catalogId: 'default',
+        catalogId: 'https://a2ui.org/specification/v0_9/basic_catalog.json',
         theme: {},
       },
       version: 'v0.9',
@@ -51,7 +51,7 @@ describe('MessageProcessor', () => {
       {
         createSurface: {
           surfaceId,
-          catalogId: 'default',
+          catalogId: 'https://a2ui.org/specification/v0_9/basic_catalog.json',
         },
         version: 'v0.9',
       },
@@ -79,7 +79,7 @@ describe('MessageProcessor', () => {
       {
         createSurface: {
           surfaceId,
-          catalogId: 'default',
+          catalogId: 'https://a2ui.org/specification/v0_9/basic_catalog.json',
         },
         version: 'v0.9',
       },
@@ -121,7 +121,7 @@ describe('MessageProcessor', () => {
       {
         createSurface: {
           surfaceId,
-          catalogId: 'default',
+          catalogId: 'https://a2ui.org/specification/v0_9/basic_catalog.json',
         },
         version: 'v0.9',
       },
@@ -147,7 +147,7 @@ describe('MessageProcessor', () => {
       {
         createSurface: {
           surfaceId,
-          catalogId: 'default',
+          catalogId: 'https://a2ui.org/specification/v0_9/basic_catalog.json',
         },
         version: 'v0.9',
       } as any,

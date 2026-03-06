@@ -247,20 +247,17 @@ class ContactAgent:
                 "Assuming valid (e.g., 'no results'). ---"
             )
             is_valid = True
-            continue
+          else:
+            # Validate the JSON data against the loaded A2UI schema.
+            # jsonschema will raise a ValidationError if compliance fails.
+            logger.info("--- ContactAgent.stream: Validating against A2UI_SCHEMA... ---")
+            effective_catalog.validator.validate(parsed_json_data)
 
-          # --- New Validation Steps ---
-          # 1. Check if it validates against the A2UI_SCHEMA
-          # This will raise jsonschema.exceptions.ValidationError if it fails
-          logger.info("--- ContactAgent.stream: Validating against A2UI_SCHEMA... ---")
-          effective_catalog.validator.validate(parsed_json_data)
-          # --- End New Validation Steps ---
-
-          logger.info(
-              "--- ContactAgent.stream: UI JSON successfully parsed AND validated"
-              f" against schema. Validation OK (Attempt {attempt}). ---"
-          )
-          is_valid = True
+            logger.info(
+                "--- ContactAgent.stream: UI JSON successfully parsed AND validated"
+                f" against schema. Validation OK (Attempt {attempt}). ---"
+            )
+            is_valid = True
         except (
             ValueError,
             json.JSONDecodeError,

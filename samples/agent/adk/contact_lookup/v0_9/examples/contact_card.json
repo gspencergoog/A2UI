@@ -3,7 +3,7 @@
     "version": "v0.9",
     "createSurface": {
       "surfaceId": "contact-card",
-      "catalogId": "default"
+      "catalogId": "https://a2ui.org/specification/v0_9/basic_catalog.json"
     }
   },
   {
@@ -54,7 +54,7 @@
           "text": {
             "path": "/name"
           },
-          "variant": "h2"
+          "variant": "h3"
         },
         {
           "id": "description_text_1",
@@ -243,7 +243,7 @@
           "id": "button_1",
           "component": "Button",
           "child": "button_1_text",
-          "variant": "primary",
+          "variant": "default",
           "action": {
             "event": {
               "name": "follow_contact",

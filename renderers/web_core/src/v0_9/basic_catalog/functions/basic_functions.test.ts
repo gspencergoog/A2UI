@@ -19,6 +19,7 @@ import * as assert from "node:assert";
 import { BASIC_FUNCTIONS } from "./basic_functions.js";
 import { DataModel } from "../../state/data-model.js";
 import { DataContext } from "../../rendering/data-context.js";
+import { A2uiExpressionError } from "../../errors.js";
 
 describe("BASIC_FUNCTIONS", () => {
   const dataModel = new DataModel({ a: 10, b: 20 });
@@ -41,22 +42,25 @@ describe("BASIC_FUNCTIONS", () => {
         BASIC_FUNCTIONS.divide({ a: 10, b: 0 }, context),
         Infinity,
       );
-      assert.ok(
-        Number.isNaN(BASIC_FUNCTIONS.divide({ a: 10, b: undefined }, context)),
+      assert.throws(
+        () => BASIC_FUNCTIONS.divide({ a: 10, b: undefined }, context),
+        A2uiExpressionError,
       );
-      assert.ok(
-        Number.isNaN(BASIC_FUNCTIONS.divide({ a: undefined, b: 10 }, context)),
+      assert.throws(
+        () => BASIC_FUNCTIONS.divide({ a: undefined, b: 10 }, context),
+        A2uiExpressionError,
       );
-      assert.ok(
-        Number.isNaN(
-          BASIC_FUNCTIONS.divide({ a: undefined, b: undefined }, context),
-        ),
+      assert.throws(
+        () => BASIC_FUNCTIONS.divide({ a: undefined, b: undefined }, context),
+        A2uiExpressionError,
       );
-      assert.ok(
-        Number.isNaN(BASIC_FUNCTIONS.divide({ a: 10, b: null }, context)),
+      assert.throws(
+        () => BASIC_FUNCTIONS.divide({ a: 10, b: null }, context),
+        A2uiExpressionError,
       );
-      assert.ok(
-        Number.isNaN(BASIC_FUNCTIONS.divide({ a: 10, b: "invalid" }, context)),
+      assert.throws(
+        () => BASIC_FUNCTIONS.divide({ a: 10, b: "invalid" }, context),
+        A2uiExpressionError,
       );
       assert.strictEqual(BASIC_FUNCTIONS.divide({ a: 10, b: "2" }, context), 5);
       assert.strictEqual(
@@ -226,9 +230,9 @@ describe("BASIC_FUNCTIONS", () => {
     });
 
     it("regex handles invalid pattern", () => {
-      assert.strictEqual(
-        BASIC_FUNCTIONS.regex({ value: "abc", pattern: "[" }, context),
-        false, // fallback when regex throws
+      assert.throws(
+        () => BASIC_FUNCTIONS.regex({ value: "abc", pattern: "[" }, context),
+        A2uiExpressionError,
       );
     });
   });

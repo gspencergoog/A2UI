@@ -133,7 +133,7 @@ describe('Catalog Components', () => {
     await TestBed.configureTestingModule({
       imports: [TestHostComponent, Row, Column, Text, Button],
       providers: [
-        { provide: MarkdownRenderer, useValue: { render: (s: string) => s } },
+        { provide: MarkdownRenderer, useValue: { render: (s: string) => Promise.resolve(s) } },
 
         { provide: A2UI_PROCESSOR, useValue: mockMessageProcessor },
         {
@@ -222,7 +222,7 @@ describe('Catalog Components', () => {
   });
 
   describe('Text', () => {
-    it('should resolve text content', () => {
+    it('should resolve text content', async () => {
       host.type = 'Text';
       host.componentData = {
         id: 'txt1',
@@ -232,6 +232,8 @@ describe('Catalog Components', () => {
           variant: 'h1',
         },
       } as Types.TextNode;
+      fixture.detectChanges();
+      await fixture.whenStable();
       fixture.detectChanges();
 
       const textEl = fixture.debugElement.query(By.css('a2ui-text'));
@@ -283,6 +285,8 @@ describe('Catalog Components', () => {
           ],
         },
       } as any;
+      fixture.detectChanges();
+      await fixture.whenStable();
       fixture.detectChanges();
       await fixture.whenStable();
       fixture.detectChanges();

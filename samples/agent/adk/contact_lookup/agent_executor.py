@@ -32,7 +32,6 @@ from a2a.utils import (
     new_task,
 )
 from a2a.utils.errors import ServerError
-from agent import ContactAgent
 from a2ui.a2a import create_a2ui_part, A2UI_EXTENSION_URI_V0_8, A2UI_EXTENSION_URI_V0_9
 from a2ui.core.parser import parse_response
 
