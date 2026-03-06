@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { MessageProcessor } from './processor';
+import { MessageProcessor, A2uiClientMessage } from './processor';
 import { Types } from '../types';
 import { Catalog } from '../rendering/catalog';
 
@@ -29,17 +29,6 @@ describe('MessageProcessor', () => {
     } as any;
 
     service.processMessages([initMsg]);
-
-    service.processMessages([
-      {
-        createSurface: {
-          surfaceId,
-          catalogId: 'default',
-          theme: {},
-        },
-        version: 'v0.9',
-      },
-    ] as any);
 
     service.processMessages([
       {
@@ -164,7 +153,7 @@ describe('MessageProcessor', () => {
       } as any,
     ]);
 
-    const action: Types.A2UIClientEventMessage = {
+    const action: A2uiClientMessage = {
       action: {
         event: { name: 'submit', context: { foo: 'bar' } },
       } as any,

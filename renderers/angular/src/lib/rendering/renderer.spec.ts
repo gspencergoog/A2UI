@@ -12,7 +12,7 @@ import { Renderer } from './renderer';
 import { Catalog } from './catalog';
 import { MessageProcessor } from '../data/processor';
 import { Theme } from './theming';
-import { A2UI_EVALUATOR, A2UI_PROCESSOR } from '../config';
+import { A2UI_PROCESSOR } from '../config';
 import { By } from '@angular/platform-browser';
 
 @Component({
@@ -91,7 +91,7 @@ describe('Renderer', () => {
         { provide: Catalog, useValue: catalog },
         { provide: MessageProcessor, useValue: processorSpy },
         { provide: A2UI_PROCESSOR, useValue: processorSpy },
-        { provide: A2UI_EVALUATOR, useValue: { evaluate: (v: any) => v } },
+
         { provide: Theme, useValue: { components: {}, additionalStyles: {} } },
       ],
     }).compileComponents();

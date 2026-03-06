@@ -143,10 +143,10 @@ export class GoogleMap extends DynamicComponent<Types.CustomNode & { component: 
   mapId = '4506f1f5f5e6e8e2';
 
   readonly title = input<Primitives.StringValue | null>();
-  protected resolvedTitle = computed(() => super.resolve<string>(this.title() ?? null));
+  protected resolvedTitle = computed(() => this.resolvePrimitive(this.title() ?? null));
 
   readonly zoom = input.required<Primitives.NumberValue | null>();
-  protected resolvedZoom = computed(() => super.resolve<number>(this.zoom()));
+  protected resolvedZoom = computed(() => this.resolvePrimitive(this.zoom()));
 
   readonly center = input.required<CustomProperties | null>();
   protected resolvedCenter = computed(() => this.resolveLatLng(this.center()));
@@ -187,13 +187,13 @@ export class GoogleMap extends DynamicComponent<Types.CustomNode & { component: 
     const borderColorValue: Primitives.StringValue = { path: `${value}.borderColor` };
     const glyphColorValue: Primitives.StringValue = { path: `${value}.glyphColor` };
 
-    const lat = this.resolve<number>(latValue);
-    const lng = this.resolve<number>(lngValue);
-    const name = this.resolve<string>(nameValue);
-    const description = this.resolve<string>(descriptionValue);
-    const background = this.resolve<string>(backgroundValue);
-    const borderColor = this.resolve<string>(borderColorValue);
-    const glyphColor = this.resolve<string>(glyphColorValue);
+    const lat = this.resolvePrimitive(latValue);
+    const lng = this.resolvePrimitive(lngValue);
+    const name = this.resolvePrimitive(nameValue);
+    const description = this.resolvePrimitive(descriptionValue);
+    const background = this.resolvePrimitive(backgroundValue);
+    const borderColor = this.resolvePrimitive(borderColorValue);
+    const glyphColor = this.resolvePrimitive(glyphColorValue);
 
     // TODO: This logic should be implemented in the `guard.ts` by making the data model typed upstream.
     if (lat === null || lng === null || name === null) {
@@ -219,8 +219,8 @@ export class GoogleMap extends DynamicComponent<Types.CustomNode & { component: 
     if (value?.path) {
       const latValue: Primitives.NumberValue = { path: `${value.path}.lat` };
       const lngValue: Primitives.NumberValue = { path: `${value.path}.lng` };
-      const lat = this.resolve<number>(latValue)!;
-      const lng = this.resolve<number>(lngValue)!;
+      const lat = this.resolvePrimitive(latValue)!;
+      const lng = this.resolvePrimitive(lngValue)!;
       return {
         lat,
         lng,

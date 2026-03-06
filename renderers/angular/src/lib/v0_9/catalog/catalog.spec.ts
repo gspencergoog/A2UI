@@ -27,11 +27,11 @@ import { DynamicComponent } from '../../rendering/dynamic-component';
 import { Renderer } from '../../rendering/renderer';
 import { Types } from '../../types';
 import { MarkdownRenderer } from '../../data/markdown';
-import { ExpressionEvaluator } from '@a2ui/web_core/v0_9/basic_catalog';
+
 import { Theme } from '../../rendering/theming';
 import { MessageProcessor } from '../../data/processor';
 import { Catalog } from '../../rendering/catalog';
-import { A2UI_EVALUATOR, A2UI_PROCESSOR } from '../../config';
+import { A2UI_PROCESSOR } from '../../config';
 
 // Mock context will be handled by MessageProcessor mock
 const mockContext = {
@@ -112,6 +112,7 @@ describe('Catalog Components', () => {
     };
 
     mockSurfaceModel = {
+      dataModel: mockDataModel,
       componentsModel: new Map([
         ['child1', { id: 'child1', type: 'Text', properties: { text: { literal: 'Child Text' } } }],
         ['item1', { id: 'item1', type: 'Text', properties: { text: { literal: 'Item 1' } } }],
@@ -133,8 +134,7 @@ describe('Catalog Components', () => {
       imports: [TestHostComponent, Row, Column, Text, Button],
       providers: [
         { provide: MarkdownRenderer, useValue: { render: (s: string) => s } },
-        { provide: ExpressionEvaluator, useValue: { evaluate: (v: any) => v } },
-        { provide: A2UI_EVALUATOR, useValue: { evaluate: (v: any) => v } },
+
         { provide: A2UI_PROCESSOR, useValue: mockMessageProcessor },
         {
           provide: Theme,

@@ -86,9 +86,8 @@ export abstract class DynamicComponent<T extends Types.AnyComponentNode = Types.
       return value.literal;
     } else if (value.path) {
       if (surfaceId) {
-        const surface = this.processor.model.getSurface(surfaceId);
-        const dataPath = this.processor.resolvePath(value.path, (component as any)['dataContextPath']);
-        return surface?.dataModel.get(dataPath);
+        const surface = this.processor.getSurfaces().get(surfaceId);
+        return surface?.dataModel.get(value.path);
       }
       return null;
     } else if ('literalString' in value) {

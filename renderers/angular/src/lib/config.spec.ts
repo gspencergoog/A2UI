@@ -19,7 +19,7 @@ describe('provideA2UI', () => {
         provideA2UI({
           catalog: dummyCatalog,
           theme: dummyTheme,
-          evaluator: {} as any,
+
           processor: {
             dispatch: () => Promise.resolve([]),
             getSurfaces: () => new Map(),

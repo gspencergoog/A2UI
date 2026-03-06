@@ -7,7 +7,7 @@ import { Component, Input, Directive, inject } from '@angular/core';
 import { Types } from '../types';
 import { DynamicComponent } from '../rendering/dynamic-component';
 import { Theme } from '../rendering/theming';
-import { A2UI_EVALUATOR, A2UI_PROCESSOR } from '../config';
+import { A2UI_PROCESSOR } from '../config';
 import { By } from '@angular/platform-browser';
 
 // Mock Renderer to inspect inputs
@@ -58,7 +58,7 @@ describe('List Component', () => {
         { provide: MessageProcessor, useClass: MockMessageProcessor },
         { provide: A2UI_PROCESSOR, useClass: MockMessageProcessor },
         { provide: Theme, useValue: mockTheme },
-        { provide: A2UI_EVALUATOR, useValue: { evaluate: (v: any) => v } },
+
       ],
     }).overrideComponent(List, {
       remove: { imports: [Renderer] },

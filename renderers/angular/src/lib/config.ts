@@ -26,7 +26,7 @@ import {
 } from '@angular/core';
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { Catalog, Theme } from './rendering';
-import { ExpressionEvaluator } from '@a2ui/web_core/v0_9/basic_catalog';
+
 import { MessageProcessor } from '@a2ui/web_core/v0_9'; // Default type for now, but token can hold any
 import { structuralStyles } from './rendering/styles';
 
@@ -35,10 +35,7 @@ import { structuralStyles } from './rendering/styles';
  */
 export const UNKNOWN_COMPONENT = new InjectionToken<Type<unknown>>('UNKNOWN_COMPONENT');
 
-/**
- * Injection token for the Expression Evaluator.
- */
-export const A2UI_EVALUATOR = new InjectionToken<ExpressionEvaluator>('A2UI_EVALUATOR');
+
 
 /**
  * Injection token for the Message Processor.
@@ -66,7 +63,7 @@ function initializeStyles() {
  * @param config The configuration object.
  * @param config.catalog The component catalog to use for rendering.
  * @param config.theme The theme definition.
- * @param config.evaluator The expression evaluator instance.
+
  * @param config.processor The message processor instance.
  * @param config.unknownComponent Optional component to render when a catalog entry is not found.
  * @returns The environment providers for A2UI.
@@ -78,7 +75,7 @@ function initializeStyles() {
  *     provideA2UI({
  *       catalog: V0_9_CATALOG,
  *       theme: MY_THEME,
- *       evaluator: new ExpressionEvaluator(BASIC_FUNCTIONS),
+
  *       processor: new V09Processor(),
  *     }),
  *   ],
@@ -88,14 +85,14 @@ function initializeStyles() {
 export function provideA2UI(config: {
   catalog: Catalog;
   theme: Theme;
-  evaluator: ExpressionEvaluator;
+
   processor: unknown;
   unknownComponent?: Type<unknown>;
 }): EnvironmentProviders {
   const providers: Provider[] = [
     { provide: Catalog, useValue: config.catalog },
     { provide: Theme, useValue: config.theme },
-    { provide: A2UI_EVALUATOR, useValue: config.evaluator },
+
     { provide: A2UI_PROCESSOR, useValue: config.processor },
     config.unknownComponent
       ? { provide: UNKNOWN_COMPONENT, useValue: config.unknownComponent }

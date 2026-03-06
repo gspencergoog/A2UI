@@ -4,7 +4,7 @@ import { DynamicComponent } from './dynamic-component';
 import { MessageProcessor } from '../data/processor';
 import { Types } from '../types';
 import { Theme } from './theming';
-import { A2UI_EVALUATOR, A2UI_PROCESSOR } from '../config';
+import { A2UI_PROCESSOR } from '../config';
 
 @Component({
   template: '',
@@ -29,7 +29,7 @@ describe('DynamicComponent', () => {
       providers: [
         { provide: MessageProcessor, useValue: spy },
         { provide: A2UI_PROCESSOR, useValue: spy },
-        { provide: A2UI_EVALUATOR, useValue: { evaluate: (v: any) => v } },
+
         { provide: Theme, useValue: { components: {}, additionalStyles: {} } },
       ],
     });

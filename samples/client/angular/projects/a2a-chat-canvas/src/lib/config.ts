@@ -30,7 +30,6 @@ import { SanitizerMarkdownRendererService } from './services/sanitizer-markdown-
 import { Catalog, Theme, provideA2UI, MessageProcessor } from '@a2ui/angular';
 import { EnvironmentProviders, Provider, Type, makeEnvironmentProviders } from '@angular/core';
 import { DEFAULT_A2UI_CATALOG } from './a2ui-catalog/a2a-chat-canvas-catalog';
-import { BASIC_FUNCTIONS, ExpressionEvaluator } from '@a2ui/web_core/v0_9/basic_catalog';
 
 const DEFAULT_RENDERERS: readonly RendererEntry[] = [
   A2UI_DATA_PART_RENDERER_ENTRY,
@@ -159,7 +158,7 @@ export function usingA2uiRenderers(customCatalog?: Catalog, theme?: Theme): A2ui
           ...(customCatalog ?? {}),
         },
         theme: theme ?? a2uiTheme,
-        evaluator: new ExpressionEvaluator(BASIC_FUNCTIONS),
+
         processor: new MessageProcessor(
           customCatalog ? { ...DEFAULT_A2UI_CATALOG, ...customCatalog } : DEFAULT_A2UI_CATALOG,
         ),

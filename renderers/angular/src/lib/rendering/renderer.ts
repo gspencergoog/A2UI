@@ -33,7 +33,7 @@ import * as Styles from '@a2ui/web_core/styles/index';
 import * as Types from '@a2ui/web_core/types/types';
 import { Catalog } from './catalog';
 import { isPlatformBrowser } from '@angular/common';
-import { A2UI_EVALUATOR, A2UI_PROCESSOR } from '../config';
+import { A2UI_PROCESSOR } from '../config';
 
 @Directive({
   selector: 'ng-container[a2ui-renderer]',
@@ -41,7 +41,7 @@ import { A2UI_EVALUATOR, A2UI_PROCESSOR } from '../config';
 export class Renderer implements OnDestroy {
   private viewContainerRef = inject(ViewContainerRef);
   private catalog = inject(Catalog);
-  private evaluator = inject(A2UI_EVALUATOR);
+
   private processor = inject(A2UI_PROCESSOR);
   private static hasInsertedStyles = false;
 

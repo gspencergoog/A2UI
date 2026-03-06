@@ -16,6 +16,7 @@
 
 import { MessageProcessor as A2uiMessageProcessor } from '@a2ui/web_core/v0_9';
 import * as Types from '@a2ui/web_core/v0_9';
+import { BASIC_FUNCTIONS } from '@a2ui/web_core/v0_9';
 import { Inject, Injectable } from '@angular/core';
 import { firstValueFrom, Subject } from 'rxjs';
 import { Catalog } from '../rendering/catalog';
@@ -40,9 +41,18 @@ export class MessageProcessor extends A2uiMessageProcessor<any> {
     // but the MessageProcessor needs it for validation/existence checks.
     //
     // TODO: This is a robust-enough hack for now, but we should align Types.
-    super([{ id: 'default', components: new Map() } as any], (action) => {
-      console.log('Action dispatched:', action);
-    });
+    super(
+      [
+        {
+          id: 'default',
+          components: new Map(),
+          functions: BASIC_FUNCTIONS,
+        } as any,
+      ],
+      (action) => {
+        console.log('Action dispatched:', action);
+      },
+    );
   }
   readonly events = new Subject<DispatchedEvent>();
 
