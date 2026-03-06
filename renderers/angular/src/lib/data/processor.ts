@@ -22,9 +22,28 @@ import { firstValueFrom, Subject } from 'rxjs';
 import { Catalog } from '../rendering/catalog';
 
 export interface A2uiClientMessage {
-  action: Types.Action;
   version: 'v0.9';
-  surfaceId?: string;
+  action?: {
+    name: string;
+    surfaceId: string;
+    sourceComponentId: string;
+    timestamp: string;
+    context: Record<string, any>;
+    event?: {
+      name: string;
+      context?: Record<string, any>;
+    };
+    functionCall?: {
+      name: string;
+      args?: Record<string, any>;
+    };
+  };
+  error?: {
+    code: string;
+    message: string;
+    surfaceId: string;
+    path?: string;
+  };
 }
 
 export interface DispatchedEvent {
@@ -46,7 +65,7 @@ export class MessageProcessor extends A2uiMessageProcessor<any> {
         {
           id: 'https://a2ui.org/specification/v0_9/basic_catalog.json',
           components: new Map(),
-          functions: BASIC_FUNCTIONS,
+          functions: new Map(Object.entries(BASIC_FUNCTIONS)),
         } as any,
       ],
       (action) => {

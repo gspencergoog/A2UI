@@ -29,7 +29,7 @@ WORKFLOW_DESCRIPTION = """
 5.  Buttons that represent the main action on a card or view (e.g., 'Follow', 'Email', 'Search') SHOULD use `"variant": "primary"`.
 6.  For the `Icon` component, use the `name` property with the correct camelCase enum value (e.g., "calendarToday"). Do NOT use "icon" or snake_case names.
 7.  For `Action` definitions (in Buttons, etc.), you MUST wrap the action details in an `event` object: `{ "event": { "name": "...", "context": { ... } } }`. Do NOT use flattened `name` or `params`.
-8. String interpolation (e.g. "${/email}") ONLY works within arguments to the `formatString` function, do NOT use it anywhere else.
+8. String interpolation (e.g. "${/email}") ONLY works within arguments to the `formatString` client function, do NOT use it anywhere else.
 """
 
 UI_DESCRIPTION = f"""

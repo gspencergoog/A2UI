@@ -3,6 +3,7 @@ import { MessageProcessor, A2uiClientMessage } from './processor';
 import { Types } from '../types';
 import { Catalog } from '../rendering/catalog';
 
+
 describe('MessageProcessor', () => {
   let service: MessageProcessor;
 
@@ -141,6 +142,7 @@ describe('MessageProcessor', () => {
     expect(service.getSurfaces().get(surfaceId)).toBeUndefined();
   });
 
+
   it('should emit action on events subject', (done) => {
     const surfaceId = 's1';
     service.processMessages([
@@ -154,10 +156,14 @@ describe('MessageProcessor', () => {
     ]);
 
     const action: A2uiClientMessage = {
-      action: {
-        event: { name: 'submit', context: { foo: 'bar' } },
-      } as any,
       version: 'v0.9',
+      action: {
+        name: 'submit',
+        surfaceId: 's1',
+        sourceComponentId: 'button1',
+        timestamp: new Date().toISOString(),
+        context: { foo: 'bar' },
+      },
     };
 
     service.events.subscribe((event) => {

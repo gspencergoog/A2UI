@@ -46,7 +46,12 @@ import * as Styles from '@a2ui/web_core/styles/index';
 })
 export class Icon extends DynamicComponent {
   readonly name = input.required<Primitives.StringValue | null>();
-  protected readonly resolvedName = computed(() => this.resolvePrimitive(this.name()));
+  protected readonly resolvedName = computed(() => {
+    const rawName = this.resolvePrimitive(this.name());
+    if (!rawName) return null;
+    // Material Symbols ligatures require snake_case.
+    return rawName.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`).replace(/^_/, '');
+  });
 
   protected overrideThemeStyles = computed(() => {
     const override = this.themeOverride();

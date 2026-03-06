@@ -15,6 +15,7 @@
  */
 
 import * as Primitives from '@a2ui/web_core/types/primitives';
+import { DataContext as WebCoreDataContext } from '@a2ui/web_core/v0_9';
 import { Types } from '../types';
 import { Directive, inject, input } from '@angular/core';
 import { A2UI_PROCESSOR } from '../config';
@@ -41,35 +42,95 @@ export abstract class DynamicComponent<T extends Types.AnyComponentNode = Types.
     if (!action) return;
 
     // Check if it's a server event action
-    if ('event' in action && action.event) {
-      const eventWithContext = { ...action };
+    const surfaceId = this.surfaceId();
+    if (!surfaceId) {
+      console.warn('Cannot dispatch action: No surface ID available.');
+      return;
+    }
 
+    const surface = this.processor.getSurfaces().get(surfaceId);
+    const catalog = surface?.catalog;
+
+    const funcInvoker = (name: string, args: Record<string, any>, ctx: WebCoreDataContext) => {
+      const func = catalog?.functions?.get(name);
+      if (!func) throw new Error(`Function ${name} not found`);
+      return func(args, ctx);
+    };
+
+    const context = surface ? new WebCoreDataContext(surface.dataModel, '/', funcInvoker) : null;
+
+    if ('event' in action && action.event) {
       // Resolve context if present
+      const resolvedContext: Record<string, any> = {};
       if (action.event.context) {
-        // We need to shallow copy context to not mutate original
-        const resolvedContext: Record<string, any> = {};
         for (const [key, val] of Object.entries(action.event.context)) {
-          resolvedContext[key] = val;
+          resolvedContext[key] = this.snapshotDynamicValue(context, val as any);
         }
       }
 
-      // Inject dataContextPath if available
-      const component = this.component();
-      if (component['dataContextPath']) {
-        // This logic seems specific to old implementation that used dataContextPath?
-        // v0.9 might not use dataContextPath in the same way?
-        // But we maintain it if it exists.
+      const message: A2uiClientMessage = {
+        version: 'v0.9',
+        action: {
+          name: action.event.name,
+          surfaceId: surfaceId,
+          sourceComponentId: this.component().id,
+          timestamp: new Date().toISOString(),
+          context: resolvedContext,
+        },
+      };
+
+      this.processor.dispatch(message);
+    } else if ('functionCall' in action && action.functionCall) {
+      const funcName = action.functionCall.call;
+
+      if (catalog && catalog.functions && !catalog.functions.has(funcName)) {
+        const errorMsg: A2uiClientMessage = {
+          version: 'v0.9',
+          error: {
+            code: 'FUNCTION_NOT_FOUND',
+            message: `Action attempted to call unregistered function '${funcName}'. Expected one of: ${Array.from(catalog.functions.keys()).join(', ')}`,
+            surfaceId: surfaceId,
+          },
+        };
+        this.processor.dispatch(errorMsg);
+        return; // Halt execution
       }
 
-      const message: A2uiClientMessage = {
-        action: eventWithContext,
-        version: 'v0.9',
-        surfaceId: this.surfaceId() ?? undefined,
-      };
-      this.processor.dispatch(message);
-    } else if ('functionCall' in action) {
-      console.warn('Function calls not yet fully supported in DynamicComponent dispatch');
+      // We have the function, lets execute it locally!
+      const resolvedArgs: Record<string, any> = {};
+      if (action.functionCall.args) {
+        for (const [key, val] of Object.entries(action.functionCall.args)) {
+          resolvedArgs[key] = this.snapshotDynamicValue(context, val as any);
+        }
+      }
+
+      const func = catalog?.functions?.get(funcName);
+      if (func) {
+        try {
+          func(resolvedArgs, context);
+        } catch (e: any) {
+          const errorMsg: A2uiClientMessage = {
+            version: 'v0.9',
+            error: {
+              code: 'FUNCTION_EXECUTION_FAILED',
+              message: `Function '${funcName}' failed: ${e.message || String(e)}`,
+              surfaceId: surfaceId,
+            },
+          };
+          this.processor.dispatch(errorMsg);
+        }
+      }
     }
+  }
+
+  private snapshotDynamicValue(context: WebCoreDataContext | null, val: any): any {
+    if (!context) {
+      return this.resolvePrimitive(val);
+    }
+    const sub = context.subscribeDynamicValue(val, () => {});
+    const value = sub.value;
+    sub.unsubscribe();
+    return value;
   }
 
   protected resolvePrimitive(value: Primitives.StringValue | null): string | null;

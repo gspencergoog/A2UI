@@ -79,13 +79,13 @@ export class ChatService {
         // TODO: Replace this with a more robust event handling mechanism.
         // Currently, it just sends the event message back to the agent.
         const action = event.message.action;
-        if (!('event' in action)) {
+        if (!action || !action.event) {
           return;
         }
 
         const message = {
           kind: 'clientEvent',
-          surfaceId: event.message.surfaceId,
+          surfaceId: action.surfaceId,
           id: 'unknown',
           event: action.event.name,
           args: action.event.context,

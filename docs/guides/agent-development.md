@@ -76,7 +76,7 @@ root_agent = Agent(
 )
 ```
 
-Don't forget to set the `GOOGLE_API_KEY` environment variable to run this example.  
+Don't forget to set the `GOOGLE_API_KEY` environment variable to run this example.
 
 ```bash
 echo 'GOOGLE_API_KEY="YOUR_API_KEY"' > .env
@@ -92,7 +92,7 @@ Select `my_agent` from the list, and ask questions about restaurants in New York
 
 ## Generating A2UI Messages
 
-Getting the LLM to generate A2UI messages requires some prompt engineering.  
+Getting the LLM to generate A2UI messages requires some prompt engineering.
 
 > ⚠️ **Attention**
 >
