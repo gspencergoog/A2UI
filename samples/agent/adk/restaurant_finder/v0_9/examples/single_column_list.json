@@ -1,0 +1,160 @@
+[
+  {
+    "version": "v0.9",
+    "createSurface": {
+      "surfaceId": "default",
+      "catalogId": "default"
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateComponents": {
+      "surfaceId": "default",
+      "components": [
+        {
+          "id": "root-column",
+          "component": "Column",
+          "children": [
+            "title-heading",
+            "item-list"
+          ]
+        },
+        {
+          "id": "title-heading",
+          "component": "Text",
+          "variant": "h1",
+          "text": {
+            "path": "/title"
+          }
+        },
+        {
+          "id": "item-list",
+          "component": "List",
+          "direction": "vertical",
+          "children": {
+            "template": {
+              "componentId": "item-card-template",
+              "dataBinding": "/items"
+            }
+          }
+        },
+        {
+          "id": "item-card-template",
+          "component": "Card",
+          "child": "card-layout"
+        },
+        {
+          "id": "card-layout",
+          "component": "Row",
+          "children": [
+            "template-image",
+            "card-details"
+          ]
+        },
+        {
+          "id": "template-image",
+          "weight": 1,
+          "component": "Image",
+          "url": {
+            "path": "/imageUrl"
+          }
+        },
+        {
+          "id": "card-details",
+          "weight": 2,
+          "component": "Column",
+          "children": [
+            "template-name",
+            "template-rating",
+            "template-detail",
+            "template-link",
+            "template-book-button"
+          ]
+        },
+        {
+          "id": "template-name",
+          "component": "Text",
+          "variant": "h3",
+          "text": {
+            "path": "/name"
+          }
+        },
+        {
+          "id": "template-rating",
+          "component": "Text",
+          "text": {
+            "path": "/rating"
+          }
+        },
+        {
+          "id": "template-detail",
+          "component": "Text",
+          "text": {
+            "path": "/detail"
+          }
+        },
+        {
+          "id": "template-link",
+          "component": "Text",
+          "text": {
+            "path": "/infoLink"
+          }
+        },
+        {
+          "id": "template-book-button",
+          "component": "Button",
+          "child": "book-now-text",
+          "variant": "primary",
+          "action": {
+            "event": {
+              "name": "book_restaurant",
+              "context": {
+                "restaurantName": {
+                  "path": "/name"
+                },
+                "imageUrl": {
+                  "path": "/imageUrl"
+                },
+                "address": {
+                  "path": "/address"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "book-now-text",
+          "component": "Text",
+          "text": "Book Now"
+        }
+      ]
+    }
+  },
+  {
+    "version": "v0.9",
+    "updateDataModel": {
+      "surfaceId": "default",
+      "value": {
+        "title": "Top Restaurants",
+        "items": {
+          "item1": {
+            "name": "The Fancy Place",
+            "rating": "4.8",
+            "detail": "Fine dining experience",
+            "infoLink": "https://example.com/fancy",
+            "imageUrl": "https://example.com/fancy.jpg",
+            "address": "123 Main St"
+          },
+          "item2": {
+            "name": "Quick Bites",
+            "rating": "4.2",
+            "detail": "Casual and fast",
+            "infoLink": "https://example.com/quick",
+            "imageUrl": "https://example.com/quick.jpg",
+            "address": "456 Oak Ave"
+          }
+        }
+      }
+    }
+  }
+]

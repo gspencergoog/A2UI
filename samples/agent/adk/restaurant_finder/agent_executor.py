@@ -32,9 +32,10 @@ from a2a.utils import (
     new_task,
 )
 from a2a.utils.errors import ServerError
-from a2ui.a2a import create_a2ui_part, try_activate_a2ui_extension
+from a2ui.a2a import create_a2ui_part, A2UI_EXTENSION_URI_V0_8, A2UI_EXTENSION_URI_V0_9
 from a2ui.core.parser import parse_response
-from agent import RestaurantAgent
+from v0_8.agent import RestaurantAgent as RestaurantAgentV08
+from v0_9.agent import RestaurantAgent as RestaurantAgentV09
 
 logger = logging.getLogger(__name__)
 
@@ -42,10 +43,11 @@ logger = logging.getLogger(__name__)
 class RestaurantAgentExecutor(AgentExecutor):
   """Restaurant AgentExecutor Example."""
 
-  def __init__(self, ui_agent: RestaurantAgent, text_agent: RestaurantAgent):
-    # Instantiate two agents: one for UI and one for text-only.
+  def __init__(self, ui_agent_v0_8: RestaurantAgentV08, ui_agent_v0_9: RestaurantAgentV09, text_agent: RestaurantAgentV09):
+    # Instantiate two agents for UI (one per version) and one for text-only.
     # The appropriate one will be chosen at execution time.
-    self.ui_agent = ui_agent
+    self.ui_agent_v0_8 = ui_agent_v0_8
+    self.ui_agent_v0_9 = ui_agent_v0_9
     self.text_agent = text_agent
 
   async def execute(
@@ -58,12 +60,31 @@ class RestaurantAgentExecutor(AgentExecutor):
     action = None
 
     logger.info(f"--- Client requested extensions: {context.requested_extensions} ---")
-    use_ui = try_activate_a2ui_extension(context)
+
+    use_ui = False
+    requested_version = None
+
+    if A2UI_EXTENSION_URI_V0_9 in context.requested_extensions or (
+        context.message and context.message.extensions and A2UI_EXTENSION_URI_V0_9 in context.message.extensions
+    ):
+      context.add_activated_extension(A2UI_EXTENSION_URI_V0_9)
+      use_ui = True
+      requested_version = "v0.9"
+    elif A2UI_EXTENSION_URI_V0_8 in context.requested_extensions or (
+        context.message and context.message.extensions and A2UI_EXTENSION_URI_V0_8 in context.message.extensions
+    ):
+      context.add_activated_extension(A2UI_EXTENSION_URI_V0_8)
+      use_ui = True
+      requested_version = "v0.8"
 
     # Determine which agent to use based on whether the a2ui extension is active.
     if use_ui:
-      agent = self.ui_agent
-      logger.info("--- AGENT_EXECUTOR: A2UI extension is active. Using UI agent. ---")
+      if requested_version == "v0.8":
+        agent = self.ui_agent_v0_8
+        logger.info("--- AGENT_EXECUTOR: A2UI extension v0.8 is active. Using v0.8 UI agent. ---")
+      else:
+        agent = self.ui_agent_v0_9
+        logger.info("--- AGENT_EXECUTOR: A2UI extension v0.9 is active. Using v0.9 UI agent. ---")
     else:
       agent = self.text_agent
       logger.info(
@@ -78,8 +99,14 @@ class RestaurantAgentExecutor(AgentExecutor):
       for i, part in enumerate(context.message.parts):
         if isinstance(part.root, DataPart):
           if "userAction" in part.root.data:
-            logger.info(f"  Part {i}: Found a2ui UI ClientEvent payload.")
+            logger.info(f"  Part {i}: Found a2ui UI ClientEvent payload (wrapped userAction).")
             ui_event_part = part.root.data["userAction"]
+          elif "action" in part.root.data:
+            logger.info(f"  Part {i}: Found a2ui UI ClientEvent payload (wrapped action).")
+            ui_event_part = part.root.data["action"]
+          elif part.root.data.get("kind") == "clientEvent":
+            logger.info(f"  Part {i}: Found a2ui UI ClientEvent payload (unwrapped).")
+            ui_event_part = part.root.data
           else:
             logger.info(f"  Part {i}: DataPart (data: {part.root.data})")
         elif isinstance(part.root, TextPart):
@@ -89,8 +116,9 @@ class RestaurantAgentExecutor(AgentExecutor):
 
     if ui_event_part:
       logger.info(f"Received a2ui ClientEvent: {ui_event_part}")
-      action = ui_event_part.get("actionName")
-      ctx = ui_event_part.get("context", {})
+      # Support both v0.8 (actionName) and v0.9 (name/event)
+      action = ui_event_part.get("name") or ui_event_part.get("event") or ui_event_part.get("actionName")
+      ctx = ui_event_part.get("context", {}) or ui_event_part.get("args", {})
 
       if action == "book_restaurant":
         restaurant_name = ctx.get("restaurantName", "Unknown Restaurant")
@@ -137,11 +165,9 @@ class RestaurantAgentExecutor(AgentExecutor):
         )
         continue
 
-      final_state = (
-          TaskState.completed
-          if action == "submit_booking"
-          else TaskState.input_required
-      )
+      final_state = TaskState.input_required  # Default
+      if action == "submit_booking":
+        final_state = TaskState.completed
 
       content = item["content"]
       final_parts = []

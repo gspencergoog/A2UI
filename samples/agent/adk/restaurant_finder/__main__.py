@@ -19,8 +19,10 @@ import click
 from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers import DefaultRequestHandler
 from a2a.server.tasks import InMemoryTaskStore
-from agent import RestaurantAgent
+from v0_8.agent import RestaurantAgent as RestaurantAgentV08
+from v0_9.agent import RestaurantAgent as RestaurantAgentV09
 from agent_executor import RestaurantAgentExecutor
+from a2ui.core.schema.constants import VERSION_0_8, VERSION_0_9
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
@@ -50,17 +52,22 @@ def main(host, port):
 
     base_url = f"http://{host}:{port}"
 
-    ui_agent = RestaurantAgent(base_url=base_url, use_ui=True)
-    text_agent = RestaurantAgent(base_url=base_url, use_ui=False)
+    ui_agent_v0_8 = RestaurantAgentV08(base_url=base_url, use_ui=True)
+    ui_agent_v0_9 = RestaurantAgentV09(base_url=base_url, use_ui=True)
+    text_agent = RestaurantAgentV09(base_url=base_url, use_ui=False)
 
-    agent_executor = RestaurantAgentExecutor(ui_agent, text_agent)
+    agent_executor = RestaurantAgentExecutor(ui_agent_v0_8, ui_agent_v0_9, text_agent)
 
     request_handler = DefaultRequestHandler(
         agent_executor=agent_executor,
         task_store=InMemoryTaskStore(),
     )
+
+    agent_card = ui_agent_v0_8.get_agent_card()
+    agent_card.extensions.extend(ui_agent_v0_9.get_agent_card().extensions)
+
     server = A2AStarletteApplication(
-        agent_card=ui_agent.get_agent_card(), http_handler=request_handler
+        agent_card=agent_card, http_handler=request_handler
     )
     import uvicorn
 

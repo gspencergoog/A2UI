@@ -27,13 +27,14 @@ from google.adk.models.lite_llm import LiteLlm
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
-from prompt_builder import (
+from .prompt_builder import (
     get_text_prompt,
     ROLE_DESCRIPTION,
+    WORKFLOW_DESCRIPTION,
     UI_DESCRIPTION,
 )
-from tools import get_restaurants
-from a2ui.core.schema.constants import VERSION_0_8, A2UI_DELIMITER
+from .tools import get_restaurants
+from a2ui.core.schema.constants import VERSION_0_9, A2UI_DELIMITER
 from a2ui.core.schema.manager import A2uiSchemaManager
 from a2ui.core.parser import parse_response
 from a2ui.basic_catalog.provider import BasicCatalog
@@ -53,9 +54,12 @@ class RestaurantAgent:
     self.use_ui = use_ui
     self._schema_manager = (
         A2uiSchemaManager(
-            VERSION_0_8,
+            VERSION_0_9,
             catalogs=[
-                BasicCatalog.get_config(version=VERSION_0_8, examples_path="examples")
+                BasicCatalog.get_config(
+                    version=VERSION_0_9,
+                    examples_path=os.path.join(os.path.dirname(__file__), "examples"),
+                )
             ],
             schema_modifiers=[remove_strict_validation],
         )
@@ -113,6 +117,7 @@ class RestaurantAgent:
     instruction = (
         self._schema_manager.generate_system_prompt(
             role_description=ROLE_DESCRIPTION,
+            workflow_description=WORKFLOW_DESCRIPTION,
             ui_description=UI_DESCRIPTION,
             include_schema=True,
             include_examples=True,
