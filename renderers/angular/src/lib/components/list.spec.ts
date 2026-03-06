@@ -58,7 +58,6 @@ describe('List Component', () => {
         { provide: MessageProcessor, useClass: MockMessageProcessor },
         { provide: A2UI_PROCESSOR, useClass: MockMessageProcessor },
         { provide: Theme, useValue: mockTheme },
-
       ],
     }).overrideComponent(List, {
       remove: { imports: [Renderer] },

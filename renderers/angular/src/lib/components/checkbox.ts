@@ -72,7 +72,10 @@ export class Checkbox extends DynamicComponent {
     const surfaceId = this.surfaceId();
     if (surfaceId) {
       const surface = this.processor.model.getSurface(surfaceId);
-      const dataPath = this.processor.resolvePath(path, (this.component() as any)['dataContextPath']);
+      const dataPath = this.processor.resolvePath(
+        path,
+        (this.component() as any)['dataContextPath'],
+      );
       surface?.dataModel.set(dataPath, event.target.checked);
     }
   }

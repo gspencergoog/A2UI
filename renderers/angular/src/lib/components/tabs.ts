@@ -65,11 +65,11 @@ export class Tabs extends DynamicComponent {
 
     return this.tabs().map((_, index) => {
       return index === selectedIndex
-          ? Styles.merge(
-              this.theme.components.Tabs.controls.all,
-              this.theme.components.Tabs.controls.selected,
+        ? Styles.merge(
+            this.theme.components.Tabs.controls.all,
+            this.theme.components.Tabs.controls.selected,
           )
-          : this.theme.components.Tabs.controls.all;
+        : this.theme.components.Tabs.controls.all;
     });
   });
 }

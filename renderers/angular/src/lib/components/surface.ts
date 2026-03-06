@@ -30,11 +30,7 @@ import { Renderer } from '../rendering/renderer';
     @let rootComponent = surface!.componentsModel.get('root');
 
     @if (surface && rootComponent) {
-      <ng-container
-        a2ui-renderer
-        [surfaceId]="surface.id"
-        [component]="rootComponent.componentTree!"
-      />
+      <ng-container a2ui-renderer [surfaceId]="surface.id" [component]="rootComponent" />
     }
   `,
   styles: `

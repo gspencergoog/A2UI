@@ -35,8 +35,6 @@ import { structuralStyles } from './rendering/styles';
  */
 export const UNKNOWN_COMPONENT = new InjectionToken<Type<unknown>>('UNKNOWN_COMPONENT');
 
-
-
 /**
  * Injection token for the Message Processor.
  */

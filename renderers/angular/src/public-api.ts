@@ -27,4 +27,3 @@ export * from './lib/config';
 export * from './lib/components/surface';
 export { CATALOG as V0_8_CATALOG } from './lib/v0_8/catalog';
 export { CATALOG as V0_9_CATALOG } from './lib/v0_9/catalog';
-

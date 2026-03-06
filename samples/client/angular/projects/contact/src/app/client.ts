@@ -14,13 +14,18 @@
  limitations under the License.
  */
 
-import { A2AServerPayload, MessageProcessor, A2uiClientMessage } from '@a2ui/angular';
+import {
+  A2AServerPayload,
+  MessageProcessor,
+  A2uiClientMessage,
+  A2UI_PROCESSOR,
+} from '@a2ui/angular';
 import * as Types from '@a2ui/web_core/v0_9';
 import { Injectable, inject, signal } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class Client {
-  private processor = inject(MessageProcessor);
+  private processor = inject(A2UI_PROCESSOR) as MessageProcessor;
 
   readonly isLoading = signal(false);
 

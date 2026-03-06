@@ -79,7 +79,10 @@ export class ChoicePicker extends DynamicComponent<Types.ChoicePicker> {
       const surfaceId = this.surfaceId();
       if (surfaceId) {
         const surface = this.processor.model.getSurface(surfaceId);
-        const dataPath = this.processor.resolvePath(val, (this.component() as any)['dataContextPath']);
+        const dataPath = this.processor.resolvePath(
+          val,
+          (this.component() as any)['dataContextPath'],
+        );
         return surface?.dataModel.get(dataPath) as string;
       }
     }
@@ -96,17 +99,23 @@ export class ChoicePicker extends DynamicComponent<Types.ChoicePicker> {
     if (typeof opts === 'string') {
       // Legacy or simplified path
       if (surface) {
-         const dataPath = this.processor.resolvePath(opts, (this.component() as any)['dataContextPath']);
-         return (surface.dataModel.get(dataPath) as Option[]) || [];
+        const dataPath = this.processor.resolvePath(
+          opts,
+          (this.component() as any)['dataContextPath'],
+        );
+        return (surface.dataModel.get(dataPath) as Option[]) || [];
       }
       return [];
     }
     if (opts && typeof opts === 'object' && !Array.isArray(opts) && 'path' in opts) {
       // DynamicList with path
       if (surface) {
-         const path = (opts as { path: string }).path;
-         const dataPath = this.processor.resolvePath(path, (this.component() as any)['dataContextPath']);
-         return (surface.dataModel.get(dataPath) as Option[]) || [];
+        const path = (opts as { path: string }).path;
+        const dataPath = this.processor.resolvePath(
+          path,
+          (this.component() as any)['dataContextPath'],
+        );
+        return (surface.dataModel.get(dataPath) as Option[]) || [];
       }
       return [];
     }
@@ -128,7 +137,10 @@ export class ChoicePicker extends DynamicComponent<Types.ChoicePicker> {
     const surfaceId = this.surfaceId();
     if (surfaceId) {
       const surface = this.processor.model.getSurface(surfaceId);
-      const dataPath = this.processor.resolvePath(rawValue, (this.component() as any)['dataContextPath']);
+      const dataPath = this.processor.resolvePath(
+        rawValue,
+        (this.component() as any)['dataContextPath'],
+      );
       surface?.dataModel.set(dataPath, target.value);
     }
   }

@@ -80,8 +80,10 @@ export abstract class DynamicComponent<T extends Types.AnyComponentNode = Types.
     const component = this.component();
     const surfaceId = this.surfaceId();
 
-    if (!value || typeof value !== 'object') {
+    if (value === null || value === undefined) {
       return null;
+    } else if (typeof value !== 'object') {
+      return value as any;
     } else if (value.literal != null) {
       return value.literal;
     } else if (value.path) {
