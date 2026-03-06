@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from a2ui.core.schema.constants import VERSION_0_8
+from a2ui.core.schema.constants import VERSION_0_8, A2UI_DELIMITER
 from a2ui.core.schema.manager import A2uiSchemaManager
 from a2ui.basic_catalog.provider import BasicCatalog
 
@@ -22,22 +22,17 @@ ROLE_DESCRIPTION = (
 )
 
 WORKFLOW_DESCRIPTION = """
-To generate the response, you MUST follow these rules:
-1.  Your response MUST be in two parts, separated by the delimiter: `---a2ui_JSON---`.
-2.  The first part is your conversational text response (e.g., "Here is the contact you requested...").
-3.  The second part is a single, raw JSON object which is a list of A2UI messages.
-4.  The JSON part MUST validate against the A2UI JSON SCHEMA provided below.
-5.  Buttons that represent the main action on a card or view (e.g., 'Follow', 'Email', 'Search') SHOULD use `"variant": "primary"`.
+Buttons that represent the main action on a card or view (e.g., 'Follow', 'Email', 'Search') SHOULD use `"variant": "primary"`.
 6.  For the `Icon` component, use the `name` property with the correct camelCase enum value (e.g., "calendarToday"). Do NOT use "icon" or snake_case names.
 7.  For `Action` definitions (in Buttons, etc.), you MUST wrap the action details in an `event` object: `{ "event": { "name": "...", "context": { ... } } }`. Do NOT use flattened `name` or `params`.
 """
 
-UI_DESCRIPTION = """
+UI_DESCRIPTION = f"""
 -   **For finding contacts (e.g., "Who is Alex Jordan?"):**
     a.  You MUST call the `get_contact_info` tool.
     b.  If the tool returns a **single contact**, you MUST use the `CONTACT_CARD_EXAMPLE` template. Populate the `dataModelUpdate.contents` with the contact's details (name, title, email, etc.).
     c.  If the tool returns **multiple contacts**, you MUST use the `CONTACT_LIST_EXAMPLE` template. Populate the `dataModelUpdate.contents` with the list of contacts for the "contacts" key.
-    d.  If the tool returns an **empty list**, respond with text only and an empty JSON list: "I couldn't find anyone by that name.---a2ui_JSON---[]"
+    d.  If the tool returns an **empty list**, respond with text only and an empty JSON list: "I couldn't find anyone by that name.{A2UI_DELIMITER}[]"
 
 -   **For handling a profile view (e.g., "WHO_IS: Alex Jordan..."):**
     a.  You MUST call the `get_contact_info` tool with the specific name.

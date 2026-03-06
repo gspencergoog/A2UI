@@ -34,7 +34,7 @@ import { Types } from '../types';
           <button
             (click)="this.selectedIndex.set($index)"
             [disabled]="selectedIndex === $index"
-            [class]="buttonClasses()[selectedIndex]"
+            [class]="buttonClasses()[$index]"
           >
             {{ tab.title }}
           </button>
@@ -52,6 +52,7 @@ import { Types } from '../types';
     :host {
       display: block;
       flex: var(--weight);
+      width: 100%;
     }
   `,
 })
@@ -64,11 +65,11 @@ export class Tabs extends DynamicComponent {
 
     return this.tabs().map((_, index) => {
       return index === selectedIndex
-        ? Styles.merge(
-            this.theme.components.Tabs.controls.all,
-            this.theme.components.Tabs.controls.selected,
+          ? Styles.merge(
+              this.theme.components.Tabs.controls.all,
+              this.theme.components.Tabs.controls.selected,
           )
-        : this.theme.components.Tabs.controls.all;
+          : this.theme.components.Tabs.controls.all;
     });
   });
 }

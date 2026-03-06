@@ -37,6 +37,7 @@ import { DynamicComponent } from '../rendering/dynamic-component';
         (input)="handleInput($event)"
         [class]="theme.components.Slider.element"
         [style]="theme.additionalStyles?.Slider"
+        [style.--slider-percent]="percentComplete() + '%'"
       />
     </section>
   `,
@@ -44,12 +45,7 @@ import { DynamicComponent } from '../rendering/dynamic-component';
     :host {
       display: block;
       flex: var(--weight);
-    }
-
-    input {
-      display: block;
       width: 100%;
-      box-sizing: border-box;
     }
   `,
 })
@@ -62,18 +58,37 @@ export class Slider extends DynamicComponent {
   protected readonly inputId = super.getUniqueId('a2ui-slider');
   protected resolvedValue = computed(() => super.resolvePrimitive(this.value()) ?? 0);
 
+  protected percentComplete = computed(() => {
+    return this.computePercentage(this.resolvedValue());
+  });
+
   protected handleInput(event: Event) {
     const path = this.value()?.path;
 
-    if (!(event.target instanceof HTMLInputElement) || !path) {
+    if (!(event.target instanceof HTMLInputElement)) {
       return;
     }
 
-    const surfaceId = this.surfaceId();
-    if (surfaceId) {
-      const surface = this.processor.model.getSurface(surfaceId);
-      const dataPath = this.processor.resolvePath(path, (this.component() as any)['dataContextPath']);
-      surface?.dataModel.set(dataPath, event.target.valueAsNumber);
+    const newValue = event.target.valueAsNumber;
+    const percent = this.computePercentage(newValue);
+
+    // Inject CSS variable directly to avoid Angular change detection lag/snapback
+    event.target.style.setProperty('--slider-percent', percent + '%');
+
+    if (path) {
+      const surfaceId = this.surfaceId();
+      if (surfaceId) {
+        const surface = this.processor.model.getSurface(surfaceId);
+        const dataPath = this.processor.resolvePath(path, (this.component() as any)['dataContextPath']);
+        surface?.dataModel.set(dataPath, newValue);
+      }
     }
+  }
+
+  private computePercentage(value: number): number {
+    const min = this.minValue() ?? 0;
+    const max = this.maxValue() ?? 100;
+    const range = max - min;
+    return range > 0 ? Math.max(0, Math.min(100, ((value - min) / range) * 100)) : 0;
   }
 }
