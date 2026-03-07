@@ -27,16 +27,23 @@ from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
 from google.adk.models.lite_llm import LiteLlm
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
-from a2a.types import AgentCapabilities, AgentCard, AgentSkill
+from a2a.types import (
+    AgentCapabilities,
+    AgentCard,
+    AgentSkill,
+    DataPart,
+    Part,
+    TextPart,
+)
 
 from google.genai import types
 from .prompt_builder import get_text_prompt, ROLE_DESCRIPTION, WORKFLOW_DESCRIPTION, UI_DESCRIPTION
 from .tools import get_contact_info
-from a2ui.core.schema.constants import VERSION_0_9, A2UI_DELIMITER
+from a2ui.core.schema.constants import VERSION_0_9, A2UI_OPEN_TAG, A2UI_CLOSE_TAG
 from a2ui.core.schema.manager import A2uiSchemaManager
-from a2ui.core.parser import parse_response
+from a2ui.core.parser.parser import parse_response, ResponsePart
 from a2ui.basic_catalog.provider import BasicCatalog
-from a2ui.a2a import get_a2ui_agent_extension
+from a2ui.a2a import create_a2ui_part, get_a2ui_agent_extension, parse_response_to_parts
 
 logger = logging.getLogger(__name__)
 
@@ -297,8 +304,8 @@ class ContactAgent:
         current_query_text = (
             f"Your previous response was invalid. {error_message} You MUST generate a"
             " valid response that strictly follows the A2UI JSON SCHEMA. The response"
-            " MUST be a JSON list of A2UI messages. Ensure the response is split by"
-            f" '{A2UI_DELIMITER}' and the JSON part is well-formed. Please retry the"
+            " MUST be a JSON list of A2UI messages. Ensure each JSON part is wrapped in"
+            f" '{A2UI_OPEN_TAG}' and '{A2UI_CLOSE_TAG}' tags. Please retry the"
             f" original request: '{query}'"
         )
         # Loop continues...

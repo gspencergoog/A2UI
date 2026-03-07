@@ -265,12 +265,12 @@ class ContactAgent:
             # jsonschema will raise a ValidationError if compliance fails.
             logger.info("--- ContactAgent.stream: Validating against A2UI_SCHEMA... ---")
             selected_catalog.validator.validate(parsed_json_data)
-
-                logger.info(
-                    "--- ContactAgent.stream: UI JSON successfully parsed AND validated"
-                    f" against schema. Validation OK (Attempt {attempt}). ---"
-                )
-                is_valid = True
+            
+            logger.info(
+                "--- ContactAgent.stream: UI JSON successfully parsed AND validated"
+                f" against schema. Validation OK (Attempt {attempt}). ---"
+            )
+            is_valid = True
         except (
             ValueError,
             json.JSONDecodeError,
