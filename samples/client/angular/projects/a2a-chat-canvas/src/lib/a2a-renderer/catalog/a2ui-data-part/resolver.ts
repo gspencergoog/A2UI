@@ -21,7 +21,7 @@ import { type PartResolver } from '../../types';
  * A PartResolver for identifying A2UI data parts within an A2A message.
  *
  * This resolver checks if a given `Part` is of kind 'data' and specifically contains
- * an A2UI message, which is indicated by the presence of the 'beginRendering' property.
+ * an A2UI message, which is indicated by the presence of the 'createSurface' or 'beginRendering' property.
  * If it's an A2UI data part, it returns the variant key 'a2ui_data_part',
  * which maps to the A2uiDataPart component for rendering.
  *
@@ -34,7 +34,7 @@ export const A2UI_DATA_PART_RESOLVER: PartResolver = (part: Part): string | null
     part.kind === 'data' &&
     part.data &&
     typeof part.data === 'object' &&
-    'beginRendering' in part.data
+    ('createSurface' in part.data || 'beginRendering' in part.data)
   ) {
     return 'a2ui_data_part';
   }

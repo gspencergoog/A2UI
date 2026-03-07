@@ -21,6 +21,7 @@ import {
   ElementRef,
   effect,
   ChangeDetectionStrategy,
+  computed,
 } from '@angular/core';
 import { DynamicComponent } from '../rendering/dynamic-component';
 import { Types } from '../types';
@@ -43,7 +44,7 @@ import { Renderer } from '../rendering';
           <ng-container
             a2ui-renderer
             [surfaceId]="surfaceId()!"
-            [component]="component().properties.contentChild"
+            [component]="modalProperties().contentChild!"
           />
         </section>
       </dialog>
@@ -52,7 +53,7 @@ import { Renderer } from '../rendering';
         <ng-container
           a2ui-renderer
           [surfaceId]="surfaceId()!"
-          [component]="component().properties.entryPointChild"
+          [component]="modalProperties().entryPointChild!"
         />
       </section>
     }
@@ -88,6 +89,7 @@ import { Renderer } from '../rendering';
 export class Modal extends DynamicComponent<Types.ModalNode> {
   protected readonly showDialog = signal(false);
   protected readonly dialog = viewChild<ElementRef<HTMLDialogElement>>('dialog');
+  protected readonly modalProperties = computed(() => this.component().properties);
 
   constructor() {
     super();

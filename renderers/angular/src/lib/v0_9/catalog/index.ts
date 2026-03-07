@@ -25,8 +25,8 @@ export const CATALOG: Catalog = {
     bindings: (node) => {
       const properties = (node as Types.RowNode).properties;
       return [
-        inputBinding('alignment', () => properties.alignment ?? 'stretch'),
-        inputBinding('distribution', () => properties.distribution ?? 'start'),
+        inputBinding('align', () => properties.align ?? 'start'),
+        inputBinding('justify', () => properties.justify ?? 'start'),
       ];
     },
   },
@@ -36,8 +36,8 @@ export const CATALOG: Catalog = {
     bindings: (node) => {
       const properties = (node as Types.ColumnNode).properties;
       return [
-        inputBinding('alignment', () => properties.alignment ?? 'stretch'),
-        inputBinding('distribution', () => properties.distribution ?? 'start'),
+        inputBinding('align', () => properties.align ?? 'start'),
+        inputBinding('justify', () => properties.justify ?? 'start'),
       ];
     },
   },
@@ -58,8 +58,8 @@ export const CATALOG: Catalog = {
       const properties = (node as Types.ImageNode).properties;
       return [
         inputBinding('url', () => properties.url),
-        inputBinding('usageHint', () => properties.usageHint),
-        inputBinding('altText', () => properties.altText ?? null),
+        inputBinding('variant', () => properties.variant ?? 'icon'),
+        inputBinding('fit', () => properties.fit ?? 'cover'),
       ];
     },
   },
@@ -94,7 +94,6 @@ export const CATALOG: Catalog = {
       const properties = (node as Types.TextNode).properties;
       return [
         inputBinding('text', () => properties.text),
-        inputBinding('usageHint', () => properties.usageHint || null),
       ];
     },
   },
@@ -128,7 +127,7 @@ export const CATALOG: Catalog = {
       return [
         inputBinding('text', () => properties.value ?? null),
         inputBinding('label', () => properties.label),
-        inputBinding('inputType', () => properties.type),
+        inputBinding('variant', () => properties.variant),
       ];
     },
   },

@@ -12,7 +12,7 @@ FLASHCARD_EXAMPLE = f"""
 Example A2UI JSON for a set of flashcards:
 
 [
-  {{"beginRendering": {{"surfaceId": "{SURFACE_ID}", "root": "mainColumn"}}}},
+  {{"createSurface": {{"surfaceId": "{SURFACE_ID}", "root": "mainColumn"}}}},
   {{
     "surfaceUpdate": {{
       "surfaceId": "{SURFACE_ID}",
@@ -87,7 +87,7 @@ AUDIO_EXAMPLE = f"""
 Example A2UI JSON for an audio player (podcast):
 
 [
-  {{"beginRendering": {{"surfaceId": "{SURFACE_ID}", "root": "audioCard"}}}},
+  {{"createSurface": {{"surfaceId": "{SURFACE_ID}", "root": "audioCard"}}}},
   {{
     "surfaceUpdate": {{
       "surfaceId": "{SURFACE_ID}",
@@ -167,7 +167,7 @@ VIDEO_EXAMPLE = f"""
 Example A2UI JSON for a video player:
 
 [
-  {{"beginRendering": {{"surfaceId": "{SURFACE_ID}", "root": "videoCard"}}}},
+  {{"createSurface": {{"surfaceId": "{SURFACE_ID}", "root": "videoCard"}}}},
   {{
     "surfaceUpdate": {{
       "surfaceId": "{SURFACE_ID}",
@@ -227,7 +227,7 @@ QUIZ_EXAMPLE = f"""
 Example A2UI JSON for quiz cards (interactive multiple choice with feedback):
 
 [
-  {{"beginRendering": {{"surfaceId": "{SURFACE_ID}", "root": "mainColumn"}}}},
+  {{"createSurface": {{"surfaceId": "{SURFACE_ID}", "root": "mainColumn"}}}},
   {{
     "surfaceUpdate": {{
       "surfaceId": "{SURFACE_ID}",
@@ -394,7 +394,7 @@ Generate the quiz JSON:"""
 {context}
 
 ## Output Format
-Output valid A2UI JSON starting with beginRendering.
+Output valid A2UI JSON starting with createSurface.
 
 ## Template for {format_type}:
 {example}

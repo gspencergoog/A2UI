@@ -67,7 +67,10 @@ export class A2AClient {
         body: JSON.stringify({
           message: context ? `${format}:${context}` : format,
           session_id: this.getSessionId(),
-          extensions: ["https://a2ui.org/a2a-extension/a2ui/v0.8"],
+          extensions: [
+            "https://a2ui.org/a2a-extension/a2ui/v0.9",
+            "https://a2ui.org/a2a-extension/a2ui/v0.8"
+          ],
         }),
       });
 
@@ -126,7 +129,10 @@ export class A2AClient {
         body: JSON.stringify({
           message: context ? `${format}:${context}` : format,
           session_id: this.getSessionId(),
-          extensions: ["https://a2ui.org/a2a-extension/a2ui/v0.8"],
+          extensions: [
+            "https://a2ui.org/a2a-extension/a2ui/v0.9",
+            "https://a2ui.org/a2a-extension/a2ui/v0.8"
+          ],
         }),
       });
 
@@ -193,7 +199,7 @@ export class A2AClient {
           format: "flashcards",
           surfaceId,
           a2ui: [
-            { beginRendering: { surfaceId, root: "mainColumn" } },
+            { createSurface: { surfaceId, root: "mainColumn" } },
             {
               surfaceUpdate: {
                 surfaceId,
@@ -281,7 +287,7 @@ export class A2AClient {
           format: "audio",
           surfaceId,
           a2ui: [
-            { beginRendering: { surfaceId, root: "audioCard" } },
+            { createSurface: { surfaceId, root: "audioCard" } },
             {
               surfaceUpdate: {
                 surfaceId,
@@ -362,7 +368,7 @@ export class A2AClient {
           format: "video",
           surfaceId,
           a2ui: [
-            { beginRendering: { surfaceId, root: "videoCard" } },
+            { createSurface: { surfaceId, root: "videoCard" } },
             {
               surfaceUpdate: {
                 surfaceId,
@@ -423,7 +429,7 @@ export class A2AClient {
           format: "quiz",
           surfaceId,
           a2ui: [
-            { beginRendering: { surfaceId, root: "mainColumn" } },
+            { createSurface: { surfaceId, root: "mainColumn" } },
             {
               surfaceUpdate: {
                 surfaceId,

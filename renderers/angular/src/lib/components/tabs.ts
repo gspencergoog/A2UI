@@ -58,12 +58,12 @@ import { Types } from '../types';
 })
 export class Tabs extends DynamicComponent {
   protected selectedIndex = signal(0);
-  readonly tabs = input.required<Types.ResolvedTabItem[]>();
+  readonly tabs = input.required<Types.TabsNode['tabs']>();
 
   protected readonly buttonClasses = computed(() => {
     const selectedIndex = this.selectedIndex();
 
-    return this.tabs().map((_, index) => {
+    return this.tabs().map((_: Types.TabItem, index: number) => {
       return index === selectedIndex
         ? Styles.merge(
             this.theme.components.Tabs.controls.all,

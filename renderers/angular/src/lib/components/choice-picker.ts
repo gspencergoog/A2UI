@@ -75,18 +75,17 @@ export class ChoicePicker extends DynamicComponent<Types.ChoicePicker> {
 
   protected resolvedValue = computed(() => {
     const val = this.component().properties.value;
-    if (typeof val === 'string' && val.startsWith('/')) {
+    const path = Array.isArray(val) ? val[0]?.path : null;
+
+    if (path) {
       const surfaceId = this.surfaceId();
       if (surfaceId) {
-        const surface = this.processor.model.getSurface(surfaceId);
-        const dataPath = this.processor.resolvePath(
-          val,
-          (this.component() as any)['dataContextPath'],
-        );
-        return surface?.dataModel.get(dataPath) as string;
+        const surface = this.processor.getSurfaces().get(surfaceId);
+        const resolvedVals = surface?.dataModel.get(path) as string[];
+        return resolvedVals && resolvedVals.length ? resolvedVals[0] : '';
       }
     }
-    return val as string;
+    return '';
   });
 
   protected resolvedLabel = computed(() => this.component().properties.label);
@@ -123,9 +122,10 @@ export class ChoicePicker extends DynamicComponent<Types.ChoicePicker> {
   });
 
   protected handleChange(event: Event) {
-    const rawValue = this.component().properties.value;
-    // Only update if it is a path
-    if (typeof rawValue !== 'string' || !rawValue.startsWith('/')) {
+    const val = this.component().properties.value;
+    const path = Array.isArray(val) ? val[0]?.path : null;
+
+    if (!path) {
       return;
     }
 
@@ -136,12 +136,9 @@ export class ChoicePicker extends DynamicComponent<Types.ChoicePicker> {
 
     const surfaceId = this.surfaceId();
     if (surfaceId) {
-      const surface = this.processor.model.getSurface(surfaceId);
-      const dataPath = this.processor.resolvePath(
-        rawValue,
-        (this.component() as any)['dataContextPath'],
-      );
-      surface?.dataModel.set(dataPath, target.value);
+      const surface = this.processor.getSurfaces().get(surfaceId);
+      // It supports an array of strings in v0.9 basic_catalog
+      surface?.dataModel.set(path, [target.value]);
     }
   }
 }

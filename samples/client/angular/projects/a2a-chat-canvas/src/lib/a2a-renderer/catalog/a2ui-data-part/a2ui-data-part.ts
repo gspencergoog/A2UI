@@ -37,6 +37,8 @@ export class A2uiDataPart implements RendererComponent {
     if (data) {
       if (data['surfaceId']) {
         surfaceId = data['surfaceId'];
+      } else if (data['createSurface']?.['surfaceId']) {
+        surfaceId = data['createSurface']['surfaceId'];
       } else if (data['beginRendering']?.['surfaceId']) {
         surfaceId = data['beginRendering']['surfaceId'];
       } else if (data['surfaceUpdate']?.['surfaceId']) {

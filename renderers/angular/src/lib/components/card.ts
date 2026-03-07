@@ -46,7 +46,7 @@ import { Types } from '../types';
   `,
   template: `
     @let properties = component().properties;
-    @let children = properties.children || (properties.child ? [properties.child] : []);
+    @let children = properties.child ? [properties.child] : [];
 
     <section [class]="theme.components.Card" [style]="theme.additionalStyles?.Card">
       @for (child of children; track child) {

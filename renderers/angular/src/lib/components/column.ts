@@ -53,45 +53,54 @@ import { Renderer } from '../rendering/renderer';
       align-items: stretch;
     }
 
-    .distribute-start {
+    .justify-start {
       justify-content: start;
     }
 
-    .distribute-center {
+    .justify-center {
       justify-content: center;
     }
 
-    .distribute-end {
+    .justify-end {
       justify-content: end;
     }
 
-    .distribute-spaceBetween {
+    .justify-spaceBetween {
       justify-content: space-between;
     }
 
-    .distribute-spaceAround {
+    .justify-spaceAround {
       justify-content: space-around;
     }
 
-    .distribute-spaceEvenly {
+    .justify-spaceEvenly {
       justify-content: space-evenly;
     }
   `,
   template: `
     <section [class]="classes()" [style]="theme.additionalStyles?.Column">
-      @for (child of component().properties.children; track child) {
+    <section [class]="classes()" [style]="theme.additionalStyles?.Column">
+      @for (child of childrenArray(); track child) {
         <ng-container a2ui-renderer [surfaceId]="surfaceId()!" [component]="child" />
       }
     </section>
   `,
 })
 export class Column extends DynamicComponent<Types.ColumnNode> {
-  readonly alignment = input<Types.ResolvedColumn['alignment']>('stretch');
-  readonly distribution = input<Types.ResolvedColumn['distribution']>('start');
+  readonly align = input<Types.ColumnNode['align']>('start');
+  readonly justify = input<Types.ColumnNode['justify']>('start');
+
+  protected readonly childrenArray = computed(() => {
+    const children = this.component().properties.children;
+    if (Array.isArray(children)) {
+      return children;
+    }
+    return [];
+  });
 
   protected readonly classes = computed(() => ({
     ...this.theme.components.Column,
-    [`align-${this.alignment()}`]: true,
-    [`distribute-${this.distribution()}`]: true,
+    [`align-${this.align()}`]: true,
+    [`justify-${this.justify()}`]: true,
   }));
 }

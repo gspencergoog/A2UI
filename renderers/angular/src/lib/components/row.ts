@@ -24,8 +24,8 @@ import { Types } from '../types';
   imports: [Renderer],
   changeDetection: ChangeDetectionStrategy.Eager,
   host: {
-    '[attr.alignment]': 'alignment()',
-    '[attr.distribution]': 'distribution()',
+    '[attr.align]': 'align()',
+    '[attr.justify]': 'justify()',
   },
   styles: `
     :host {
@@ -57,45 +57,56 @@ import { Types } from '../types';
       align-items: stretch;
     }
 
-    .distribute-start {
+    .justify-start {
       justify-content: start;
     }
 
-    .distribute-center {
+    .justify-center {
       justify-content: center;
     }
 
-    .distribute-end {
+    .justify-end {
       justify-content: end;
     }
 
-    .distribute-spaceBetween {
+    .justify-spaceBetween {
       justify-content: space-between;
     }
 
-    .distribute-spaceAround {
+    .justify-spaceAround {
       justify-content: space-around;
     }
 
-    .distribute-spaceEvenly {
+    .justify-spaceEvenly {
       justify-content: space-evenly;
     }
   `,
   template: `
     <section [class]="classes()" [style]="theme.additionalStyles?.Row">
-      @for (child of component().properties.children; track child) {
+    <section [class]="classes()" [style]="theme.additionalStyles?.Row">
+      @for (child of childrenArray(); track child) {
         <ng-container a2ui-renderer [surfaceId]="surfaceId()!" [component]="child" />
       }
     </section>
   `,
 })
 export class Row extends DynamicComponent<Types.RowNode> {
-  readonly alignment = input<Types.ResolvedRow['alignment']>('stretch');
-  readonly distribution = input<Types.ResolvedRow['distribution']>('start');
+  readonly align = input<Types.RowNode['align']>('start');
+  readonly justify = input<Types.RowNode['justify']>('start');
+
+  protected readonly childrenArray = computed(() => {
+    const children = this.component().properties.children;
+    if (Array.isArray(children)) {
+      return children;
+    }
+    // Handle the { path: string, componentId: string } case
+    // This requires processor context which may need a different approach
+    return []; // Fallback for now, usually handled by a higher-order component or specific rendering logic
+  });
 
   protected readonly classes = computed(() => ({
     ...this.theme.components.Row,
-    [`align-${this.alignment()}`]: true,
-    [`distribute-${this.distribution()}`]: true,
+    [`align-${this.align()}`]: true,
+    [`justify-${this.justify()}`]: true,
   }));
 }

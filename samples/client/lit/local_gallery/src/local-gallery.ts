@@ -162,10 +162,12 @@ export class LocalGallery extends SignalWatcher(LitElement) {
           // Detect actual surfaceId used in the file
           const firstMessage = messages.find((m: any) => 
             m.surfaceUpdate?.surfaceId || 
+            m.createSurface?.surfaceId ||
             m.beginRendering?.surfaceId || 
             m.dataModelUpdate?.surfaceId
           );
           const actualId = firstMessage?.surfaceUpdate?.surfaceId || 
+                           firstMessage?.createSurface?.surfaceId ||
                            firstMessage?.beginRendering?.surfaceId || 
                            firstMessage?.dataModelUpdate?.surfaceId;
           

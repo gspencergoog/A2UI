@@ -21,18 +21,18 @@
  * Uses the signal-based model processor for proper reactivity.
  */
 
-import { v0_8 } from "@a2ui/web-lib";
+import { v0_9 } from "@a2ui/web-lib";
 import type { SourceInfo } from "./a2a-client";
 // Import the theme provider to register the custom element
 import "./theme-provider.js";
 
 // Type alias for the processor - use the actual exported class name
-type A2UIModelProcessorInstance = InstanceType<typeof v0_8.Data.A2uiMessageProcessor>;
+type A2UIModelProcessorInstance = InstanceType<typeof v0_9.Data.A2uiMessageProcessor>;
 
 // Extended element type for the theme provider wrapper
 interface A2UIThemeProviderElement extends HTMLElement {
   surfaceId: string;
-  surface: v0_8.Types.Surface;
+  surface: v0_9.Types.Surface;
   processor: A2UIModelProcessorInstance;
 }
 
@@ -61,11 +61,11 @@ export class A2UIRenderer {
     contentEl.appendChild(container);
 
     // Create a model processor for this render
-    const processor = v0_8.Data.createSignalA2uiMessageProcessor();
+    const processor = v0_9.Data.createSignalA2uiMessageProcessor();
 
     // Process all A2UI messages to build the model
     try {
-      processor.processMessages(a2uiMessages as v0_8.Types.ServerToClientMessage[]);
+      processor.processMessages(a2uiMessages as v0_9.Types.ServerToClientMessage[]);
     } catch (error) {
       console.error("[A2UIRenderer] Error processing messages:", error);
     }
@@ -116,7 +116,7 @@ export class A2UIRenderer {
   private renderSurface(
     container: HTMLElement,
     surfaceId: string,
-    surface: v0_8.Types.Surface,
+    surface: v0_9.Types.Surface,
     processor: A2UIModelProcessorInstance
   ): void {
     // Create the theme provider wrapper which contains the a2ui-surface

@@ -62,7 +62,7 @@ import { DynamicComponent } from '../rendering/dynamic-component';
         [id]="inputId"
         [value]="inputValue()"
         placeholder="Please enter a value"
-        [type]="inputType() === 'number' ? 'number' : 'text'"
+        [type]="resolvedVariant() === 'number' ? 'number' : 'text'"
       />
     </section>
   `,
@@ -70,10 +70,11 @@ import { DynamicComponent } from '../rendering/dynamic-component';
 export class TextField extends DynamicComponent {
   readonly text = input.required<Primitives.StringValue | null>();
   readonly label = input.required<Primitives.StringValue | null>();
-  readonly inputType = input.required<Types.ResolvedTextField['type'] | null>();
+  readonly variant = input.required<Types.TextFieldNode['variant'] | null>();
 
   protected inputValue = computed(() => super.resolvePrimitive(this.text()) || '');
   protected resolvedLabel = computed(() => super.resolvePrimitive(this.label()));
+  protected resolvedVariant = computed(() => this.variant());
   protected inputId = super.getUniqueId('a2ui-input');
 
   protected handleInput(event: Event) {

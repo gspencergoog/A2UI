@@ -40,32 +40,27 @@ import { DynamicComponent } from '../rendering/dynamic-component';
   `,
   template: `
     @let resolvedUrl = this.resolvedUrl();
-    @let resolvedAltText = this.resolvedAltText();
 
     @if (resolvedUrl) {
       <section [class]="classes()" [style]="theme.additionalStyles?.Image">
-        <img [src]="resolvedUrl" [alt]="resolvedAltText" />
+        <img [src]="resolvedUrl" [style.object-fit]="fit()" />
       </section>
     }
   `,
 })
 export class Image extends DynamicComponent {
   readonly url = input.required<Primitives.StringValue | null>();
-  readonly usageHint = input.required<Types.ResolvedImage['usageHint'] | null>();
-  readonly altText = input.required<Primitives.StringValue | null>();
+  readonly variant = input.required<Types.ImageNode['variant']>();
+  readonly fit = input.required<Types.ImageNode['fit']>();
 
   protected readonly resolvedUrl = computed(() => this.resolvePrimitive(this.url()));
-  protected readonly resolvedAltText = computed(() => {
-    const raw = this.altText();
-    return raw ? this.resolvePrimitive(raw) : '';
-  });
 
   protected classes = computed(() => {
-    const usageHint = this.usageHint();
+    const variant = this.variant();
 
     return Styles.merge(
       this.theme.components.Image.all,
-      usageHint ? this.theme.components.Image[usageHint] : {},
+      variant ? this.theme.components.Image[variant] : {},
     );
   });
 }

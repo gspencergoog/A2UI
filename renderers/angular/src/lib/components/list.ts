@@ -25,6 +25,7 @@ import { Renderer } from '../rendering/renderer';
   changeDetection: ChangeDetectionStrategy.Eager,
   host: {
     '[attr.direction]': 'direction()',
+    '[attr.align]': 'align()',
   },
   styles: `
     :host {
@@ -53,9 +54,25 @@ import { Renderer } from '../rendering/renderer';
       cursor: pointer;
       box-sizing: border-box;
     }
+
+    .align-start {
+      align-items: start;
+    }
+
+    .align-center {
+      align-items: center;
+    }
+
+    .align-end {
+      align-items: end;
+    }
+
+    .align-stretch {
+      align-items: stretch;
+    }
   `,
   template: `
-    <section [class]="theme.components.List" [style]="theme.additionalStyles?.List">
+    <section [class]="classes()" [style]="theme.additionalStyles?.List">
       @for (child of childrenArray(); track child) {
         <div class="a2ui-list-item">
           <ng-container a2ui-renderer [surfaceId]="surfaceId()!" [component]="child" />
@@ -66,6 +83,12 @@ import { Renderer } from '../rendering/renderer';
 })
 export class List extends DynamicComponent<Types.ListNode> {
   readonly direction = input<'vertical' | 'horizontal'>('vertical');
+  readonly align = input<Types.ListNode['align']>('stretch');
+
+  protected readonly classes = computed(() => ({
+    ...this.theme.components.List,
+    [`align-${this.align()}`]: true,
+  }));
 
   protected readonly childrenArray = computed(() => {
     const children = this.component().properties.children;
