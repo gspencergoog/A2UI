@@ -24,7 +24,7 @@ import jsonschema
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.artifacts import InMemoryArtifactService
 from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
-from google.adk.models.lite_llm import LiteLlm
+from google.adk.models.google_llm import Gemini
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from a2a.types import (
@@ -60,7 +60,10 @@ class ContactAgent:
         A2uiSchemaManager(
             version=VERSION_0_8,
             catalogs=[
-                BasicCatalog.get_config(version=VERSION_0_8, examples_path="examples")
+                BasicCatalog.get_config(
+                    version=VERSION_0_8,
+                    examples_path=os.path.join(os.path.dirname(__file__), "examples"),
+                )
             ],
         )
         if use_ui
@@ -118,7 +121,7 @@ class ContactAgent:
 
   def _build_agent(self, use_ui: bool) -> LlmAgent:
     """Builds the LLM agent for the contact agent."""
-    LITELLM_MODEL = os.getenv("LITELLM_MODEL", "gemini/gemini-2.5-flash")
+    LITELLM_MODEL = os.getenv("LITELLM_MODEL", "gemini-2.5-flash")
 
     instruction = (
         self._schema_manager.generate_system_prompt(
@@ -134,7 +137,7 @@ class ContactAgent:
     )
 
     return LlmAgent(
-        model=LiteLlm(model=LITELLM_MODEL),
+        model=Gemini(model=LITELLM_MODEL),
         name="contact_agent",
         description="An agent that finds colleague contact info.",
         instruction=instruction,

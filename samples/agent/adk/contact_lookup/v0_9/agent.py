@@ -24,7 +24,7 @@ import jsonschema
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.artifacts import InMemoryArtifactService
 from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
-from google.adk.models.lite_llm import LiteLlm
+from google.adk.models.google_llm import Gemini
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from a2a.types import (
@@ -60,7 +60,10 @@ class ContactAgent:
         A2uiSchemaManager(
             version=VERSION_0_9,
             catalogs=[
-                BasicCatalog.get_config(version=VERSION_0_9, examples_path="examples")
+                BasicCatalog.get_config(
+                    version=VERSION_0_9,
+                    examples_path=os.path.join(os.path.dirname(__file__), "examples"),
+                )
             ],
         )
         if use_ui
@@ -118,7 +121,7 @@ class ContactAgent:
 
   def _build_agent(self, use_ui: bool) -> LlmAgent:
     """Builds the LLM agent for the contact agent."""
-    LITELLM_MODEL = os.getenv("LITELLM_MODEL", "gemini/gemini-2.5-flash")
+    LITELLM_MODEL = os.getenv("LITELLM_MODEL", "gemini-2.5-flash")
 
     instruction = (
         self._schema_manager.generate_system_prompt(
@@ -134,7 +137,7 @@ class ContactAgent:
     )
 
     return LlmAgent(
-        model=LiteLlm(model=LITELLM_MODEL),
+        model=Gemini(model=LITELLM_MODEL),
         name="contact_agent",
         description="An agent that finds colleague contact info.",
         instruction=instruction,
@@ -244,27 +247,33 @@ class ContactAgent:
             f" {attempt})... ---"
         )
         try:
-          json_string_cleaned = ""
-          text_part, parsed_json_data = parse_response(final_response_content)
+          response_parts = parse_response(final_response_content)
+          has_any_json = False
 
-          # Handle the "no results found" or empty JSON case
-          if parsed_json_data == []:
-            logger.info(
-                "--- ContactAgent.stream: Empty JSON list found. "
-                "Assuming valid (e.g., 'no results'). ---"
-            )
-            is_valid = True
-          else:
-            # Validate the JSON data against the loaded A2UI schema.
-            # jsonschema will raise a ValidationError if compliance fails.
-            logger.info("--- ContactAgent.stream: Validating against A2UI_SCHEMA... ---")
-            effective_catalog.validator.validate(parsed_json_data)
+          for part in response_parts:
+            parsed_json_data = part.a2ui_json
+            if parsed_json_data is not None:
+              has_any_json = True
+              # Handle the "no results found" or empty JSON case
+              if parsed_json_data == []:
+                logger.info(
+                    "--- ContactAgent.stream: Empty JSON list found. "
+                    "Assuming valid (e.g., 'no results'). ---"
+                )
+              else:
+                # Validate the JSON data against the loaded A2UI schema.
+                # jsonschema will raise a ValidationError if compliance fails.
+                logger.info("--- ContactAgent.stream: Validating against A2UI_SCHEMA... ---")
+                effective_catalog.validator.validate(parsed_json_data)
 
-            logger.info(
-                "--- ContactAgent.stream: UI JSON successfully parsed AND validated"
-                f" against schema. Validation OK (Attempt {attempt}). ---"
-            )
-            is_valid = True
+          if not has_any_json:
+              raise ValueError(f"A2UI tags '{A2UI_OPEN_TAG}' and '{A2UI_CLOSE_TAG}' not found in response.")
+
+          logger.info(
+              "--- ContactAgent.stream: UI JSON successfully parsed AND validated"
+              f" against schema. Validation OK (Attempt {attempt}). ---"
+          )
+          is_valid = True
         except (
             ValueError,
             json.JSONDecodeError,
