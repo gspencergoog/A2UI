@@ -14,9 +14,25 @@
  * limitations under the License.
  */
 
-import { V0_8_CATALOG as BASE_V0_8_CATALOG } from '@a2ui/angular';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { DynamicComponent } from '../rendering/dynamic-component';
 
-export const V0_8_CATALOG = {
-  ...BASE_V0_8_CATALOG,
-  Canvas: () => import('./canvas/canvas').then((r) => r.Canvas),
-};
+@Component({
+  selector: 'a2ui-divider',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: '<hr [class]="theme.components.Divider" [style]="theme.additionalStyles?.Divider"/>',
+  styles: `
+    :host {
+      display: block;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    hr {
+      height: 1px;
+      background: #ccc;
+      border: none;
+    }
+  `,
+})
+export class Divider extends DynamicComponent {}

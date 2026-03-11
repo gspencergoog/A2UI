@@ -14,9 +14,28 @@
  * limitations under the License.
  */
 
-import { V0_8_CATALOG as BASE_V0_8_CATALOG } from '@a2ui/angular';
+import { Types } from '../types';
 
-export const V0_8_CATALOG = {
-  ...BASE_V0_8_CATALOG,
-  Canvas: () => import('./canvas/canvas').then((r) => r.Canvas),
-};
+/**
+ * Represents a text chunk in the stream.
+ */
+export interface A2TextPayload {
+  kind: 'text';
+  /** The text content. */
+  text: string;
+}
+
+/**
+ * Represents a structural data chunk in the stream.
+ */
+export interface A2DataPayload {
+  kind: 'data';
+  /** The A2UI protocol message. */
+  data: Types.ServerToClientMessage;
+}
+
+/**
+ * Union type for payloads received from the server stream.
+ * Can be a list of text/data chunks or an error object.
+ */
+export type A2AServerPayload = Array<A2DataPayload | A2TextPayload> | { error: string };

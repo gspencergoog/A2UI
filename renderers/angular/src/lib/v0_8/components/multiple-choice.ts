@@ -69,10 +69,15 @@ export class MultipleChoice extends DynamicComponent {
       return;
     }
 
-    this.processor.setData(
-      this.component(),
-      this.processor.resolvePath(path, this.component().dataContextPath),
-      event.target.value,
-    );
+    const surfaceId = this.surfaceId();
+    if (surfaceId) {
+      this.processor.setData(
+        this.component(),
+        path,
+        event.target.value,
+        surfaceId
+      );
+    }
+
   }
 }

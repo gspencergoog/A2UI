@@ -106,9 +106,10 @@ export class Text extends DynamicComponent {
 
     return this.markdownRenderer.render(
       value, {
-        tagClassMap: Styles.appendToAll(this.theme.markdown, ['ol', 'ul', 'li'], {}),
+        tagClassMap: Styles.appendToAll(this.theme['markdown'], ['ol', 'ul', 'li'], {}),
       },
     );
+
   });
 
   protected classes = computed(() => {

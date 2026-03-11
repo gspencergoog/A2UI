@@ -14,46 +14,45 @@
  * limitations under the License.
  */
 
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import * as Types from '@a2ui/web_core/types/types';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
 import { DynamicComponent } from '../rendering/dynamic-component';
 import { Renderer } from '../rendering/renderer';
+import { Types } from '../types';
 
 @Component({
-  selector: 'a2ui-button',
+  selector: 'a2ui-card',
   imports: [Renderer],
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <button
-      [class]="theme.components.Button"
-      [style]="theme.additionalStyles?.Button"
-      (click)="handleClick()"
-    >
-      <ng-container
-        a2ui-renderer
-        [surfaceId]="surfaceId()!"
-        [component]="component().properties.child"
-      />
-    </button>
-  `,
   styles: `
-    :host {
+    a2ui-card {
       display: block;
       flex: var(--weight);
       min-height: 0;
+      overflow: auto;
+    }
+
+    a2ui-card > section {
+      height: 100%;
+      width: 100%;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    a2ui-card > section > * {
+      height: 100%;
+      width: 100%;
     }
   `,
+  template: `
+    @let properties = componentProperties() || {};
+    @let children = properties['child'] ? [properties['child']] : [];
+
+    <section [class]="theme.components.Card" [style]="theme.additionalStyles?.Card">
+      @for (child of children; track child) {
+        <ng-container a2ui-renderer [surfaceId]="surfaceId()!" [component]="child" [dataContext]="getContext()" />
+      }
+    </section>
+  `,
 })
-export class Button extends DynamicComponent<Types.ButtonNode> {
-  readonly action = input.required<Types.Action | null>();
-  // This is currently not handled by the template.
-  readonly primary = input<boolean | null>(false);
-
-  protected handleClick() {
-    const action = this.action();
-
-    if (action) {
-      super.sendAction(action);
-    }
-  }
-}
+export class Card extends DynamicComponent<Types.CardNode> {}

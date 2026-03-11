@@ -16,7 +16,7 @@
 
 import { computed, Component, input, ChangeDetectionStrategy } from '@angular/core';
 import * as Primitives from '@a2ui/web_core/types/primitives';
-import * as Types from '@a2ui/web_core/types/types';
+import { Types } from '../types';
 import { DynamicComponent } from '../rendering/dynamic-component';
 
 @Component({
@@ -62,7 +62,7 @@ import { DynamicComponent } from '../rendering/dynamic-component';
         [id]="inputId"
         [value]="inputValue()"
         placeholder="Please enter a value"
-        [type]="textFieldType() === 'number' ? 'number' : 'text'"
+        [type]="inputType()"
       />
     </section>
   `,
@@ -70,11 +70,16 @@ import { DynamicComponent } from '../rendering/dynamic-component';
 export class TextField extends DynamicComponent {
   readonly text = input.required<Primitives.StringValue | null>();
   readonly label = input.required<Primitives.StringValue | null>();
-  // The template does not respect all the poosible textFieldType values, like "date" or "longText".
-  readonly textFieldType = input.required<Types.ResolvedTextField['textFieldType'] | null>();
+  readonly variant = input.required<Types.TextFieldNode['variant'] | null>();
 
   protected inputValue = computed(() => super.resolvePrimitive(this.text()) || '');
   protected resolvedLabel = computed(() => super.resolvePrimitive(this.label()));
+  protected inputType = computed(() => {
+    const v = this.variant();
+    if (v === 'number') return 'number';
+    if (v === 'obscured') return 'password';
+    return 'text';
+  });
   protected inputId = super.getUniqueId('a2ui-input');
 
   protected handleInput(event: Event) {
@@ -84,6 +89,11 @@ export class TextField extends DynamicComponent {
       return;
     }
 
-    this.processor.setData(this.component(), path, event.target.value, this.surfaceId());
+    const surfaceId = this.surfaceId();
+    if (surfaceId) {
+      const surface = this.processor.getSurfaces().get(surfaceId);
+      // dataContextPath logic removed because DataModel paths are absolute
+      surface?.dataModel.set(path, event.target.value);
+    }
   }
 }

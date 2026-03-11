@@ -76,8 +76,12 @@ export class Slider extends DynamicComponent {
     event.target.style.setProperty('--slider-percent', percent + '%');
 
     if (path) {
-      this.processor.setData(this.component(), path, newValue, this.surfaceId());
+      const surfaceId = this.surfaceId();
+      if (surfaceId) {
+        this.processor.setData(this.component(), path, newValue, surfaceId);
+      }
     }
+
   }
 
   private computePercentage(value: number): number {

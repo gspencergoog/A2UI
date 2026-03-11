@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-import { EnvironmentProviders, makeEnvironmentProviders } from '@angular/core';
-import { Catalog, Theme } from './rendering';
-
-export function provideA2UI(config: { catalog: Catalog; theme: Theme }): EnvironmentProviders {
-  return makeEnvironmentProviders([
-    { provide: Catalog, useValue: config.catalog },
-    { provide: Theme, useValue: config.theme },
-  ]);
-}
+export * from './audio';
+export * from './button';
+export * from './card';
+export * from './checkbox';
+export * from './choice-picker';
+export * from './column';
+export * from './datetime-input';
+export * from './divider';
+export * from './icon';
+export * from './image';
+export * from './list';
+export * from './modal';
+export * from './multiple-choice';
+export * from './row';
+export * from './slider';
+export * from './surface';
+export * from './tabs';
+export * from './text-field';
+export * from './text';
+export * from './video';

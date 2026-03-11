@@ -24,7 +24,7 @@ import {
 } from '@angular/core';
 import { DynamicComponent } from '../rendering/dynamic-component';
 import * as Types from '@a2ui/web_core/types/types';
-import { Renderer } from '../rendering';
+import { Renderer } from '../rendering/renderer';
 
 @Component({
   selector: 'a2ui-modal',

@@ -45,5 +45,10 @@ import * as Primitives from '@a2ui/web_core/types/primitives';
 })
 export class Icon extends DynamicComponent {
   readonly name = input.required<Primitives.StringValue | null>();
-  protected readonly resolvedName = computed(() => this.resolvePrimitive(this.name()));
+  protected readonly resolvedName = computed(() => {
+    const rawName = this.resolvePrimitive(this.name());
+    if (!rawName) return null;
+    // Material Symbols ligatures require snake_case.
+    return String(rawName).replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`).replace(/^_/, '');
+  });
 }

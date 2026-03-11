@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-import { V0_8_CATALOG as BASE_V0_8_CATALOG } from '@a2ui/angular';
+import { Types } from '../types';
+import { InjectionToken } from '@angular/core';
 
-export const V0_8_CATALOG = {
-  ...BASE_V0_8_CATALOG,
-  Canvas: () => import('./canvas/canvas').then((r) => r.Canvas),
-};
+/**
+ * Injection token for the A2UI Theme.
+ * Provide this token to configure the global theme for A2UI components.
+ */
+export const Theme = new InjectionToken<Theme>('Theme');
+
+/**
+ * Defines the theme structure for A2UI components.
+ * This is an alias for the protocol's Theme type.
+ */
+export type Theme = Types.Theme;

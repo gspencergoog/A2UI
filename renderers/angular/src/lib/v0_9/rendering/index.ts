@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-import { V0_8_CATALOG as BASE_V0_8_CATALOG } from '@a2ui/angular';
+/**
+ * @module @a2ui/angular/rendering
+ *
+ * Contains the core rendering logic, including the `Renderer` directive,
+ * `DynamicComponent` base class, and catalog definitions.
+ */
 
-export const V0_8_CATALOG = {
-  ...BASE_V0_8_CATALOG,
-  Canvas: () => import('./canvas/canvas').then((r) => r.Canvas),
-};
+export * from './catalog';
+export * from './dynamic-component';
+export * from './renderer';
+export * from './theming';
