@@ -34,9 +34,7 @@ export interface ButtonProps {
   action: Action;
   variant?: string; // 'default' | 'primary' | 'borderless'
 }
-export type ButtonNode = Component<ButtonProps> & {
-  child?: string;
-};
+export type ButtonNode = Component<ButtonProps>;
 
 export interface TextProps {
   text: Primitives.StringValue;
@@ -49,10 +47,7 @@ export interface ImageProps {
   fit?: string; // 'contain' | 'cover' | 'fill' | 'none' | 'scaleDown'
   variant?: string; // 'icon' | 'avatar' | 'smallFeature' | 'mediumFeature' | 'largeFeature' | 'header'
 }
-export type ImageNode = Component<ImageProps> & {
-  variant?: string;
-  fit?: string;
-};
+export type ImageNode = Component<ImageProps>;
 
 export interface IconProps {
   name: string | { path: string };
@@ -63,9 +58,7 @@ export interface AudioProps {
   url: string;
   description?: string;
 }
-export type AudioPlayerNode = Component<AudioProps> & {
-  description?: string;
-};
+export type AudioPlayerNode = Component<AudioProps>;
 
 export interface VideoProps {
   url: string;
@@ -75,9 +68,7 @@ export type VideoNode = Component<VideoProps>;
 export interface CardProps {
   child: string;
 }
-export type CardNode = Component<CardProps> & {
-  child: string;
-};
+export type CardNode = Component<CardProps>;
 
 export interface DividerProps {
   axis?: string; // 'horizontal' | 'vertical'
@@ -89,29 +80,21 @@ export interface RowProps {
   justify?: string;
   align?: string;
 }
-export type RowNode = Component<RowProps> & {
-  align?: string;
-  justify?: string;
-};
+export type RowNode = Component<RowProps>;
 
 export interface ColumnProps {
   children: string[] | { path: string; componentId: string };
   justify?: string;
   align?: string;
 }
-export type ColumnNode = Component<ColumnProps> & {
-  align?: string;
-  justify?: string;
-};
+export type ColumnNode = Component<ColumnProps>;
 
 export interface ListProps {
   children: string[] | { path: string; componentId: string };
   direction?: string; // 'vertical' | 'horizontal'
   align?: string;
 }
-export type ListNode = Component<ListProps> & {
-  align?: string;
-};
+export type ListNode = Component<ListProps>;
 
 export interface TextFieldProps {
   label: Primitives.StringValue;
@@ -119,9 +102,7 @@ export interface TextFieldProps {
   variant?: string; // 'longText' | 'number' | 'shortText' | 'obscured'
   validationRegexp?: string;
 }
-export type TextFieldNode = Component<TextFieldProps> & {
-  variant?: string;
-};
+export type TextFieldNode = Component<TextFieldProps>;
 
 export interface CheckBoxProps {
   label: Primitives.StringValue;
@@ -170,4 +151,4 @@ export interface TabItem {
 export interface TabsProps {
   tabs: TabItem[];
 }
-export type TabsNode = Component<TabsProps> & { tabs: TabItem[] };
+export type TabsNode = Component<TabsProps>;
