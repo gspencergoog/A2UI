@@ -32,8 +32,9 @@ from .constants import (
     VERSION_0_9,
 )
 
-# RFC 6901 compliant regex for JSON Pointer
-JSON_POINTER_PATTERN = re.compile(r"^(?:\/(?:[^~\/]|~[01])*)*$")
+# RFC 6901 compliant regex for JSON Pointer, modified to allow relative paths
+# (no leading slash)
+JSON_POINTER_PATTERN = re.compile(r"^(?:\/?(?:[^~\/]|~[01])*)*$")
 
 # Recursion Limits
 MAX_GLOBAL_DEPTH = 50
@@ -624,7 +625,9 @@ def _validate_recursion_and_paths(data: Any) -> None:
       if PATH in item and isinstance(item[PATH], str):
         path = item[PATH]
         if not re.fullmatch(JSON_POINTER_PATTERN, path):
-          raise ValueError(f"Invalid JSON Pointer syntax: '{path}'")
+          raise ValueError(
+              f"Invalid JSON Pointer syntax: '{path}'."
+          )
 
       # Check for FunctionCall
       is_func = CALL in item and ARGS in item

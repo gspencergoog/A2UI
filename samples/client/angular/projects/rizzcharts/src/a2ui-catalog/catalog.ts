@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Catalog, V0_8_CATALOG } from '@a2ui/angular';
+import { Catalog, V0_9_CATALOG } from '@a2ui/angular';
 import { inputBinding } from '@angular/core';
 
 export const RIZZ_CHARTS_CATALOG = {
-  ...V0_8_CATALOG,
+  ...V0_9_CATALOG,
   Canvas: () => import('./canvas').then((r) => r.Canvas),
   Chart: {
     type: () => import('./chart').then((r) => r.Chart),

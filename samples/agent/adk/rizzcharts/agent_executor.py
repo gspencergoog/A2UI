@@ -25,7 +25,7 @@ from a2ui.adk.a2a_extension.send_a2ui_to_client_toolset import (
     A2uiPartConverter,
     SendA2uiToClientToolset,
 )
-from a2ui.core.schema.constants import A2UI_CLIENT_CAPABILITIES_KEY
+from a2ui.core.schema.constants import A2UI_CLIENT_CAPABILITIES_KEY, VERSION_0_8, VERSION_0_9
 from a2ui.core.schema.manager import A2uiSchemaManager
 from google.adk.a2a.converters.request_converter import AgentRunRequest
 from google.adk.a2a.executor.a2a_agent_executor import A2aAgentExecutor
@@ -86,10 +86,10 @@ class RizzchartsAgentExecutor(A2aAgentExecutor):
       self,
       base_url: str,
       runner: Runner,
-      schema_manager: A2uiSchemaManager,
+      schema_managers: dict[str, A2uiSchemaManager],
   ):
     self._base_url = base_url
-    self.schema_manager = schema_manager
+    self.schema_managers = schema_managers
 
     config = A2aAgentExecutorConfig(event_converter=A2uiEventConverter())
     super().__init__(runner=runner, config=config)
@@ -115,11 +115,13 @@ class RizzchartsAgentExecutor(A2aAgentExecutor):
           if context.message and context.message.metadata
           else None
       )
-      a2ui_catalog = self.schema_manager.get_selected_catalog(
+      version = VERSION_0_9 if capabilities and "0.9" in str(capabilities) else VERSION_0_8
+      schema_manager = self.schema_managers[version]
+      a2ui_catalog = schema_manager.get_selected_catalog(
           client_ui_capabilities=capabilities
       )
 
-      examples = self.schema_manager.load_examples(a2ui_catalog, validate=True)
+      examples = schema_manager.load_examples(a2ui_catalog, validate=True)
 
       await runner.session_service.append_event(
           session,

@@ -48,7 +48,6 @@ describe('MarkdownPipe', () => {
     expect(result).toContain('<strong>bold</strong>');
   });
 
-
   it('should open links in new tab', () => {
     const markdown = '[link](http://example.com)';
     const result = pipe.transform(markdown);

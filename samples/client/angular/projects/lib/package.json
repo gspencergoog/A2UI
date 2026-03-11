@@ -1,6 +1,6 @@
 {
   "name": "@a2ui/angular",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "dependencies": {
     "markdown-it": "^14.1.0",
     "tslib": "^2.3.0",
@@ -9,6 +9,9 @@
   "peerDependencies": {
     "@angular/common": "^21.2.0",
     "@angular/core": "^21.2.0"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2"
   },
   "sideEffects": false
 }

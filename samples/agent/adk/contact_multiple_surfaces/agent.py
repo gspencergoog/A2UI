@@ -43,12 +43,13 @@ from prompt_builder import (
     UI_DESCRIPTION,
 )
 from tools import get_contact_info
-from a2ui.core.schema.constants import VERSION_0_8, A2UI_OPEN_TAG, A2UI_CLOSE_TAG
+from a2ui.core.schema.constants import VERSION_0_8, VERSION_0_9, A2UI_OPEN_TAG, A2UI_CLOSE_TAG
 from a2ui.core.schema.manager import A2uiSchemaManager
 from a2ui.core.parser.parser import parse_response, ResponsePart
 from a2ui.basic_catalog.provider import BasicCatalog
 from a2ui.core.schema.common_modifiers import remove_strict_validation
 from a2ui.a2a import create_a2ui_part, get_a2ui_agent_extension, parse_response_to_parts
+from google.adk.agents.readonly_context import ReadonlyContext
 
 logger = logging.getLogger(__name__)
 
@@ -61,18 +62,24 @@ class ContactAgent:
   def __init__(self, base_url: str, use_ui: bool = False):
     self.base_url = base_url
     self.use_ui = use_ui
-    self.schema_manager = (
-        A2uiSchemaManager(
-            VERSION_0_8,
-            catalogs=[
-                BasicCatalog.get_config(version=VERSION_0_8, examples_path="examples")
-            ],
-            schema_modifiers=[remove_strict_validation],
-            accepts_inline_catalogs=True,
-        )
-        if use_ui
-        else None
-    )
+    self.schema_managers = {}
+    if use_ui:
+      self.schema_managers[VERSION_0_8] = A2uiSchemaManager(
+          VERSION_0_8,
+          catalogs=[
+              BasicCatalog.get_config(version=VERSION_0_8, examples_path="v0_8/examples")
+          ],
+          schema_modifiers=[remove_strict_validation],
+          accepts_inline_catalogs=True,
+      )
+      self.schema_managers[VERSION_0_9] = A2uiSchemaManager(
+          VERSION_0_9,
+          catalogs=[
+              BasicCatalog.get_config(version=VERSION_0_9, examples_path="v0_9/examples")
+          ],
+          schema_modifiers=[remove_strict_validation],
+          accepts_inline_catalogs=True,
+      )
     self._agent = self._build_agent(use_ui)
     self._user_id = "remote_agent"
     self._runner = Runner(
@@ -88,8 +95,8 @@ class ContactAgent:
         streaming=True,
         extensions=[
             get_a2ui_agent_extension(
-                self.schema_manager.accepts_inline_catalogs,
-                self.schema_manager.supported_catalog_ids,
+                True,
+                self.schema_managers[VERSION_0_8].supported_catalog_ids if self.use_ui else [],
             )
         ],
     )
@@ -124,24 +131,25 @@ class ContactAgent:
     """Builds the LLM agent for the contact agent."""
     LITELLM_MODEL = os.getenv("LITELLM_MODEL", "gemini/gemini-2.5-flash")
 
-    instruction = (
-        self.schema_manager.generate_system_prompt(
-            role_description=ROLE_DESCRIPTION,
-            workflow_description=WORKFLOW_DESCRIPTION,
-            ui_description=UI_DESCRIPTION,
-            include_examples=True,
-            include_schema=True,
-            validate_examples=False,  # Missing inline_catalogs for OrgChart and WebFrame validation
-        )
-        if use_ui
-        else get_text_prompt()
-    )
+    def instruction_provider(ctx: ReadonlyContext) -> str:
+      if not use_ui:
+        return get_text_prompt()
+      client_capabilities = ctx.session.state.get("client_capabilities")
+      version = VERSION_0_9 if client_capabilities and "0.9" in str(client_capabilities) else VERSION_0_8
+      return self.schema_managers[version].generate_system_prompt(
+          role_description=ROLE_DESCRIPTION,
+          workflow_description=WORKFLOW_DESCRIPTION,
+          ui_description=UI_DESCRIPTION,
+          include_examples=True,
+          include_schema=True,
+          validate_examples=False,  # Missing inline_catalogs for OrgChart and WebFrame validation
+      )
 
     return LlmAgent(
         model=LiteLlm(model=LITELLM_MODEL),
         name="contact_agent",
         description="An agent that finds colleague contact info.",
-        instruction=instruction,
+        instruction=instruction_provider if use_ui else get_text_prompt(),
         tools=[get_contact_info],
     )
 
@@ -168,8 +176,8 @@ class ContactAgent:
     attempt = 0
     current_query_text = query
 
-    # Ensure schema was loaded
-    selected_catalog = self.schema_manager.get_selected_catalog()
+    version = VERSION_0_9 if session.state.get("client_capabilities") and "0.9" in str(session.state.get("client_capabilities")) else VERSION_0_8
+    selected_catalog = self.schema_managers[version].get_selected_catalog() if self.use_ui else None
     if self.use_ui and not selected_catalog.catalog_schema:
       logger.error(
           "--- ContactAgent.stream: A2UI_SCHEMA is not loaded. "
@@ -198,10 +206,9 @@ class ContactAgent:
       if query.startswith("ACTION:") and "send_message" in query:
         logger.info("--- ContactAgent.stream: Detected send_message ACTION ---")
 
-        # Re-implement logic to read from file
         from pathlib import Path
 
-        examples_dir = Path(__file__).parent / "examples"
+        examples_dir = Path(__file__).parent / ("v0_9/examples" if version == "0.9.0" or version == VERSION_0_9 else "v0_8/examples")
         action_file = examples_dir / "action_confirmation.json"
 
         if action_file.exists():
@@ -253,7 +260,7 @@ class ContactAgent:
         logger.info("--- ContactAgent.stream: Detected view_location ACTION ---")
 
         # Use the predefined example floor plan
-        json_content = load_floor_plan_example().strip()
+        json_content = load_floor_plan_example(version).strip()
         start_idx = json_content.find("[")
         end_idx = json_content.rfind("]")
         if start_idx != -1 and end_idx != -1:

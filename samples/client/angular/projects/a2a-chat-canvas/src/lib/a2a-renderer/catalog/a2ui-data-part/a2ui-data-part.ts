@@ -14,53 +14,55 @@
  * limitations under the License.
  */
 
-import { Part } from '@a2a-js/sdk';
-import { RendererComponent } from '@a2a_chat_canvas/a2a-renderer/types';
-import { ChatService } from '@a2a_chat_canvas/services/chat-service';
-import { UiMessageContent } from '@a2a_chat_canvas/types/ui-message';
-import { isA2aDataPart } from '@a2a_chat_canvas/utils/type-guards';
+import { Component, computed, inject, input } from '@angular/core';
 import { Surface } from '@a2ui/angular';
-import * as Types from '@a2ui/web_core/types/types';
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { RendererComponent } from '../../types';
+import { UiMessageContent } from '../../../types/ui-message';
+import { ChatService } from '../../../services/chat-service';
+import { isA2aDataPart } from '../../../utils/type-guards';
+import { DataPart } from '@a2a-js/sdk';
 
-/**
- * Component responsible for rendering an A2UI surface embedded within an A2A message part.
- * It extracts the surface ID from the 'beginRendering' message and uses the A2UI Surface component to render it.
- */
 @Component({
   selector: 'a2ui-data-part',
-  templateUrl: './a2ui-data-part.html',
-  styleUrl: './a2ui-data-part.scss',
+  template: `
+    @let surface = this.surface();
+    @if (surface) {
+      <a2ui-surface [surfaceId]="surface.id" [surface]="surface" />
+    }
+  `,
+  standalone: true,
   imports: [Surface],
-  changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class A2uiDataPart implements RendererComponent {
-  /** The UiMessageContent containing the A2A data part with the embedded A2UI message. */
   readonly uiMessageContent = input.required<UiMessageContent>();
-
-  /** Service for managing chat interactions and accessing A2UI surfaces. */
   private readonly chatService = inject(ChatService);
 
-  /** Computes the surface ID from the 'beginRendering' message within the A2A data part. */
-  protected readonly a2uiSurfaceId = computed(() => {
-    const part = this.uiMessageContent().data as Part;
-    if (isA2aDataPart(part)) {
-      if (part.data && typeof part.data === 'object' && 'beginRendering' in part.data) {
-        const beginRenderingMessage = part.data['beginRendering'] as Types.BeginRenderingMessage;
-        return beginRenderingMessage.surfaceId;
-      }
-    }
+  protected readonly surface = computed(() => {
+    const part = this.uiMessageContent().data;
 
-    return undefined;
-  });
-
-  /** Retrieves the A2UI surface data from the ChatService using the computed surface ID. */
-  protected readonly a2uiSurface = computed(() => {
-    const surfaceId = this.a2uiSurfaceId();
-    if (!surfaceId) {
+    if (!isA2aDataPart(part as any)) {
       return undefined;
     }
 
-    return this.chatService.a2uiSurfaces().get(surfaceId);
+    // Explicitly cast to DataPart since the predicate above checked it at runtime
+    // but didn't narrow the original variable due to 'as any'
+    const dataPart = part as DataPart;
+    const data = dataPart.data as Record<string, any> | undefined;
+
+    let surfaceId: string | undefined;
+    if (data) {
+      if (data['surfaceId']) {
+        surfaceId = data['surfaceId'];
+      } else if (data['createSurface']?.['surfaceId']) {
+        surfaceId = data['createSurface']['surfaceId'];
+      } else if (data['updateComponents']?.['surfaceId']) {
+        surfaceId = data['updateComponents']['surfaceId'];
+      }
+    }
+
+    if (surfaceId) {
+      return this.chatService.a2uiSurfaces().get(surfaceId);
+    }
+    return undefined;
   });
 }

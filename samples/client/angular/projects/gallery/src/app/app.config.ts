@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { V0_8_CATALOG, provideA2UI } from '@a2ui/angular';
+import { MessageProcessor, V0_9_CATALOG, provideA2UI } from '@a2ui/angular';
+
 import { IMAGE_CONFIG } from '@angular/common';
 import {
   ApplicationConfig,
@@ -30,8 +31,10 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideClientHydration(withEventReplay()),
     provideA2UI({
-      catalog: V0_8_CATALOG,
+      catalog: V0_9_CATALOG,
       theme: theme,
+
+      processor: new MessageProcessor(V0_9_CATALOG),
     }),
     {
       provide: IMAGE_CONFIG,

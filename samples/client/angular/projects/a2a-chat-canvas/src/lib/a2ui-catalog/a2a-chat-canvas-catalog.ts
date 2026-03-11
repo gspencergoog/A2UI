@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { V0_8_CATALOG as BASE_V0_8_CATALOG } from '@a2ui/angular';
+import { V0_9_CATALOG } from '@a2ui/angular';
 
-export const V0_8_CATALOG = {
-  ...BASE_V0_8_CATALOG,
+export const DEFAULT_A2UI_CATALOG = {
+  ...V0_9_CATALOG,
   Canvas: () => import('./canvas/canvas').then((r) => r.Canvas),
 };

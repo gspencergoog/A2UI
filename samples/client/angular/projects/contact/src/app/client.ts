@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-import { A2AServerPayload, MessageProcessor } from '@a2ui/angular';
-import * as Types from '@a2ui/web_core/types/types';
+import {
+  A2AServerPayload,
+  MessageProcessor,
+  A2uiClientMessage,
+  A2UI_PROCESSOR,
+} from '@a2ui/angular';
+import * as Types from '@a2ui/web_core/v0_9';
 import { Injectable, inject, signal } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class Client {
-  private processor = inject(MessageProcessor);
+  private processor = inject(A2UI_PROCESSOR) as MessageProcessor;
 
   readonly isLoading = signal(false);
 
@@ -36,12 +41,12 @@ export class Client {
     });
   }
 
-  async makeRequest(request: Types.A2UIClientEventMessage | string) {
-    let messages: Types.ServerToClientMessage[];
+  async makeRequest(request: A2uiClientMessage | string | any) {
+    let messages: Types.A2uiMessage[];
 
     try {
       this.isLoading.set(true);
-      const response = await this.send(request as Types.A2UIClientEventMessage);
+      const response = await this.send(request as A2uiClientMessage);
       messages = response;
     } catch (err) {
       console.error(err);
@@ -55,7 +60,7 @@ export class Client {
     return messages;
   }
 
-  async send(message: Types.A2UIClientEventMessage): Promise<Types.ServerToClientMessage[]> {
+  async send(message: A2uiClientMessage): Promise<Types.A2uiMessage[]> {
     const response = await fetch('/a2a', {
       body: JSON.stringify(message),
       method: 'POST',
@@ -63,7 +68,7 @@ export class Client {
 
     if (response.ok) {
       const data = (await response.json()) as A2AServerPayload;
-      const messages: Types.ServerToClientMessage[] = [];
+      const messages: Types.A2uiMessage[] = [];
 
       if ('error' in data) {
         throw new Error(data.error);

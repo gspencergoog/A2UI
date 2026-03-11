@@ -20,13 +20,18 @@ from a2a.types import AgentExtension, Part, DataPart, TextPart
 
 logger = logging.getLogger(__name__)
 
-A2UI_EXTENSION_URI = "https://a2ui.org/a2a-extension/a2ui/v0.8"
+A2UI_EXTENSION_URI = "https://a2ui.org/a2a-extension/a2ui/v0.9"
+A2UI_EXTENSION_URI_V0_9 = A2UI_EXTENSION_URI
+A2UI_EXTENSION_URI_V0_8 = "https://a2ui.org/a2a-extension/a2ui/v0.8"
 AGENT_EXTENSION_SUPPORTED_CATALOG_IDS_KEY = "supportedCatalogIds"
 AGENT_EXTENSION_ACCEPTS_INLINE_CATALOGS_KEY = "acceptsInlineCatalogs"
 
 MIME_TYPE_KEY = "mimeType"
 A2UI_MIME_TYPE = "application/json+a2ui"
 
+A2UI_CLIENT_CAPABILITIES_KEY = "a2uiClientCapabilities"
+SUPPORTED_CATALOG_IDS_KEY = "supportedCatalogIds"
+INLINE_CATALOGS_KEY = "inlineCatalogs"
 
 def create_a2ui_part(a2ui_data: dict[str, Any]) -> Part:
   """Creates an A2A Part containing A2UI data.
@@ -80,12 +85,14 @@ def get_a2ui_datapart(part: Part) -> Optional[DataPart]:
 def get_a2ui_agent_extension(
     accepts_inline_catalogs: bool = False,
     supported_catalog_ids: List[str] = [],
+    extension_uri: str = A2UI_EXTENSION_URI,
 ) -> AgentExtension:
   """Creates the A2UI AgentExtension configuration.
 
   Args:
       accepts_inline_catalogs: Whether the agent accepts inline catalogs.
       supported_catalog_ids: All pre-defined catalogs the agent is known to support.
+      extension_uri: The A2UI extension URI to advertise. Defaults to v0.9.
 
   Returns:
       The configured A2UI AgentExtension.
@@ -100,7 +107,7 @@ def get_a2ui_agent_extension(
     params[AGENT_EXTENSION_SUPPORTED_CATALOG_IDS_KEY] = supported_catalog_ids
 
   return AgentExtension(
-      uri=A2UI_EXTENSION_URI,
+      uri=extension_uri,
       description="Provides agent driven UI using the A2UI JSON format.",
       params=params if params else None,
   )

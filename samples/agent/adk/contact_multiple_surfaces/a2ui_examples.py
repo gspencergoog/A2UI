@@ -34,9 +34,9 @@ EXAMPLE_FILES = {
 FLOOR_PLAN_FILE = "floor_plan.json"
 
 
-def load_floor_plan_example() -> str:
+def load_floor_plan_example(version: str) -> str:
   """Loads the floor plan example specifically."""
-  examples_dir = Path(os.path.dirname(__file__)) / "examples"
+  examples_dir = Path(os.path.dirname(__file__)) / ("v0_9/examples" if "0.9" in str(version) else "v0_8/examples")
   file_path = examples_dir / FLOOR_PLAN_FILE
   try:
     return file_path.read_text(encoding="utf-8")

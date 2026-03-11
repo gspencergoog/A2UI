@@ -15,36 +15,40 @@
  */
 
 import { Part } from '@a2a-js/sdk';
-import * as Types from '@a2ui/web_core/types/types';
+import * as Types from '@a2ui/web_core/v0_9';
 import { isA2aDataPart } from './type-guards';
 
 /**
  * Extracts A2UI ServerToClientMessages from an array of A2A Parts.
  * It filters for parts that are A2A DataParts and checks for the presence of A2UI message keys
- * (beginRendering, surfaceUpdate, dataModelUpdate, deleteSurface).
+ * (createSurface, updateComponents, updateDataModel, deleteSurface).
  *
  * @param parts An array of A2A Parts.
- * @returns An array of A2UI Types.ServerToClientMessage objects.
+ * @returns An array of A2UI Types.A2uiMessage objects.
  */
-export function extractA2uiDataParts(parts: Part[]) {
-  return parts.reduce<Types.ServerToClientMessage[]>((messages, part) => {
+export function extractA2uiDataParts(parts: Part[]): Types.A2uiMessage[] {
+  return parts.reduce<Types.A2uiMessage[]>((messages, part) => {
     if (isA2aDataPart(part)) {
       if (part.data && typeof part.data === 'object') {
-        if ('beginRendering' in part.data) {
+        if ('createSurface' in part.data) {
           messages.push({
-            beginRendering: part.data['beginRendering'] as Types.BeginRenderingMessage,
+            version: 'v0.9',
+            createSurface: part.data['createSurface'] as Types.CreateSurfaceMessage['createSurface'],
           });
-        } else if ('surfaceUpdate' in part.data) {
+        } else if ('updateComponents' in part.data) {
           messages.push({
-            surfaceUpdate: part.data['surfaceUpdate'] as Types.SurfaceUpdateMessage,
+            version: 'v0.9',
+            updateComponents: part.data['updateComponents'] as Types.UpdateComponentsMessage['updateComponents'],
           });
-        } else if ('dataModelUpdate' in part.data) {
+        } else if ('updateDataModel' in part.data) {
           messages.push({
-            dataModelUpdate: part.data['dataModelUpdate'] as Types.DataModelUpdate,
+            version: 'v0.9',
+            updateDataModel: part.data['updateDataModel'] as Types.UpdateDataModelMessage['updateDataModel'],
           });
         } else if ('deleteSurface' in part.data) {
           messages.push({
-            deleteSurface: part.data['deleteSurface'] as Types.DeleteSurfaceMessage,
+            version: 'v0.9',
+            deleteSurface: part.data['deleteSurface'] as Types.DeleteSurfaceMessage['deleteSurface'],
           });
         }
       }

@@ -26,6 +26,7 @@ export * from "./state/surface-components-model.js";
 export * from "./state/surface-group-model.js";
 export * from "./state/surface-model.js";
 export * from "./errors.js";
+export * from "./basic_catalog/index.js";
 
 import A2uiMessageSchemaRaw from "./schemas/server_to_client.json" with { type: "json" };
 

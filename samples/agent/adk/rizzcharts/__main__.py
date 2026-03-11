@@ -21,7 +21,7 @@ import click
 from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers import DefaultRequestHandler
 from a2a.server.tasks import InMemoryTaskStore
-from a2ui.core.schema.constants import VERSION_0_8
+from a2ui.core.schema.constants import VERSION_0_8, VERSION_0_9
 from a2ui.core.schema.manager import A2uiSchemaManager, CatalogConfig
 from a2ui.basic_catalog.provider import BasicCatalog
 from agent_executor import RizzchartsAgentExecutor, get_a2ui_enabled, get_a2ui_catalog, get_a2ui_examples
@@ -61,26 +61,43 @@ def main(host, port):
 
     base_url = f"http://{host}:{port}"
 
-    schema_manager = A2uiSchemaManager(
-        VERSION_0_8,
-        catalogs=[
-            CatalogConfig.from_path(
-                name="rizzcharts",
-                catalog_path="rizzcharts_catalog_definition.json",
-                examples_path="examples/rizzcharts_catalog",
-            ),
-            BasicCatalog.get_config(
-                version=VERSION_0_8,
-                examples_path="examples/standard_catalog",
-            ),
-        ],
-        accepts_inline_catalogs=True,
-    )
+    schema_managers = {
+        VERSION_0_8: A2uiSchemaManager(
+            VERSION_0_8,
+            catalogs=[
+                CatalogConfig.from_path(
+                    name="rizzcharts",
+                    catalog_path="rizzcharts_catalog_definition_v0_8.json",
+                    examples_path="v0_8/examples/rizzcharts_catalog",
+                ),
+                BasicCatalog.get_config(
+                    version=VERSION_0_8,
+                    examples_path="v0_8/examples/standard_catalog",
+                ),
+            ],
+            accepts_inline_catalogs=True,
+        ),
+        VERSION_0_9: A2uiSchemaManager(
+            VERSION_0_9,
+            catalogs=[
+                CatalogConfig.from_path(
+                    name="rizzcharts",
+                    catalog_path="rizzcharts_catalog_definition_v0_9.json",
+                    examples_path="v0_9/examples/rizzcharts_catalog",
+                ),
+                BasicCatalog.get_config(
+                    version=VERSION_0_9,
+                    examples_path="v0_9/examples/standard_catalog",
+                ),
+            ],
+            accepts_inline_catalogs=True,
+        )
+    }
 
     agent = RizzchartsAgent(
         base_url=base_url,
         model=LiteLlm(model=lite_llm_model),
-        schema_manager=schema_manager,
+        schema_managers=schema_managers,
         a2ui_enabled_provider=get_a2ui_enabled,
         a2ui_catalog_provider=get_a2ui_catalog,
         a2ui_examples_provider=get_a2ui_examples,
@@ -96,7 +113,7 @@ def main(host, port):
     agent_executor = RizzchartsAgentExecutor(
         base_url=base_url,
         runner=runner,
-        schema_manager=schema_manager,
+        schema_managers=schema_managers,
     )
 
     request_handler = DefaultRequestHandler(

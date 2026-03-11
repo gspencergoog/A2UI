@@ -19,7 +19,8 @@ import click
 from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers import DefaultRequestHandler
 from a2a.server.tasks import InMemoryTaskStore
-from agent import ContactAgent
+from v0_8.agent import ContactAgent as ContactAgentV08
+from v0_9.agent import ContactAgent as ContactAgentV09
 from agent_executor import ContactAgentExecutor
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -49,17 +50,25 @@ def main(host, port):
         )
 
     base_url = f"http://{host}:{port}"
-    ui_agent = ContactAgent(base_url=base_url, use_ui=True)
-    text_agent = ContactAgent(base_url=base_url, use_ui=False)
+    ui_agent_v0_8 = ContactAgentV08(base_url=base_url, use_ui=True)
+    ui_agent_v0_9 = ContactAgentV09(base_url=base_url, use_ui=True)
+    text_agent = ContactAgentV09(base_url=base_url, use_ui=False)
 
-    agent_executor = ContactAgentExecutor(ui_agent=ui_agent, text_agent=text_agent)
+    agent_executor = ContactAgentExecutor(ui_agent_v0_8=ui_agent_v0_8, ui_agent_v0_9=ui_agent_v0_9, text_agent=text_agent)
 
     request_handler = DefaultRequestHandler(
         agent_executor=agent_executor,
         task_store=InMemoryTaskStore(),
     )
+
+    merged_agent_card = ui_agent_v0_9.get_agent_card()
+    v0_8_card = ui_agent_v0_8.get_agent_card()
+    # Merge capabilities extensions to advertise both v0.8 and v0.9
+    for ext in v0_8_card.capabilities.extensions:
+      merged_agent_card.capabilities.extensions.append(ext)
+
     server = A2AStarletteApplication(
-        agent_card=ui_agent.get_agent_card(), http_handler=request_handler
+        agent_card=merged_agent_card, http_handler=request_handler
     )
     import uvicorn
 

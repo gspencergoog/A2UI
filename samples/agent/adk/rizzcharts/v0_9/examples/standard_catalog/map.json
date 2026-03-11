@@ -1,0 +1,122 @@
+[
+  {
+    "createSurface": {
+      "surfaceId": "la-map-view",
+      "root": "root-column",
+      "styles": {
+        "primaryColor": "#4285F4",
+        "font": "Roboto"
+      },
+      "catalogId": "a2ui.org/basic"
+    }
+  },
+  {
+    "updateComponents": {
+      "surfaceId": "la-map-view",
+      "components": [
+        {
+          "id": "root-column",
+          "component": {
+            "Column": {
+              "children": {
+                "explicitList": [
+                  "map-header",
+                  "map-image",
+                  "location-list"
+                ]
+              },
+              "alignment": "stretch"
+            }
+          }
+        },
+        {
+          "id": "map-header",
+          "component": {
+            "Text": {
+              "text": {
+                "literalString": "Points of Interest in Los Angeles"
+              },
+              "usageHint": "h2"
+            }
+          }
+        },
+        {
+          "id": "location-list",
+          "component": {
+            "List": {
+              "direction": "vertical",
+              "children": {
+                "template": {
+                  "componentId": "location-card-template",
+                  "dataBinding": "/mapConfig.locations"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "location-card-template",
+          "component": {
+            "Card": {
+              "child": "location-details"
+            }
+          }
+        },
+        {
+          "id": "location-details",
+          "component": {
+            "Column": {
+              "children": {
+                "explicitList": [
+                  "location-name",
+                  "location-description"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": "location-name",
+          "component": {
+            "Text": {
+              "text": {
+                "path": "/name"
+              },
+              "usageHint": "h4"
+            }
+          }
+        },
+        {
+          "id": "location-description",
+          "component": {
+            "Text": {
+              "text": {
+                "path": "/description"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "updateDataModel": {
+      "surfaceId": "la-map-view",
+      "path": "/",
+      "value": {
+        "mapConfig.locations[0].name": "Google Store Santa Monica",
+        "mapConfig.locations[0].description": "Your local destination for Google hardware.",
+        "mapConfig.locations[1].name": "Griffith Observatory",
+        "mapConfig.locations[1].description": "A public observatory with views of the Hollywood Sign.",
+        "mapConfig.locations[2].name": "Hollywood Sign Viewpoint",
+        "mapConfig.locations[2].description": "Iconic landmark in the Hollywood Hills.",
+        "mapConfig.locations[3].name": "Crypto.com Arena",
+        "mapConfig.locations[3].description": "Multi-purpose sports and entertainment arena.",
+        "mapConfig.locations[4].name": "LACMA",
+        "mapConfig.locations[4].description": "Los Angeles County Museum of Art.",
+        "mapConfig.locations[5].name": "Venice Beach Boardwalk",
+        "mapConfig.locations[5].description": "Famous oceanfront promenade."
+      }
+    }
+  }
+]

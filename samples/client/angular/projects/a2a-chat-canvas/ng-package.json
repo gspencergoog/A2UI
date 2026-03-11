@@ -3,5 +3,6 @@
   "dest": "../../dist/a2a-chat-canvas",
   "lib": {
     "entryFile": "src/public-api.ts"
-  }
+  },
+  "allowedNonPeerDependencies": ["@a2ui/web_core", "@a2ui/angular"]
 }

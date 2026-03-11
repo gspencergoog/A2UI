@@ -1,0 +1,80 @@
+[
+  {
+    "createSurface": {
+      "surfaceId": "org-chart-view",
+      "root": "main-column",
+      "catalogId": "a2ui.org/basic"
+    }
+  },
+  {
+    "updateComponents": {
+      "surfaceId": "org-chart-view",
+      "components": [
+        {
+          "id": "main-column",
+          "component": {
+            "Column": {
+              "children": {
+                "explicitList": [
+                  "title",
+                  "org-chart"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": "title",
+          "component": {
+            "Text": {
+              "usageHint": "h2",
+              "text": {
+                "literalString": "Organizational Chart"
+              }
+            }
+          }
+        },
+        {
+          "id": "org-chart",
+          "component": {
+            "OrgChart": {
+              "chain": {
+                "path": "/hierarchy"
+              },
+              "action": {
+                "name": "chart_node_click",
+                "context": []
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "updateDataModel": {
+      "surfaceId": "org-chart-view",
+      "path": "/",
+      "value": {
+        "hierarchy": {
+          "0": {
+            "title": "CEO",
+            "name": "Jane Doe"
+          },
+          "1": {
+            "title": "VP Marketing",
+            "name": "John Smith"
+          },
+          "2": {
+            "title": "Director",
+            "name": "Alice Johnson"
+          },
+          "3": {
+            "title": "Digital Marketing Specialist",
+            "name": "Casey Smith"
+          }
+        }
+      }
+    }
+  }
+]

@@ -35,7 +35,7 @@ def get_restaurants(
   if "new york" in location.lower() or "ny" in location.lower():
     try:
       script_dir = os.path.dirname(__file__)
-      file_path = os.path.join(script_dir, "restaurant_data.json")
+      file_path = os.path.join(script_dir, "..", "restaurant_data.json")
       with open(file_path) as f:
         restaurant_data_str = f.read()
         if base_url := tool_context.state.get("base_url"):

@@ -1,6 +1,6 @@
 [
   {
-    "beginRendering": {
+    "createSurface": {
       "surfaceId": "recipe-card",
       "root": "root-column",
       "styles": {

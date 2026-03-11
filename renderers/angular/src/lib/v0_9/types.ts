@@ -54,8 +54,8 @@ export namespace Types {
   export type A2UIClientEventMessage = ClientToServerMessage;
 
   // Base Component Node (Runtime Model)
-  // This is kept here to not break legacy component definition structures if they exist 
-  // alongside the imported ones. 
+  // This is kept here to not break legacy component definition structures if they exist
+  // alongside the imported ones.
   export interface Component<P = Record<string, any>> {
     id: string;
     type: string;
@@ -95,7 +95,7 @@ export namespace Types {
   export type Tabs = TabsNode;
   export type Modal = ModalNode;
   export type ChoicePicker = ChoicePickerNode;
-  
+
   // Explicit Node exports for backward compatibility
   export type RowNode = import('@a2ui/web_core/v0_9/basic_catalog').RowNode;
   export type ColumnNode = import('@a2ui/web_core/v0_9/basic_catalog').ColumnNode;
@@ -117,7 +117,7 @@ export namespace Types {
   export type TabsNode = import('@a2ui/web_core/v0_9/basic_catalog').TabsNode;
   export type TabItem = import('@a2ui/web_core/v0_9/basic_catalog').TabItem;
   export type ModalNode = import('@a2ui/web_core/v0_9/basic_catalog').ModalNode;
-  
+
   // Link component wasn't in basic_catalog.json but it's used in types.ts.
   // Re-adding it here until a proper migration is mapped.
   export interface LinkProps {
@@ -126,7 +126,7 @@ export namespace Types {
   }
   export type LinkNode = Component<LinkProps>;
   export type Link = LinkNode;
-  
+
   export type CardNode = import('@a2ui/web_core/v0_9/basic_catalog').CardNode;
 }
 

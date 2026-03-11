@@ -263,6 +263,34 @@ interface ChatRequest {
 // =============================================================================
 let cachedAccessToken: { token: string; expiresAt: number } | null = null;
 
+function mapA2uiVersion(a2uiArray: any[], requestedExtensions?: string[]): any[] {
+  if (!a2uiArray || !Array.isArray(a2uiArray)) return a2uiArray;
+  
+  const extensions = requestedExtensions || [];
+  const wantsV09 = extensions.some(ext => ext.includes("v0.9"));
+  const wantsV08 = extensions.some(ext => ext.includes("v0.8"));
+  
+  // Default to v0.9 if requested, otherwise v0.8
+  const targetVersion = wantsV09 ? "v0.9" : (wantsV08 ? "v0.8" : "v0.9");
+  
+  return a2uiArray.map(msg => {
+    if (targetVersion === "v0.9" && msg.beginRendering) {
+      return { createSurface: msg.beginRendering, ...msg, beginRendering: undefined };
+    }
+    if (targetVersion === "v0.8" && msg.createSurface) {
+      return { beginRendering: msg.createSurface, ...msg, createSurface: undefined };
+    }
+    return msg;
+  }).map(msg => {
+    // cleanup undefined keys
+    const cleanMsg: any = {};
+    for (const key in msg) {
+      if (msg[key] !== undefined) cleanMsg[key] = msg[key];
+    }
+    return cleanMsg;
+  });
+}
+
 // Get Google Cloud access token with caching
 // In Cloud Run, use the metadata server. Locally, use gcloud CLI.
 async function getAccessToken(): Promise<string> {
@@ -921,6 +949,10 @@ async function main() {
               result = localQuiz;
             }
           }
+        }
+
+        if (result.a2ui) {
+          result.a2ui = mapA2uiVersion(result.a2ui, body.extensions);
         }
 
         // LOG: Server → Client response with A2UI

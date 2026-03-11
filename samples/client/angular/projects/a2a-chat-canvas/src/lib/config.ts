@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-import { A2UI_DATA_PART_RENDERER_ENTRY } from '@a2a_chat_canvas/a2a-renderer/catalog/a2ui-data-part/renderer-config';
-import { A2UI_DATA_PART_RESOLVER } from '@a2a_chat_canvas/a2a-renderer/catalog/a2ui-data-part/resolver';
-import { DEFAULT_TEXT_PART_RENDERER_ENTRY } from '@a2a_chat_canvas/a2a-renderer/catalog/default-text-part/renderer-config';
-import { DEFAULT_TEXT_PART_RESOLVER } from '@a2a_chat_canvas/a2a-renderer/catalog/default-text-part/resolver';
-import {
-  ARTIFACT_RESOLVERS,
-  PART_RESOLVERS,
-  RENDERERS,
-} from '@a2a_chat_canvas/a2a-renderer/tokens';
-import { ArtifactResolver, PartResolver, RendererEntry } from '@a2a_chat_canvas/a2a-renderer/types';
-import { theme as a2uiTheme } from '@a2a_chat_canvas/a2ui-catalog/theme';
-import { A2A_SERVICE, A2aService } from '@a2a_chat_canvas/interfaces/a2a-service';
+import { A2UI_DATA_PART_RENDERER_ENTRY } from './a2a-renderer/catalog/a2ui-data-part/renderer-config';
+import { A2UI_DATA_PART_RESOLVER } from './a2a-renderer/catalog/a2ui-data-part/resolver';
+import { DEFAULT_TEXT_PART_RENDERER_ENTRY } from './a2a-renderer/catalog/default-text-part/renderer-config';
+import { DEFAULT_TEXT_PART_RESOLVER } from './a2a-renderer/catalog/default-text-part/resolver';
+import { ARTIFACT_RESOLVERS, PART_RESOLVERS, RENDERERS } from './a2a-renderer/tokens';
+import { ArtifactResolver, PartResolver, RendererEntry } from './a2a-renderer/types';
+import { theme as a2uiTheme } from './a2ui-catalog/theme';
+import { A2A_SERVICE, A2aService } from './interfaces/a2a-service';
 import {
   MARKDOWN_RENDERER_SERVICE,
   MarkdownRendererService,
-} from '@a2a_chat_canvas/interfaces/markdown-renderer-service';
-import { SanitizerMarkdownRendererService } from '@a2a_chat_canvas/services/sanitizer-markdown-renderer-service';
-import { Catalog, Theme } from '@a2ui/angular';
+} from './interfaces/markdown-renderer-service';
+import { SanitizerMarkdownRendererService } from './services/sanitizer-markdown-renderer-service';
+import { Catalog, Theme, provideA2UI, MessageProcessor } from '@a2ui/angular';
 import { EnvironmentProviders, Provider, Type, makeEnvironmentProviders } from '@angular/core';
 import { V0_8_CATALOG } from './a2ui-catalog/a2a-chat-canvas-catalog';
 
@@ -156,14 +152,17 @@ export function usingA2uiRenderers(customCatalog?: Catalog, theme?: Theme): A2ui
   return {
     kind: ChatCanvasFeatureKind.A2UI_FEATURE,
     providers: [
-      {
-        provide: Catalog,
-        useValue: {
-          ...V0_8_CATALOG,
+      provideA2UI({
+        catalog: {
+          ...V0_9_CATALOG,
           ...(customCatalog ?? {}),
         },
-      },
-      { provide: Theme, useValue: theme ?? a2uiTheme },
+        theme: theme ?? a2uiTheme,
+
+        processor: new MessageProcessor(
+          customCatalog ? { ...DEFAULT_A2UI_CATALOG, ...customCatalog } : DEFAULT_A2UI_CATALOG,
+        ),
+      }),
     ],
   };
 }
@@ -173,7 +172,7 @@ export function usingA2uiRenderers(customCatalog?: Catalog, theme?: Theme): A2ui
  */
 export interface ChatCanvasFeature<FeatureKind extends ChatCanvasFeatureKind> {
   kind: FeatureKind;
-  providers: readonly Provider[];
+  providers: readonly (Provider | EnvironmentProviders)[];
 }
 
 /**

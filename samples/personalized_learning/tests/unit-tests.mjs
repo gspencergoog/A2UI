@@ -58,7 +58,7 @@ function getFallbackContent(format) {
         format: "flashcards",
         surfaceId,
         a2ui: [
-          { beginRendering: { surfaceId, root: "mainColumn" } },
+          { createSurface: { surfaceId, root: "mainColumn" } },
           {
             surfaceUpdate: {
               surfaceId,
@@ -134,7 +134,7 @@ function getFallbackContent(format) {
         format: "audio",
         surfaceId,
         a2ui: [
-          { beginRendering: { surfaceId, root: "audioCard" } },
+          { createSurface: { surfaceId, root: "audioCard" } },
           {
             surfaceUpdate: {
               surfaceId,
@@ -207,7 +207,7 @@ function getFallbackContent(format) {
         format: "video",
         surfaceId,
         a2ui: [
-          { beginRendering: { surfaceId, root: "videoCard" } },
+          { createSurface: { surfaceId, root: "videoCard" } },
           {
             surfaceUpdate: {
               surfaceId,
@@ -275,15 +275,15 @@ test("getFallbackContent returns valid flashcard structure", () => {
   assert.equal(result.surfaceId, "learningContent");
   assert.ok(Array.isArray(result.a2ui));
   assert.equal(result.a2ui.length, 2);
-  assert.ok(result.a2ui[0].beginRendering);
+  assert.ok(result.a2ui[0].createSurface);
   assert.ok(result.a2ui[1].surfaceUpdate);
 });
 
 test("getFallbackContent returns valid audio structure", () => {
   const result = getFallbackContent("audio");
   assert.equal(result.format, "audio");
-  assert.ok(result.a2ui[0].beginRendering);
-  assert.equal(result.a2ui[0].beginRendering.root, "audioCard");
+  assert.ok(result.a2ui[0].createSurface);
+  assert.equal(result.a2ui[0].createSurface.root, "audioCard");
 });
 
 test("getFallbackContent handles podcast as audio", () => {
@@ -294,7 +294,7 @@ test("getFallbackContent handles podcast as audio", () => {
 test("getFallbackContent returns valid video structure", () => {
   const result = getFallbackContent("video");
   assert.equal(result.format, "video");
-  assert.ok(result.a2ui[0].beginRendering);
+  assert.ok(result.a2ui[0].createSurface);
 });
 
 test("getFallbackContent returns error for unknown format", () => {
@@ -393,7 +393,7 @@ console.log("\n--- A2UI Message Structure Tests ---\n");
 
 function validateA2UIMessage(message) {
   // A valid A2UI message should have exactly one of these keys
-  const validKeys = ["beginRendering", "surfaceUpdate", "dataModelUpdate", "deleteSurface"];
+  const validKeys = ["createSurface", "surfaceUpdate", "dataModelUpdate", "deleteSurface"];
   const keys = Object.keys(message);
   const matchingKeys = keys.filter(k => validKeys.includes(k));
 
@@ -403,10 +403,10 @@ function validateA2UIMessage(message) {
 
   const key = matchingKeys[0];
 
-  if (key === "beginRendering") {
-    const br = message.beginRendering;
+  if (key === "createSurface") {
+    const br = message.createSurface;
     if (!br.surfaceId || !br.root) {
-      return { valid: false, error: "beginRendering requires surfaceId and root" };
+      return { valid: false, error: "createSurface requires surfaceId and root" };
     }
   }
 
@@ -425,14 +425,14 @@ function validateA2UIMessage(message) {
   return { valid: true };
 }
 
-test("validateA2UIMessage accepts valid beginRendering", () => {
-  const msg = { beginRendering: { surfaceId: "test", root: "main" } };
+test("validateA2UIMessage accepts valid createSurface", () => {
+  const msg = { createSurface: { surfaceId: "test", root: "main" } };
   const result = validateA2UIMessage(msg);
   assert.ok(result.valid, result.error);
 });
 
-test("validateA2UIMessage rejects beginRendering without surfaceId", () => {
-  const msg = { beginRendering: { root: "main" } };
+test("validateA2UIMessage rejects createSurface without surfaceId", () => {
+  const msg = { createSurface: { root: "main" } };
   const result = validateA2UIMessage(msg);
   assert.ok(!result.valid);
 });
@@ -458,7 +458,7 @@ test("validateA2UIMessage rejects surfaceUpdate without components", () => {
 
 test("validateA2UIMessage rejects message with multiple action types", () => {
   const msg = {
-    beginRendering: { surfaceId: "test", root: "main" },
+    createSurface: { surfaceId: "test", root: "main" },
     surfaceUpdate: { surfaceId: "test", components: [] }
   };
   const result = validateA2UIMessage(msg);
@@ -665,9 +665,9 @@ function validateA2UIPayload(messages) {
     return { valid: false, errors: ["Payload cannot be empty"] };
   }
 
-  // Check that first message is beginRendering
-  if (!messages[0].beginRendering) {
-    errors.push("First message should be beginRendering");
+  // Check that first message is createSurface
+  if (!messages[0].createSurface) {
+    errors.push("First message should be createSurface");
   }
 
   // Validate each message

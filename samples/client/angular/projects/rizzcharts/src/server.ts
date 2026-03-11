@@ -83,7 +83,9 @@ app.post('/a2a', (req, res) => {
 
 app.get('/a2a/agent-card', async (req, res) => {
   try {
-    const response = await fetchWithCustomHeader('http://localhost:10002/.well-known/agent-card.json');
+    const response = await fetchWithCustomHeader(
+      'http://localhost:10002/.well-known/agent-card.json',
+    );
     if (!response.ok) {
       res.status(response.status).json({ error: 'Failed to fetch agent card' });
       return;

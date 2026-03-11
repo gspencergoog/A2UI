@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { V0_8_CATALOG, provideA2UI, provideMarkdownRenderer } from '@a2ui/angular';
-import { renderMarkdown } from '@a2ui/markdown-it';
+import { MessageProcessor, V0_9_CATALOG, provideA2UI, provideMarkdownRenderer } from '@a2ui/angular';
 import { IMAGE_CONFIG } from '@angular/common';
 import {
   ApplicationConfig,
@@ -25,14 +24,18 @@ import {
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { theme } from './theme';
 
+import { renderMarkdown } from '@a2ui/markdown-it';
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideClientHydration(withEventReplay()),
+    provideMarkdownRenderer(renderMarkdown),
     provideA2UI({
-      catalog: V0_8_CATALOG,
+      catalog: V0_9_CATALOG,
       theme: theme,
+      processor: new MessageProcessor(V0_9_CATALOG),
     }),
     provideMarkdownRenderer(renderMarkdown),
     {

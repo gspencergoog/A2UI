@@ -25,28 +25,29 @@ from starlette.requests import Request
 from a2ui.core.schema.utils import wrap_as_json_array
 
 
-def load_a2ui_schema() -> dict[str, Any]:
+def load_a2ui_schema(version: str) -> dict[str, Any]:
   current_dir = pathlib.Path(__file__).resolve().parent
-  spec_root = current_dir / "../../../specification/v0_8/json"
+  spec_root = current_dir / f"../../../specification/{version}/json"
 
   server_to_client_content = (spec_root / "server_to_client.json").read_text()
   server_to_client_json = json.loads(server_to_client_content)
 
-  standard_catalog_content = (
-      spec_root / "standard_catalog_definition.json"
-  ).read_text()
-  standard_catalog_json = json.loads(standard_catalog_content)
+  if version == "v0_8":
+    standard_catalog_content = (
+        spec_root / "standard_catalog_definition.json"
+    ).read_text()
+    standard_catalog_json = json.loads(standard_catalog_content)
 
-  server_to_client_json["properties"]["surfaceUpdate"]["properties"]["components"][
-      "items"
-  ]["properties"]["component"]["properties"] = standard_catalog_json
+    server_to_client_json["properties"]["surfaceUpdate"]["properties"]["components"][
+        "items"
+    ]["properties"]["component"]["properties"] = standard_catalog_json
 
   return wrap_as_json_array(server_to_client_json)
 
 
-def load_a2ui_client_to_server_schema() -> dict[str, Any]:
+def load_a2ui_client_to_server_schema(version: str) -> dict[str, Any]:
   current_dir = pathlib.Path(__file__).resolve().parent
-  spec_root = current_dir / "../../../specification/v0_8/json"
+  spec_root = current_dir / f"../../../specification/{version}/json"
 
   client_to_server_content = (spec_root / "client_to_server.json").read_text()
   client_to_server_json = json.loads(client_to_server_content)
@@ -63,24 +64,35 @@ def load_a2ui_client_to_server_schema() -> dict[str, Any]:
     help="Transport type",
 )
 def main(port: int, transport: str) -> int:
-  a2ui_schema = load_a2ui_schema()
-  print(f"Loaded A2UI schema: {a2ui_schema}")
+  a2ui_schemas = {
+      "v0.8": load_a2ui_schema("v0_8"),
+      "v0.9": load_a2ui_schema("v0_9"),
+  }
+  print(f"Loaded A2UI schemas")
 
-  recipe_a2ui_json = json.loads(
-      (pathlib.Path(__file__).resolve().parent / "recipe_a2ui.json").read_text()
-  )
-  jsonschema.validate(instance=recipe_a2ui_json, schema=a2ui_schema)
-  print(f"Loaded Recipe A2UI JSON: {recipe_a2ui_json}")
+  recipe_jsons = {
+      "v0.8": json.loads((pathlib.Path(__file__).resolve().parent / "recipe_a2ui_v0_8.json").read_text()),
+      "v0.9": json.loads((pathlib.Path(__file__).resolve().parent / "recipe_a2ui_v0_9.json").read_text()),
+  }
 
-  a2ui_client_to_server_schema = load_a2ui_client_to_server_schema()
-  print(f"Loaded A2UI client to server schema: {a2ui_client_to_server_schema}")
+  jsonschema.validate(instance=recipe_jsons["v0.8"], schema=a2ui_schemas["v0.8"])
+  print(f"Loaded Recipe A2UI JSONs")
+
+  a2ui_client_to_server_schemas = {
+      "v0.8": load_a2ui_client_to_server_schema("v0_8"),
+      "v0.9": load_a2ui_client_to_server_schema("v0_9"),
+  }
+  print(f"Loaded A2UI client to server schemas")
 
   app = Server("a2ui-over-mcp-demo")
 
   @app.call_tool()
   async def handle_call_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
     if name == "get_recipe_a2ui":
-      return {"events": recipe_a2ui_json}
+      version = arguments.get("version", "v0.9")
+      if version not in recipe_jsons:
+        version = "v0.9"
+      return {"events": recipe_jsons[version]}
 
     if name == "send_a2ui_user_action":
       return {"response": f"Received A2UI user action", "args": arguments}
@@ -114,12 +126,22 @@ def main(port: int, transport: str) -> int:
             name="get_recipe_a2ui",
             title="Get Recipe A2UI",
             description="Returns the A2UI JSON to show a recipe",
-            inputSchema={"type": "object", "additionalProperties": False},
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "version": {
+                        "type": "string",
+                        "description": "The A2UI version to use (v0.8 or v0.9)",
+                        "default": "v0.9"
+                    }
+                },
+                "additionalProperties": False
+            },
             # MCP throws an error for "type":"array" so wrapping in an object
             # TODO fix this in MCP SDK
             outputSchema={
                 "type": "object",
-                "properties": {"events": a2ui_schema},
+                "properties": {"events": {"type": "array"}},
                 "required": ["events"],
                 "additionalProperties": False,
             },
@@ -128,13 +150,13 @@ def main(port: int, transport: str) -> int:
             name="send_a2ui_user_action",
             title="Send A2UI User Action",
             description="Sends an A2UI user action",
-            inputSchema=a2ui_client_to_server_schema["properties"]["userAction"],
+            inputSchema=a2ui_client_to_server_schemas["v0.9"]["properties"]["userAction"],
         ),
         types.Tool(
             name="send_a2ui_error",
             title="Send A2UI Error",
             description="Sends an A2UI error",
-            inputSchema=a2ui_client_to_server_schema["properties"]["error"],
+            inputSchema=a2ui_client_to_server_schemas["v0.9"]["properties"]["error"],
         ),
     ]
 

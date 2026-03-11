@@ -33,7 +33,7 @@ def get_contact_info(name: str, tool_context: ToolContext, department: str = "")
   results = []
   try:
     script_dir = os.path.dirname(__file__)
-    file_path = os.path.join(script_dir, "contact_data.json")
+    file_path = os.path.join(script_dir, "..", "contact_data.json")
     with open(file_path) as f:
       contact_data_str = f.read()
       if base_url := tool_context.state.get("base_url"):

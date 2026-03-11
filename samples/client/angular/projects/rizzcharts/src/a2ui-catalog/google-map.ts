@@ -133,7 +133,7 @@ export interface CustomProperties {
     }
   `,
 })
-export class GoogleMap extends DynamicComponent<Types.CustomNode> {
+export class GoogleMap extends DynamicComponent<Types.CustomNode & { component: string }> {
   private readonly maxPinCount = 100;
   private readonly defaultCenter: google.maps.LatLngLiteral = {
     lat: 34.0626,
@@ -143,10 +143,10 @@ export class GoogleMap extends DynamicComponent<Types.CustomNode> {
   mapId = '4506f1f5f5e6e8e2';
 
   readonly title = input<Primitives.StringValue | null>();
-  protected resolvedTitle = computed(() => super.resolvePrimitive(this.title() ?? null));
+  protected resolvedTitle = computed(() => this.resolvePrimitive(this.title() ?? null));
 
   readonly zoom = input.required<Primitives.NumberValue | null>();
-  protected resolvedZoom = computed(() => super.resolvePrimitive(this.zoom()));
+  protected resolvedZoom = computed(() => this.resolvePrimitive(this.zoom()));
 
   readonly center = input.required<CustomProperties | null>();
   protected resolvedCenter = computed(() => this.resolveLatLng(this.center()));

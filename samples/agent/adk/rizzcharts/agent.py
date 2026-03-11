@@ -20,6 +20,7 @@ from typing import Any, ClassVar
 from a2a.types import AgentCapabilities, AgentCard, AgentSkill
 from a2ui.a2a import get_a2ui_agent_extension
 from a2ui.adk.a2a_extension.send_a2ui_to_client_toolset import SendA2uiToClientToolset, A2uiEnabledProvider, A2uiCatalogProvider, A2uiExamplesProvider
+from a2ui.core.schema.constants import VERSION_0_8, VERSION_0_9
 from a2ui.core.schema.manager import A2uiSchemaManager
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.agents.readonly_context import ReadonlyContext
@@ -60,7 +61,7 @@ Your task is to analyze the user's request, fetch the necessary data, select the
     * Use the **entire** JSON array from the chosen example as the base value for the `a2ui_json` argument.
     * **Generate a new `surfaceId`:** You MUST generate a new, unique `surfaceId` for this request (e.g., `sales_breakdown_q3_surface`, `regional_outliers_northeast_surface`). This new ID must be used for the `surfaceId` in all three messages within the JSON array (`beginRendering`, `surfaceUpdate`, `dataModelUpdate`).
     * **Update the title Text:** You MUST update the `literalString` value for the `Text` component (the component with `id: "page_header"`) to accurately reflect the specific user query. For example, if the user asks for "Q3" sales, update the generic template text to "Q3 2025 Sales by Product Category".
-    * Ensure the generated JSON perfectly matches the A2UI specification. It will be validated against the json_schema and rejected if it does not conform.  
+    * Ensure the generated JSON perfectly matches the A2UI specification. It will be validated against the json_schema and rejected if it does not conform.
     * If you get an error in the tool response apologize to the user and let them know they should try again.
 
 5.  **Call the Tool:** Call the `send_a2ui_json_to_client` tool with the fully constructed `a2ui_json` payload.
@@ -87,7 +88,7 @@ class RizzchartsAgent(LlmAgent):
 
   SUPPORTED_CONTENT_TYPES: ClassVar[list[str]] = ["text", "text/plain"]
   base_url: str = ""
-  schema_manager: A2uiSchemaManager = None
+  schema_managers: dict[str, A2uiSchemaManager] = PrivateAttr(default_factory=dict)
   _a2ui_enabled_provider: A2uiEnabledProvider = PrivateAttr()
   _a2ui_catalog_provider: A2uiCatalogProvider = PrivateAttr()
   _a2ui_examples_provider: A2uiExamplesProvider = PrivateAttr()
@@ -96,7 +97,7 @@ class RizzchartsAgent(LlmAgent):
       self,
       model: Any,
       base_url: str,
-      schema_manager: A2uiSchemaManager,
+      schema_managers: dict[str, A2uiSchemaManager],
       a2ui_enabled_provider: A2uiEnabledProvider,
       a2ui_catalog_provider: A2uiCatalogProvider,
       a2ui_examples_provider: A2uiExamplesProvider,
@@ -106,25 +107,29 @@ class RizzchartsAgent(LlmAgent):
     Args:
         model: The LLM model to use.
         base_url: The base URL for the agent.
-        schema_manager: The A2UI schema manager.
+        schema_managers: A dict of A2UiSchemaManagers for each supported version.
         a2ui_enabled_provider: A provider to check if A2UI is enabled.
         a2ui_catalog_provider: A provider to retrieve the A2UI catalog (A2uiCatalog object).
         a2ui_examples_provider: A provider to retrieve the A2UI examples (str).
     """
 
-    system_instructions = schema_manager.generate_system_prompt(
-        role_description=ROLE_DESCRIPTION,
-        workflow_description=WORKFLOW_DESCRIPTION,
-        ui_description=UI_DESCRIPTION,
-        include_schema=False,
-        include_examples=False,
-        validate_examples=False,
-    )
+    def instruction_provider(ctx: ReadonlyContext) -> str:
+      client_capabilities = ctx.session.state.get("client_capabilities")
+      version = VERSION_0_9 if client_capabilities and "0.9" in str(client_capabilities) else VERSION_0_8
+      schema_manager = schema_managers[version]
+      return schema_manager.generate_system_prompt(
+          role_description=ROLE_DESCRIPTION,
+          workflow_description=WORKFLOW_DESCRIPTION,
+          ui_description=UI_DESCRIPTION,
+          include_schema=False,
+          include_examples=False,
+          validate_examples=False,
+      )
     super().__init__(
         model=model,
         name="rizzcharts_agent",
         description="An agent that lets sales managers request sales data.",
-        instruction=system_instructions,
+        instruction=instruction_provider,
         tools=[
             get_store_sales,
             get_sales_data,
@@ -141,10 +146,10 @@ class RizzchartsAgent(LlmAgent):
         ),
         disallow_transfer_to_peers=True,
         base_url=base_url,
-        schema_manager=schema_manager,
     )
 
     self._a2ui_enabled_provider = a2ui_enabled_provider
+    self.schema_managers = schema_managers
     self._a2ui_catalog_provider = a2ui_catalog_provider
     self._a2ui_examples_provider = a2ui_examples_provider
 
@@ -168,8 +173,8 @@ class RizzchartsAgent(LlmAgent):
             streaming=True,
             extensions=[
                 get_a2ui_agent_extension(
-                    self.schema_manager.accepts_inline_catalogs,
-                    self.schema_manager.supported_catalog_ids,
+                    True,
+                    self.schema_managers[VERSION_0_8].supported_catalog_ids,
                 )
             ],
         ),

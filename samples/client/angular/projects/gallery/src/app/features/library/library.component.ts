@@ -15,8 +15,14 @@
  */
 
 import { ChangeDetectionStrategy, Component, ElementRef, ViewChild } from '@angular/core';
-import { Surface } from '@a2ui/angular';
-import * as Types from '@a2ui/web_core/types/types';
+import { Catalog, Theme, Surface } from '@a2ui/angular';
+import {
+  DataModel,
+  SurfaceComponentsModel,
+  SurfaceModel,
+  ComponentModel,
+} from '@a2ui/web_core/v0_9';
+import { inject } from '@angular/core';
 
 @Component({
   selector: 'app-library',
@@ -26,12 +32,14 @@ import * as Types from '@a2ui/web_core/types/types';
   changeDetection: ChangeDetectionStrategy.Eager,
 })
 export class LibraryComponent {
+  private readonly catalog = inject(Catalog);
+  private readonly theme = inject(Theme);
   @ViewChild('dialog') dialog!: ElementRef<HTMLDialogElement>;
-  selectedBlock: { name: string; surface: Types.Surface } | null = null;
+  selectedBlock: { name: string; surface: SurfaceModel<any> } | null = null;
   activeSection = '';
   showJsonId: string | null = null;
 
-  openDialog(block: { name: string; surface: Types.Surface }) {
+  openDialog(block: { name: string; surface: SurfaceModel<any> }) {
     this.selectedBlock = block;
     this.dialog.nativeElement.showModal();
   }
@@ -80,14 +88,13 @@ export class LibraryComponent {
     this.showJsonId = this.showJsonId === name ? null : name;
   }
 
-  getJson(surface: Types.Surface): string {
+  getJson(surface: SurfaceModel<any>): string {
     return JSON.stringify(
-      surface,
-      (key, value) => {
-        if (key === 'rootComponentId' || key === 'dataModel' || key === 'styles') return undefined;
-        if (value instanceof Map) return Object.fromEntries(value.entries());
-        return value;
+      {
+        id: surface.id,
+        components: Object.fromEntries(surface.componentsModel.entries),
       },
+      null,
       2,
     );
   }
@@ -558,27 +565,68 @@ export class LibraryComponent {
     },
   ];
 
-  private createSingleComponentSurface(type: string, properties: any): Types.Surface {
+  private createSingleComponentSurface(type: string, properties: any): SurfaceModel<any> {
     const rootId = 'root';
+    const surfaceId = 'generated-' + Math.random().toString(36).substr(2, 9);
+    const model = new SurfaceModel(surfaceId, this.catalog as any, this.theme);
 
-    return {
-      rootComponentId: rootId,
-      dataModel: new Map(),
-      styles: {},
-      componentTree: {
-        id: rootId,
-        type: type,
-        properties: properties,
-      } as any,
-      components: new Map(),
+    const rootDef = {
+      id: rootId,
+      type: type,
+      properties: properties,
     };
+
+    this.flatten(rootDef, model.componentsModel);
+
+    return model;
   }
 
   private createComponent(type: string, properties: any): any {
     return {
-      id: 'generated-' + Math.random().toString(36).substr(2, 9), // ID will be overridden by key in map usually, or ignored if inline
+      id: 'generated-' + Math.random().toString(36).substr(2, 9),
       type: type,
       properties: properties,
     };
+  }
+
+  /*
+    Recursively flattens a nested component definition into a flat map,
+    returning the ID of the processed component.
+  */
+  private flatten(
+    componentDef: { id: string; type: string; properties: any },
+    componentsModel: SurfaceComponentsModel,
+  ): string {
+    const flattenedProps: any = { ...componentDef.properties };
+
+    const processChild = (childDef: any): string => {
+      if (childDef && typeof childDef === 'object' && childDef.type) {
+        return this.flatten(childDef, componentsModel);
+      }
+      return childDef;
+    };
+
+    if (flattenedProps.child) {
+      flattenedProps.child = processChild(flattenedProps.child);
+    }
+    if (Array.isArray(flattenedProps.children)) {
+      flattenedProps.children = flattenedProps.children.map((child: any) => processChild(child));
+    }
+    if (flattenedProps.entryPointChild) {
+      flattenedProps.entryPointChild = processChild(flattenedProps.entryPointChild);
+    }
+    if (flattenedProps.contentChild) {
+      flattenedProps.contentChild = processChild(flattenedProps.contentChild);
+    }
+    if (Array.isArray(flattenedProps.tabItems)) {
+      flattenedProps.tabItems = flattenedProps.tabItems.map((item: any) => ({
+        ...item,
+        child: processChild(item.child),
+      }));
+    }
+
+    const componentModel = new ComponentModel(componentDef.id, componentDef.type, flattenedProps);
+    componentsModel.addComponent(componentModel);
+    return componentDef.id;
   }
 }

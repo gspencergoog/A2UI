@@ -19,14 +19,7 @@ from collections.abc import AsyncIterable
 from typing import Any
 
 import jsonschema
-from a2a.types import (
-    AgentCapabilities,
-    AgentCard,
-    AgentSkill,
-    DataPart,
-    Part,
-    TextPart,
-)
+from a2a.types import AgentCapabilities, AgentCard, AgentSkill, Part, TextPart
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.artifacts import InMemoryArtifactService
 from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
@@ -34,18 +27,19 @@ from google.adk.models.lite_llm import LiteLlm
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
-from prompt_builder import (
+from .prompt_builder import (
     get_text_prompt,
     ROLE_DESCRIPTION,
+    WORKFLOW_DESCRIPTION,
     UI_DESCRIPTION,
 )
-from tools import get_restaurants
-from a2ui.core.schema.constants import VERSION_0_8, A2UI_OPEN_TAG, A2UI_CLOSE_TAG
+from .tools import get_restaurants
+from a2ui.core.schema.constants import VERSION_0_9, A2UI_OPEN_TAG, A2UI_CLOSE_TAG
 from a2ui.core.schema.manager import A2uiSchemaManager
-from a2ui.core.parser.parser import parse_response, ResponsePart
+from a2ui.core.parser.parser import parse_response
 from a2ui.basic_catalog.provider import BasicCatalog
 from a2ui.core.schema.common_modifiers import remove_strict_validation
-from a2ui.a2a import create_a2ui_part, get_a2ui_agent_extension, parse_response_to_parts
+from a2ui.a2a import get_a2ui_agent_extension, parse_response_to_parts
 
 logger = logging.getLogger(__name__)
 
@@ -60,9 +54,12 @@ class RestaurantAgent:
     self.use_ui = use_ui
     self._schema_manager = (
         A2uiSchemaManager(
-            VERSION_0_8,
+            VERSION_0_9,
             catalogs=[
-                BasicCatalog.get_config(version=VERSION_0_8, examples_path="examples")
+                BasicCatalog.get_config(
+                    version=VERSION_0_9,
+                    examples_path=os.path.join(os.path.dirname(__file__), "examples"),
+                )
             ],
             schema_modifiers=[remove_strict_validation],
         )
@@ -120,6 +117,7 @@ class RestaurantAgent:
     instruction = (
         self._schema_manager.generate_system_prompt(
             role_description=ROLE_DESCRIPTION,
+            workflow_description=WORKFLOW_DESCRIPTION,
             ui_description=UI_DESCRIPTION,
             include_schema=True,
             include_examples=True,
@@ -169,16 +167,10 @@ class RestaurantAgent:
       )
       yield {
           "is_task_complete": True,
-          "parts": [
-              Part(
-                  root=TextPart(
-                      text=(
-                          "I'm sorry, I'm facing an internal configuration error with"
-                          " my UI components. Please contact support."
-                      )
-                  )
-              )
-          ],
+          "content": (
+              "I'm sorry, I'm facing an internal configuration error with my UI"
+              " components. Please contact support."
+          ),
       }
       return
 
@@ -243,26 +235,27 @@ class RestaurantAgent:
         try:
           response_parts = parse_response(final_response_content)
 
+          # --- New Validation Steps ---
+          # 1. Check if it validates against the A2UI_SCHEMA
+          # This will raise jsonschema.exceptions.ValidationError if it fails
+          logger.info(
+              "--- RestaurantAgent.stream: Validating against A2UI_SCHEMA... ---"
+          )
+          parsed_json_data = None
           for part in response_parts:
-            if not part.a2ui_json:
-              continue
+            if part.a2ui_json:
+              parsed_json_data = part.a2ui_json
+              selected_catalog.validator.validate(parsed_json_data)
 
-            parsed_json_data = part.a2ui_json
+          if not parsed_json_data:
+             raise ValueError("No A2UI JSON data found in response.")
+          # --- End New Validation Steps ---
 
-            # --- Validation Steps ---
-            # Check if it validates against the A2UI_SCHEMA
-            # This will raise jsonschema.exceptions.ValidationError if it fails
-            logger.info(
-                "--- RestaurantAgent.stream: Validating against A2UI_SCHEMA... ---"
-            )
-            selected_catalog.validator.validate(parsed_json_data)
-            # --- End Validation Steps ---
-
-            logger.info(
-                "--- RestaurantAgent.stream: UI JSON successfully parsed AND validated"
-                f" against schema. Validation OK (Attempt {attempt}). ---"
-            )
-            is_valid = True
+          logger.info(
+              "--- RestaurantAgent.stream: UI JSON successfully parsed AND validated"
+              f" against schema. Validation OK (Attempt {attempt}). ---"
+          )
+          is_valid = True
 
         except (
             ValueError,
@@ -286,9 +279,16 @@ class RestaurantAgent:
             "--- RestaurantAgent.stream: Response is valid. Sending final response"
             f" (Attempt {attempt}). ---"
         )
+        logger.info(f"Final response: {final_response_content}")
+
+        print("Writing final response content to /tmp/adk_llm_output.txt")
+        with open("/tmp/adk_llm_output.txt", "w") as f:
+            f.write(final_response_content)
+        
+        # We need to yield the actual final parts!
         final_parts = parse_response_to_parts(
             final_response_content, fallback_text="OK."
-        )
+        ) if self.use_ui else [Part(root=TextPart(text=final_response_content))]
 
         yield {
             "is_task_complete": True,
@@ -306,8 +306,8 @@ class RestaurantAgent:
         current_query_text = (
             f"Your previous response was invalid. {error_message} You MUST generate a"
             " valid response that strictly follows the A2UI JSON SCHEMA. The response"
-            " MUST be a JSON list of A2UI messages. Ensure each JSON part is wrapped in"
-            f" '{A2UI_OPEN_TAG}' and '{A2UI_CLOSE_TAG}' tags. Please retry the"
+            " MUST be a JSON list of A2UI messages. Ensure the response is split by"
+            f" '{A2UI_OPEN_TAG}' and '{A2UI_CLOSE_TAG}' tags and the JSON part is well-formed. Please retry the"
             f" original request: '{query}'"
         )
         # Loop continues...
@@ -319,15 +319,9 @@ class RestaurantAgent:
     )
     yield {
         "is_task_complete": True,
-        "parts": [
-            Part(
-                root=TextPart(
-                    text=(
-                        "I'm sorry, I'm having trouble generating the interface for"
-                        " that request right now. Please try again in a moment."
-                    )
-                )
-            )
-        ],
+        "content": (
+            "I'm sorry, I'm having trouble generating the interface for that request"
+            " right now. Please try again in a moment."
+        ),
     }
     # --- End: UI Validation and Retry Logic ---

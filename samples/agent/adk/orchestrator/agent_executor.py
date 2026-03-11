@@ -108,20 +108,21 @@ class OrchestratorAgentExecutor(A2aAgentExecutor):
         a2a_event.metadata["a2a_subagent"] = subagent_card
 
       for a2a_part in a2a_event.status.message.parts:
-        if (
-            is_a2ui_part(a2a_part)
-            and (begin_rendering := a2a_part.root.data.get("beginRendering"))
-            and (surface_id := begin_rendering.get("surfaceId"))
-        ):
-          asyncio.run_coroutine_threadsafe(
-              SubagentRouteManager.set_route_to_subagent_name(
-                  surface_id,
-                  event.author,
-                  invocation_context.session_service,
-                  invocation_context.session,
-              ),
-              asyncio.get_event_loop(),
-          )
+        if is_a2ui_part(a2a_part):
+          create_surface = a2a_part.root.data.get("createSurface")
+          begin_rendering = a2a_part.root.data.get("beginRendering")
+          init_msg = create_surface or begin_rendering
+
+          if init_msg and (surface_id := init_msg.get("surfaceId")):
+            asyncio.run_coroutine_threadsafe(
+                SubagentRouteManager.set_route_to_subagent_name(
+                    surface_id,
+                    event.author,
+                    invocation_context.session_service,
+                    invocation_context.session,
+                ),
+                asyncio.get_event_loop(),
+            )
 
     return a2a_events
 
