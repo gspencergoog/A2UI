@@ -17,8 +17,10 @@
 import assert from "node:assert";
 import { describe, it, beforeEach } from "node:test";
 import { signal } from "@preact/signals-core";
+import { z } from "zod";
 import { DataModel } from "../state/data-model.js";
 import { DataContext } from "./data-context.js";
+import { A2uiExpressionError } from "../errors.js";
 
 describe("DataContext", () => {
   let model: DataModel;
@@ -139,11 +141,27 @@ describe("DataContext", () => {
     );
   });
 
-  it("throws on invalid dynamic value format synchronously", () => {
-    assert.throws(
-      () => context.resolveDynamicValue({ foo: "bar" } as any),
-      /Invalid DynamicValue format/,
-    );
+  it("does not resolve arbitrary objects recursively", () => {
+    const obj = {
+      foo: "bar",
+      nested: { path: "name" },
+      list: [{ path: "address/city" }, "literal"],
+    };
+
+    const resolved = context.resolveDynamicValue(obj as any);
+    assert.deepStrictEqual(resolved, obj);
+  });
+
+  it("subscribes to literal objects as signals without resolution", () => {
+    const obj = { foo: "bar", nested: { path: "name" } };
+    const sig = context.resolveSignal(obj as any);
+
+    // It should be a literal signal containing the object
+    assert.deepStrictEqual(sig.peek(), obj);
+
+    // Updating the path should NOT affect it
+    context.set("name", "Bob");
+    assert.deepStrictEqual(sig.peek(), obj);
   });
 
   it("subscribes to function calls with no args", () => {
@@ -190,15 +208,10 @@ describe("DataContext", () => {
     assert.ok(true); // Verification occurs by absence of crash, and coverage hits the switch
   });
 
-  it("subscribes to invalid dynamic value reactively (falls back to literal)", () => {
-    let val: any;
-    const sub = context.subscribeDynamicValue(
-      { unknown: "thing" } as any,
-      (v) => {
-        val = v;
-      },
-    );
-    assert.deepStrictEqual(sub.value, { unknown: "thing" });
+  it("subscribes to invalid dynamic value reactively (falls back to literal signal)", () => {
+    const obj = { unknown: "thing" };
+    const sub = context.subscribeDynamicValue(obj as any, () => {});
+    assert.deepStrictEqual(sub.value, obj);
   });
 
   it("handles path resolution edge cases", () => {
@@ -209,5 +222,124 @@ describe("DataContext", () => {
     assert.strictEqual(rootCtx.nested("test").path, "/test");
     const trailingCtx = new DataContext(model, "/user/", () => null);
     assert.strictEqual(trailingCtx.nested("test").path, "/user/test");
+  });
+  it("subscribes to function call with arguments reactively", () => {
+    const fnInvoker = (name: string, args: any) => {
+      if (name === "greet") return `Hello ${args.name}`;
+      return null;
+    };
+    const ctx = new DataContext(model, "/user", fnInvoker);
+
+    const sub = ctx.subscribeDynamicValue(
+      { call: "greet", args: { name: { path: "name" } }, returnType: "any" },
+      () => {},
+    );
+
+    assert.strictEqual(sub.value, "Hello Alice");
+
+    // Update inner path
+    ctx.set("name", "Bob");
+    assert.strictEqual(sub.value, "Hello Bob");
+
+    sub.unsubscribe();
+  });
+
+  describe("resolveAction", () => {
+    it("resolves event actions non-recursively", () => {
+      const action = {
+        event: {
+          name: "save",
+          context: {
+            id: { path: "name" },
+            metadata: { nested: { path: "something" } },
+          },
+        },
+      };
+
+      const resolved = context.resolveAction(action as any);
+
+      assert.deepStrictEqual(resolved, {
+        event: {
+          name: "save",
+          context: {
+            id: "Alice",
+            metadata: { nested: { path: "something" } }, // Literal, NOT resolved
+          },
+        },
+      });
+    });
+
+    it("resolves functionCall actions", () => {
+      const fnInvoker = (name: string, args: any) => {
+        if (name === "greet") return `Hello ${args.name}`;
+        return null;
+      };
+      const ctx = new DataContext(model, "/user", fnInvoker);
+
+      const action = {
+        functionCall: {
+          call: "greet",
+          args: { name: { path: "name" } },
+        },
+      };
+
+      const resolved = ctx.resolveAction(action as any);
+      assert.strictEqual(resolved, "Hello Alice");
+    });
+  });
+
+  describe("Error Handling", () => {
+    it("translates ZodError into A2uiExpressionError", () => {
+      const invokerWithZodError = () => {
+        throw new z.ZodError([
+          {
+            code: "invalid_type",
+            expected: "string",
+            received: "number",
+            path: ["foo"],
+            message: "Expected string, received number",
+          },
+        ]);
+      };
+      const ctx = new DataContext(model, "/", invokerWithZodError);
+
+      assert.throws(
+        () =>
+          ctx.resolveDynamicValue({
+            call: "fail",
+            args: {},
+            returnType: "any",
+          }),
+        (e: any) => {
+          return (
+            e instanceof A2uiExpressionError &&
+            e.message.includes("Validation failed")
+          );
+        },
+      );
+    });
+
+    it("does not translate other errors", () => {
+      const invokerWithRegularError = () => {
+        throw new Error("Generic failure");
+      };
+      const ctx = new DataContext(model, "/", invokerWithRegularError);
+
+      assert.throws(
+        () =>
+          ctx.resolveDynamicValue({
+            call: "fail",
+            args: {},
+            returnType: "any",
+          }),
+        (e: any) => {
+          return (
+            e instanceof Error &&
+            !(e instanceof A2uiExpressionError) &&
+            e.message === "Generic failure"
+          );
+        },
+      );
+    });
   });
 });

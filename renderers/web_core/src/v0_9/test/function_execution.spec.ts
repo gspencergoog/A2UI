@@ -22,7 +22,7 @@ import { DataContext } from "../rendering/data-context.js";
 import { signal } from "@preact/signals-core";
 
 describe("Function Execution in DataContext", () => {
-  it("resolves and subscribes to metronome function", (_t, done) => {
+  it("resolves and subscribes to metronome function", (_t) => {
     const dataModel = new DataModel();
 
     const functions = new Map<string, Function>();
@@ -57,26 +57,31 @@ describe("Function Execution in DataContext", () => {
     };
 
     const values: string[] = [];
-    const subscription = context.subscribeDynamicValue<string>(
-      dynamicValue,
-      (val) => {
-        if (val) values.push(val);
-        if (values.length >= 3) {
-          subscription.unsubscribe();
-          try {
-            assert.strictEqual(values[0], "tick 0");
-            assert.strictEqual(values[1], "tick 1");
-            assert.strictEqual(values[2], "tick 2");
-            done();
-          } catch (e) {
-            done(e);
+    return new Promise<void>((resolve, reject) => {
+      const subscription = context.subscribeDynamicValue<string>(
+        dynamicValue,
+        (val) => {
+          if (val) values.push(val);
+          if (values.length >= 3) {
+            subscription.unsubscribe();
+            try {
+              assert.strictEqual(values[0], "tick 0");
+              assert.strictEqual(values[1], "tick 1");
+              assert.strictEqual(values[2], "tick 2");
+              resolve();
+            } catch (e) {
+              reject(e);
+            }
           }
-        }
-      },
-    );
+        },
+      );
+      if (subscription.value) {
+        values.push(subscription.value);
+      }
+    });
   });
 
-  it("updates function output when arguments change", (_t, done) => {
+  it("updates function output when arguments change", (_t) => {
     const dataModel = new DataModel();
     const functions = new Map<string, Function>();
 
@@ -100,29 +105,31 @@ describe("Function Execution in DataContext", () => {
     };
 
     const values: string[] = [];
-    const subscription = context.subscribeDynamicValue<string>(
-      dynamicValue,
-      (val) => {
-        if (val) values.push(val);
-        if (values.length === 2) {
-          subscription.unsubscribe();
-          try {
-            assert.strictEqual(values[0], "echo: hello");
-            assert.strictEqual(values[1], "echo: world");
-            done();
-          } catch (e) {
-            done(e);
+    return new Promise<void>((resolve, reject) => {
+      const subscription = context.subscribeDynamicValue<string>(
+        dynamicValue,
+        (val) => {
+          if (val) values.push(val);
+          if (values.length === 2) {
+            subscription.unsubscribe();
+            try {
+              assert.strictEqual(values[0], "echo: hello");
+              assert.strictEqual(values[1], "echo: world");
+              resolve();
+            } catch (e) {
+              reject(e);
+            }
           }
-        }
-      },
-    );
-    if (subscription.value) {
-      values.push(subscription.value);
-    }
+        },
+      );
+      if (subscription.value) {
+        values.push(subscription.value);
+      }
 
-    // Change data after a short delay to ensure first emit happens
-    setTimeout(() => {
-      dataModel.set("/msg", "world");
-    }, 50);
+      // Change data after a short delay to ensure first emit happens
+      setTimeout(() => {
+        dataModel.set("/msg", "world");
+      }, 50);
+    });
   });
 });

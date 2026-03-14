@@ -15,14 +15,17 @@
  */
 
 import { signal, computed, Signal, effect } from "@preact/signals-core";
+import { z } from "zod";
 import { DataModel, DataSubscription } from "../state/data-model.js";
 import type {
   DynamicValue,
   DataBinding,
   FunctionCall,
+  Action,
 } from "../schema/common-types.js";
 import { A2uiExpressionError } from "../errors.js";
-import type { FunctionInvoker } from "../catalog/types.js";
+
+import { FunctionInvoker } from "../catalog/function_invoker.js";
 
 /**
  * A contextual view of the main DataModel, serving as the unified interface for resolving
@@ -39,7 +42,7 @@ export class DataContext {
    * @param dataModel The shared, global DataModel instance for the entire UI surface.
    * @param path The absolute path in the DataModel that this context is scoped to (its "current working directory").
    * @param functionInvoker An optional callback for executing function calls defined in the A2UI component tree against a UI catalog.
-   *        Architectural Note: We use a callback instead of passing the Catalog directly 
+   *        Architectural Note: We use a callback instead of passing the Catalog directly
    *        to prevent a circular dependency between DataContext and Catalog types.
    *        Pass `undefined` if this context does not need to evaluate functions.
    */
@@ -75,8 +78,8 @@ export class DataContext {
    * @returns The synchronously resolved value.
    */
   resolveDynamicValue<V>(value: DynamicValue): V {
-    // 1. Literal Check
-    if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    // 1. Literal check (excluding arrays and objects)
+    if (value === null || typeof value !== "object" || Array.isArray(value)) {
       return value as V;
     }
 
@@ -95,17 +98,29 @@ export class DataContext {
         args[key] = this.resolveDynamicValue(argVal);
       }
 
-      // Synchronous resolution should not spawn long-running resources.
       const abortController = new AbortController();
-      abortController.abort();
-      
-      const result = this.functionInvoker(call.call, args, this, abortController.signal);
-      return (result instanceof Signal ? result.peek() : result) as V;
+
+      try {
+        const result = this.functionInvoker(
+          call.call,
+          args,
+          this,
+          abortController.signal,
+        );
+        return (result instanceof Signal ? result.peek() : result) as V;
+      } catch (e: any) {
+        if (e?.name === "ZodError" || e instanceof z.ZodError) {
+          throw new A2uiExpressionError(
+            `Validation failed for function '${call.call}': ${e.message}`,
+            call.call,
+            e.errors ?? e.issues,
+          );
+        }
+        throw e;
+      }
     }
 
-    throw new A2uiExpressionError(
-      `Invalid DynamicValue format: ${JSON.stringify(value)}`,
-    );
+    return value as V;
   }
 
   /**
@@ -125,7 +140,7 @@ export class DataContext {
     onChange: (value: V | undefined) => void,
   ): DataSubscription<V> {
     const sig = this.resolveSignal<V>(value);
-    
+
     let isSync = true;
     let currentValue = sig.peek();
 
@@ -153,6 +168,13 @@ export class DataContext {
 
   /**
    * Returns a Preact Signal representing the reactive dynamic value.
+   *
+   * This method recursively resolves any nested path bindings or function calls into a
+   * single, reactive `Signal`. Any changes to the underlying data or function dependencies
+   * will cause this signal's value to update.
+   *
+   * @param value The DynamicValue to evaluate and observe.
+   * @returns A Preact Signal containing the reactive result of the evaluation.
    */
   resolveSignal<V>(value: DynamicValue): Signal<V> {
     // 1. Literal
@@ -177,29 +199,63 @@ export class DataContext {
 
       if (Object.keys(argSignals).length === 0) {
         const abortController = new AbortController();
-        const result = this.evaluateFunctionReactive<V>(call.call, {}, abortController.signal);
+        const result = this.evaluateFunctionReactive<V>(
+          call.call,
+          {},
+          abortController.signal,
+        );
         const sig = result instanceof Signal ? result : signal(result);
         (sig as any).unsubscribe = () => abortController.abort();
         return sig;
       }
 
       const keys = Object.keys(argSignals);
+      const resultSig = signal<V | undefined>(undefined);
       let abortController: AbortController | undefined;
-      
-      const sig = computed(() => {
-        if (abortController) abortController.abort();
-        abortController = new AbortController();
-        
+      let innerUnsubscribe: (() => void) | undefined;
+
+      const argsSig = computed(() => {
         const argsRecord: Record<string, any> = {};
         for (let i = 0; i < keys.length; i++) {
           argsRecord[keys[i]] = argSignals[keys[i]].value;
         }
-        
-        const result = this.evaluateFunctionReactive<V>(call.call, argsRecord, abortController.signal);
-        return result instanceof Signal ? result.value : result;
+        return argsRecord;
       });
 
-      (sig as any).unsubscribe = () => {
+      const stopper = effect(() => {
+        const args = argsSig.value;
+        if (abortController) abortController.abort();
+        if (innerUnsubscribe) {
+          innerUnsubscribe();
+          innerUnsubscribe = undefined;
+        }
+        abortController = new AbortController();
+
+        try {
+          const res = this.evaluateFunctionReactive<V>(
+            call.call,
+            args,
+            abortController.signal,
+          );
+
+          if (res instanceof Signal) {
+            innerUnsubscribe = effect(() => {
+              resultSig.value = res.value;
+            });
+          } else {
+            resultSig.value = res;
+          }
+        } catch (e) {
+          // In reactive mode, we might want to propagate errors through the signal
+          // or at least log them. For now, we'll let them bubble if it's the first run,
+          // or just store them if we had a better way.
+          throw e;
+        }
+      });
+
+      (resultSig as any).unsubscribe = () => {
+        stopper();
+        if (innerUnsubscribe) innerUnsubscribe();
         if (abortController) abortController.abort();
         for (let i = 0; i < keys.length; i++) {
           const argSig = argSignals[keys[i]];
@@ -209,10 +265,39 @@ export class DataContext {
         }
       };
 
-      return sig;
+      return resultSig as unknown as Signal<V>;
     }
 
     return signal(value as unknown as V);
+  }
+
+  /**
+   * Resolves an action by evaluating its top-level dynamic values.
+   *
+   * For event actions, it resolves each value in the context map.
+   * For function call actions, it evaluates the call.
+   *
+   * This is non-recursive: it only resolves one level deep for the context record.
+   */
+  resolveAction(action: Action): any {
+    if ("event" in action) {
+      const resolvedContext: Record<string, any> = {};
+      if (action.event.context) {
+        for (const [key, value] of Object.entries(action.event.context)) {
+          resolvedContext[key] = this.resolveDynamicValue(value);
+        }
+      }
+      return {
+        event: {
+          ...action.event,
+          context: resolvedContext,
+        },
+      };
+    }
+    if ("functionCall" in action) {
+      return this.resolveDynamicValue(action.functionCall);
+    }
+    return action;
   }
 
   private evaluateFunctionReactive<V>(
@@ -220,7 +305,18 @@ export class DataContext {
     args: Record<string, any>,
     abortSignal?: AbortSignal,
   ): Signal<V> | V {
-    return this.functionInvoker(name, args, this, abortSignal);
+    try {
+      return this.functionInvoker(name, args, this, abortSignal);
+    } catch (e: any) {
+      if (e?.name === "ZodError" || e instanceof z.ZodError) {
+        throw new A2uiExpressionError(
+          `Validation failed for function '${name}': ${e.message}`,
+          name,
+          e.errors ?? e.issues,
+        );
+      }
+      throw e;
+    }
   }
 
   /**
