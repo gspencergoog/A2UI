@@ -22,7 +22,7 @@ import { Renderer } from '../rendering/renderer';
 @Component({
   selector: 'a2ui-list',
   imports: [Renderer],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.onPush,
   host: {
     '[attr.direction]': 'direction()',
   },

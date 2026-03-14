@@ -23,7 +23,7 @@ import * as Types from '@a2ui/web_core/types/types';
   imports: [Surface],
   templateUrl: './library.html',
   styleUrl: './library.css',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.onPush,
 })
 export class LibraryComponent {
   @ViewChild('dialog') dialog!: ElementRef<HTMLDialogElement>;

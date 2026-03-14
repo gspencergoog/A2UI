@@ -34,7 +34,7 @@ import { BaseChartDirective } from 'ng2-charts';
 @Component({
   selector: 'a2ui-chart',
   imports: [BaseChartDirective, MatIconButton, MatIcon],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.onPush,
   styles: `
     :host {
       display: block;

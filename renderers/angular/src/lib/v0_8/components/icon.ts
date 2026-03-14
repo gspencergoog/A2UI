@@ -24,7 +24,7 @@ import * as Primitives from '@a2ui/web_core/types/primitives';
     'aria-hidden': 'true',
     tabindex: '-1',
   },
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.onPush,
   styles: `
     :host {
       display: block;

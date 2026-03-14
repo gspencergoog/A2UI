@@ -21,7 +21,7 @@ import { CanvasService } from '@a2a_chat_canvas/services/canvas-service';
 
 @Component({
   selector: 'a2ui-canvas',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.onPush,
   styles: `
     :host {
       display: block;

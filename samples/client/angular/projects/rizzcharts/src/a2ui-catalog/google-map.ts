@@ -38,7 +38,7 @@ export interface CustomProperties {
 @Component({
   selector: 'a2ui-map',
   imports: [GoogleMapsModule, MatIconButton, MatIcon],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.onPush,
   styles: `
     :host {
       display: block;
