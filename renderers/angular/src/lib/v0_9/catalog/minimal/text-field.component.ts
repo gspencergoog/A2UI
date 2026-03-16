@@ -40,11 +40,16 @@ import { A2uiRendererService } from '../../core/a2ui-renderer.service';
   `,
   styles: [
     `
+      :host {
+        display: block;
+        flex: 1;
+        width: 100%;
+      }
       .a2ui-text-field-container {
         display: flex;
         flex-direction: column;
         gap: 4px;
-        width: 100%;
+        margin: 4px;
       }
       input {
         padding: 8px;
