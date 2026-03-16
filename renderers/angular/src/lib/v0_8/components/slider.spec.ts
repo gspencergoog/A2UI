@@ -44,10 +44,10 @@ describe('Slider', () => {
           container: 'custom-slider-container',
           label: 'custom-slider-label',
           element: 'custom-slider-input',
-        }
+        },
       },
       additionalStyles: {
-        Slider: { 'accent-color': 'red' }
+        Slider: { 'accent-color': 'red' },
       },
     };
 
@@ -65,12 +65,12 @@ describe('Slider', () => {
         { provide: MarkdownRenderer, useValue: mockMarkdownRenderer },
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: DOCUMENT, useValue: document },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Slider);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
@@ -82,14 +82,14 @@ describe('Slider', () => {
         label: 'Volume',
         minValue: 0,
         maxValue: 100,
-      }
+      },
     });
     fixture.componentRef.setInput('value', { literalNumber: 50 });
     fixture.componentRef.setInput('label', 'Volume');
     fixture.componentRef.setInput('minValue', 0);
     fixture.componentRef.setInput('maxValue', 100);
     fixture.componentRef.setInput('weight', 1);
-    
+
     fixture.detectChanges();
   });
 
@@ -128,7 +128,7 @@ describe('Slider', () => {
       jasmine.any(Object),
       'volume',
       75,
-      'surface-1'
+      'surface-1',
     );
     expect(input.style.getPropertyValue('--slider-percent')).toBe('75%');
   });

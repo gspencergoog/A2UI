@@ -42,7 +42,7 @@ describe('Divider', () => {
         Divider: 'custom-divider-class',
       },
       additionalStyles: {
-        Divider: { 'height': '2px' }
+        Divider: { height: '2px' },
       },
     };
 
@@ -60,22 +60,22 @@ describe('Divider', () => {
         { provide: MarkdownRenderer, useValue: mockMarkdownRenderer },
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: DOCUMENT, useValue: document },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Divider);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
       id: 'div1',
       type: 'Divider',
       weight: 1,
-      properties: {}
+      properties: {},
     });
     fixture.componentRef.setInput('weight', 1);
-    
+
     fixture.detectChanges();
   });
 

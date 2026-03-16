@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export const EXAMPLES = [
+import { Example } from './types';
+
+export const EXAMPLES: Example[] = [
   {
     name: 'Simple Text',
     description: 'Basic text rendering',

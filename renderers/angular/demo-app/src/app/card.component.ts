@@ -17,6 +17,7 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ComponentHostComponent } from '../../../src/lib/v0_9/core/component-host.component';
+import { BoundProperty } from '../../../src/lib/v0_9/core/types';
 
 /**
  * A simple card component for the demo.
@@ -31,8 +32,8 @@ import { ComponentHostComponent } from '../../../src/lib/v0_9/core/component-hos
       style="border: 1px solid #ccc; padding: 16px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 16px; background-color: white;"
     >
       <a2ui-v09-component-host
-        *ngIf="props.child?.value()"
-        [componentId]="props.child.value()"
+        *ngIf="props['child']?.value()"
+        [componentId]="props['child'].value()"
         [surfaceId]="surfaceId"
       >
       </a2ui-v09-component-host>
@@ -41,6 +42,6 @@ import { ComponentHostComponent } from '../../../src/lib/v0_9/core/component-hos
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardComponent {
-  @Input() props: any = {};
+  @Input() props: Record<string, BoundProperty> = {};
   @Input() surfaceId!: string;
 }

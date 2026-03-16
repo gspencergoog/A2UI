@@ -44,10 +44,10 @@ describe('DatetimeInput', () => {
           container: 'custom-container',
           label: 'custom-label',
           element: 'custom-input',
-        }
+        },
       },
       additionalStyles: {
-        DateTimeInput: { 'background': 'red' }
+        DateTimeInput: { background: 'red' },
       },
     };
 
@@ -66,25 +66,25 @@ describe('DatetimeInput', () => {
         { provide: MarkdownRenderer, useValue: mockMarkdownRenderer },
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: DOCUMENT, useValue: document },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DatetimeInput);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
       id: 'dt1',
       type: 'DateTimeInput',
       weight: 1,
-      properties: {}
+      properties: {},
     });
     fixture.componentRef.setInput('value', { path: 'date_path' });
     fixture.componentRef.setInput('enableDate', true);
     fixture.componentRef.setInput('enableTime', true);
     fixture.componentRef.setInput('weight', 1);
-    
+
     fixture.detectChanges();
   });
 
@@ -118,7 +118,7 @@ describe('DatetimeInput', () => {
     const input = fixture.nativeElement.querySelector('input');
     input.value = '2025-04-20T16:20';
     input.dispatchEvent(new Event('input'));
-    
+
     expect(mockMessageProcessor.setData).toHaveBeenCalled();
   });
 
@@ -126,7 +126,7 @@ describe('DatetimeInput', () => {
     const section = fixture.nativeElement.querySelector('section');
     const label = fixture.nativeElement.querySelector('label');
     const input = fixture.nativeElement.querySelector('input');
-    
+
     expect(section.className).toBe('custom-container');
     expect(label.className).toBe('custom-label');
     expect(input.className).toBe('custom-input');

@@ -45,7 +45,7 @@ describe('Image', () => {
         },
       },
       additionalStyles: {
-        Image: { 'border': '1px solid black' }
+        Image: { border: '1px solid black' },
       },
     };
 
@@ -63,12 +63,12 @@ describe('Image', () => {
         { provide: MarkdownRenderer, useValue: mockMarkdownRenderer },
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: DOCUMENT, useValue: document },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Image);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
@@ -78,13 +78,13 @@ describe('Image', () => {
       properties: {
         url: { literalString: 'https://example.com/a.png' },
         altText: { literalString: 'Example Image' },
-      }
+      },
     });
     fixture.componentRef.setInput('url', { literalString: 'https://example.com/a.png' });
     fixture.componentRef.setInput('usageHint', 'avatar');
     fixture.componentRef.setInput('altText', { literalString: 'Example Image' });
     fixture.componentRef.setInput('weight', 1);
-    
+
     fixture.detectChanges();
   });
 

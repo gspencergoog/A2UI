@@ -42,7 +42,7 @@ describe('Column', () => {
         Column: { 'custom-column-class': true },
       },
       additionalStyles: {
-        Column: { 'gap': '10px' }
+        Column: { gap: '10px' },
       },
     };
 
@@ -60,12 +60,12 @@ describe('Column', () => {
         { provide: MarkdownRenderer, useValue: mockMarkdownRenderer },
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: DOCUMENT, useValue: document },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Column);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
@@ -73,15 +73,13 @@ describe('Column', () => {
       type: 'Column',
       weight: 1,
       properties: {
-        children: [
-          { id: 'text1', type: 'Text', properties: { value: 'Child 1' } },
-        ]
-      }
+        children: [{ id: 'text1', type: 'Text', properties: { value: 'Child 1' } }],
+      },
     });
     fixture.componentRef.setInput('alignment', 'center');
     fixture.componentRef.setInput('distribution', 'spaceBetween');
     fixture.componentRef.setInput('weight', 1);
-    
+
     fixture.detectChanges();
   });
 

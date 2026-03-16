@@ -51,7 +51,9 @@ describe('Text', () => {
     };
 
     mockMarkdownRenderer = {
-      render: jasmine.createSpy('render').and.callFake((val: string) => Promise.resolve(`rendered: ${val}`)),
+      render: jasmine
+        .createSpy('render')
+        .and.callFake((val: string) => Promise.resolve(`rendered: ${val}`)),
     };
 
     await TestBed.configureTestingModule({
@@ -60,12 +62,12 @@ describe('Text', () => {
         { provide: MessageProcessor, useValue: mockMessageProcessor },
         { provide: Theme, useValue: mockTheme },
         { provide: MarkdownRenderer, useValue: mockMarkdownRenderer },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Text);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
@@ -74,12 +76,12 @@ describe('Text', () => {
       weight: 1,
       properties: {
         value: { literalString: 'Hello world' },
-      }
+      },
     });
     fixture.componentRef.setInput('text', { literalString: 'Hello world' });
     fixture.componentRef.setInput('usageHint', 'body');
     fixture.componentRef.setInput('weight', 1);
-    
+
     fixture.detectChanges();
   });
 
@@ -115,7 +117,10 @@ describe('Text', () => {
       fixture.detectChanges();
       await fixture.whenStable();
       fixture.detectChanges();
-      expect(mockMarkdownRenderer.render).toHaveBeenCalledWith(`${prefixes[i]} Hello world`, jasmine.any(Object));
+      expect(mockMarkdownRenderer.render).toHaveBeenCalledWith(
+        `${prefixes[i]} Hello world`,
+        jasmine.any(Object),
+      );
     }
   });
 
@@ -148,7 +153,7 @@ describe('Text', () => {
       body: { 'font-size': '1em' },
     };
     mockTheme.additionalStyles.Text = hintedTheme;
-    
+
     fixture.componentRef.setInput('usageHint', 'h1');
     fixture.detectChanges();
     // We can't easily check the protected additionalStyles() directly without casting
@@ -173,7 +178,7 @@ describe('Text', () => {
       body: { 'font-size': '1.1em' },
     };
     mockTheme.additionalStyles.Text = hintedTheme;
-    
+
     fixture.componentRef.setInput('usageHint', null);
     fixture.detectChanges();
     const section = fixture.nativeElement.querySelector('section');
@@ -181,9 +186,9 @@ describe('Text', () => {
   });
 
   it('should apply simple additional styles if not hinted', () => {
-    const simpleStyles = { 'color': 'green', 'opacity': '0.5' };
+    const simpleStyles = { color: 'green', opacity: '0.5' };
     mockTheme.additionalStyles.Text = simpleStyles;
-    
+
     fixture.componentRef.setInput('usageHint', 'h1');
     fixture.detectChanges();
     const section = fixture.nativeElement.querySelector('section');
@@ -206,12 +211,12 @@ describe('Text', () => {
     mockTheme.additionalStyles.Text = incompleteHinted;
     fixture.componentRef.setInput('usageHint', 'h1');
     fixture.detectChanges();
-    
+
     // It should treat incompleteHinted as a direct style record (applying [key]: {color: 'red'} as strings to style)
-    // Wait, if it's not hinted, it returns styles as is. 
+    // Wait, if it's not hinted, it returns styles as is.
     // styles[h1] = {color: 'red'} (as string '[object Object]')?
     // Angular's [style] binding might handle it or fail.
     // Actually, in Text.ts: additionalStyles = styles;
-    // So [style]="{ h1: { color: 'red' } }" 
+    // So [style]="{ h1: { color: 'red' } }"
   });
 });

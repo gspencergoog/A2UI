@@ -44,10 +44,10 @@ describe('MultipleChoice', () => {
           container: 'custom-container',
           label: 'custom-label',
           element: 'custom-select',
-        }
+        },
       },
       additionalStyles: {
-        MultipleChoice: { 'border': '1px solid black' }
+        MultipleChoice: { border: '1px solid black' },
       },
     };
 
@@ -65,12 +65,12 @@ describe('MultipleChoice', () => {
         { provide: MarkdownRenderer, useValue: mockMarkdownRenderer },
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: DOCUMENT, useValue: document },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MultipleChoice);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
@@ -84,7 +84,7 @@ describe('MultipleChoice', () => {
         ],
         value: { path: 'selectedOpt', literalString: 'opt1' },
         description: 'Choose one',
-      }
+      },
     });
     fixture.componentRef.setInput('options', [
       { label: { literalString: 'Option 1' }, value: 'opt1' },
@@ -93,7 +93,7 @@ describe('MultipleChoice', () => {
     fixture.componentRef.setInput('value', { path: 'selectedOpt', literalString: 'opt1' });
     fixture.componentRef.setInput('description', 'Choose one');
     fixture.componentRef.setInput('weight', 1);
-    
+
     fixture.detectChanges();
   });
 
@@ -120,7 +120,7 @@ describe('MultipleChoice', () => {
       jasmine.any(Object),
       'selectedOpt',
       'opt2',
-      'surface-1'
+      'surface-1',
     );
   });
 

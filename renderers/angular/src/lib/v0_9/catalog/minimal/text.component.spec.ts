@@ -17,6 +17,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TextComponent } from './text.component';
 import { By } from '@angular/platform-browser';
+import { signal } from '@angular/core';
 
 describe('TextComponent', () => {
   let component: TextComponent;
@@ -30,9 +31,9 @@ describe('TextComponent', () => {
     fixture = TestBed.createComponent(TextComponent);
     component = fixture.componentInstance;
     component.props = {
-      text: { value: () => 'Hello World' },
-      weight: { value: () => 'bold' },
-      style: { value: () => 'italic' },
+      text: { value: signal('Hello World'), raw: 'Hello World', onUpdate: () => {} },
+      weight: { value: signal('bold'), raw: 'bold', onUpdate: () => {} },
+      style: { value: signal('italic'), raw: 'italic', onUpdate: () => {} },
     };
   });
 

@@ -17,6 +17,7 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ComponentHostComponent } from '../../core/component-host.component';
+import { BoundProperty } from '../../core/types';
 import { getNormalizedPath } from '../../core/utils';
 
 /**
@@ -29,8 +30,8 @@ import { getNormalizedPath } from '../../core/utils';
   template: `
     <div
       class="a2ui-row"
-      [style.justify-content]="props.justify?.value()"
-      [style.align-items]="props.align?.value()"
+      [style.justify-content]="props['justify']?.value()"
+      [style.align-items]="props['align']?.value()"
       style="display: flex; flex-direction: row; width: 100%;"
     >
       <ng-container *ngIf="!isRepeating()">
@@ -62,24 +63,24 @@ export class RowComponent {
   /**
    * Bound properties.
    */
-  @Input() props: any = {};
+  @Input() props: Record<string, BoundProperty> = {};
   @Input() surfaceId!: string;
   @Input() dataContextPath: string = '/';
 
   protected children() {
-    const raw = this.props.children?.value() || [];
+    const raw = this.props['children']?.value() || [];
     return Array.isArray(raw) ? raw : [];
   }
 
   protected isRepeating() {
-    return !!this.props.children?.raw?.componentId;
+    return !!this.props['children']?.raw?.componentId;
   }
 
   protected getTemplateId() {
-    return this.props.children?.raw?.componentId;
+    return this.props['children']?.raw?.componentId;
   }
 
   protected getNormalizedPath(index: number) {
-    return getNormalizedPath(this.props.children?.raw?.path, this.dataContextPath, index);
+    return getNormalizedPath(this.props['children']?.raw?.path, this.dataContextPath, index);
   }
 }

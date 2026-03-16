@@ -17,6 +17,7 @@
 import { Injectable } from '@angular/core';
 import { A2uiRendererService } from '../../../src/lib/v0_9/core/a2ui-renderer.service';
 import { AngularCatalog } from '../../../src/lib/v0_9/catalog/types';
+import { SurfaceGroupAction, A2uiMessage } from '@a2ui/web_core/v0_9';
 
 /**
  * A stub service that simulates an A2UI agent.
@@ -27,7 +28,7 @@ import { AngularCatalog } from '../../../src/lib/v0_9/catalog/types';
 })
 export class AgentStubService {
   /** Log of actions received from the surface. */
-  actionsLog: any[] = [];
+  actionsLog: Array<{ timestamp: Date; action: SurfaceGroupAction }> = [];
 
   constructor(
     private rendererService: A2uiRendererService,
@@ -40,55 +41,58 @@ export class AgentStubService {
    * - Emulates generic server-side evaluation triggers delaying deferred updates.
    * - Dispatch subsequent node-tree node triggers back over `A2uiRendererService`.
    */
-  handleAction(action: any) {
+  handleAction(action: SurfaceGroupAction) {
     console.log('[AgentStub] handleAction action:', action);
     this.actionsLog.push({ timestamp: new Date(), action });
 
     // Simulate server processing delay
     setTimeout(() => {
-      if (action.event?.name === 'update_property') {
-        const { path, value, surfaceId } = action.event.context;
-        console.log(
-          '[AgentStub] update_property path:',
-          path,
-          'value:',
-          value,
-          'surfaceId:',
-          surfaceId,
-        );
-        this.rendererService.processMessages([
-          {
-            version: 'v0.9',
-            updateDataModel: {
-              surfaceId: surfaceId || action.surfaceId,
-              path: path,
-              value: value,
+      if ('event' in action) {
+        const { name, context } = action.event;
+        if (name === 'update_property' && context) {
+          const { path, value, surfaceId } = context as any;
+          console.log(
+            '[AgentStub] update_property path:',
+            path,
+            'value:',
+            value,
+            'surfaceId:',
+            surfaceId,
+          );
+          this.rendererService.processMessages([
+            {
+              version: 'v0.9',
+              updateDataModel: {
+                surfaceId: (surfaceId as string) || action.surfaceId,
+                path: path as string,
+                value: value,
+              },
             },
-          },
-        ]);
-      } else if (action.event?.name === 'submit_form') {
-        const formData = action.event.context;
-        const name = formData.name || 'Anonymous';
+          ]);
+        } else if (name === 'submit_form' && context) {
+          const formData = context as any;
+          const nameValue = formData.name || 'Anonymous';
 
-        // Respond with an update to the data model in v0.9 layout
-        this.rendererService.processMessages([
-          {
-            version: 'v0.9',
-            updateDataModel: {
-              surfaceId: action.surfaceId,
-              path: '/form/submitted',
-              value: true,
+          // Respond with an update to the data model in v0.9 layout
+          this.rendererService.processMessages([
+            {
+              version: 'v0.9',
+              updateDataModel: {
+                surfaceId: action.surfaceId,
+                path: '/form/submitted',
+                value: true,
+              },
             },
-          },
-          {
-            version: 'v0.9',
-            updateDataModel: {
-              surfaceId: action.surfaceId,
-              path: '/form/responseMessage',
-              value: `Hello, ${name}! Your form has been processed.`,
+            {
+              version: 'v0.9',
+              updateDataModel: {
+                surfaceId: action.surfaceId,
+                path: '/form/responseMessage',
+                value: `Hello, ${nameValue}! Your form has been processed.`,
+              },
             },
-          },
-        ]);
+          ]);
+        }
       }
     }, 50); // Shorter delay for property updates
   }
@@ -96,7 +100,7 @@ export class AgentStubService {
   /**
    * Initializes a demo session with an initial set of messages.
    */
-  initializeDemo(initialMessages: any[]) {
+  initializeDemo(initialMessages: A2uiMessage[]) {
     this.rendererService.initialize({
       catalogs: [this.catalog],
       actionHandler: (action) => this.handleAction(action),

@@ -42,7 +42,7 @@ describe('Video', () => {
         Video: 'custom-video-class',
       },
       additionalStyles: {
-        Video: { 'background-color': 'black' }
+        Video: { 'background-color': 'black' },
       },
     };
 
@@ -60,12 +60,12 @@ describe('Video', () => {
         { provide: MarkdownRenderer, useValue: mockMarkdownRenderer },
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: DOCUMENT, useValue: document },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Video);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
@@ -74,11 +74,11 @@ describe('Video', () => {
       weight: 1,
       properties: {
         url: { literalString: 'https://example.com/a.mp4' },
-      }
+      },
     });
     fixture.componentRef.setInput('url', { literalString: 'https://example.com/a.mp4' });
     fixture.componentRef.setInput('weight', 1);
-    
+
     fixture.detectChanges();
   });
 

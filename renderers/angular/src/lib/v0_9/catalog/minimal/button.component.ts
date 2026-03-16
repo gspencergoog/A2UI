@@ -19,6 +19,7 @@ import { CommonModule } from '@angular/common';
 import { ComponentHostComponent } from '../../core/component-host.component';
 import { ComponentContext, DataContext } from '@a2ui/web_core/v0_9';
 import { A2uiRendererService } from '../../core/a2ui-renderer.service';
+import { BoundProperty } from '../../core/types';
 
 /**
  * Angular implementation of the A2UI Button component (v0.9).
@@ -29,13 +30,13 @@ import { A2uiRendererService } from '../../core/a2ui-renderer.service';
   imports: [CommonModule, ComponentHostComponent],
   template: `
     <button
-      [type]="props.variant?.value() === 'primary' ? 'submit' : 'button'"
-      [class]="'a2ui-button ' + (props.variant?.value() || 'default')"
+      [type]="props['variant']?.value() === 'primary' ? 'submit' : 'button'"
+      [class]="'a2ui-button ' + (props['variant']?.value() || 'default')"
       (click)="handleClick()"
     >
       <a2ui-v09-component-host
-        *ngIf="props.child?.value()"
-        [componentId]="props.child.value()"
+        *ngIf="props['child']?.value()"
+        [componentId]="props['child'].value()"
         [surfaceId]="surfaceId"
         [dataContextPath]="dataContextPath"
       >
@@ -69,14 +70,14 @@ export class ButtonComponent {
   /**
    * Bound properties.
    */
-  @Input() props: any = {};
+  @Input() props: Record<string, BoundProperty> = {};
   @Input() surfaceId!: string;
   @Input() dataContextPath: string = '/';
 
   private rendererService = inject(A2uiRendererService);
 
   handleClick() {
-    const action = this.props.action?.value();
+    const action = this.props['action']?.value();
     if (action) {
       const surface = this.rendererService.surfaceGroup?.getSurface(this.surfaceId);
       if (surface) {

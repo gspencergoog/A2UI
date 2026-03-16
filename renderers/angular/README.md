@@ -73,7 +73,7 @@ export class DashboardComponent implements OnInit {
       catalogs: [this.myCatalog],
       actionHandler: (action) => {
         console.log('Global action handler received:', action);
-      }
+      },
     });
   }
 

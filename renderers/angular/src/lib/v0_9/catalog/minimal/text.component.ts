@@ -16,6 +16,7 @@
 
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { BoundProperty } from '../../core/types';
 
 /**
  * Angular implementation of the A2UI Text component (v0.9).
@@ -25,8 +26,11 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <span [style.font-weight]="props.weight?.value()" [style.font-style]="props.style?.value()">
-      {{ props.text?.value() }}
+    <span
+      [style.font-weight]="props['weight']?.value()"
+      [style.font-style]="props['style']?.value()"
+    >
+      {{ props['text']?.value() }}
     </span>
   `,
   // Default change detection to allow passive updates from Preact signals
@@ -35,7 +39,7 @@ export class TextComponent {
   /**
    * Bound properties.
    */
-  @Input() props: any = {};
+  @Input() props: Record<string, BoundProperty> = {};
   @Input() surfaceId?: string;
   @Input() componentId?: string;
   @Input() dataContextPath?: string;

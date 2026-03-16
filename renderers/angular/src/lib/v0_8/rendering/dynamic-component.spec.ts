@@ -43,7 +43,11 @@ describe('DynamicComponent', () => {
   let mockTheme: any;
 
   beforeEach(async () => {
-    mockProcessor = jasmine.createSpyObj('MessageProcessor', ['resolvePath', 'getData', 'dispatch']);
+    mockProcessor = jasmine.createSpyObj('MessageProcessor', [
+      'resolvePath',
+      'getData',
+      'dispatch',
+    ]);
     mockTheme = {};
 
     await TestBed.configureTestingModule({
@@ -56,12 +60,16 @@ describe('DynamicComponent', () => {
 
     fixture = TestBed.createComponent(TestDynamicComponent);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
-    fixture.componentRef.setInput('component', { id: 'comp-1', type: 'button', dataContextPath: '/root' });
+    fixture.componentRef.setInput('component', {
+      id: 'comp-1',
+      type: 'button',
+      dataContextPath: '/root',
+    });
     fixture.componentRef.setInput('weight', 'normal');
-    
+
     fixture.detectChanges();
   });
 
@@ -79,7 +87,7 @@ describe('DynamicComponent', () => {
     expect(mockProcessor.getData).toHaveBeenCalledWith(
       jasmine.any(Object),
       'some/path',
-      'surface-1'
+      'surface-1',
     );
   });
 
@@ -94,8 +102,8 @@ describe('DynamicComponent', () => {
       name: 'click',
       context: [
         { key: 'static', value: { literalString: 'value' } },
-        { key: 'dynamic', value: { path: 'data/path' } }
-      ]
+        { key: 'dynamic', value: { path: 'data/path' } },
+      ],
     };
 
     mockProcessor.resolvePath.and.returnValue('/root/data/path');
@@ -104,16 +112,18 @@ describe('DynamicComponent', () => {
 
     await component.callSendAction(action);
 
-    expect(mockProcessor.dispatch).toHaveBeenCalledWith(jasmine.objectContaining({
-      userAction: jasmine.objectContaining({
-        name: 'click',
-        sourceComponentId: 'comp-1',
-        surfaceId: 'surface-1',
-        context: {
-          static: 'value',
-          dynamic: 'dynamic-value'
-        }
-      })
-    }));
+    expect(mockProcessor.dispatch).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        userAction: jasmine.objectContaining({
+          name: 'click',
+          sourceComponentId: 'comp-1',
+          surfaceId: 'surface-1',
+          context: {
+            static: 'value',
+            dynamic: 'dynamic-value',
+          },
+        }),
+      }),
+    );
   });
 });

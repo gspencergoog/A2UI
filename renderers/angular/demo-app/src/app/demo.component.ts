@@ -21,7 +21,9 @@ import { AgentStubService } from './agent-stub.service';
 import { ComponentHostComponent } from '../../../src/lib/v0_9/core/component-host.component';
 import { AngularCatalog } from '../../../src/lib/v0_9/catalog/types';
 import { DemoCatalog } from './demo-catalog';
+import { SurfaceGroupAction, A2uiMessage, CreateSurfaceMessage } from '@a2ui/web_core/v0_9';
 import { EXAMPLES } from './examples-bundle';
+import { Example } from './types';
 import { Subscription } from 'rxjs';
 
 /**
@@ -91,7 +93,7 @@ import { Subscription } from 'rxjs';
             <div *ngFor="let ev of eventsLog" class="log-item">
               <div class="log-header">
                 <span class="log-time">{{ ev.timestamp | date: 'HH:mm:ss.SSS' }}</span>
-                <span class="log-type">{{ ev.action.type || 'Action' }}</span>
+                <span class="log-type">{{ getActionType(ev.action) }}</span>
               </div>
               <pre class="log-details">{{ ev.action | json }}</pre>
             </div>
@@ -346,12 +348,12 @@ export class DemoComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
 
   examples = EXAMPLES;
-  selectedExample: any = null;
+  selectedExample: Example | undefined = undefined;
   surfaceId: string | null = null;
   inspectTab: 'data' | 'events' = 'data';
 
-  currentDataModel: any = null;
-  eventsLog: any[] = [];
+  currentDataModel: Record<string, unknown> = {};
+  eventsLog: Array<{ timestamp: Date; action: SurfaceGroupAction }> = [];
 
   private actionSub?: () => void;
   private dataModelSub?: { unsubscribe: () => void };
@@ -368,10 +370,10 @@ export class DemoComponent implements OnInit, OnDestroy {
    * - Re-initializes incremental playback state sequence into `AgentStubService`.
    * - Subscribes to path `/` enabling live model inspection updates.
    */
-  selectExample(example: any) {
+  selectExample(example: Example) {
     this.selectedExample = example;
     this.surfaceId = null;
-    this.currentDataModel = null;
+    this.currentDataModel = {};
     this.eventsLog = [];
     this.cdr.detectChanges();
 
@@ -383,7 +385,7 @@ export class DemoComponent implements OnInit, OnDestroy {
     this.agentStub.initializeDemo(example.messages);
 
     // Look for the surfaceId in the first message or use default
-    const createMsg = example.messages.find((m: any) => m.createSurface);
+    const createMsg = example.messages.find((m): m is CreateSurfaceMessage => 'createSurface' in m);
     this.surfaceId = createMsg ? createMsg.createSurface.surfaceId : 'demo-surface';
 
     this.cdr.detectChanges();
@@ -393,7 +395,7 @@ export class DemoComponent implements OnInit, OnDestroy {
     if (surface) {
       // Subscribe to root changes
       this.dataModelSub = surface.dataModel.subscribe('/', (data) => {
-        this.currentDataModel = data;
+        this.currentDataModel = data as Record<string, unknown>;
         this.cdr.detectChanges();
       });
       // Set initial data model
@@ -411,6 +413,17 @@ export class DemoComponent implements OnInit, OnDestroy {
       });
       this.actionSub = () => sub.unsubscribe();
     }
+  }
+
+  /** Gets a display string for the action type. */
+  getActionType(action: SurfaceGroupAction): string {
+    if ('event' in action) {
+      return action.event.name;
+    }
+    if ('functionCall' in action) {
+      return `Call: ${action.functionCall.call}`;
+    }
+    return 'Action';
   }
 
   ngOnDestroy(): void {

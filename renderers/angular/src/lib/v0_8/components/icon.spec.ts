@@ -42,7 +42,7 @@ describe('Icon', () => {
         Icon: 'custom-icon-class',
       },
       additionalStyles: {
-        Icon: { 'color': 'blue' }
+        Icon: { color: 'blue' },
       },
     };
 
@@ -60,12 +60,12 @@ describe('Icon', () => {
         { provide: MarkdownRenderer, useValue: mockMarkdownRenderer },
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: DOCUMENT, useValue: document },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Icon);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
@@ -74,11 +74,11 @@ describe('Icon', () => {
       weight: 1,
       properties: {
         name: { literalString: 'home' },
-      }
+      },
     });
     fixture.componentRef.setInput('name', { literalString: 'home' });
     fixture.componentRef.setInput('weight', 1);
-    
+
     fixture.detectChanges();
   });
 

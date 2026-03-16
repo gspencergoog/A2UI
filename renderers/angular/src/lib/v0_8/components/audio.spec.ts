@@ -42,7 +42,7 @@ describe('Audio', () => {
         AudioPlayer: 'custom-audio-class',
       },
       additionalStyles: {
-        AudioPlayer: { 'background-color': 'gray' }
+        AudioPlayer: { 'background-color': 'gray' },
       },
     };
 
@@ -60,12 +60,12 @@ describe('Audio', () => {
         { provide: MarkdownRenderer, useValue: mockMarkdownRenderer },
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: DOCUMENT, useValue: document },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Audio);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
@@ -74,11 +74,11 @@ describe('Audio', () => {
       weight: 1,
       properties: {
         url: { literalString: 'https://example.com/a.mp3' },
-      }
+      },
     });
     fixture.componentRef.setInput('url', { literalString: 'https://example.com/a.mp3' });
     fixture.componentRef.setInput('weight', 1);
-    
+
     fixture.detectChanges();
   });
 

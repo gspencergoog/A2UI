@@ -58,15 +58,15 @@ describe('Modal', () => {
         Modal: {
           backdrop: 'custom-backdrop',
           element: 'custom-modal-element',
-        }
+        },
       },
       additionalStyles: {
-        Modal: { 'background': 'blue' }
+        Modal: { background: 'blue' },
       },
     };
 
     mockCatalog = {
-      'Text': () => Promise.resolve(MockChild),
+      Text: () => Promise.resolve(MockChild),
     };
 
     mockMarkdownRenderer = {
@@ -82,12 +82,12 @@ describe('Modal', () => {
         { provide: MarkdownRenderer, useValue: mockMarkdownRenderer },
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: DOCUMENT, useValue: document },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Modal);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
@@ -97,10 +97,10 @@ describe('Modal', () => {
       properties: {
         entryPointChild: { id: 'entry', type: 'Text', weight: 1, properties: {} },
         contentChild: { id: 'content', type: 'Text', weight: 1, properties: {} },
-      }
+      },
     });
     fixture.componentRef.setInput('weight', 1);
-    
+
     fixture.detectChanges();
   });
 
@@ -123,10 +123,10 @@ describe('Modal', () => {
 
     const dialog = fixture.nativeElement.querySelector('dialog');
     expect(dialog).toBeTruthy();
-    
+
     await fixture.whenStable();
     fixture.detectChanges();
-    
+
     const contentChild = dialog.querySelector('.child-content');
     expect(contentChild).toBeTruthy();
   });
@@ -135,21 +135,21 @@ describe('Modal', () => {
     // Open first
     fixture.nativeElement.querySelector('section').click();
     fixture.detectChanges();
-    
+
     const closeButton = fixture.nativeElement.querySelector('button');
     closeButton.click();
     fixture.detectChanges();
-    
+
     expect(fixture.nativeElement.querySelector('dialog')).toBeNull();
   });
 
   it('should apply theme classes to dialog and section', async () => {
     fixture.nativeElement.querySelector('section').click();
     fixture.detectChanges();
-    
+
     const dialog = fixture.nativeElement.querySelector('dialog');
     const modalSection = dialog.querySelector('section');
-    
+
     expect(dialog.classList).toContain('custom-backdrop');
     expect(modalSection.classList).toContain('custom-modal-element');
   });

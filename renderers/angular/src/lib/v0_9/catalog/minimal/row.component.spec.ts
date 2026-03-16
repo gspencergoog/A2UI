@@ -17,6 +17,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, Input } from '@angular/core';
 import { RowComponent } from './row.component';
+import { signal } from '@angular/core';
 import { A2uiRendererService } from '../../core/a2ui-renderer.service';
 import { ComponentBinder } from '../../core/component-binder.service';
 import { By } from '@angular/platform-browser';
@@ -76,9 +77,13 @@ describe('RowComponent', () => {
     component = fixture.componentInstance;
     component.surfaceId = 'surf1';
     component.props = {
-      justify: { value: () => 'center' },
-      align: { value: () => 'baseline' },
-      children: { value: () => ['child1', 'child2'] },
+      justify: { value: signal('center'), raw: 'center', onUpdate: () => {} },
+      align: { value: signal('baseline'), raw: 'baseline', onUpdate: () => {} },
+      children: {
+        value: signal(['child1', 'child2']),
+        raw: ['child1', 'child2'],
+        onUpdate: () => {},
+      },
     };
   });
 
@@ -103,12 +108,13 @@ describe('RowComponent', () => {
   });
 
   it('should render repeating children', () => {
-    component.props.children = {
-      value: () => [{}, {}], // two items
+    component.props['children'] = {
+      value: signal([{}, {}]), // two items
       raw: {
         componentId: 'template1',
         path: 'items',
       },
+      onUpdate: () => {},
     };
     fixture.detectChanges();
 

@@ -38,10 +38,10 @@ describe('Checkbox', () => {
           container: 'cb-container',
           label: 'cb-label',
           element: 'cb-input',
-        }
+        },
       },
       additionalStyles: {
-        CheckBox: { display: 'flex' }
+        CheckBox: { display: 'flex' },
       },
     };
 
@@ -50,12 +50,12 @@ describe('Checkbox', () => {
       providers: [
         { provide: MessageProcessor, useValue: mockMessageProcessor },
         { provide: Theme, useValue: mockTheme },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Checkbox);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
@@ -65,12 +65,12 @@ describe('Checkbox', () => {
       properties: {
         value: { path: 'user.agreed' },
         label: { literalString: 'I agree' },
-      }
+      },
     });
     fixture.componentRef.setInput('value', { path: 'user.agreed' });
     fixture.componentRef.setInput('label', { literalString: 'I agree' });
     fixture.componentRef.setInput('weight', 1);
-    
+
     fixture.detectChanges();
   });
 
@@ -93,7 +93,7 @@ describe('Checkbox', () => {
       jasmine.any(Object),
       'user.agreed',
       false,
-      'surface-1'
+      'surface-1',
     );
   });
 });

@@ -54,16 +54,16 @@ describe('Tabs', () => {
             // Use different prefixes to avoid Styles.merge conflict logic
             all: { 'tabbutton-all': true },
             selected: { 'tabselected-active': true },
-          }
-        }
+          },
+        },
       },
       additionalStyles: {
-        Tabs: { 'border': '1px solid black' }
+        Tabs: { border: '1px solid black' },
       },
     };
 
     mockCatalog = {
-      'Text': () => Promise.resolve(MockChild),
+      Text: () => Promise.resolve(MockChild),
     };
 
     mockMarkdownRenderer = {
@@ -79,26 +79,32 @@ describe('Tabs', () => {
         { provide: MarkdownRenderer, useValue: mockMarkdownRenderer },
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: DOCUMENT, useValue: document },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Tabs);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
       id: 'tabs1',
       type: 'Tabs',
       weight: 1,
-      properties: {}
+      properties: {},
     });
     fixture.componentRef.setInput('tabs', [
-      { title: { literalString: 'Tab 1' }, child: { id: 'c1', type: 'Text', weight: 1, properties: {} } },
-      { title: { literalString: 'Tab 2' }, child: { id: 'c2', type: 'Text', weight: 1, properties: {} } },
+      {
+        title: { literalString: 'Tab 1' },
+        child: { id: 'c1', type: 'Text', weight: 1, properties: {} },
+      },
+      {
+        title: { literalString: 'Tab 2' },
+        child: { id: 'c2', type: 'Text', weight: 1, properties: {} },
+      },
     ]);
     fixture.componentRef.setInput('weight', 1);
-    
+
     fixture.detectChanges();
   });
 
@@ -132,7 +138,7 @@ describe('Tabs', () => {
 
     await fixture.whenStable();
     fixture.detectChanges();
-    
+
     // In a real test we'd verify the child component changed if they were different,
     // but here they both use MockChild.
   });
@@ -142,7 +148,7 @@ describe('Tabs', () => {
     // First tab is selected
     expect(buttons[0].classList).toContain('tabbutton-all');
     expect(buttons[0].classList).toContain('tabselected-active');
-    
+
     // Second tab is not
     expect(buttons[1].classList).toContain('tabbutton-all');
     expect(buttons[1].classList).not.toContain('tabselected-active');

@@ -23,7 +23,7 @@ describe('MessageProcessor', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [MessageProcessor]
+      providers: [MessageProcessor],
     });
     service = TestBed.inject(MessageProcessor);
   });
@@ -70,7 +70,10 @@ describe('MessageProcessor', () => {
 
   it('should override setData and handle null surfaceId', () => {
     const node: any = { id: 'node1' };
-    const spy = spyOn(Object.getPrototypeOf(MessageProcessor.prototype), 'setData').and.callThrough();
+    const spy = spyOn(
+      Object.getPrototypeOf(MessageProcessor.prototype),
+      'setData',
+    ).and.callThrough();
 
     service.setData(node, 'path', 'value', null);
 

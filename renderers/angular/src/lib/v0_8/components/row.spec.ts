@@ -42,7 +42,7 @@ describe('Row', () => {
         Row: { 'custom-row-class': true },
       },
       additionalStyles: {
-        Row: { 'gap': '10px' }
+        Row: { gap: '10px' },
       },
     };
 
@@ -60,12 +60,12 @@ describe('Row', () => {
         { provide: MarkdownRenderer, useValue: mockMarkdownRenderer },
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: DOCUMENT, useValue: document },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Row);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
@@ -73,15 +73,13 @@ describe('Row', () => {
       type: 'Row',
       weight: 1,
       properties: {
-        children: [
-          { id: 'text1', type: 'Text', properties: { value: 'Child 1' } },
-        ]
-      }
+        children: [{ id: 'text1', type: 'Text', properties: { value: 'Child 1' } }],
+      },
     });
     fixture.componentRef.setInput('alignment', 'center');
     fixture.componentRef.setInput('distribution', 'spaceBetween');
     fixture.componentRef.setInput('weight', 1);
-    
+
     fixture.detectChanges();
   });
 

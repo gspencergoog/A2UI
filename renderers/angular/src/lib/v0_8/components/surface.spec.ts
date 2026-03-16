@@ -51,7 +51,7 @@ describe('Surface', () => {
     };
 
     mockCatalog = {
-      'Text': () => Promise.resolve(MockChild),
+      Text: () => Promise.resolve(MockChild),
     };
 
     mockMarkdownRenderer = {
@@ -67,12 +67,12 @@ describe('Surface', () => {
         { provide: MarkdownRenderer, useValue: mockMarkdownRenderer },
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: DOCUMENT, useValue: document },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Surface);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('surface', {
@@ -81,14 +81,14 @@ describe('Surface', () => {
         id: 'c1',
         type: 'Text',
         weight: 1,
-        properties: {}
+        properties: {},
       },
       styles: {
         primaryColor: '#ff0000',
         font: 'Arial',
-      }
+      },
     });
-    
+
     fixture.detectChanges();
   });
 

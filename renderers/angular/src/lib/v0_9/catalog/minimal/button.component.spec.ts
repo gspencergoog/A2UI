@@ -15,7 +15,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, Input } from '@angular/core';
+import { Component, Input, signal } from '@angular/core';
 import { ButtonComponent } from './button.component';
 import { A2uiRendererService } from '../../core/a2ui-renderer.service';
 import { ComponentBinder } from '../../core/component-binder.service';
@@ -82,9 +82,13 @@ describe('ButtonComponent', () => {
     component = fixture.componentInstance;
     component.surfaceId = 'surf1';
     component.props = {
-      variant: { value: () => 'primary' },
-      child: { value: () => 'child1' },
-      action: { value: () => ({ type: 'test-action', data: {} }) },
+      variant: { value: signal('primary'), raw: 'primary', onUpdate: () => {} },
+      child: { value: signal('child1'), raw: 'child1', onUpdate: () => {} },
+      action: {
+        value: signal({ type: 'test-action', data: {} }),
+        raw: { type: 'test-action', data: {} },
+        onUpdate: () => {},
+      },
     };
   });
 
@@ -100,7 +104,11 @@ describe('ButtonComponent', () => {
   });
 
   it('should set button type to button for non-primary variant', () => {
-    component.props.variant = { value: () => 'default' };
+    component.props['variant'] = {
+      value: signal('secondary'),
+      raw: 'secondary',
+      onUpdate: () => {},
+    };
     fixture.detectChanges();
     const button = fixture.debugElement.query(By.css('button'));
     expect(button.nativeElement.type).toBe('button');
@@ -129,7 +137,7 @@ describe('ButtonComponent', () => {
   });
 
   it('should not show child component host if child prop is absent', () => {
-    component.props.child = { value: () => null };
+    component.props['child'] = { value: signal(null), raw: null, onUpdate: () => {} };
     fixture.detectChanges();
     const host = fixture.debugElement.query(By.css('a2ui-v09-component-host'));
     expect(host).toBeFalsy();

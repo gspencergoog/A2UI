@@ -16,6 +16,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TextFieldComponent } from './text-field.component';
+import { signal } from '@angular/core';
 import { A2uiRendererService } from '../../core/a2ui-renderer.service';
 import { By } from '@angular/platform-browser';
 
@@ -35,10 +36,14 @@ describe('TextFieldComponent', () => {
     fixture = TestBed.createComponent(TextFieldComponent);
     component = fixture.componentInstance;
     component.props = {
-      label: { value: () => 'Username' },
-      value: { value: () => 'testuser', onUpdate: jasmine.createSpy('onUpdate') },
-      placeholder: { value: () => 'Enter username' },
-      variant: { value: () => 'text' },
+      label: { value: signal('Username'), raw: 'Username', onUpdate: () => {} },
+      value: {
+        value: signal('testuser'),
+        raw: 'testuser',
+        onUpdate: jasmine.createSpy('onUpdate'),
+      },
+      placeholder: { value: signal('Enter username'), raw: 'Enter username', onUpdate: () => {} },
+      variant: { value: signal('text'), raw: 'text', onUpdate: () => {} },
     };
   });
 
@@ -54,7 +59,7 @@ describe('TextFieldComponent', () => {
   });
 
   it('should not render label if not provided', () => {
-    component.props.label = { value: () => null };
+    component.props['label'] = { value: signal(null), raw: null, onUpdate: () => {} };
     fixture.detectChanges();
     const label = fixture.debugElement.query(By.css('label'));
     expect(label).toBeFalsy();
@@ -69,11 +74,11 @@ describe('TextFieldComponent', () => {
 
   it('should return correct input type based on variant', () => {
     expect(component.getInputType()).toBe('text');
-    
-    component.props.variant = { value: () => 'obscured' };
+
+    component.props['variant'] = { value: signal('obscured'), raw: 'obscured', onUpdate: () => {} };
     expect(component.getInputType()).toBe('password');
-    
-    component.props.variant = { value: () => 'number' };
+
+    component.props['variant'] = { value: signal('number'), raw: 'number', onUpdate: () => {} };
     expect(component.getInputType()).toBe('number');
   });
 
@@ -82,7 +87,7 @@ describe('TextFieldComponent', () => {
     const input = fixture.debugElement.query(By.css('input'));
     input.nativeElement.value = 'newuser';
     input.triggerEventHandler('input', { target: input.nativeElement });
-    
-    expect(component.props.value.onUpdate).toHaveBeenCalledWith('newuser');
+
+    expect(component.props['value'].onUpdate).toHaveBeenCalledWith('newuser');
   });
 });

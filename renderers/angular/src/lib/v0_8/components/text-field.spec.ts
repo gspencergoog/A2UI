@@ -38,10 +38,10 @@ describe('TextField', () => {
           container: 'tf-container',
           label: 'tf-label',
           element: 'tf-input',
-        }
+        },
       },
       additionalStyles: {
-        TextField: { color: 'blue' }
+        TextField: { color: 'blue' },
       },
     };
 
@@ -50,12 +50,12 @@ describe('TextField', () => {
       providers: [
         { provide: MessageProcessor, useValue: mockMessageProcessor },
         { provide: Theme, useValue: mockTheme },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TextField);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
@@ -65,14 +65,14 @@ describe('TextField', () => {
       properties: {
         text: { path: 'user.name' },
         label: { literalString: 'Name' },
-        textFieldType: 'text'
-      }
+        textFieldType: 'text',
+      },
     });
     fixture.componentRef.setInput('text', { path: 'user.name' });
     fixture.componentRef.setInput('label', { literalString: 'Name' });
     fixture.componentRef.setInput('textFieldType', 'text');
     fixture.componentRef.setInput('weight', 1);
-    
+
     fixture.detectChanges();
   });
 
@@ -95,7 +95,7 @@ describe('TextField', () => {
       jasmine.any(Object),
       'user.name',
       'New Name',
-      'surface-1'
+      'surface-1',
     );
   });
 

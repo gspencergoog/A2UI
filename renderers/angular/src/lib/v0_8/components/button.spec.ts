@@ -58,12 +58,12 @@ describe('Button', () => {
         { provide: Theme, useValue: mockTheme },
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: DOCUMENT, useValue: document },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Button);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
@@ -71,12 +71,12 @@ describe('Button', () => {
       type: 'Button',
       weight: 1,
       properties: {
-        child: { id: 'text1', type: 'Text', properties: { value: 'Click me' } }
-      }
+        child: { id: 'text1', type: 'Text', properties: { value: 'Click me' } },
+      },
     });
     fixture.componentRef.setInput('weight', 1);
     fixture.componentRef.setInput('action', { action: 'test-action', context: [] });
-    
+
     fixture.detectChanges();
   });
 

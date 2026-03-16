@@ -36,7 +36,7 @@ describe('MarkdownRenderer', () => {
           provide: DomSanitizer,
           useValue: mockSanitizer,
         },
-      ]
+      ],
     });
     service = TestBed.inject(MarkdownRenderer);
     sanitizer = TestBed.inject(DomSanitizer);
@@ -57,7 +57,7 @@ describe('MarkdownRenderer', () => {
           provide: DomSanitizer,
           useValue: mockSanitizer,
         },
-      ]
+      ],
     });
     service = TestBed.inject(MarkdownRenderer);
 
@@ -68,7 +68,7 @@ describe('MarkdownRenderer', () => {
   it('should return a fallback span if no renderer is provided', async () => {
     const spy = spyOn(console, 'warn');
     const result: any = await service.render('test');
-    
+
     expect(spy).toHaveBeenCalled();
     expect(result).toContain('span');
     expect(result).toContain('test');

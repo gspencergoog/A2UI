@@ -42,7 +42,7 @@ describe('Card', () => {
         Card: 'card-class',
       },
       additionalStyles: {
-        Card: { 'border': '1px solid black' }
+        Card: { border: '1px solid black' },
       },
     };
 
@@ -60,12 +60,12 @@ describe('Card', () => {
         { provide: MarkdownRenderer, useValue: mockMarkdownRenderer },
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: DOCUMENT, useValue: document },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Card);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
@@ -76,11 +76,11 @@ describe('Card', () => {
         children: [
           { id: 'text1', type: 'Text', properties: { value: 'Child 1' } },
           { id: 'text2', type: 'Text', properties: { value: 'Child 2' } },
-        ]
-      }
+        ],
+      },
     });
     fixture.componentRef.setInput('weight', 1);
-    
+
     fixture.detectChanges();
   });
 

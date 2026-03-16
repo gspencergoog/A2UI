@@ -42,7 +42,7 @@ describe('List', () => {
         List: 'custom-list-class',
       },
       additionalStyles: {
-        List: { 'padding': '10px' }
+        List: { padding: '10px' },
       },
     };
 
@@ -60,12 +60,12 @@ describe('List', () => {
         { provide: MarkdownRenderer, useValue: mockMarkdownRenderer },
         { provide: PLATFORM_ID, useValue: 'browser' },
         { provide: DOCUMENT, useValue: document },
-      ]
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(List);
     component = fixture.componentInstance;
-    
+
     // Set required inputs
     fixture.componentRef.setInput('surfaceId', 'surface-1');
     fixture.componentRef.setInput('component', {
@@ -76,12 +76,12 @@ describe('List', () => {
         children: [
           { id: 'text1', type: 'Text', properties: { value: 'Item 1' } },
           { id: 'text2', type: 'Text', properties: { value: 'Item 2' } },
-        ]
-      }
+        ],
+      },
     });
     fixture.componentRef.setInput('direction', 'vertical');
     fixture.componentRef.setInput('weight', 1);
-    
+
     fixture.detectChanges();
   });
 
