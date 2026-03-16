@@ -16,7 +16,7 @@
 
 import { DestroyRef } from '@angular/core';
 import { signal as preactSignal } from '@preact/signals-core';
-import { toAngularSignal } from './utils';
+import { toAngularSignal, getNormalizedPath } from './utils';
 
 describe('toAngularSignal', () => {
   let mockDestroyRef: jasmine.SpyObj<DestroyRef>;
@@ -75,5 +75,22 @@ describe('toAngularSignal', () => {
     onDestroyCallback();
 
     expect(unsubscribeSpy).toHaveBeenCalled();
+  });
+});
+
+describe('getNormalizedPath', () => {
+  it('should handle absolute paths', () => {
+    expect(getNormalizedPath('/absolute', '/', 0)).toBe('/absolute/0');
+    expect(getNormalizedPath('/absolute/', '/base', 5)).toBe('/absolute/5');
+  });
+
+  it('should resolve relative paths against dataContextPath', () => {
+    expect(getNormalizedPath('relative', '/', 2)).toBe('/relative/2');
+    expect(getNormalizedPath('relative', '/base', 3)).toBe('/base/relative/3');
+  });
+
+  it('should handle empty paths', () => {
+    expect(getNormalizedPath('', '/', 1)).toBe('/1');
+    expect(getNormalizedPath('', '/base', 4)).toBe('/base/4');
   });
 });

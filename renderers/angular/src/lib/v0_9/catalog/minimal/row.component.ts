@@ -17,6 +17,7 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ComponentHostComponent } from '../../core/component-host.component';
+import { getNormalizedPath } from '../../core/utils';
 
 /**
  * Angular implementation of the A2UI Row component (v0.9).
@@ -79,14 +80,6 @@ export class RowComponent {
   }
 
   protected getNormalizedPath(index: number) {
-    let path = this.props.children?.raw?.path || '';
-    if (!path.startsWith('/')) {
-      const base = this.dataContextPath === '/' ? '' : this.dataContextPath;
-      path = `${base}/${path}`;
-    }
-    if (path.endsWith('/')) {
-      path = path.slice(0, -1);
-    }
-    return `${path}/${index}`;
+    return getNormalizedPath(this.props.children?.raw?.path, this.dataContextPath, index);
   }
 }

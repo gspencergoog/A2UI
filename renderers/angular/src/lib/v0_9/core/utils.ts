@@ -52,3 +52,24 @@ export function toAngularSignal<T>(
 
   return s.asReadonly();
 }
+
+/**
+ * Normalizes a data model path by correctly combining a relative path with a base data context path,
+ * and appending an index for repeating children.
+ *
+ * @param path The relative or absolute path from the component properties.
+ * @param dataContextPath The current base data context path.
+ * @param index The index of the child component.
+ * @returns A fully normalized absolute path for the indexed child.
+ */
+export function getNormalizedPath(path: string, dataContextPath: string, index: number): string {
+  let normalized = path || '';
+  if (!normalized.startsWith('/')) {
+    const base = dataContextPath === '/' ? '' : dataContextPath;
+    normalized = `${base}/${normalized}`;
+  }
+  if (normalized.endsWith('/')) {
+    normalized = normalized.slice(0, -1);
+  }
+  return `${normalized}/${index}`;
+}
