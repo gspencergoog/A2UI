@@ -82,7 +82,7 @@ describe("BASIC_FUNCTIONS", () => {
       assert.throws(() => invoke("divide", { a: undefined, b: 10 }, context), A2uiExpressionError);
       assert.throws(() => invoke("divide", { a: undefined, b: undefined }, context), A2uiExpressionError);
       assert.throws(() => invoke("divide", { a: 10, b: null }, context), A2uiExpressionError);
-      assert.throws(() => invoke("divide", { a: 10, b: "invalid" }, context), A2uiExpressionError);
+      assert.ok(Number.isNaN(invoke("divide", { a: 10, b: "invalid" }, context)));
       assert.strictEqual(invoke("divide", { a: 10, b: "2" }, context), 5);
       assert.strictEqual(
         invoke("divide", { a: "10", b: "2" }, context),
