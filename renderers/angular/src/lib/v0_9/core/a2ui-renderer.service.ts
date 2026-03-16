@@ -25,7 +25,6 @@ import { AngularComponentApi, AngularCatalog } from '../catalog/types';
 @Injectable()
 export class A2uiRendererService implements OnDestroy {
   private _messageProcessor?: MessageProcessor<AngularComponentApi>;
-  private _surfaceGroup?: SurfaceGroupModel<AngularComponentApi>;
 
   private catalog = inject(AngularCatalog);
 
@@ -44,7 +43,6 @@ export class A2uiRendererService implements OnDestroy {
       [this.catalog],
       actionHandler,
     );
-    this._surfaceGroup = this._messageProcessor.model;
   }
 
   /**
@@ -65,11 +63,10 @@ export class A2uiRendererService implements OnDestroy {
    * Returns the current surface group model.
    */
   get surfaceGroup(): SurfaceGroupModel<AngularComponentApi> | undefined {
-    return this._surfaceGroup;
+    return this._messageProcessor?.model;
   }
 
   ngOnDestroy(): void {
-    this._surfaceGroup?.dispose();
-    // MessageProcessor doesn't have a dispose but it owns the model which does.
+    this._messageProcessor?.model.dispose();
   }
 }
