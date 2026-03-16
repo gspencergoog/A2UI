@@ -294,7 +294,9 @@ export class DataContext {
    * For event actions, it resolves each value in the context map.
    * For function call actions, it evaluates the call.
    *
-   * This is non-recursive: it only resolves one level deep for the context record.
+   * This is non-recursive: it only resolves one level deep for the context record,
+   * in accordance with the schema specification that requires values to be single
+   * DynamicValue types and prevents arbitrary nesting.
    */
   resolveAction(action: Action): any {
     if ("event" in action) {
