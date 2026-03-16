@@ -82,7 +82,7 @@ describe("BASIC_FUNCTIONS", () => {
       assert.throws(() => invoke("divide", { a: undefined, b: 10 }, context), A2uiExpressionError);
       assert.throws(() => invoke("divide", { a: undefined, b: undefined }, context), A2uiExpressionError);
       assert.throws(() => invoke("divide", { a: 10, b: null }, context), A2uiExpressionError);
-      assert.ok(Number.isNaN(invoke("divide", { a: 10, b: "invalid" }, context)));
+      assert.throws(() => invoke("divide", { a: 10, b: "invalid" }, context), A2uiExpressionError);
       assert.strictEqual(invoke("divide", { a: 10, b: "2" }, context), 5);
       assert.strictEqual(
         invoke("divide", { a: "10", b: "2" }, context),
@@ -333,14 +333,16 @@ describe("BASIC_FUNCTIONS", () => {
     });
 
     it("email", () => {
-      assert.strictEqual(
-        invoke("email", { value: "test@example.com" }, context),
-        true,
-      );
-      assert.strictEqual(
-        invoke("email", { value: "invalid" }, context),
-        false,
-      );
+      assert.strictEqual(invoke("email", { value: "test@example.com" }, context), true);
+      assert.strictEqual(invoke("email", { value: "test.name@example.com" }, context), true);
+      assert.strictEqual(invoke("email", { value: "test+label@example.com" }, context), true);
+      assert.strictEqual(invoke("email", { value: "test@example-domain.com" }, context), true);
+      
+      assert.strictEqual(invoke("email", { value: "invalid" }, context), false);
+      assert.strictEqual(invoke("email", { value: "test@test" }, context), false);
+      assert.strictEqual(invoke("email", { value: "test@test.c" }, context), false);
+      assert.strictEqual(invoke("email", { value: "test@.com" }, context), false);
+      
       assert.throws(
         () => invoke("email", {}, context),
         A2uiExpressionError,

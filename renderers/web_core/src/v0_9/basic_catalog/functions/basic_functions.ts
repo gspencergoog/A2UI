@@ -120,9 +120,10 @@ export const NumericImplementation = createFunctionImplementation(NumericApi, (a
   return true;
 });
 export const EmailImplementation = createFunctionImplementation(EmailApi, (args) => {
-  // TODO(gspencergoog): Use a "real" email validation function, preferably from
-  // an existing package. This is woefully insufficient.
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(args.value);
+  // TODO(gspencergoog): Use a "real" email validation function, preferably
+  // from an existing package. This is woefully insufficient, real email
+  // validation can't be done with a regex.
+  return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(args.value);
 });
 
 // Formatting
