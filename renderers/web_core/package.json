@@ -40,7 +40,8 @@
     "prepack": "npm run build",
     "build": "wireit",
     "build:tsc": "wireit",
-    "test": "wireit"
+    "test": "wireit",
+    "test:coverage": "c8 node --test dist"
   },
   "wireit": {
     "copy-spec": {
@@ -87,6 +88,7 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/node": "^24.11.0",
+    "c8": "^11.0.0",
     "typescript": "^5.8.3",
     "wireit": "^0.15.0-pre.2",
     "zod-to-json-schema": "^3.25.1"

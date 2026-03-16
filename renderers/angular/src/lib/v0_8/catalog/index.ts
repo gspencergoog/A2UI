@@ -58,7 +58,7 @@ export const CATALOG: Catalog = {
       return [
         inputBinding('url', () => properties.url),
         inputBinding('usageHint', () => properties.usageHint),
-        inputBinding('altText', () => (properties as any).altText ?? null),
+        inputBinding('altText', () => properties.altText ?? null),
       ];
     },
   },
@@ -127,7 +127,7 @@ export const CATALOG: Catalog = {
       return [
         inputBinding('text', () => properties.text ?? null),
         inputBinding('label', () => properties.label),
-        inputBinding('inputType', () => (properties as any).textFieldType),
+        inputBinding('inputType', () => properties.textFieldType),
       ];
     },
   },

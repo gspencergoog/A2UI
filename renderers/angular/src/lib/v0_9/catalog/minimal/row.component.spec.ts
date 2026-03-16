@@ -16,7 +16,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, Input } from '@angular/core';
-import { ColumnComponent } from './column.component';
+import { RowComponent } from './row.component';
 import { A2uiRendererService } from '../../core/a2ui-renderer.service';
 import { ComponentBinder } from '../../core/component-binder.service';
 import { By } from '@angular/platform-browser';
@@ -32,9 +32,9 @@ class DummyChild {
   @Input() dataContextPath?: string;
 }
 
-describe('ColumnComponent', () => {
-  let component: ColumnComponent;
-  let fixture: ComponentFixture<ColumnComponent>;
+describe('RowComponent', () => {
+  let component: RowComponent;
+  let fixture: ComponentFixture<RowComponent>;
   let mockRendererService: any;
   let mockSurface: any;
   let mockSurfaceGroup: any;
@@ -65,19 +65,19 @@ describe('ColumnComponent', () => {
     mockBinder.bind.and.returnValue({ text: { value: () => 'bound' } });
 
     await TestBed.configureTestingModule({
-      imports: [ColumnComponent],
+      imports: [RowComponent],
       providers: [
         { provide: A2uiRendererService, useValue: mockRendererService },
         { provide: ComponentBinder, useValue: mockBinder },
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ColumnComponent);
+    fixture = TestBed.createComponent(RowComponent);
     component = fixture.componentInstance;
     component.surfaceId = 'surf1';
     component.props = {
-      justify: { value: () => 'start' },
-      align: { value: () => 'stretch' },
+      justify: { value: () => 'center' },
+      align: { value: () => 'baseline' },
       children: { value: () => ['child1', 'child2'] },
     };
   });
@@ -89,9 +89,9 @@ describe('ColumnComponent', () => {
 
   it('should apply flex styles from props', () => {
     fixture.detectChanges();
-    const div = fixture.debugElement.query(By.css('.a2ui-column'));
-    expect(div.styles['justify-content']).toBe('start');
-    expect(div.styles['align-items']).toBe('stretch');
+    const div = fixture.debugElement.query(By.css('.a2ui-row'));
+    expect(div.styles['justify-content']).toBe('center');
+    expect(div.styles['align-items']).toBe('baseline');
   });
 
   it('should render non-repeating children', () => {
@@ -104,7 +104,7 @@ describe('ColumnComponent', () => {
 
   it('should render repeating children', () => {
     component.props.children = {
-      value: () => [{}, {}],
+      value: () => [{}, {}], // two items
       raw: {
         componentId: 'template1',
         path: 'items',
