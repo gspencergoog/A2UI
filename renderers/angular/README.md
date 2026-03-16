@@ -17,7 +17,7 @@ The `v0_9` model decouples rendering mechanics from static templates by binding 
 
 ### 1. Register Components in a Catalog
 
-Extend `AngularCatalog` or use preset catalogs like `MinimalCatalog`. Define your custom elements using a dynamic mapping:
+Extend `AngularCatalog` or use preset catalogs like `MinimalCatalog`. Define your custom elements by passing them to the base constructor:
 
 ```typescript
 import { Injectable } from '@angular/core';
@@ -27,53 +27,54 @@ import { CustomComponent } from './custom-component';
 @Injectable({ providedIn: 'root' })
 export class MyCatalog extends MinimalCatalog {
   constructor() {
-    super();
+    const customComponents = [
+      {
+        name: 'CustomComponent',
+        schema: { ... }, // Zod schema spec
+        component: CustomComponent,
+      },
+    ];
 
-    const customApi = {
-      name: 'CustomComponent',
-      schema: { ... }, // Zod schema spec
-      component: CustomComponent,
-    };
-
-    const components = Array.from(this.components.values());
-    components.push(customApi);
-
-    // Merge custom registrations
-    (this as any).components = new Map(components.map((c) => [c.name, c]));
+    super('my-catalog', customComponents, []);
   }
 }
 ```
 
 ### 2. Provide Renderer Infrastructure
 
-In your dashboard component or module providers tier, initialize the `A2uiRendererService` and declare the backing `AngularCatalog`:
+In your dashboard component or module providers tier, provide the `A2uiRendererService`:
 
 ```typescript
-import { Component, inject, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { A2uiRendererService } from '@a2ui/angular/lib/v0_9/core/a2ui-renderer.service';
-import { AngularCatalog } from '@a2ui/angular/lib/v0_9/catalog/types';
 import { MyCatalog } from './my-catalog';
 
 @Component({
   selector: 'app-dashboard',
   providers: [
     A2uiRendererService,
-    { provide: AngularCatalog, useClass: MyCatalog },
+    // MyCatalog is providedIn: 'root', otherwise provide it here
   ]
 })
 ```
 
 ### 3. Initialize Layout and Render
 
-Prepare the service on load and supply the generic host targeting the source surface:
+Prepare the service on load by providing a `RendererConfiguration`. This defines the catalogs to use and an optional global action handler:
 
 ```typescript
 export class DashboardComponent implements OnInit {
   private rendererService = inject(A2uiRendererService);
+  private myCatalog = inject(MyCatalog);
   surfaceId = 'dashboard-surface';
 
   ngOnInit() {
-    this.rendererService.initialize();
+    this.rendererService.initialize({
+      catalogs: [this.myCatalog],
+      actionHandler: (action) => {
+        console.log('Global action handler received:', action);
+      }
+    });
   }
 
   onMessagesReceived(messages: any[]) {
