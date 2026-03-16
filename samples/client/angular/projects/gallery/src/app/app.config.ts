@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { V0_8_CATALOG, provideA2UI } from '@a2ui/angular';
+import { V0_8_CATALOG, provideA2UI } from '@a2ui/angular/v0_8';
 import { IMAGE_CONFIG } from '@angular/common';
 import {
   ApplicationConfig,

@@ -16,10 +16,10 @@
 
 import { ChangeDetectorRef, Component, OnInit, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { A2uiRendererService } from '../../../src/lib/v0_9/core/a2ui-renderer.service';
+import { A2uiRendererService } from '../../../v0_9/core/a2ui-renderer.service';
 import { AgentStubService } from './agent-stub.service';
-import { ComponentHostComponent } from '../../../src/lib/v0_9/core/component-host.component';
-import { AngularCatalog } from '../../../src/lib/v0_9/catalog/types';
+import { ComponentHostComponent } from '../../../v0_9/core/component-host.component';
+import { AngularCatalog } from '../../../v0_9/catalog/types';
 import { DemoCatalog } from './demo-catalog';
 import { SurfaceGroupAction, A2uiMessage, CreateSurfaceMessage } from '@a2ui/web_core/v0_9';
 import { EXAMPLES } from './examples-bundle';

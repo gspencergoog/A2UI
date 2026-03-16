@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { V0_8_CATALOG as BASE_V0_8_CATALOG } from '@a2ui/angular';
+import { V0_8_CATALOG as BASE_V0_8_CATALOG } from '@a2ui/angular/v0_8';
 
 export const V0_8_CATALOG = {
   ...BASE_V0_8_CATALOG,

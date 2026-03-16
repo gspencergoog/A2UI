@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,4 +14,10 @@
  * limitations under the License.
  */
 
-export * from './lib/v0_8/public-api';
+/**
+ * The version of @a2ui/angular package.
+ * Consumers are encouraged to use version subpaths instead:
+ *   - @a2ui/angular/v0_8
+ *   - @a2ui/angular/v0_9
+ */
+export const A2UI_ANGULAR_VERSION = '0.9.0';

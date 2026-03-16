@@ -16,8 +16,8 @@
 
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ComponentHostComponent } from '../../../src/lib/v0_9/core/component-host.component';
-import { BoundProperty } from '../../../src/lib/v0_9/core/types';
+import { ComponentHostComponent } from '../../../v0_9/core/component-host.component';
+import { BoundProperty } from '../../../v0_9/core/types';
 
 /**
  * A simple card component for the demo.

@@ -20,10 +20,10 @@ import {
   BaseMinimalCatalog,
   MINIMAL_COMPONENTS,
   MINIMAL_FUNCTIONS,
-} from '../../../src/lib/v0_9/catalog/minimal/minimal-catalog';
+} from '../../../v0_9/catalog/minimal/minimal-catalog';
 import { CustomSliderComponent } from './custom-slider.component';
 import { CardComponent } from './card.component';
-import { AngularComponentApi } from '../../../src/lib/v0_9/catalog/types';
+import { AngularComponentApi } from '../../../v0_9/catalog/types';
 import { BASIC_FUNCTIONS } from '@a2ui/web_core/v0_9/basic_catalog';
 
 /**

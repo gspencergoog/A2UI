@@ -28,7 +28,7 @@ import {
 import { provideRouter } from '@angular/router';
 import { RIZZ_CHARTS_CATALOG } from '@rizzcharts/a2ui-catalog/catalog';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
-import { provideMarkdownRenderer } from '@a2ui/angular';
+import { provideMarkdownRenderer } from '@a2ui/angular/v0_8';
 import markdownit from 'markdown-it';
 
 const md = markdownit({

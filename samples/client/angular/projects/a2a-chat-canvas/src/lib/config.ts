@@ -31,7 +31,7 @@ import {
   MarkdownRendererService,
 } from '@a2a_chat_canvas/interfaces/markdown-renderer-service';
 import { SanitizerMarkdownRendererService } from '@a2a_chat_canvas/services/sanitizer-markdown-renderer-service';
-import { Catalog, Theme } from '@a2ui/angular';
+import { Catalog, Theme } from '@a2ui/angular/v0_8';
 import { EnvironmentProviders, Provider, Type, makeEnvironmentProviders } from '@angular/core';
 import { V0_8_CATALOG } from './a2ui-catalog/a2a-chat-canvas-catalog';
 

@@ -16,7 +16,7 @@
 
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BoundProperty } from '../../../src/lib/v0_9/core/types';
+import { BoundProperty } from '../../../v0_9/core/types';
 
 /**
  * A custom component not part of any catalog, used to verify the renderer's

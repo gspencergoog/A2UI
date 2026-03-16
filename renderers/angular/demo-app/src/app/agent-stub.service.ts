@@ -15,8 +15,8 @@
  */
 
 import { Injectable } from '@angular/core';
-import { A2uiRendererService } from '../../../src/lib/v0_9/core/a2ui-renderer.service';
-import { AngularCatalog } from '../../../src/lib/v0_9/catalog/types';
+import { A2uiRendererService } from '../../../v0_9/core/a2ui-renderer.service';
+import { AngularCatalog } from '../../../v0_9/catalog/types';
 import { SurfaceGroupAction, A2uiMessage } from '@a2ui/web_core/v0_9';
 
 /**

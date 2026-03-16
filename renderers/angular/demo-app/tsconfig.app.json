@@ -9,6 +9,6 @@
     "types": [],
     "rootDir": "../"
   },
-  "include": ["src/**/*.ts", "../src/lib/v0_9/**/*.ts"],
-  "exclude": ["src/**/*.spec.ts", "../src/**/*.spec.ts"]
+  "include": ["src/**/*.ts", "../v0_9/**/*.ts"],
+  "exclude": ["src/**/*.spec.ts", "../v0_8/**/*.spec.ts", "../v0_9/**/*.spec.ts"]
 }

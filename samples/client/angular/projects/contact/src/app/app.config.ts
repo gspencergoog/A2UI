@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { V0_8_CATALOG, provideA2UI, provideMarkdownRenderer } from '@a2ui/angular';
+import { V0_8_CATALOG, provideA2UI, provideMarkdownRenderer } from '@a2ui/angular/v0_8';
 import { renderMarkdown } from '@a2ui/markdown-it';
 import { IMAGE_CONFIG } from '@angular/common';
 import {
