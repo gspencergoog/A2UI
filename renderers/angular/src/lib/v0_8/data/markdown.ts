@@ -34,9 +34,10 @@ export class MarkdownRenderer {
     }
 
     if (!MarkdownRenderer.defaultMarkdownWarningLogged) {
-      console.warn("[MarkdownRenderer]",
+      console.warn(
+        '[MarkdownRenderer]',
         "can't render markdown because no markdown renderer is configured.\n",
-        "Use `@a2ui/markdown-it`, or your own markdown renderer.",
+        'Use `@a2ui/markdown-it`, or your own markdown renderer.',
       );
       MarkdownRenderer.defaultMarkdownWarningLogged = true;
     }

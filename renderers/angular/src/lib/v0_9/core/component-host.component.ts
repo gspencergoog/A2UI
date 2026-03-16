@@ -55,7 +55,6 @@ export class ComponentHostComponent implements OnInit {
   @Input() dataContextPath: string = '/';
 
   private rendererService = inject(A2uiRendererService);
-  private catalog = inject(AngularCatalog);
   private binder = inject(ComponentBinder);
   private destroyRef = inject(DestroyRef);
 
@@ -64,8 +63,6 @@ export class ComponentHostComponent implements OnInit {
   private context?: ComponentContext;
 
   ngOnInit(): void {
-
-
     const surface = this.rendererService.surfaceGroup?.getSurface(this.surfaceId);
 
     if (!surface) {
@@ -80,11 +77,12 @@ export class ComponentHostComponent implements OnInit {
       return;
     }
 
-    // Resolve component from catalog
-    const api = this.catalog.components.get(componentModel.type);
+    // Resolve component from the surface's catalog
+    const catalog = surface.catalog as AngularCatalog;
+    const api = catalog.components.get(componentModel.type);
 
     if (!api) {
-      console.error(`Component type "${componentModel.type}" not found in catalog`);
+      console.error(`Component type "${componentModel.type}" not found in catalog "${catalog.id}"`);
       return;
     }
     this.componentType = api.component;

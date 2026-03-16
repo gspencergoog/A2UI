@@ -80,10 +80,7 @@ export class ButtonComponent {
     if (action) {
       const surface = this.rendererService.surfaceGroup?.getSurface(this.surfaceId);
       if (surface) {
-        const dataContext = new DataContext(
-          surface,
-          this.dataContextPath,
-        );
+        const dataContext = new DataContext(surface, this.dataContextPath);
         const resolvedAction = dataContext.resolveAction(action);
         surface.dispatchAction(resolvedAction);
       }

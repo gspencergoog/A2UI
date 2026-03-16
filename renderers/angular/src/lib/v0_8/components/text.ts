@@ -112,7 +112,10 @@ export class Text extends DynamicComponent {
   protected classes = computed(() => {
     const usageHint = this.usageHint();
     const textTheme = this.theme.components.Text;
-    return Styles.merge(textTheme.all, usageHint && usageHint in textTheme ? textTheme[usageHint as keyof typeof textTheme] : {});
+    return Styles.merge(
+      textTheme.all,
+      usageHint && usageHint in textTheme ? textTheme[usageHint as keyof typeof textTheme] : {},
+    );
   });
 
   protected additionalStyles = computed(() => {

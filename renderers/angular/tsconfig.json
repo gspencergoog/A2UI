@@ -15,9 +15,7 @@
     "baseUrl": ".",
     "paths": {
       "@a2ui/angular": ["src/public-api.ts"],
-      "@preact/signals-core": [
-        "../node_modules/@preact/signals-core"
-      ]
+      "@preact/signals-core": ["../node_modules/@preact/signals-core"]
     }
   },
   "angularCompilerOptions": {

@@ -54,10 +54,7 @@ export class DemoCatalog extends MinimalCatalog {
     const components = Array.from(this.components.values());
     components.push(customSliderApi, cardApi);
 
-    const functions = [
-      ...BASIC_FUNCTIONS,
-      ...Array.from(this.functions?.values() || []),
-    ];
+    const functions = [...BASIC_FUNCTIONS, ...Array.from(this.functions?.values() || [])];
 
     (this as any).components = new Map(components.map((c) => [c.name, c]));
     (this as any).functions = new Map(functions.map((f) => [f.name, f]));

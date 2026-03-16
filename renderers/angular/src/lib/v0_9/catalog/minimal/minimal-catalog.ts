@@ -49,7 +49,11 @@ export class MinimalCatalog extends AngularCatalog {
 
     const functions = [
       createFunctionImplementation(
-        { name: 'capitalize', returnType: 'string', schema: z.object({ value: z.string().optional() }) },
+        {
+          name: 'capitalize',
+          returnType: 'string',
+          schema: z.object({ value: z.string().optional() }),
+        },
         (args) => {
           console.log('[MinimalCatalog] capitalize called with args:', args);
           const value = String(args.value || '');

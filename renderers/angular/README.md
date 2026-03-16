@@ -6,8 +6,8 @@ The `@a2ui/angular` package provides the Angular implementation for rendering A2
 
 The package contains evolving architectures to support different A2UI specification versions:
 
--   **`v0_8`**: Initial approach utilizing dedicated, static Angular components for each element type (e.g., `<a2ui-button>`).
--   **`v0_9`**: Dynamic approach centering around a single generic host component (`ComponentHostComponent`) coupled with extensible `Catalog` registries. **This is the recommended architecture for modern integrations.**
+- **`v0_8`**: Initial approach utilizing dedicated, static Angular components for each element type (e.g., `<a2ui-button>`).
+- **`v0_9`**: Dynamic approach centering around a single generic host component (`ComponentHostComponent`) coupled with extensible `Catalog` registries. **This is the recommended architecture for modern integrations.**
 
 ---
 
@@ -85,8 +85,7 @@ export class DashboardComponent implements OnInit {
 Place the `<a2ui-v09-component-host>` component in your template pointing to the desired layout node:
 
 ```html
-<a2ui-v09-component-host [surfaceId]="surfaceId" componentId="root">
-</a2ui-v09-component-host>
+<a2ui-v09-component-host [surfaceId]="surfaceId" componentId="root"> </a2ui-v09-component-host>
 ```
 
 ---
@@ -94,13 +93,17 @@ Place the `<a2ui-v09-component-host>` component in your template pointing to the
 ## Building and Development
 
 ### Building the Package
+
 Distributes the library bundle utilizing `ng-packagr` outputting to `./dist`:
+
 ```bash
 npm run build
 ```
 
 ### Running the Demo
+
 Starts a dev environment rendering local samples containing live inspectors reviewing data pipelines:
+
 ```bash
 npm run demo
 ```

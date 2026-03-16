@@ -16,6 +16,7 @@
 
 import { Injectable } from '@angular/core';
 import { A2uiRendererService } from '../../../src/lib/v0_9/core/a2ui-renderer.service';
+import { AngularCatalog } from '../../../src/lib/v0_9/catalog/types';
 
 /**
  * A stub service that simulates an A2UI agent.
@@ -28,7 +29,10 @@ export class AgentStubService {
   /** Log of actions received from the surface. */
   actionsLog: any[] = [];
 
-  constructor(private rendererService: A2uiRendererService) {}
+  constructor(
+    private rendererService: A2uiRendererService,
+    private catalog: AngularCatalog,
+  ) {}
 
   /**
    * Pushes actions triggered from the rendered Canvas frame through simulation.
@@ -44,7 +48,14 @@ export class AgentStubService {
     setTimeout(() => {
       if (action.event?.name === 'update_property') {
         const { path, value, surfaceId } = action.event.context;
-        console.log('[AgentStub] update_property path:', path, 'value:', value, 'surfaceId:', surfaceId);
+        console.log(
+          '[AgentStub] update_property path:',
+          path,
+          'value:',
+          value,
+          'surfaceId:',
+          surfaceId,
+        );
         this.rendererService.processMessages([
           {
             version: 'v0.9',
@@ -60,24 +71,24 @@ export class AgentStubService {
         const name = formData.name || 'Anonymous';
 
         // Respond with an update to the data model in v0.9 layout
-          this.rendererService.processMessages([
-            {
-              version: 'v0.9',
-              updateDataModel: {
-                surfaceId: action.surfaceId,
-                path: '/form/submitted',
-                value: true,
-              },
+        this.rendererService.processMessages([
+          {
+            version: 'v0.9',
+            updateDataModel: {
+              surfaceId: action.surfaceId,
+              path: '/form/submitted',
+              value: true,
             },
-            {
-              version: 'v0.9',
-              updateDataModel: {
-                surfaceId: action.surfaceId,
-                path: '/form/responseMessage',
-                value: `Hello, ${name}! Your form has been processed.`,
-              },
+          },
+          {
+            version: 'v0.9',
+            updateDataModel: {
+              surfaceId: action.surfaceId,
+              path: '/form/responseMessage',
+              value: `Hello, ${name}! Your form has been processed.`,
             },
-          ]);
+          },
+        ]);
       }
     }, 50); // Shorter delay for property updates
   }
@@ -86,7 +97,10 @@ export class AgentStubService {
    * Initializes a demo session with an initial set of messages.
    */
   initializeDemo(initialMessages: any[]) {
-    this.rendererService.initialize((action) => this.handleAction(action));
+    this.rendererService.initialize({
+      catalogs: [this.catalog],
+      actionHandler: (action) => this.handleAction(action),
+    });
     this.rendererService.processMessages(initialMessages);
   }
 }

@@ -30,7 +30,7 @@ describe('Capitalize Function Binding', () => {
 
   it('should update output correctly when bound input updates using function call binding', () => {
     const catalog = new MinimalCatalog();
-    
+
     // Create Surface Model and DataContext
     const surface = new SurfaceModel('surface_1', catalog);
     const dataModel = surface.dataModel;
@@ -40,10 +40,10 @@ describe('Capitalize Function Binding', () => {
       call: 'capitalize',
       args: {
         value: {
-          path: '/inputValue'
-        }
+          path: '/inputValue',
+        },
       },
-      returnType: 'string'
+      returnType: 'string',
     };
 
     // 1. Resolve Signal

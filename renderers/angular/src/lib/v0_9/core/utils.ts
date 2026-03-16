@@ -33,7 +33,7 @@ export function toAngularSignal<T>(
   ngZone?: NgZone,
 ): Signal<T> {
   const s = angularSignal(preactSignal.peek());
-  
+
   const dispose = effect(() => {
     if (ngZone) {
       ngZone.run(() => s.set(preactSignal.value));

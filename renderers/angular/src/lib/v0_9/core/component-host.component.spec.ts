@@ -44,11 +44,16 @@ describe('ComponentHostComponent', () => {
   let mockSurfaceGroup: any;
 
   beforeEach(async () => {
+    mockCatalog = {
+      id: 'test-catalog',
+      components: new Map([['TestType', { component: TestChildComponent }]]),
+    };
+
     mockSurface = {
       componentsModel: new Map([
         ['comp1', { id: 'comp1', type: 'TestType', properties: { text: 'Hello' } }],
       ]),
-      catalog: { invoker: jasmine.createSpy('invoker').and.returnValue('result') },
+      catalog: mockCatalog,
     };
 
     mockSurfaceGroup = {
@@ -60,18 +65,15 @@ describe('ComponentHostComponent', () => {
       getFunctionInvoker: jasmine.createSpy('getFunctionInvoker').and.returnValue(() => {}),
     };
 
-    mockCatalog = {
-      components: new Map([['TestType', { component: TestChildComponent }]]),
-    };
-
     mockBinder = jasmine.createSpyObj('ComponentBinder', ['bind']);
-    mockBinder.bind.and.returnValue({ text: { value: () => 'bound-hello', onUpdate: () => {} } as any });
+    mockBinder.bind.and.returnValue({
+      text: { value: () => 'bound-hello', onUpdate: () => {} } as any,
+    });
 
     await TestBed.configureTestingModule({
       imports: [ComponentHostComponent],
       providers: [
         { provide: A2uiRendererService, useValue: mockRendererService },
-        { provide: AngularCatalog, useValue: mockCatalog },
         { provide: ComponentBinder, useValue: mockBinder },
       ],
     }).compileComponents();
@@ -93,7 +95,9 @@ describe('ComponentHostComponent', () => {
       // @ts-ignore - Accessing protected property
       expect(component.componentType).toBe(TestChildComponent);
       // @ts-ignore - Accessing protected property
-      expect(component.props).toEqual({ text: jasmine.objectContaining({ value: jasmine.any(Function) }) as any });
+      expect(component.props).toEqual({
+        text: jasmine.objectContaining({ value: jasmine.any(Function) }) as any,
+      });
 
       expect(mockSurfaceGroup.getSurface).toHaveBeenCalledWith('surf1');
       expect(mockBinder.bind).toHaveBeenCalled();
@@ -144,7 +148,7 @@ describe('ComponentHostComponent', () => {
       // @ts-ignore
       expect(component.componentType).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Component type "TestType" not found in catalog',
+        'Component type "TestType" not found in catalog "test-catalog"',
       );
     });
 

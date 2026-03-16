@@ -15,8 +15,24 @@
  */
 
 import { Injectable, OnDestroy, inject } from '@angular/core';
-import { MessageProcessor, SurfaceGroupModel, ActionListener as ActionHandler, A2uiMessage } from '@a2ui/web_core/v0_9';
+import {
+  MessageProcessor,
+  SurfaceGroupModel,
+  ActionListener as ActionHandler,
+  A2uiMessage,
+  SurfaceGroupAction,
+} from '@a2ui/web_core/v0_9';
 import { AngularComponentApi, AngularCatalog } from '../catalog/types';
+
+/**
+ * Configuration for the A2UI renderer.
+ */
+export interface RendererConfiguration {
+  /** The catalogs containing the available components and functions. */
+  catalogs: AngularCatalog[];
+  /** Optional handler for actions dispatched from any surface. */
+  actionHandler?: (action: SurfaceGroupAction) => void;
+}
 
 /**
  * Service responsible for managing A2UI v0.9 rendering sessions.
@@ -25,31 +41,27 @@ import { AngularComponentApi, AngularCatalog } from '../catalog/types';
 @Injectable()
 export class A2uiRendererService implements OnDestroy {
   private _messageProcessor?: MessageProcessor<AngularComponentApi>;
-
-  private catalog = inject(AngularCatalog);
+  private _catalogs: AngularCatalog[] = [];
 
   /**
    * Initializes the renderer.
-   * @param externalActionHandler Optional handler for actions dispatched from surfaces.
+   * @param config The renderer configuration.
    */
-  initialize(externalActionHandler?: (action: any) => void): void {
-    const actionHandler = (action: any) => {
-      if (externalActionHandler) {
-        externalActionHandler(action);
-      }
-    };
+  initialize(config: RendererConfiguration): void {
+    this._catalogs = config.catalogs;
 
     this._messageProcessor = new MessageProcessor<AngularComponentApi>(
-      [this.catalog],
-      actionHandler,
+      this._catalogs,
+      config.actionHandler as ActionHandler,
     );
   }
 
   /**
-   * Returns a function invoker that uses the current catalog.
+   * Returns a function invoker that uses the currently configured catalogs.
+   * If multiple catalogs are configured, it uses the first one.
    */
   getFunctionInvoker(): any {
-    return this.catalog.invoker;
+    return this._catalogs[0]?.invoker;
   }
 
   /**

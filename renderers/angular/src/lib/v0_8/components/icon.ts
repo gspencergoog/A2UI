@@ -49,9 +49,9 @@ export class Icon extends DynamicComponent {
     const rawName = this.resolvePrimitive(this.name());
     if (!rawName) return null;
     // Material Symbols ligatures require snake_case and must not have whitespace.
-    return String(rawName).trim()
+    return String(rawName)
+      .trim()
       .replace(/([A-Z])/g, (match) => `_${match.toLowerCase()}`)
       .replace(/^_/, '');
   });
 }
-

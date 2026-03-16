@@ -33,11 +33,11 @@ describe('A2uiRendererService', () => {
           console.warn(`Function "${name}" not found in catalog`);
           return undefined;
         };
-      }
+      },
     };
 
     TestBed.configureTestingModule({
-      providers: [A2uiRendererService, { provide: AngularCatalog, useValue: mockCatalog }],
+      providers: [A2uiRendererService],
     });
 
     service = TestBed.inject(A2uiRendererService);
@@ -49,7 +49,7 @@ describe('A2uiRendererService', () => {
 
   describe('initialize', () => {
     it('should create MessageProcessor and surfaceGroup', () => {
-      service.initialize();
+      service.initialize({ catalogs: [mockCatalog] });
       expect(service.surfaceGroup).toBeDefined();
     });
 
@@ -57,7 +57,7 @@ describe('A2uiRendererService', () => {
       const mockFn = jasmine.createSpy('mockFn').and.returnValue('result');
       mockCatalog.functions.set('testFn', mockFn);
 
-      service.initialize();
+      service.initialize({ catalogs: [mockCatalog] });
 
       const invoker = service.getFunctionInvoker();
       expect(invoker).toBeDefined();
@@ -69,8 +69,10 @@ describe('A2uiRendererService', () => {
     });
 
     it('should return undefined and warn if function not found', () => {
+      // Catalog.invoker itself throws A2uiExpressionError now, but the service's mockCatalog
+      // followed the old pattern. Let's keep it consistent with what's in the spec file's beforeEach.
       const consoleWarnSpy = spyOn(console, 'warn');
-      service.initialize();
+      service.initialize({ catalogs: [mockCatalog] });
 
       const invoker = service.getFunctionInvoker();
       const result = invoker('unknownFn', {}, {});
@@ -82,7 +84,7 @@ describe('A2uiRendererService', () => {
 
   describe('processMessages', () => {
     it('should delegate to MessageProcessor', () => {
-      service.initialize();
+      service.initialize({ catalogs: [mockCatalog] });
 
       // Access private _messageProcessor via bracket notation for testing if needed,
       // or verify indirectly by inspecting surfaceGroup after messages.
@@ -97,7 +99,7 @@ describe('A2uiRendererService', () => {
 
   describe('ngOnDestroy', () => {
     it('should dispose surfaceGroup', () => {
-      service.initialize();
+      service.initialize({ catalogs: [mockCatalog] });
       const surfaceGroup = service.surfaceGroup;
       expect(surfaceGroup).toBeDefined();
 

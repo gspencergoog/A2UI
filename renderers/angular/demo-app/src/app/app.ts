@@ -19,7 +19,7 @@ import { DemoComponent } from './demo.component';
 
 /**
  * Root Component of the A2UI Angular Demo app.
- * 
+ *
  * This component acts as a direct container that embeds the `<a2ui-v0-9-demo>` dashboard.
  * All dynamic canvas layout and agent rendering behavior is handled inside `DemoComponent`.
  */
