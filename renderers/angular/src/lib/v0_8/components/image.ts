@@ -65,7 +65,7 @@ export class Image extends DynamicComponent {
 
     return Styles.merge(
       this.theme.components.Image.all,
-      usageHint ? (this.theme.components.Image as any)[usageHint] : {},
+      usageHint ? this.theme.components.Image[usageHint] : {},
     );
   });
 }

@@ -77,9 +77,7 @@ export class Slider extends DynamicComponent {
 
     if (path) {
       const surfaceId = this.surfaceId();
-      if (surfaceId) {
-        this.processor.setData(this.component(), path, newValue, surfaceId);
-      }
+      this.processor.setData(this.component(), path, newValue, surfaceId);
     }
   }
 

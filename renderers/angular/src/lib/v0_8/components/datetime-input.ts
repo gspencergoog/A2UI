@@ -120,9 +120,7 @@ export class DatetimeInput extends DynamicComponent {
     }
 
     const surfaceId = this.surfaceId();
-    if (surfaceId) {
-      this.processor.setData(this.component(), path, event.target.value, surfaceId);
-    }
+    this.processor.setData(this.component(), path, event.target.value, surfaceId);
   }
 
   private padNumber(value: number) {

@@ -114,7 +114,7 @@ export class Text extends DynamicComponent {
 
     return Styles.merge(
       this.theme.components.Text.all,
-      usageHint ? (this.theme.components.Text as any)[usageHint] : {},
+      usageHint ? this.theme.components.Text[usageHint] : {},
     );
   });
 
