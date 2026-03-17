@@ -24,6 +24,7 @@ import type {
   Action,
 } from "../schema/common-types.js";
 import { A2uiExpressionError } from "../errors.js";
+import { isSignal } from "../catalog/types.js";
 
 import { FunctionInvoker } from "../catalog/function_invoker.js";
 import { SurfaceModel } from "../state/surface-model.js";
@@ -111,7 +112,7 @@ export class DataContext {
           this,
           abortController.signal,
         );
-        return (result instanceof Signal ? result.peek() : result) as V;
+        return (isSignal(result) ? result.peek() : result) as V;
       } catch (e: any) {
         if (e?.name === "ZodError" || e instanceof z.ZodError) {
           const err = new A2uiExpressionError(
@@ -240,33 +241,39 @@ export class DataContext {
       });
 
       const stopper = effect(() => {
-        const args = argsSig.value;
-        if (abortController) abortController.abort();
-        if (innerUnsubscribe) {
-          innerUnsubscribe();
-          innerUnsubscribe = undefined;
-        }
-        abortController = new AbortController();
-
         try {
+          const args = argsSig.value;
+          if (abortController) abortController.abort();
+          if (innerUnsubscribe) {
+            innerUnsubscribe();
+            innerUnsubscribe = undefined;
+          }
+          abortController = new AbortController();
+
           const res = this.evaluateFunctionReactive<V>(
             call.call,
             args,
             abortController.signal,
           );
 
-          if (res instanceof Signal) {
+          if (isSignal(res)) {
             innerUnsubscribe = effect(() => {
               resultSig.value = res.value;
             });
           } else {
             resultSig.value = res;
           }
-        } catch (e) {
-          // In reactive mode, we might want to propagate errors through the signal
-          // or at least log them. For now, we'll let them bubble if it's the first run,
-          // or just store them if we had a better way.
-          throw e;
+        } catch (e: any) {
+          if (e instanceof A2uiExpressionError) {
+            this.surface.dispatchError({
+              code: "EXPRESSION_ERROR",
+              message: e.message,
+              expression: e.expression,
+              details: e.details,
+            });
+          }
+          // In reactive mode, we should not throw. Instead, reset the signal value.
+          resultSig.value = undefined;
         }
       });
 
