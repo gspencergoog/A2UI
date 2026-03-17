@@ -67,6 +67,16 @@ describe('A2uiRendererService', () => {
       // Let's pass an empty array to verify delegate runs without error.
       expect(() => service.processMessages([])).not.toThrow();
     });
+
+    it('should queue messages if called before initialize and flush them on initialize', () => {
+      const messages = [{ beginRendering: { surfaceId: 'test', root: 'col' } }] as any;
+      // Should not throw, but will queue
+      expect(() => service.processMessages(messages)).not.toThrow();
+      expect(service.surfaceGroup).toBeUndefined(); // Not initialized yet
+
+      service.initialize({ catalogs: [mockCatalog] });
+      expect(service.surfaceGroup).toBeDefined(); // Now initialized
+    });
   });
 
   describe('ngOnDestroy', () => {

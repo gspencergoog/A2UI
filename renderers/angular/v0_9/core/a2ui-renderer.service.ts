@@ -42,6 +42,7 @@ export interface RendererConfiguration {
 export class A2uiRendererService implements OnDestroy {
   private _messageProcessor?: MessageProcessor<AngularComponentApi>;
   private _catalogs: AngularCatalog[] = [];
+  private _messageQueue: A2uiMessage[] = [];
 
   /**
    * Initializes the renderer.
@@ -54,13 +55,22 @@ export class A2uiRendererService implements OnDestroy {
       this._catalogs,
       config.actionHandler as ActionHandler,
     );
+
+    if (this._messageQueue.length > 0) {
+      this._messageProcessor.processMessages(this._messageQueue);
+      this._messageQueue = [];
+    }
   }
 
   /**
    * Processes a list of messages.
    */
   processMessages(messages: A2uiMessage[]): void {
-    this._messageProcessor?.processMessages(messages);
+    if (this._messageProcessor) {
+      this._messageProcessor.processMessages(messages);
+    } else {
+      this._messageQueue.push(...messages);
+    }
   }
 
   /**
