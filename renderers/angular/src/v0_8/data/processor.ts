@@ -26,6 +26,8 @@ export interface A2UIClientEvent {
   completion: Subject<Types.ServerToClientMessage[]>;
 }
 
+export type DispatchedEvent = A2UIClientEvent;
+
 @Injectable({
   providedIn: 'root',
 })

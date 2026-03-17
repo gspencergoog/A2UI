@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { Injectable, inject } from '@angular/core';
 import { Catalog } from '../rendering/catalog';
 
 // Components
@@ -37,37 +36,29 @@ import { Text } from '../components/text';
 import { TextField } from '../components/text-field';
 import { Video } from '../components/video';
 
+export const DEFAULT_CATALOG: Catalog = {
+  AudioPlayer: () => AudioPlayer,
+  Button: () => Button,
+  Card: () => Card,
+  CheckBox: () => Checkbox,
+  Column: () => Column,
+  DateTimeInput: () => DateTimeInput,
+  Divider: () => Divider,
+  Icon: () => Icon,
+  Image: () => Image,
+  List: () => List,
+  Modal: () => Modal,
+  MultipleChoice: () => MultipleChoice,
+  Row: () => Row,
+  Slider: () => Slider,
+  Tabs: () => Tabs,
+  Text: () => Text,
+  TextField: () => TextField,
+  Video: () => Video,
+};
+
 export function registerStandardComponents(catalog: Catalog) {
-  catalog.registerComponent('AudioPlayer', AudioPlayer);
-  catalog.registerComponent('Button', Button);
-  catalog.registerComponent('Card', Card);
-  catalog.registerComponent('CheckBox', Checkbox);
-  catalog.registerComponent('Column', Column);
-  catalog.registerComponent('DateTimeInput', DateTimeInput);
-  catalog.registerComponent('Divider', Divider);
-  catalog.registerComponent('Icon', Icon);
-  catalog.registerComponent('Image', Image);
-  catalog.registerComponent('List', List);
-  catalog.registerComponent('Modal', Modal);
-  catalog.registerComponent('MultipleChoice', MultipleChoice);
-  catalog.registerComponent('Row', Row);
-  catalog.registerComponent('Slider', Slider);
-  catalog.registerComponent('Tabs', Tabs);
-  catalog.registerComponent('Text', Text);
-  catalog.registerComponent('TextField', TextField);
-  catalog.registerComponent('Video', Video);
-}
-
-export const DEFAULT_CATALOG = new Catalog();
-registerStandardComponents(DEFAULT_CATALOG);
-
-@Injectable({
-  providedIn: 'root',
-})
-export class StandardCatalog {
-  private readonly catalog = inject(Catalog);
-
-  register() {
-    registerStandardComponents(this.catalog);
+  for (const [key, value] of Object.entries(DEFAULT_CATALOG)) {
+    catalog[key] = value;
   }
 }
