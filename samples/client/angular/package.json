@@ -33,6 +33,7 @@
     "@a2a-js/sdk": "^0.3.4",
     "@modelcontextprotocol/ext-apps": "^1.2.0",
     "@a2ui/web_core": "file:../../../renderers/web_core",
+    "@a2ui/angular": "file:../../../renderers/angular/dist",
     "@a2ui/markdown-it": "file:../../../renderers/markdown/markdown-it",
     "@angular/cdk": "^20.2.10",
     "@angular/common": "^21.2.0",
