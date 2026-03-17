@@ -14,31 +14,10 @@
  * limitations under the License.
  */
 
-import {
-  Action as WebCoreAction,
-  ServerToClientMessage as WebCoreServerToClientMessage,
-  ButtonNode,
-  TextNode,
-  ImageNode,
-  IconNode,
-  AudioPlayerNode,
-  VideoNode,
-  CardNode,
-  DividerNode,
-  RowNode,
-  ColumnNode,
-  ListNode,
-  TextFieldNode,
-  CheckboxNode,
-  SliderNode,
-  MultipleChoiceNode,
-  DateTimeInputNode,
-  ModalNode,
-  TabsNode,
-} from '@a2ui/web_core/v0_8';
+import * as WebCore from '@a2ui/web_core/v0_8';
 
 export namespace Types {
-  export type Action = WebCoreAction;
+  export type Action = WebCore.Action;
   export type FunctionCall = unknown; // v0.8 might not have FunctionCall or structure differs
   export type SurfaceID = string;
 
@@ -58,7 +37,7 @@ export namespace Types {
   export type AnyComponentNode = Component<any>;
   export type CustomNode = AnyComponentNode;
 
-  export type ServerToClientMessage = WebCoreServerToClientMessage;
+  export type ServerToClientMessage = WebCore.ServerToClientMessage;
 
   export interface Theme {
     components?: Record<string, unknown>;
@@ -66,42 +45,42 @@ export namespace Types {
   }
 
   // Aliases
-  export type Row = RowNode;
-  export type Column = ColumnNode;
-  export type Text = TextNode;
-  export type List = ListNode;
-  export type Image = ImageNode;
-  export type Icon = IconNode;
-  export type Video = VideoNode;
-  export type Audio = AudioPlayerNode;
-  export type Button = ButtonNode;
-  export type Divider = DividerNode;
-  export type MultipleChoice = MultipleChoiceNode;
-  export type TextField = TextFieldNode;
-  export type Checkbox = CheckboxNode;
-  export type Slider = SliderNode;
-  export type DateTimeInput = DateTimeInputNode;
-  export type Tabs = TabsNode;
-  export type Modal = ModalNode;
+  export type Row = WebCore.RowNode;
+  export type Column = WebCore.ColumnNode;
+  export type Text = WebCore.TextNode;
+  export type List = WebCore.ListNode;
+  export type Image = WebCore.ImageNode;
+  export type Icon = WebCore.IconNode;
+  export type Video = WebCore.VideoNode;
+  export type Audio = WebCore.AudioPlayerNode;
+  export type Button = WebCore.ButtonNode;
+  export type Divider = WebCore.DividerNode;
+  export type MultipleChoice = WebCore.MultipleChoiceNode;
+  export type TextField = WebCore.TextFieldNode;
+  export type Checkbox = WebCore.CheckboxNode;
+  export type Slider = WebCore.SliderNode;
+  export type DateTimeInput = WebCore.DateTimeInputNode;
+  export type Tabs = WebCore.TabsNode;
+  export type Modal = WebCore.ModalNode;
 
   // Explicit Node exports
-  export type RowNode = import('@a2ui/web_core/v0_8').RowNode;
-  export type ColumnNode = import('@a2ui/web_core/v0_8').ColumnNode;
-  export type TextNode = import('@a2ui/web_core/v0_8').TextNode;
-  export type ListNode = import('@a2ui/web_core/v0_8').ListNode;
-  export type ImageNode = import('@a2ui/web_core/v0_8').ImageNode;
-  export type IconNode = import('@a2ui/web_core/v0_8').IconNode;
-  export type VideoNode = import('@a2ui/web_core/v0_8').VideoNode;
-  export type AudioPlayerNode = import('@a2ui/web_core/v0_8').AudioPlayerNode;
-  export type ButtonNode = import('@a2ui/web_core/v0_8').ButtonNode;
-  export type DividerNode = import('@a2ui/web_core/v0_8').DividerNode;
-  export type MultipleChoiceNode = import('@a2ui/web_core/v0_8').MultipleChoiceNode;
-  export type TextFieldNode = import('@a2ui/web_core/v0_8').TextFieldNode;
-  export type CheckboxNode = import('@a2ui/web_core/v0_8').CheckboxNode;
-  export type SliderNode = import('@a2ui/web_core/v0_8').SliderNode;
-  export type DateTimeInputNode = import('@a2ui/web_core/v0_8').DateTimeInputNode;
-  export type TabsNode = import('@a2ui/web_core/v0_8').TabsNode;
-  export type ModalNode = import('@a2ui/web_core/v0_8').ModalNode;
+  export type RowNode = WebCore.RowNode;
+  export type ColumnNode = WebCore.ColumnNode;
+  export type TextNode = WebCore.TextNode;
+  export type ListNode = WebCore.ListNode;
+  export type ImageNode = WebCore.ImageNode;
+  export type IconNode = WebCore.IconNode;
+  export type VideoNode = WebCore.VideoNode;
+  export type AudioPlayerNode = WebCore.AudioPlayerNode;
+  export type ButtonNode = WebCore.ButtonNode;
+  export type DividerNode = WebCore.DividerNode;
+  export type MultipleChoiceNode = WebCore.MultipleChoiceNode;
+  export type TextFieldNode = WebCore.TextFieldNode;
+  export type CheckboxNode = WebCore.CheckboxNode;
+  export type SliderNode = WebCore.SliderNode;
+  export type DateTimeInputNode = WebCore.DateTimeInputNode;
+  export type TabsNode = WebCore.TabsNode;
+  export type ModalNode = WebCore.ModalNode;
 
-  export type CardNode = import('@a2ui/web_core/v0_8').CardNode;
+  export type CardNode = WebCore.CardNode;
 }
