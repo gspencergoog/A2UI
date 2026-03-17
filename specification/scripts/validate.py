@@ -85,15 +85,25 @@ def validate_messages(root_schema, example_files, refs=None, temp_dir="temp_val"
     return success
 
 def compare_schemas(subset_path, standard_path):
-    """Compares that subset schema is a strict subset of standard schema."""
+    """Compares that subset schema is a subset of standard schema.
+    
+    Allows object keys and string arrays to be subsets. For non-string arrays
+    (e.g., arrays of objects), we enforce element-by-element equality in length 
+    and structure to simplify position-dependent matching.
+    """
     print(f"  Comparing {os.path.basename(subset_path)} is a subset of {os.path.basename(standard_path)}...")
     try:
         with open(subset_path, 'r') as f:
             subset = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"    [FAIL] Error loading or parsing subset schema '{os.path.basename(subset_path)}': {e}")
+        return False
+
+    try:
         with open(standard_path, 'r') as f:
             standard = json.load(f)
-    except Exception as e:
-        print(f"    [FAIL] Error loading schemas for comparison: {e}")
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"    [FAIL] Error loading or parsing standard schema '{os.path.basename(standard_path)}': {e}")
         return False
 
     success = True
@@ -129,10 +139,13 @@ def compare_schemas(subset_path, standard_path):
                       compare(sub[key], std[key], new_path)
         elif sub_type == "array":
              if all(isinstance(x, str) for x in sub) and all(isinstance(x, str) for x in std):
-                  if set(sub) != set(std):
-                      print(f"    [FAIL] String array mismatch at {path}: subset={sub}, standard={std}")
+                  if not set(sub).issubset(set(std)):
+                      print(f"    [FAIL] String array is not a subset at {path}: subset={sub}, standard={std}")
                       success = False
              else:
+                  # For non-string arrays (e.g. arrays of objects like inside anyOf), 
+                  # order and length typically matter for structure matching in this script.
+                  # To avoid complex matching, we enforce equality in length and structure.
                   if len(sub) != len(std):
                       print(f"    [FAIL] Array length mismatch at {path}: subset={len(sub)}, standard={len(std)}")
                       success = False
