@@ -39,7 +39,7 @@ import {
 
 export namespace Types {
   export type Action = WebCoreAction;
-  export type FunctionCall = any; // v0.8 might not have FunctionCall or structure differs
+  export type FunctionCall = unknown; // v0.8 might not have FunctionCall or structure differs
   export type SurfaceID = string;
 
   export interface ClientToServerMessage {
@@ -49,11 +49,10 @@ export namespace Types {
   }
   export type A2UIClientEventMessage = ClientToServerMessage;
 
-  export interface Component<P = Record<string, any>> {
+  export interface Component<P = Record<string, unknown>> {
     id: string;
     type: string;
     properties: P;
-    [key: string]: any;
   }
 
   export type AnyComponentNode = Component<any>;
@@ -62,9 +61,8 @@ export namespace Types {
   export type ServerToClientMessage = WebCoreServerToClientMessage;
 
   export interface Theme {
-    components?: any;
-    additionalStyles?: any;
-    [key: string]: any;
+    components?: Record<string, unknown>;
+    additionalStyles?: string[];
   }
 
   // Aliases
