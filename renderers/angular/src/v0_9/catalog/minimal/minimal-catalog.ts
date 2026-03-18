@@ -60,7 +60,7 @@ export const MINIMAL_FUNCTIONS: FunctionImplementation[] = [
 ];
 
 /**
- * A base class for minimal catalogs, providing extensibility for non-DI use cases.
+ * Provides a base implementation for catalogs that include minimal components.
  */
 export class BaseMinimalCatalog extends AngularCatalog {
   constructor(
@@ -73,7 +73,10 @@ export class BaseMinimalCatalog extends AngularCatalog {
 }
 
 /**
- * A minimal catalog of components and functions for v0.9 verification.
+ * Defines a minimal catalog of components and functions for A2UI v0.9.
+ *
+ * This catalog includes basic layout (Row, Column) and UI elements (Text, Button, TextField)
+ * along with standard functions like string formatting.
  */
 @Injectable({
   providedIn: 'root',

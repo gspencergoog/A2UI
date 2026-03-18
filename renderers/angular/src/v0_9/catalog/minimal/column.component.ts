@@ -21,7 +21,9 @@ import { BoundProperty } from '../../core/types';
 import { getNormalizedPath } from '../../core/utils';
 
 /**
- * Angular implementation of the A2UI Column component (v0.9).
+ * A vertical layout container that aligns children in a flex column.
+ *
+ * It supports both static children and repeating templates bound to a data path.
  */
 @Component({
   selector: 'a2ui-v09-column',

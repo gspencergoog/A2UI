@@ -21,7 +21,10 @@ import { A2uiRendererService } from '../../core/a2ui-renderer.service';
 import { BoundProperty } from '../../core/types';
 
 /**
- * Angular implementation of the A2UI Button component (v0.9).
+ * A standard button component providing primary, default, and borderless variants.
+ *
+ * It supports child A2UI components (e.g., icons or text) and dispatches actions
+ * when clicked.
  */
 @Component({
   selector: 'a2ui-v09-button',

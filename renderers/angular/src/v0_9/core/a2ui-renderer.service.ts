@@ -35,15 +35,17 @@ export interface RendererConfiguration {
 }
 
 /**
- * Injection token for A2UI Renderer Configuration.
+ * Injection token for the A2UI renderer configuration.
  */
 export const A2UI_RENDERER_CONFIG = new InjectionToken<RendererConfiguration>(
   'A2UI_RENDERER_CONFIG',
 );
 
 /**
- * Service responsible for managing A2UI v0.9 rendering sessions.
- * Bridges the A2UI MessageProcessor to Angular-friendly models.
+ * Manages A2UI v0.9 rendering sessions by bridging the MessageProcessor to Angular.
+ *
+ * This service is responsible for processing incoming A2UI messages and making the
+ * resulting surface models available to Angular components.
  */
 @Injectable()
 export class A2uiRendererService implements OnDestroy {
@@ -60,14 +62,16 @@ export class A2uiRendererService implements OnDestroy {
   }
 
   /**
-   * Processes a list of messages.
+   * Processes a list of A2UI messages and updates the internal model.
+   *
+   * @param messages The list of messages to process.
    */
   processMessages(messages: A2uiMessage[]): void {
     this._messageProcessor.processMessages(messages);
   }
 
   /**
-   * Returns the current surface group model.
+   * The current surface group model containing all active surfaces.
    */
   get surfaceGroup(): SurfaceGroupModel<AngularComponentApi> {
     return this._messageProcessor.model;

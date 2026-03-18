@@ -18,11 +18,14 @@ import { DestroyRef, Signal, signal as angularSignal } from '@angular/core';
 import { Signal as PreactSignal, effect } from '@a2ui/web_core/v0_9';
 
 /**
- * Bridges a Preact Signal to an Angular Signal.
- * Automatically cleans up the Preact effect and any signal-specific resources on destroy.
+ * Bridges a Preact Signal to a reactive Angular Signal.
+ *
+ * This utility handles the lifecycle mapping between Preact and Angular,
+ * ensuring that updates are propagated correctly and resources are cleaned up.
  *
  * @param preactSignal The source Preact Signal.
  * @param destroyRef Angular DestroyRef for lifecycle management.
+ * @param ngZone Optional NgZone to ensure updates run within the Angular zone.
  * @returns A read-only Angular Signal.
  */
 import { NgZone } from '@angular/core';
@@ -54,8 +57,10 @@ export function toAngularSignal<T>(
 }
 
 /**
- * Normalizes a data model path by correctly combining a relative path with a base data context path,
- * and appending an index for repeating children.
+ * Normalizes a data model path by combining a relative path with a base context.
+ *
+ * This is used to create unique absolute paths for components within a repeating
+ * collection or nested structure.
  *
  * @param path The relative or absolute path from the component properties.
  * @param dataContextPath The current base data context path.

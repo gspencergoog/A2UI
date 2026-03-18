@@ -19,7 +19,10 @@ import { BoundProperty } from '../../core/types';
 
 
 /**
- * Angular implementation of the A2UI TextField component (v0.9).
+ * An interactive text input component that supports labels, placeholders, and variants.
+ *
+ * It maps its value to a bound data path and supports 'obscured' (password) and
+ * 'number' variants.
  */
 @Component({
   selector: 'a2ui-v09-text-field',

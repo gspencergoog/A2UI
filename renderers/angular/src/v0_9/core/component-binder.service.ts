@@ -20,7 +20,10 @@ import { toAngularSignal } from './utils';
 import { BoundProperty } from './types';
 
 /**
- * Service that binds A2UI ComponentModel properties to reactive Angular Signals.
+ * Binds A2UI ComponentModel properties to reactive Angular Signals.
+ *
+ * This service resolves data bindings from the A2UI DataContext and exposes them
+ * as Angular Signals for use in renderer components.
  */
 @Injectable({
   providedIn: 'root',

@@ -18,7 +18,7 @@ import { Component, ChangeDetectionStrategy, input, computed } from '@angular/co
 import { BoundProperty } from '../../core/types';
 
 /**
- * Angular implementation of the A2UI Text component (v0.9).
+ * A basic text component that supports font weights and styles.
  */
 @Component({
   selector: 'a2ui-v09-text',

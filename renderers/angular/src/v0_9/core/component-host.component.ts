@@ -30,8 +30,10 @@ import { AngularCatalog } from '../catalog/types';
 import { ComponentBinder } from './component-binder.service';
 
 /**
- * Host component for any A2UI component.
- * Manages the lifecycle of a ComponentContext and ComponentBinding.
+ * Dynamically renders an A2UI component as defined in the current surface model.
+ *
+ * This component acts as a bridge between the A2UI surface model and Angular components,
+ * resolving the appropriate component from the catalog and binding its properties.
  */
 @Component({
   selector: 'a2ui-v09-component-host',

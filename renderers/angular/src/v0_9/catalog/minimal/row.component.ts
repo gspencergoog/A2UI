@@ -20,7 +20,9 @@ import { BoundProperty } from '../../core/types';
 import { getNormalizedPath } from '../../core/utils';
 
 /**
- * Angular implementation of the A2UI Row component (v0.9).
+ * A horizontal layout container that aligns children in a flex row.
+ *
+ * It supports both static children and repeating templates bound to a data path.
  */
 @Component({
   selector: 'a2ui-v09-row',
