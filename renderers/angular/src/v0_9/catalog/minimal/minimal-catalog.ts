@@ -17,7 +17,7 @@
 import { Injectable } from '@angular/core';
 import { z } from 'zod';
 import { createFunctionImplementation } from '@a2ui/web_core/v0_9';
-import { AngularCatalog, AngularComponentApi } from '../types';
+import { AngularCatalog, AngularComponentImplementation } from '../types';
 import { TextComponent } from './text.component';
 import { RowComponent } from './row.component';
 import { ColumnComponent } from './column.component';
@@ -33,7 +33,7 @@ import {
 import { FunctionImplementation } from '@a2ui/web_core/v0_9';
 import { FormatStringImplementation } from '@a2ui/web_core/v0_9/basic_catalog';
 
-export const MINIMAL_COMPONENTS: AngularComponentApi[] = [
+export const MINIMAL_COMPONENTS: AngularComponentImplementation[] = [
   { ...TextApi, component: TextComponent },
   { ...RowApi, component: RowComponent },
   { ...ColumnApi, component: ColumnComponent },
@@ -65,7 +65,7 @@ export const MINIMAL_FUNCTIONS: FunctionImplementation[] = [
 export class BaseMinimalCatalog extends AngularCatalog {
   constructor(
     id: string = 'minimal',
-    components: AngularComponentApi[] = MINIMAL_COMPONENTS,
+    components: AngularComponentImplementation[] = MINIMAL_COMPONENTS,
     functions: FunctionImplementation[] = MINIMAL_FUNCTIONS,
   ) {
     super(id, components, functions);

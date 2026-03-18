@@ -19,7 +19,7 @@ import { z } from 'zod';
 import { BaseMinimalCatalog, MINIMAL_COMPONENTS, MINIMAL_FUNCTIONS } from '@a2ui/angular/v0_9';
 import { CustomSliderComponent } from './custom-slider.component';
 import { CardComponent } from './card.component';
-import { AngularComponentApi } from '@a2ui/angular/v0_9';
+import { AngularComponentImplementation } from '@a2ui/angular/v0_9';
 import { BASIC_FUNCTIONS } from '@a2ui/web_core/v0_9/basic_catalog';
 
 /**
@@ -30,7 +30,7 @@ import { BASIC_FUNCTIONS } from '@a2ui/web_core/v0_9/basic_catalog';
 })
 export class DemoCatalog extends BaseMinimalCatalog {
   constructor() {
-    const customSliderApi: AngularComponentApi = {
+    const customSliderApi: AngularComponentImplementation = {
       name: 'CustomSlider',
       schema: z.object({
         label: z.string().optional(),
@@ -41,7 +41,7 @@ export class DemoCatalog extends BaseMinimalCatalog {
       component: CustomSliderComponent,
     };
 
-    const cardApi: AngularComponentApi = {
+    const cardApi: AngularComponentImplementation = {
       name: 'Card',
       schema: z.object({
         child: z.string().optional(),

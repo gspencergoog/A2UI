@@ -22,7 +22,7 @@ import {
   A2uiMessage,
   SurfaceGroupAction,
 } from '@a2ui/web_core/v0_9';
-import { AngularComponentApi, AngularCatalog } from '../catalog/types';
+import { AngularComponentImplementation, AngularCatalog } from '../catalog/types';
 
 /**
  * Configuration for the A2UI renderer.
@@ -49,13 +49,13 @@ export const A2UI_RENDERER_CONFIG = new InjectionToken<RendererConfiguration>(
  */
 @Injectable()
 export class A2uiRendererService implements OnDestroy {
-  private _messageProcessor: MessageProcessor<AngularComponentApi>;
+  private _messageProcessor: MessageProcessor<AngularComponentImplementation>;
   private _catalogs: AngularCatalog[] = [];
 
   constructor(@Inject(A2UI_RENDERER_CONFIG) private config: RendererConfiguration) {
     this._catalogs = this.config.catalogs;
 
-    this._messageProcessor = new MessageProcessor<AngularComponentApi>(
+    this._messageProcessor = new MessageProcessor<AngularComponentImplementation>(
       this._catalogs,
       this.config.actionHandler as ActionHandler,
     );
@@ -73,7 +73,7 @@ export class A2uiRendererService implements OnDestroy {
   /**
    * The current surface group model containing all active surfaces.
    */
-  get surfaceGroup(): SurfaceGroupModel<AngularComponentApi> {
+  get surfaceGroup(): SurfaceGroupModel<AngularComponentImplementation> {
     return this._messageProcessor.model;
   }
 
