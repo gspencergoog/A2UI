@@ -26,14 +26,14 @@ import { A2uiRendererService } from '../../core/a2ui-renderer.service';
   imports: [],
   template: `
     <div class="a2ui-text-field-container">
-      @if (props()['label']?.value()) {
-        <label>{{ props()['label']?.value() }}</label>
+      @if (label()) {
+        <label>{{ label() }}</label>
       }
       <input
         [type]="inputType()"
-        [value]="props()['value']?.value() || ''"
+        [value]="value()"
         (input)="handleInput($event)"
-        [placeholder]="props()['placeholder']?.value() || ''"
+        [placeholder]="placeholder()"
       />
       <!-- Validation errors would go here in a more advanced version -->
     </div>
@@ -71,9 +71,13 @@ export class TextFieldComponent {
 
   private rendererService = inject(A2uiRendererService);
 
+  variant = computed(() => this.props()['variant']?.value());
+  label = computed(() => this.props()['label']?.value());
+  value = computed(() => this.props()['value']?.value() ?? '');
+  placeholder = computed(() => this.props()['placeholder']?.value() ?? '');
+
   inputType = computed(() => {
-    const variant = this.props()['variant']?.value();
-    switch (variant) {
+    switch (this.variant()) {
       case 'obscured':
         return 'password';
       case 'number':

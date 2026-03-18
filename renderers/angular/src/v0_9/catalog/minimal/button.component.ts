@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, ChangeDetectionStrategy, inject, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, computed } from '@angular/core';
 import { ComponentHostComponent } from '../../core/component-host.component';
 import { ComponentContext, DataContext } from '@a2ui/web_core/v0_9';
 import { A2uiRendererService } from '../../core/a2ui-renderer.service';
@@ -28,13 +28,13 @@ import { BoundProperty } from '../../core/types';
   imports: [ComponentHostComponent],
   template: `
     <button
-      [type]="props()['variant']?.value() === 'primary' ? 'submit' : 'button'"
-      [class]="'a2ui-button ' + (props()['variant']?.value() || 'default')"
+      [type]="variant() === 'primary' ? 'submit' : 'button'"
+      [class]="'a2ui-button ' + variant()"
       (click)="handleClick()"
     >
-      @if (props()['child']?.value()) {
+      @if (child()) {
         <a2ui-v09-component-host
-          [componentId]="props()['child']!.value()"
+          [componentId]="child()!"
           [surfaceId]="surfaceId()"
           [dataContextPath]="dataContextPath()"
         >
@@ -75,8 +75,12 @@ export class ButtonComponent {
 
   private rendererService = inject(A2uiRendererService);
 
+  variant = computed(() => this.props()['variant']?.value() ?? 'default');
+  child = computed(() => this.props()['child']?.value());
+  action = computed(() => this.props()['action']?.value());
+
   handleClick() {
-    const action = this.props()['action']?.value();
+    const action = this.action();
     if (action) {
       const surface = this.rendererService.surfaceGroup?.getSurface(this.surfaceId());
       if (surface) {

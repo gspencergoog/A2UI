@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
 import { BoundProperty } from '../../core/types';
 
 /**
@@ -25,10 +25,10 @@ import { BoundProperty } from '../../core/types';
   imports: [],
   template: `
     <span
-      [style.font-weight]="props()['weight']?.value()"
-      [style.font-style]="props()['style']?.value()"
+      [style.font-weight]="fontWeight()"
+      [style.font-style]="fontStyle()"
     >
-      {{ props()['text']?.value() }}
+      {{ text() }}
     </span>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,4 +41,8 @@ export class TextComponent {
   surfaceId = input<string>();
   componentId = input<string>();
   dataContextPath = input<string>();
+
+  text = computed(() => this.props()['text']?.value() ?? '');
+  fontWeight = computed(() => this.props()['weight']?.value());
+  fontStyle = computed(() => this.props()['style']?.value());
 }

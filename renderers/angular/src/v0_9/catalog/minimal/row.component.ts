@@ -28,8 +28,8 @@ import { getNormalizedPath } from '../../core/utils';
   template: `
     <div
       class="a2ui-row"
-      [style.justify-content]="props()['justify']?.value()"
-      [style.align-items]="props()['align']?.value()"
+      [style.justify-content]="justify()"
+      [style.align-items]="align()"
       style="display: flex; flex-direction: row; width: 100%;"
     >
       @if (!isRepeating()) {
@@ -64,6 +64,9 @@ export class RowComponent {
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input.required<string>();
   dataContextPath = input<string>('/');
+
+  protected justify = computed(() => this.props()['justify']?.value());
+  protected align = computed(() => this.props()['align']?.value());
 
   protected children = computed(() => {
     const raw = this.props()['children']?.value() || [];
