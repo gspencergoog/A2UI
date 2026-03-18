@@ -16,17 +16,13 @@
 
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Types } from '../types';
-<<<<<<<< HEAD:renderers/angular/v0_8/components/button.ts
-
-========
->>>>>>>> main:renderers/angular/src/v0_8/components/button.ts
 import { DynamicComponent } from '../rendering/dynamic-component';
 import { Renderer } from '../rendering/renderer';
 
 @Component({
   selector: 'a2ui-button',
   imports: [Renderer],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <button
       [class]="theme.components.Button"

@@ -20,10 +20,6 @@ import { Types } from '../types';
 
 @Component({
   selector: 'a2ui-audio',
-<<<<<<<< HEAD:renderers/angular/v0_8/components/audio.ts
-  changeDetection: ChangeDetectionStrategy.OnPush,
-========
->>>>>>>> main:renderers/angular/src/v0_8/components/audio.ts
   template: `
     <audio controls [src]="resolvedUrl()" [style]="theme.additionalStyles?.AudioPlayer"></audio>
   `,

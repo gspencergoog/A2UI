@@ -41,7 +41,7 @@ interface HintedStyles {
 
 @Component({
   selector: 'a2ui-text',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <section
       [class]="classes()"
@@ -104,17 +104,19 @@ export class Text extends DynamicComponent<Types.TextNode> {
         break;
     }
 
-    return this.markdownRenderer.render(value, {
-      tagClassMap: Styles.appendToAll(this.theme['markdown'], ['ol', 'ul', 'li'], {}),
-    });
+    return this.markdownRenderer.render(
+      value, {
+        tagClassMap: Styles.appendToAll(this.theme.markdown, ['ol', 'ul', 'li'], {}),
+      },
+    );
   });
 
   protected classes = computed(() => {
     const usageHint = this.usageHint();
-    const textTheme = this.theme.components.Text;
+
     return Styles.merge(
-      textTheme.all,
-      usageHint && usageHint in textTheme ? textTheme[usageHint as keyof typeof textTheme] : {},
+      this.theme.components.Text.all,
+      usageHint ? this.theme.components.Text[usageHint] : {},
     );
   });
 
@@ -129,15 +131,9 @@ export class Text extends DynamicComponent<Types.TextNode> {
     let additionalStyles: Record<string, string> = {};
 
     if (this.areHintedStyles(styles)) {
-<<<<<<<< HEAD:renderers/angular/v0_8/components/text.ts
-      additionalStyles = (styles as any)[usageHint ?? 'body'];
-    } else {
-      additionalStyles = styles;
-========
       additionalStyles = (styles as any)[usageHint ?? 'body'] || {};
     } else if (typeof styles === 'object' && styles !== null) {
       additionalStyles = styles as Record<string, string>;
->>>>>>>> main:renderers/angular/src/v0_8/components/text.ts
     }
 
     return additionalStyles;

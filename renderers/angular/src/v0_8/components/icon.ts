@@ -24,7 +24,7 @@ import { Types } from '../types';
     'aria-hidden': 'true',
     tabindex: '-1',
   },
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     :host {
       display: block;
@@ -43,21 +43,7 @@ import { Types } from '../types';
     }
   `,
 })
-<<<<<<<< HEAD:renderers/angular/v0_8/components/icon.ts
-export class Icon extends DynamicComponent {
-  readonly name = input.required<Primitives.StringValue | null>();
-  protected readonly resolvedName = computed(() => {
-    const rawName = this.resolvePrimitive(this.name());
-    if (!rawName) return null;
-    // Material Symbols ligatures require snake_case and must not have whitespace.
-    return String(rawName)
-      .trim()
-      .replace(/([A-Z])/g, (match) => `_${match.toLowerCase()}`)
-      .replace(/^_/, '');
-  });
-========
 export class Icon extends DynamicComponent<Types.IconNode> {
   readonly name = input.required<Types.StringValue | null>();
   protected readonly resolvedName = computed(() => this.resolvePrimitive(this.name()));
->>>>>>>> main:renderers/angular/src/v0_8/components/icon.ts
 }
