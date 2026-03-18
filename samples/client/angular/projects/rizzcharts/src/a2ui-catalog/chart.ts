@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DynamicComponent } from '@a2ui/angular';
+import { DynamicComponent } from '@a2ui/angular/v0_8';
 import * as Primitives from '@a2ui/web_core/types/primitives';
 import * as Types from '@a2ui/web_core/types/types';
 import {

@@ -5,8 +5,9 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "paths": {
-      "@a2ui/angular": [
-        "./projects/lib/src/public-api.ts"
+
+      "@angular/*": [
+        "./node_modules/@angular/*"
       ],
       "@a2a_chat_canvas/*": [
         "./projects/a2a-chat-canvas/src/lib/*"
