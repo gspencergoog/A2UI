@@ -73,7 +73,7 @@ describe('MessageProcessor', () => {
     const baseProcessor = (service as any).baseProcessor;
     spyOn(baseProcessor, 'getData').and.returnValue('mock-value');
 
-    const node: Types.AnyComponentNode = { id: '1', type: 'Text' };
+    const node = { id: '1', type: 'Text' } as any as Types.AnyComponentNode;
     const result = service.getData(node, 'path/to/data', 'surf-1');
 
     expect(baseProcessor.getData).toHaveBeenCalledWith(node, 'path/to/data', 'surf-1');
@@ -84,7 +84,7 @@ describe('MessageProcessor', () => {
     const baseProcessor = (service as any).baseProcessor;
     spyOn(baseProcessor, 'setData');
 
-    const node: Types.AnyComponentNode = { id: '1', type: 'Text' };
+    const node = { id: '1', type: 'Text' } as any as Types.AnyComponentNode;
     service.setData(node, 'path/to/data', 'new-value', 'surf-1');
 
     expect(baseProcessor.setData).toHaveBeenCalledWith(node, 'path/to/data', 'new-value', 'surf-1');
