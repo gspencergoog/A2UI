@@ -16,11 +16,7 @@
 
 import { Injectable } from '@angular/core';
 import { z } from 'zod';
-import {
-  BaseMinimalCatalog,
-  MINIMAL_COMPONENTS,
-  MINIMAL_FUNCTIONS,
-} from '@a2ui/angular/v0_9';
+import { BaseMinimalCatalog, MINIMAL_COMPONENTS, MINIMAL_FUNCTIONS } from '@a2ui/angular/v0_9';
 import { CustomSliderComponent } from './custom-slider.component';
 import { CardComponent } from './card.component';
 import { AngularComponentApi } from '@a2ui/angular/v0_9';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Injectable, OnDestroy, inject } from '@angular/core';
+import { Injectable, OnDestroy, InjectionToken, Inject } from '@angular/core';
 import {
   MessageProcessor,
   SurfaceGroupModel,
@@ -35,52 +35,45 @@ export interface RendererConfiguration {
 }
 
 /**
+ * Injection token for A2UI Renderer Configuration.
+ */
+export const A2UI_RENDERER_CONFIG = new InjectionToken<RendererConfiguration>(
+  'A2UI_RENDERER_CONFIG',
+);
+
+/**
  * Service responsible for managing A2UI v0.9 rendering sessions.
  * Bridges the A2UI MessageProcessor to Angular-friendly models.
  */
 @Injectable()
 export class A2uiRendererService implements OnDestroy {
-  private _messageProcessor?: MessageProcessor<AngularComponentApi>;
+  private _messageProcessor: MessageProcessor<AngularComponentApi>;
   private _catalogs: AngularCatalog[] = [];
-  private _messageQueue: A2uiMessage[] = [];
 
-  /**
-   * Initializes the renderer.
-   * @param config The renderer configuration.
-   */
-  initialize(config: RendererConfiguration): void {
-    this._catalogs = config.catalogs;
+  constructor(@Inject(A2UI_RENDERER_CONFIG) private config: RendererConfiguration) {
+    this._catalogs = this.config.catalogs;
 
     this._messageProcessor = new MessageProcessor<AngularComponentApi>(
       this._catalogs,
-      config.actionHandler as ActionHandler,
+      this.config.actionHandler as ActionHandler,
     );
-
-    if (this._messageQueue.length > 0) {
-      this._messageProcessor.processMessages(this._messageQueue);
-      this._messageQueue = [];
-    }
   }
 
   /**
    * Processes a list of messages.
    */
   processMessages(messages: A2uiMessage[]): void {
-    if (this._messageProcessor) {
-      this._messageProcessor.processMessages(messages);
-    } else {
-      this._messageQueue.push(...messages);
-    }
+    this._messageProcessor.processMessages(messages);
   }
 
   /**
    * Returns the current surface group model.
    */
-  get surfaceGroup(): SurfaceGroupModel<AngularComponentApi> | undefined {
-    return this._messageProcessor?.model;
+  get surfaceGroup(): SurfaceGroupModel<AngularComponentApi> {
+    return this._messageProcessor.model;
   }
 
   ngOnDestroy(): void {
-    this._messageProcessor?.model.dispose();
+    this._messageProcessor.model.dispose();
   }
 }

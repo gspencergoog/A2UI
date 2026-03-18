@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-import { Component, effect, inject, input, viewChild, ViewContainerRef, Type, Binding } from '@angular/core';
+import {
+  Component,
+  effect,
+  inject,
+  input,
+  viewChild,
+  ViewContainerRef,
+  Type,
+  Binding,
+} from '@angular/core';
 import { Catalog } from './catalog';
 import { Types } from '../types';
 
 @Component({
   selector: '[a2ui-renderer]',
-  template: `
-    <ng-template #container />
-  `,
+  template: ` <ng-template #container /> `,
   styles: `
     :host {
       display: contents;
@@ -67,11 +74,11 @@ export class Renderer {
         const res = config.type();
         componentType = res instanceof Promise ? await res : res;
       } else {
-         componentType = config.type;
+        componentType = config.type;
       }
-      
+
       if (typeof config.bindings === 'function') {
-         componentBindings = config.bindings(node as any);
+        componentBindings = config.bindings(node as any);
       }
     }
 
@@ -80,15 +87,15 @@ export class Renderer {
       const bindingsObject: Record<string, any> = {};
       if (componentBindings) {
         for (const binding of componentBindings) {
-           // binding is from inputBinding, which typically is { provide: ..., useFactory: ... } or similar in older angular
-           // Wait, inputBinding in old angular constructed a Binding array.
-           // Standard input binding from @angular/core could be mapped or used.
-           // However, if we just want to support older layouts without complex evaluation hookup here,
-           // we can evaluate bindings that are function/factory structure if possible,
-           // or we can fallback to just applying properties.
-           // Let's check how bindings were applied on main:
-           // `bindings` was array of standard angular bindings provider!
-           // Angular's createComponent takes array of bindings in options.
+          // binding is from inputBinding, which typically is { provide: ..., useFactory: ... } or similar in older angular
+          // Wait, inputBinding in old angular constructed a Binding array.
+          // Standard input binding from @angular/core could be mapped or used.
+          // However, if we just want to support older layouts without complex evaluation hookup here,
+          // we can evaluate bindings that are function/factory structure if possible,
+          // or we can fallback to just applying properties.
+          // Let's check how bindings were applied on main:
+          // `bindings` was array of standard angular bindings provider!
+          // Angular's createComponent takes array of bindings in options.
         }
       }
 

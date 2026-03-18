@@ -35,7 +35,7 @@ describe('TextFieldComponent', () => {
 
     fixture = TestBed.createComponent(TextFieldComponent);
     component = fixture.componentInstance;
-    component.props = {
+    fixture.componentRef.setInput('props', {
       label: { value: signal('Username'), raw: 'Username', onUpdate: () => {} },
       value: {
         value: signal('testuser'),
@@ -44,7 +44,7 @@ describe('TextFieldComponent', () => {
       },
       placeholder: { value: signal('Enter username'), raw: 'Enter username', onUpdate: () => {} },
       variant: { value: signal('text'), raw: 'text', onUpdate: () => {} },
-    };
+    });
   });
 
   it('should create', () => {
@@ -59,7 +59,10 @@ describe('TextFieldComponent', () => {
   });
 
   it('should not render label if not provided', () => {
-    component.props['label'] = { value: signal(null), raw: null, onUpdate: () => {} };
+    fixture.componentRef.setInput('props', {
+      ...component.props(),
+      label: { value: signal(null), raw: null, onUpdate: () => {} },
+    });
     fixture.detectChanges();
     const label = fixture.debugElement.query(By.css('label'));
     expect(label).toBeFalsy();
@@ -73,13 +76,20 @@ describe('TextFieldComponent', () => {
   });
 
   it('should return correct input type based on variant', () => {
-    expect(component.getInputType()).toBe('text');
+    // inputType is now a computed signal
+    expect(component.inputType()).toBe('text');
 
-    component.props['variant'] = { value: signal('obscured'), raw: 'obscured', onUpdate: () => {} };
-    expect(component.getInputType()).toBe('password');
+    fixture.componentRef.setInput('props', {
+      ...component.props(),
+      variant: { value: signal('obscured'), raw: 'obscured', onUpdate: () => {} },
+    });
+    expect(component.inputType()).toBe('password');
 
-    component.props['variant'] = { value: signal('number'), raw: 'number', onUpdate: () => {} };
-    expect(component.getInputType()).toBe('number');
+    fixture.componentRef.setInput('props', {
+      ...component.props(),
+      variant: { value: signal('number'), raw: 'number', onUpdate: () => {} },
+    });
+    expect(component.inputType()).toBe('number');
   });
 
   it('should call onUpdate when input changes', () => {
@@ -88,6 +98,6 @@ describe('TextFieldComponent', () => {
     input.nativeElement.value = 'newuser';
     input.triggerEventHandler('input', { target: input.nativeElement });
 
-    expect(component.props['value'].onUpdate).toHaveBeenCalledWith('newuser');
+    expect(component.props()['value'].onUpdate).toHaveBeenCalledWith('newuser');
   });
 });

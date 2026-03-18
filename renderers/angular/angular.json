@@ -46,9 +46,7 @@
                 "input": "a2ui_explorer/public"
               }
             ],
-            "styles": [
-              "a2ui_explorer/src/styles.css"
-            ]
+            "styles": ["a2ui_explorer/src/styles.css"]
           },
           "configurations": {
             "production": {

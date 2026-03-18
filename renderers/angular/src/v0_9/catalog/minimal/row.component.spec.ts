@@ -75,8 +75,8 @@ describe('RowComponent', () => {
 
     fixture = TestBed.createComponent(RowComponent);
     component = fixture.componentInstance;
-    component.surfaceId = 'surf1';
-    component.props = {
+    fixture.componentRef.setInput('surfaceId', 'surf1');
+    fixture.componentRef.setInput('props', {
       justify: { value: signal('center'), raw: 'center', onUpdate: () => {} },
       align: { value: signal('baseline'), raw: 'baseline', onUpdate: () => {} },
       children: {
@@ -84,7 +84,7 @@ describe('RowComponent', () => {
         raw: ['child1', 'child2'],
         onUpdate: () => {},
       },
-    };
+    });
   });
 
   it('should create', () => {
@@ -103,26 +103,29 @@ describe('RowComponent', () => {
     fixture.detectChanges();
     const hosts = fixture.debugElement.queryAll(By.css('a2ui-v09-component-host'));
     expect(hosts.length).toBe(2);
-    expect(hosts[0].componentInstance.componentId).toBe('child1');
-    expect(hosts[1].componentInstance.componentId).toBe('child2');
+    expect(hosts[0].componentInstance.componentId()).toBe('child1');
+    expect(hosts[1].componentInstance.componentId()).toBe('child2');
   });
 
   it('should render repeating children', () => {
-    component.props['children'] = {
-      value: signal([{}, {}]), // two items
-      raw: {
-        componentId: 'template1',
-        path: 'items',
+    fixture.componentRef.setInput('props', {
+      ...component.props(),
+      children: {
+        value: signal([{}, {}]), // two items
+        raw: {
+          componentId: 'template1',
+          path: 'items',
+        },
+        onUpdate: () => {},
       },
-      onUpdate: () => {},
-    };
+    });
     fixture.detectChanges();
 
     const hosts = fixture.debugElement.queryAll(By.css('a2ui-v09-component-host'));
     expect(hosts.length).toBe(2);
-    expect(hosts[0].componentInstance.componentId).toBe('template1');
-    expect(hosts[0].componentInstance.dataContextPath).toBe('/items/0');
-    expect(hosts[1].componentInstance.componentId).toBe('template1');
-    expect(hosts[1].componentInstance.dataContextPath).toBe('/items/1');
+    expect(hosts[0].componentInstance.componentId()).toBe('template1');
+    expect(hosts[0].componentInstance.dataContextPath()).toBe('/items/0');
+    expect(hosts[1].componentInstance.componentId()).toBe('template1');
+    expect(hosts[1].componentInstance.dataContextPath()).toBe('/items/1');
   });
 });

@@ -79,8 +79,8 @@ describe('ComponentHostComponent', () => {
 
     fixture = TestBed.createComponent(ComponentHostComponent);
     component = fixture.componentInstance;
-    component.componentId = 'comp1';
-    component.surfaceId = 'surf1';
+    fixture.componentRef.setInput('componentId', 'comp1');
+    fixture.componentRef.setInput('surfaceId', 'surf1');
   });
 
   it('should be created', () => {
@@ -109,7 +109,7 @@ describe('ComponentHostComponent', () => {
     });
 
     it('should use provided dataContextPath for ComponentContext', () => {
-      component.dataContextPath = '/nested/path';
+      fixture.componentRef.setInput('dataContextPath', '/nested/path');
       fixture.detectChanges();
 
       const bindArg = mockBinder.bind.calls.mostRecent().args[0];
@@ -170,7 +170,7 @@ describe('ComponentHostComponent', () => {
       expect(compiled.innerHTML).toContain('Child Component');
     });
     it('should pass dataContextPath to the rendered component', () => {
-      component.dataContextPath = '/some/path';
+      fixture.componentRef.setInput('dataContextPath', '/some/path');
       fixture.detectChanges();
 
       const childDebugElement = fixture.debugElement.query(By.directive(TestChildComponent));

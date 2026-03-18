@@ -35,11 +35,7 @@ import { Types } from '../types';
     @if (isOpen()) {
       <div [class]="theme.components.Modal.backdrop" (click)="closeModal()">
         <div [class]="theme.components.Modal.element" (click)="$event.stopPropagation()">
-          <ng-container
-            a2ui-renderer
-            [surfaceId]="surfaceId()!"
-            [component]="contentChild()"
-          />
+          <ng-container a2ui-renderer [surfaceId]="surfaceId()!" [component]="contentChild()" />
         </div>
       </div>
     }

@@ -80,8 +80,8 @@ describe('ButtonComponent', () => {
 
     fixture = TestBed.createComponent(ButtonComponent);
     component = fixture.componentInstance;
-    component.surfaceId = 'surf1';
-    component.props = {
+    fixture.componentRef.setInput('surfaceId', 'surf1');
+    fixture.componentRef.setInput('props', {
       variant: { value: signal('primary'), raw: 'primary', onUpdate: () => {} },
       child: { value: signal('child1'), raw: 'child1', onUpdate: () => {} },
       action: {
@@ -89,7 +89,7 @@ describe('ButtonComponent', () => {
         raw: { type: 'test-action', data: {} },
         onUpdate: () => {},
       },
-    };
+    });
   });
 
   it('should create', () => {
@@ -104,11 +104,14 @@ describe('ButtonComponent', () => {
   });
 
   it('should set button type to button for non-primary variant', () => {
-    component.props['variant'] = {
-      value: signal('secondary'),
-      raw: 'secondary',
-      onUpdate: () => {},
-    };
+    fixture.componentRef.setInput('props', {
+      ...component.props(),
+      variant: {
+        value: signal('secondary'),
+        raw: 'secondary',
+        onUpdate: () => {},
+      },
+    });
     fixture.detectChanges();
     const button = fixture.debugElement.query(By.css('button'));
     expect(button.nativeElement.type).toBe('button');
@@ -125,7 +128,7 @@ describe('ButtonComponent', () => {
     const button = fixture.debugElement.query(By.css('button'));
     button.triggerEventHandler('click', null);
 
-    expect(mockSurfaceGroup.getSurface).toHaveBeenCalledWith('surf1');
+    expect(mockRendererService.surfaceGroup.getSurface).toHaveBeenCalledWith('surf1');
     expect(mockSurface.dispatchAction).toHaveBeenCalled();
   });
 
@@ -133,11 +136,15 @@ describe('ButtonComponent', () => {
     fixture.detectChanges();
     const host = fixture.debugElement.query(By.css('a2ui-v09-component-host'));
     expect(host).toBeTruthy();
-    expect(host.componentInstance.componentId).toBe('child1');
+    // componentId is now a signal, so we access it via ()
+    expect(host.componentInstance.componentId()).toBe('child1');
   });
 
   it('should not show child component host if child prop is absent', () => {
-    component.props['child'] = { value: signal(null), raw: null, onUpdate: () => {} };
+    fixture.componentRef.setInput('props', {
+      ...component.props(),
+      child: { value: signal(null), raw: null, onUpdate: () => {} },
+    });
     fixture.detectChanges();
     const host = fixture.debugElement.query(By.css('a2ui-v09-component-host'));
     expect(host).toBeFalsy();

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, computed, input } from '@angular/core';
 import { ComponentHostComponent } from '../../core/component-host.component';
 import { BoundProperty } from '../../core/types';
 import { getNormalizedPath } from '../../core/utils';
@@ -25,36 +24,35 @@ import { getNormalizedPath } from '../../core/utils';
  */
 @Component({
   selector: 'a2ui-v09-row',
-  standalone: true,
-  imports: [CommonModule, ComponentHostComponent],
+  imports: [ComponentHostComponent],
   template: `
     <div
       class="a2ui-row"
-      [style.justify-content]="props['justify']?.value()"
-      [style.align-items]="props['align']?.value()"
+      [style.justify-content]="props()['justify']?.value()"
+      [style.align-items]="props()['align']?.value()"
       style="display: flex; flex-direction: row; width: 100%;"
     >
-      <ng-container *ngIf="!isRepeating()">
-        <ng-container *ngFor="let childId of children()">
+      @if (!isRepeating()) {
+        @for (childId of children(); track childId) {
           <a2ui-v09-component-host
             [componentId]="childId"
-            [surfaceId]="surfaceId"
-            [dataContextPath]="dataContextPath"
+            [surfaceId]="surfaceId()"
+            [dataContextPath]="dataContextPath()"
           >
           </a2ui-v09-component-host>
-        </ng-container>
-      </ng-container>
+        }
+      }
 
-      <ng-container *ngIf="isRepeating()">
-        <ng-container *ngFor="let item of children(); let i = index">
+      @if (isRepeating()) {
+        @for (item of children(); track $index) {
           <a2ui-v09-component-host
-            [componentId]="getTemplateId()"
-            [surfaceId]="surfaceId"
-            [dataContextPath]="getNormalizedPath(i)"
+            [componentId]="templateId()!"
+            [surfaceId]="surfaceId()"
+            [dataContextPath]="getNormalizedPath($index)"
           >
           </a2ui-v09-component-host>
-        </ng-container>
-      </ng-container>
+        }
+      }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -63,24 +61,24 @@ export class RowComponent {
   /**
    * Bound properties.
    */
-  @Input() props: Record<string, BoundProperty> = {};
-  @Input() surfaceId!: string;
-  @Input() dataContextPath: string = '/';
+  props = input<Record<string, BoundProperty>>({});
+  surfaceId = input.required<string>();
+  dataContextPath = input<string>('/');
 
-  protected children() {
-    const raw = this.props['children']?.value() || [];
+  protected children = computed(() => {
+    const raw = this.props()['children']?.value() || [];
     return Array.isArray(raw) ? raw : [];
-  }
+  });
 
-  protected isRepeating() {
-    return !!this.props['children']?.raw?.componentId;
-  }
+  protected isRepeating = computed(() => {
+    return !!this.props()['children']?.raw?.componentId;
+  });
 
-  protected getTemplateId() {
-    return this.props['children']?.raw?.componentId;
-  }
+  protected templateId = computed(() => {
+    return this.props()['children']?.raw?.componentId;
+  });
 
   protected getNormalizedPath(index: number) {
-    return getNormalizedPath(this.props['children']?.raw?.path, this.dataContextPath, index);
+    return getNormalizedPath(this.props()['children']?.raw?.path, this.dataContextPath(), index);
   }
 }

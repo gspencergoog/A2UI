@@ -18,7 +18,6 @@
       "@a2ui/angular/v0_9": ["src/v0_9/public-api.ts"],
       "@preact/signals-core": ["../web_core/node_modules/@preact/signals-core"]
     }
-
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

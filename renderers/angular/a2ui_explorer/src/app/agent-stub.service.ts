@@ -18,6 +18,7 @@ import { Injectable } from '@angular/core';
 import { A2uiRendererService } from '@a2ui/angular/v0_9';
 import { AngularCatalog } from '@a2ui/angular/v0_9';
 import { SurfaceGroupAction, A2uiMessage } from '@a2ui/web_core/v0_9';
+import { ActionDispatcher } from './action-dispatcher.service';
 
 /**
  * Context for the 'update_property' event.
@@ -50,7 +51,11 @@ export class AgentStubService {
   constructor(
     private rendererService: A2uiRendererService,
     private catalog: AngularCatalog,
-  ) {}
+    private dispatcher: ActionDispatcher,
+  ) {
+    // Subscribe to actions dispatched by the renderer
+    this.dispatcher.actions.subscribe((action) => this.handleAction(action));
+  }
 
   /**
    * Pushes actions triggered from the rendered Canvas frame through simulation.
@@ -67,7 +72,7 @@ export class AgentStubService {
       if ('event' in action) {
         const { name, context } = action.event;
         if (name === 'update_property' && context) {
-          const { path, value, surfaceId } = (context as unknown) as UpdatePropertyContext;
+          const { path, value, surfaceId } = context as unknown as UpdatePropertyContext;
           console.log(
             '[AgentStub] update_property path:',
             path,
@@ -87,7 +92,7 @@ export class AgentStubService {
             },
           ]);
         } else if (name === 'submit_form' && context) {
-          const formData = (context as unknown) as SubmitFormContext;
+          const formData = context as unknown as SubmitFormContext;
           const nameValue = formData.name || 'Anonymous';
 
           // Respond with an update to the data model in v0.9 layout
@@ -118,10 +123,6 @@ export class AgentStubService {
    * Initializes a demo session with an initial set of messages.
    */
   initializeDemo(initialMessages: A2uiMessage[]) {
-    this.rendererService.initialize({
-      catalogs: [this.catalog],
-      actionHandler: (action) => this.handleAction(action),
-    });
     this.rendererService.processMessages(initialMessages);
   }
 }

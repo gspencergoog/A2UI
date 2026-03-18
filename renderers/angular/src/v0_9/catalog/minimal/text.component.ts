@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { BoundProperty } from '../../core/types';
 
 /**
@@ -23,24 +22,23 @@ import { BoundProperty } from '../../core/types';
  */
 @Component({
   selector: 'a2ui-v09-text',
-  standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
     <span
-      [style.font-weight]="props['weight']?.value()"
-      [style.font-style]="props['style']?.value()"
+      [style.font-weight]="props()['weight']?.value()"
+      [style.font-style]="props()['style']?.value()"
     >
-      {{ props['text']?.value() }}
+      {{ props()['text']?.value() }}
     </span>
   `,
-  // Default change detection to allow passive updates from Preact signals
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TextComponent {
   /**
    * Bound properties.
    */
-  @Input() props: Record<string, BoundProperty> = {};
-  @Input() surfaceId?: string;
-  @Input() componentId?: string;
-  @Input() dataContextPath?: string;
+  props = input<Record<string, BoundProperty>>({});
+  surfaceId = input<string>();
+  componentId = input<string>();
+  dataContextPath = input<string>();
 }

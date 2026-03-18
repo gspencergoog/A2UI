@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, ChangeDetectionStrategy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { ComponentHostComponent } from '../../core/component-host.component';
 import { ComponentContext, DataContext } from '@a2ui/web_core/v0_9';
 import { A2uiRendererService } from '../../core/a2ui-renderer.service';
@@ -26,21 +25,21 @@ import { BoundProperty } from '../../core/types';
  */
 @Component({
   selector: 'a2ui-v09-button',
-  standalone: true,
-  imports: [CommonModule, ComponentHostComponent],
+  imports: [ComponentHostComponent],
   template: `
     <button
-      [type]="props['variant']?.value() === 'primary' ? 'submit' : 'button'"
-      [class]="'a2ui-button ' + (props['variant']?.value() || 'default')"
+      [type]="props()['variant']?.value() === 'primary' ? 'submit' : 'button'"
+      [class]="'a2ui-button ' + (props()['variant']?.value() || 'default')"
       (click)="handleClick()"
     >
-      <a2ui-v09-component-host
-        *ngIf="props['child']?.value()"
-        [componentId]="props['child'].value()"
-        [surfaceId]="surfaceId"
-        [dataContextPath]="dataContextPath"
-      >
-      </a2ui-v09-component-host>
+      @if (props()['child']?.value()) {
+        <a2ui-v09-component-host
+          [componentId]="props()['child']!.value()"
+          [surfaceId]="surfaceId()"
+          [dataContextPath]="dataContextPath()"
+        >
+        </a2ui-v09-component-host>
+      }
     </button>
   `,
   styles: [
@@ -70,18 +69,18 @@ export class ButtonComponent {
   /**
    * Bound properties.
    */
-  @Input() props: Record<string, BoundProperty> = {};
-  @Input() surfaceId!: string;
-  @Input() dataContextPath: string = '/';
+  props = input<Record<string, BoundProperty>>({});
+  surfaceId = input.required<string>();
+  dataContextPath = input<string>('/');
 
   private rendererService = inject(A2uiRendererService);
 
   handleClick() {
-    const action = this.props['action']?.value();
+    const action = this.props()['action']?.value();
     if (action) {
-      const surface = this.rendererService.surfaceGroup?.getSurface(this.surfaceId);
+      const surface = this.rendererService.surfaceGroup?.getSurface(this.surfaceId());
       if (surface) {
-        const dataContext = new DataContext(surface, this.dataContextPath);
+        const dataContext = new DataContext(surface, this.dataContextPath());
         const resolvedAction = dataContext.resolveAction(action);
         surface.dispatchAction(resolvedAction);
       }

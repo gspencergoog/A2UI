@@ -18,12 +18,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
-  Input,
   OnInit,
   Type,
   inject,
+  input,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { NgComponentOutlet } from '@angular/common';
 import { ComponentContext } from '@a2ui/web_core/v0_9';
 import { A2uiRendererService } from './a2ui-renderer.service';
 import { AngularCatalog } from '../catalog/types';
@@ -35,24 +35,23 @@ import { ComponentBinder } from './component-binder.service';
  */
 @Component({
   selector: 'a2ui-v09-component-host',
-  standalone: true,
-  imports: [CommonModule],
+  imports: [NgComponentOutlet],
   template: `
-    <ng-container *ngIf="componentType">
+    @if (componentType) {
       <ng-container
         *ngComponentOutlet="
           componentType;
-          inputs: { props: props, surfaceId: surfaceId, dataContextPath: dataContextPath }
+          inputs: { props: props, surfaceId: surfaceId(), dataContextPath: dataContextPath() }
         "
       ></ng-container>
-    </ng-container>
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ComponentHostComponent implements OnInit {
-  @Input({ required: true }) componentId!: string;
-  @Input({ required: true }) surfaceId!: string;
-  @Input() dataContextPath: string = '/';
+  componentId = input.required<string>();
+  surfaceId = input.required<string>();
+  dataContextPath = input<string>('/');
 
   private rendererService = inject(A2uiRendererService);
   private binder = inject(ComponentBinder);
@@ -63,17 +62,17 @@ export class ComponentHostComponent implements OnInit {
   private context?: ComponentContext;
 
   ngOnInit(): void {
-    const surface = this.rendererService.surfaceGroup?.getSurface(this.surfaceId);
+    const surface = this.rendererService.surfaceGroup?.getSurface(this.surfaceId());
 
     if (!surface) {
-      console.warn(`Surface ${this.surfaceId} not found`);
+      console.warn(`Surface ${this.surfaceId()} not found`);
       return;
     }
 
-    const componentModel = surface.componentsModel.get(this.componentId);
+    const componentModel = surface.componentsModel.get(this.componentId());
 
     if (!componentModel) {
-      console.warn(`Component ${this.componentId} not found in surface ${this.surfaceId}`);
+      console.warn(`Component ${this.componentId()} not found in surface ${this.surfaceId()}`);
       return;
     }
 
@@ -88,7 +87,7 @@ export class ComponentHostComponent implements OnInit {
     this.componentType = api.component;
 
     // Create context
-    this.context = new ComponentContext(surface, this.componentId, this.dataContextPath);
+    this.context = new ComponentContext(surface, this.componentId(), this.dataContextPath());
     this.props = this.binder.bind(this.context);
 
     this.destroyRef.onDestroy(() => {

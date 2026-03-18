@@ -15,7 +15,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { A2uiRendererService } from './a2ui-renderer.service';
+import { A2uiRendererService, A2UI_RENDERER_CONFIG } from './a2ui-renderer.service';
 import { AngularCatalog } from '../catalog/types';
 
 describe('A2uiRendererService', () => {
@@ -37,7 +37,13 @@ describe('A2uiRendererService', () => {
     };
 
     TestBed.configureTestingModule({
-      providers: [A2uiRendererService],
+      providers: [
+        A2uiRendererService,
+        {
+          provide: A2UI_RENDERER_CONFIG,
+          useValue: { catalogs: [mockCatalog] },
+        },
+      ],
     });
 
     service = TestBed.inject(A2uiRendererService);
@@ -47,17 +53,14 @@ describe('A2uiRendererService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('initialize', () => {
-    it('should create MessageProcessor and surfaceGroup', () => {
-      service.initialize({ catalogs: [mockCatalog] });
+  describe('initialization', () => {
+    it('should create surfaceGroup', () => {
       expect(service.surfaceGroup).toBeDefined();
     });
   });
 
   describe('processMessages', () => {
     it('should delegate to MessageProcessor', () => {
-      service.initialize({ catalogs: [mockCatalog] });
-
       // Access private _messageProcessor via bracket notation for testing if needed,
       // or verify indirectly by inspecting surfaceGroup after messages.
       // Since MessageProcessor is complex, we can just verify it doesn't crash
@@ -67,21 +70,10 @@ describe('A2uiRendererService', () => {
       // Let's pass an empty array to verify delegate runs without error.
       expect(() => service.processMessages([])).not.toThrow();
     });
-
-    it('should queue messages if called before initialize and flush them on initialize', () => {
-      const messages = [{ beginRendering: { surfaceId: 'test', root: 'col' } }] as any;
-      // Should not throw, but will queue
-      expect(() => service.processMessages(messages)).not.toThrow();
-      expect(service.surfaceGroup).toBeUndefined(); // Not initialized yet
-
-      service.initialize({ catalogs: [mockCatalog] });
-      expect(service.surfaceGroup).toBeDefined(); // Now initialized
-    });
   });
 
   describe('ngOnDestroy', () => {
     it('should dispose surfaceGroup', () => {
-      service.initialize({ catalogs: [mockCatalog] });
       const surfaceGroup = service.surfaceGroup;
       expect(surfaceGroup).toBeDefined();
 

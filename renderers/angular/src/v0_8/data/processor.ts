@@ -60,7 +60,11 @@ export class MessageProcessor {
   }
 
   getData(node: Types.AnyComponentNode, path: string, surfaceId?: string | null): unknown {
-    return this.baseProcessor.getData(node as WebCore.AnyComponentNode, path, surfaceId ?? undefined);
+    return this.baseProcessor.getData(
+      node as WebCore.AnyComponentNode,
+      path,
+      surfaceId ?? undefined,
+    );
   }
 
   setData(node: Types.AnyComponentNode | null, path: string, value: any, surfaceId: string) {

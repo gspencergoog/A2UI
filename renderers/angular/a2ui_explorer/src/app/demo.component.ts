@@ -16,7 +16,7 @@
 
 import { ChangeDetectorRef, Component, OnInit, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { A2uiRendererService } from '@a2ui/angular/v0_9';
+import { A2uiRendererService, A2UI_RENDERER_CONFIG } from '@a2ui/angular/v0_9';
 import { AgentStubService } from './agent-stub.service';
 import { ComponentHostComponent } from '@a2ui/angular/v0_9';
 import { AngularCatalog } from '@a2ui/angular/v0_9';
@@ -25,6 +25,7 @@ import { SurfaceGroupAction, A2uiMessage, CreateSurfaceMessage } from '@a2ui/web
 import { EXAMPLES } from './examples-bundle';
 import { Example } from './types';
 import { Subscription } from 'rxjs';
+import { ActionDispatcher } from './action-dispatcher.service';
 
 /**
  * Main dashboard component for A2UI v0.9 Angular Renderer.
@@ -36,6 +37,7 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [CommonModule, ComponentHostComponent],
   template: `
+    <!-- template omitted for brevity, keeping same -->
     <div class="dashboard">
       <!-- Sidebar Navigation -->
       <div class="sidebar">
@@ -105,6 +107,7 @@ import { Subscription } from 'rxjs';
   `,
   styles: [
     `
+      /* styles omitted for brevity, keeping same */
       .dashboard {
         display: flex;
         height: 100vh;
@@ -330,16 +333,19 @@ import { Subscription } from 'rxjs';
       }
     `,
   ],
-  /**
-   * Component-scoped providers for the demo workspace dashboard:
-   * - A2uiRendererService: Coordinates structural updates to dynamic views and layouts.
-   * - AngularCatalog: Maps standalone schemas triggers with dynamic component loading.
-   * - AgentStubService: Pushes reactive messages simulating AI pushes.
-   */
   providers: [
     A2uiRendererService,
     { provide: AngularCatalog, useClass: DemoCatalog },
+    ActionDispatcher,
     AgentStubService,
+    {
+      provide: A2UI_RENDERER_CONFIG,
+      useFactory: (catalog: AngularCatalog, dispatcher: ActionDispatcher) => ({
+        catalogs: [catalog],
+        actionHandler: (action: SurfaceGroupAction) => dispatcher.dispatch(action),
+      }),
+      deps: [AngularCatalog, ActionDispatcher],
+    },
   ],
 })
 export class DemoComponent implements OnInit, OnDestroy {
