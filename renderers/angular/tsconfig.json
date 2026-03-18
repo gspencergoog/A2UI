@@ -12,6 +12,7 @@
     "importHelpers": true,
     "target": "ES2022",
     "baseUrl": ".",
+    "moduleResolution": "bundler",
     "paths": {
       "@a2ui/angular/v0_8": ["src/v0_8/public-api.ts"],
       "@a2ui/angular/v0_9": ["src/v0_9/public-api.ts"],
