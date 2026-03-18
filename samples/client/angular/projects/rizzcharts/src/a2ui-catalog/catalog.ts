@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Catalog, DEFAULT_CATALOG } from '@a2ui/angular/v0_8';
+import { Catalog, DEFAULT_CATALOG } from '@a2ui/angular';
 import { inputBinding } from '@angular/core';
 
 export const RIZZ_CHARTS_CATALOG = {

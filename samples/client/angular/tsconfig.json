@@ -5,9 +5,8 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "paths": {
-
-      "@angular/*": [
-        "./node_modules/@angular/*"
+      "@a2ui/angular": [
+        "./projects/lib/src/public-api.ts"
       ],
       "@a2a_chat_canvas/*": [
         "./projects/a2a-chat-canvas/src/lib/*"
@@ -23,8 +22,7 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "ES2022",
-    "module": "esnext",
-    "moduleResolution": "bundler"
+    "module": "preserve"
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Catalog } from '@a2ui/angular/v0_8';
+import { Catalog } from '@a2ui/angular';
 import { inputBinding } from '@angular/core';
 
 export const DEMO_CATALOG = {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DEFAULT_CATALOG } from '@a2ui/angular/v0_8';
+import { DEFAULT_CATALOG } from '@a2ui/angular';
 
 export const DEFAULT_A2UI_CATALOG = {
   ...DEFAULT_CATALOG,

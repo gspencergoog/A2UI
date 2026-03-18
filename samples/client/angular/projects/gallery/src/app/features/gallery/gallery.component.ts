@@ -16,7 +16,7 @@
 
 import { ChangeDetectionStrategy, Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Surface } from '@a2ui/angular/v0_8';
+import { Surface } from '@a2ui/angular';
 import * as Types from '@a2ui/web_core/types/types';
 
 interface GallerySample {

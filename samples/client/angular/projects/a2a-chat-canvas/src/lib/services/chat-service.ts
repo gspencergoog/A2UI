@@ -21,7 +21,7 @@ import { UiAgent, UiMessage, UiMessageContent } from '@a2a_chat_canvas/types/ui-
 import { extractA2aPartsFromResponse } from '@a2a_chat_canvas/utils/a2a';
 import { extractA2uiDataParts } from '@a2a_chat_canvas/utils/a2ui';
 import { convertPartToUiMessageContent } from '@a2a_chat_canvas/utils/ui-message-utils';
-import { MessageProcessor, DispatchedEvent } from '@a2ui/angular/v0_8';
+import { MessageProcessor, DispatchedEvent } from '@a2ui/angular';
 import { inject, Injectable, resource, signal } from '@angular/core';
 import { v4 as uuid } from 'uuid';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { A2AServerPayload, MessageProcessor } from '@a2ui/angular/v0_8';
+import { A2AServerPayload, MessageProcessor } from '@a2ui/angular';
 import * as Types from '@a2ui/web_core/types/types';
 import { Injectable, inject, signal } from '@angular/core';
 

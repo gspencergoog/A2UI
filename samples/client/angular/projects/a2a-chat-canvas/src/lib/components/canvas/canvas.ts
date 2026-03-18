@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Renderer } from '@a2ui/angular/v0_8';
+import { Renderer } from '@a2ui/angular';
 import { InteractivityChecker } from '@angular/cdk/a11y';
 import {
   ChangeDetectionStrategy,

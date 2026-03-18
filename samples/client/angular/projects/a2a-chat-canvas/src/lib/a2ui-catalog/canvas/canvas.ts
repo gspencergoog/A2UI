@@ -15,7 +15,7 @@
  */
 
 import { CanvasService } from '@a2a_chat_canvas/services/canvas-service';
-import { DynamicComponent } from '@a2ui/angular/v0_8';
+import { DynamicComponent } from '@a2ui/angular';
 import * as Types from '@a2ui/web_core/types/types';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
 import { MatButton } from '@angular/material/button';
