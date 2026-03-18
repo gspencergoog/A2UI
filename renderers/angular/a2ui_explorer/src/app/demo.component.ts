@@ -21,10 +21,9 @@ import { AgentStubService } from './agent-stub.service';
 import { ComponentHostComponent } from '@a2ui/angular/v0_9';
 import { AngularCatalog } from '@a2ui/angular/v0_9';
 import { DemoCatalog } from './demo-catalog';
-import { SurfaceGroupAction, A2uiMessage, CreateSurfaceMessage } from '@a2ui/web_core/v0_9';
+import { SurfaceGroupAction, CreateSurfaceMessage } from '@a2ui/web_core/v0_9';
 import { EXAMPLES } from './examples-bundle';
 import { Example } from './types';
-import { Subscription } from 'rxjs';
 import { ActionDispatcher } from './action-dispatcher.service';
 
 /**
