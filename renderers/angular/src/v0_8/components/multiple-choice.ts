@@ -21,10 +21,7 @@ import { Types } from '../types';
 @Component({
   selector: 'a2ui-multiple-choice',
   template: `
-    <div
-      [class]="theme.components.MultipleChoice.container"
-      [style]="theme.additionalStyles?.MultipleChoice"
-    >
+    <div [class]="theme.components.MultipleChoice.container" [style]="theme.additionalStyles?.MultipleChoice">
       <label [class]="theme.components.MultipleChoice.label" [for]="selectId">
         {{ label() }}
       </label>
@@ -64,8 +61,8 @@ export class MultipleChoice extends DynamicComponent<Types.MultipleChoiceNode> {
       name,
       context: Object.entries(context).map(([key, val]) => ({
         key,
-        value: typeof val === 'number' ? { literalNumber: val } : { literalString: String(val) },
-      })),
+        value: typeof val === 'number' ? { literalNumber: val } : { literalString: String(val) }
+      }))
     });
   }
 }

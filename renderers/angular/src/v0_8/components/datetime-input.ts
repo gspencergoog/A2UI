@@ -21,10 +21,7 @@ import { Types } from '../types';
 @Component({
   selector: 'a2ui-datetime-input',
   template: `
-    <div
-      [class]="theme.components.DateTimeInput.container"
-      [style]="theme.additionalStyles?.DateTimeInput"
-    >
+    <div [class]="theme.components.DateTimeInput.container" [style]="theme.additionalStyles?.DateTimeInput">
       <label [class]="theme.components.DateTimeInput.label" [for]="inputId">
         {{ label() }}
       </label>
@@ -70,8 +67,8 @@ export class DateTimeInput extends DynamicComponent<Types.DateTimeInputNode> {
       name,
       context: Object.entries(context).map(([key, val]) => ({
         key,
-        value: typeof val === 'number' ? { literalNumber: val } : { literalString: String(val) },
-      })),
+        value: typeof val === 'number' ? { literalNumber: val } : { literalString: String(val) }
+      }))
     });
   }
 }

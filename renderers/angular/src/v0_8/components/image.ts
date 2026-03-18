@@ -22,7 +22,7 @@ import { DynamicComponent } from '../rendering/dynamic-component';
 
 @Component({
   selector: 'a2ui-image',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     :host {
       display: block;
@@ -62,11 +62,10 @@ export class Image extends DynamicComponent<Types.ImageNode> {
 
   protected classes = computed(() => {
     const usageHint = this.usageHint();
-    const imageTheme = this.theme.components.Image;
 
     return Styles.merge(
-      imageTheme.all,
-      usageHint && usageHint in imageTheme ? imageTheme[usageHint as keyof typeof imageTheme] : {},
+      this.theme.components.Image.all,
+      usageHint ? this.theme.components.Image[usageHint] : {},
     );
   });
 }

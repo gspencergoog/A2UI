@@ -25,7 +25,11 @@ import { Types } from '../types';
   template: `
     @if (surface(); as s) {
       @if (s.componentTree; as root) {
-        <ng-container a2ui-renderer [surfaceId]="surfaceId()" [component]="root" />
+        <ng-container
+          a2ui-renderer
+          [surfaceId]="surfaceId()"
+          [component]="root"
+        />
       }
     }
   `,

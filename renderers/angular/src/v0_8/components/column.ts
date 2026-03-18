@@ -22,7 +22,7 @@ import { Renderer } from '../rendering/renderer';
 @Component({
   selector: 'a2ui-column',
   imports: [Renderer],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     :host {
       display: flex;

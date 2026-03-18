@@ -20,7 +20,7 @@ import { Types } from '../types';
 
 @Component({
   selector: 'a2ui-video',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @let resolvedUrl = this.resolvedUrl();
 
