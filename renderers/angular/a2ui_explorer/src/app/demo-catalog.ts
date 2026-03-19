@@ -16,7 +16,7 @@
 
 import { Injectable } from '@angular/core';
 import { z } from 'zod';
-import { BaseBasicCatalog, BASIC_COMPONENTS, BASIC_FUNCTIONS } from '@a2ui/angular/v0_9';
+import { BasicCatalogBase, BASIC_FUNCTIONS } from '@a2ui/angular/v0_9';
 import { CustomSliderComponent } from './custom-slider.component';
 import { CardComponent } from './card.component';
 import { AngularComponentImplementation } from '@a2ui/angular/v0_9';
@@ -28,7 +28,7 @@ import { createFunctionImplementation, FunctionImplementation } from '@a2ui/web_
 @Injectable({
   providedIn: 'root',
 })
-export class DemoCatalog extends BaseBasicCatalog {
+export class DemoCatalog extends BasicCatalogBase {
   constructor() {
     const customSliderApi: AngularComponentImplementation = {
       name: 'CustomSlider',
@@ -49,8 +49,6 @@ export class DemoCatalog extends BaseBasicCatalog {
       component: CardComponent,
     };
 
-    const components = [...BASIC_COMPONENTS, customSliderApi, cardApi];
-
     const capitalizeImplementation: FunctionImplementation = createFunctionImplementation(
       {
         name: 'capitalize',
@@ -66,6 +64,13 @@ export class DemoCatalog extends BaseBasicCatalog {
     // Unify functions from both core and angular libraries, plus local demo functions
     const functions = [...BASIC_FUNCTIONS, capitalizeImplementation];
 
-    super('https://a2ui.org/specification/v0_9/basic_catalog.json', components, functions);
+    super({
+      id: 'https://a2ui.org/specification/v0_9/basic_catalog.json',
+      components: {
+        card: cardApi,
+      },
+      extraComponents: [customSliderApi],
+      functions,
+    });
   }
 }

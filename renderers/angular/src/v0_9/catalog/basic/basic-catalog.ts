@@ -59,45 +59,85 @@ import {
 import { FunctionImplementation } from '@a2ui/web_core/v0_9';
 
 /**
+ * The set of default Angular implementations for each component in the basic catalog.
+ */
+const DEFAULT_COMPONENT_IMPLEMENTATIONS = {
+  text: { ...TextApi, component: TextComponent },
+  row: { ...RowApi, component: RowComponent },
+  column: { ...ColumnApi, component: ColumnComponent },
+  button: { ...ButtonApi, component: ButtonComponent },
+  textField: { ...TextFieldApi, component: TextFieldComponent },
+  image: { ...ImageApi, component: ImageComponent },
+  icon: { ...IconApi, component: IconComponent },
+  video: { ...VideoApi, component: VideoComponent },
+  audioPlayer: { ...AudioPlayerApi, component: AudioPlayerComponent },
+  list: { ...ListApi, component: ListComponent },
+  card: { ...CardApi, component: CardComponent },
+  tabs: { ...TabsApi, component: TabsComponent },
+  modal: { ...ModalApi, component: ModalComponent },
+  divider: { ...DividerApi, component: DividerComponent },
+  checkBox: { ...CheckBoxApi, component: CheckBoxComponent },
+  choicePicker: { ...ChoicePickerApi, component: ChoicePickerComponent },
+  slider: { ...SliderApi, component: SliderComponent },
+  dateTimeInput: { ...DateTimeInputApi, component: DateTimeInputComponent },
+} as const;
+
+/**
+ * Interface for specifying overrides and configuration for the basic catalog.
+ */
+export interface BasicCatalogOptions {
+  /**
+   * An optional override for the catalog's unique identifier.
+   */
+  id?: string;
+
+  /**
+   * Optional overrides for individual components in the catalog.
+   */
+  components?: Partial<{
+    [K in keyof typeof DEFAULT_COMPONENT_IMPLEMENTATIONS]: AngularComponentImplementation;
+  }>;
+
+  /**
+   * Optional additional components to include in the catalog beyond
+   * the standard basic catalog components.
+   */
+  extraComponents?: AngularComponentImplementation[];
+
+  /**
+   * An optional set of function implementations to use instead of the defaults.
+   */
+  functions?: FunctionImplementation[];
+}
+
+/**
  * The set of Angular UI components provided by the basic catalog.
  */
-export const BASIC_COMPONENTS: AngularComponentImplementation[] = [
-  { ...TextApi, component: TextComponent },
-  { ...RowApi, component: RowComponent },
-  { ...ColumnApi, component: ColumnComponent },
-  { ...ButtonApi, component: ButtonComponent },
-  { ...TextFieldApi, component: TextFieldComponent },
-  { ...ImageApi, component: ImageComponent },
-  { ...IconApi, component: IconComponent },
-  { ...VideoApi, component: VideoComponent },
-  { ...AudioPlayerApi, component: AudioPlayerComponent },
-  { ...ListApi, component: ListComponent },
-  { ...CardApi, component: CardComponent },
-  { ...TabsApi, component: TabsComponent },
-  { ...ModalApi, component: ModalComponent },
-  { ...DividerApi, component: DividerComponent },
-  { ...CheckBoxApi, component: CheckBoxComponent },
-  { ...ChoicePickerApi, component: ChoicePickerComponent },
-  { ...SliderApi, component: SliderComponent },
-  { ...DateTimeInputApi, component: DateTimeInputComponent },
-];
+export const BASIC_COMPONENTS: AngularComponentImplementation[] = Object.values(
+  DEFAULT_COMPONENT_IMPLEMENTATIONS,
+);
 
 /**
  * The set of client-side functions provided by the basic catalog.
  */
 export { BASIC_FUNCTIONS };
 
-
-
 /**
  * A base class for basic catalogs, providing extensibility for non-DI use cases.
  */
-export class BaseBasicCatalog extends AngularCatalog {
-  constructor(
-    id: string = 'https://a2ui.org/specification/v0_9/basic_catalog.json',
-    components: AngularComponentImplementation[] = BASIC_COMPONENTS,
-    functions: FunctionImplementation[] = BASIC_FUNCTIONS,
-  ) {
+export class BasicCatalogBase extends AngularCatalog {
+  constructor(options: BasicCatalogOptions = {}) {
+    const id = options.id ?? 'https://a2ui.org/specification/v0_9/basic_catalog.json';
+    const functions = options.functions ?? BASIC_FUNCTIONS;
+
+    const overrides = options.components ?? {};
+    const components: AngularComponentImplementation[] = [
+      ...Object.entries(DEFAULT_COMPONENT_IMPLEMENTATIONS).map(([key, defaultValue]) => {
+        return (overrides as any)[key] ?? defaultValue;
+      }),
+      ...(options.extraComponents ?? []),
+    ];
+
     super(id, components, functions);
   }
 }
@@ -112,7 +152,7 @@ export class BaseBasicCatalog extends AngularCatalog {
 @Injectable({
   providedIn: 'root',
 })
-export class BasicCatalog extends BaseBasicCatalog {
+export class BasicCatalog extends BasicCatalogBase {
   constructor() {
     super();
   }

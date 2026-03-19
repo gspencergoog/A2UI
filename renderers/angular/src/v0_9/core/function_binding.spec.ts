@@ -16,7 +16,7 @@
 
 import { DataContext, SurfaceModel } from '@a2ui/web_core/v0_9';
 import { DestroyRef } from '@angular/core';
-import { BaseBasicCatalog } from '../catalog/basic/basic-catalog';
+import { BasicCatalogBase } from '../catalog/basic/basic-catalog';
 import { toAngularSignal } from './utils';
 
 describe('Function Bindings', () => {
@@ -29,7 +29,7 @@ describe('Function Bindings', () => {
 
   describe('add', () => {
     it('should update output correctly when bound input updates using function call binding', () => {
-      const catalog = new BaseBasicCatalog();
+      const catalog = new BasicCatalogBase();
 
       // Create Surface Model and DataContext
       const surface = new SurfaceModel('surface_1', catalog);
@@ -70,7 +70,7 @@ describe('Function Bindings', () => {
 
   describe('formatString', () => {
     it('should correctly format string with dynamic path and dollar sign', () => {
-      const catalog = new BaseBasicCatalog();
+      const catalog = new BasicCatalogBase();
 
       // Create Surface Model and DataContext
       const surface = new SurfaceModel('surface_1', catalog);
@@ -106,7 +106,7 @@ describe('Function Bindings', () => {
     });
 
     it('should handle multiple path interpolations correctly', () => {
-      const catalog = new BaseBasicCatalog();
+      const catalog = new BasicCatalogBase();
       const surface = new SurfaceModel('surface_1', catalog);
       const dataModel = surface.dataModel;
       const context = new DataContext(surface, '/');
