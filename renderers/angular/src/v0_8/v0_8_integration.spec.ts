@@ -24,6 +24,58 @@ import { MarkdownRenderer, DefaultMarkdownRenderer } from './data/markdown';
 import { Component, Input, Type } from '@angular/core';
 import { Types } from './types';
 import { By } from '@angular/platform-browser';
+import * as restaurantCardMock from './test_data/mocks/restaurant-card.json';
+import * as contactCardMock from './test_data/mocks/contact-card.json';
+
+/**
+ * Resolves a component tree from a flat list of component messages.
+ * This handles the v0.8 format where children are often referenced by ID.
+ */
+function resolveComponentTree(messages: any[], rootId: string): any {
+  const surfaceUpdate = messages.find((m) => m.surfaceUpdate)?.surfaceUpdate;
+  if (!surfaceUpdate) return null;
+
+  const componentMap = new Map(surfaceUpdate.components.map((c: any) => [c.id, c]));
+
+  function resolve(idOrNode: any): any {
+    if (typeof idOrNode === 'string') {
+      const node = componentMap.get(idOrNode);
+      return node ? resolve(node) : null;
+    }
+
+    if (idOrNode && typeof idOrNode === 'object') {
+      // If it's already in the { type, properties } format, just return it
+      if (idOrNode.type && idOrNode.properties) return idOrNode;
+
+      // If it's in the { id, component: { Type: { ... } } } format
+      if (idOrNode.component) {
+        const type = Object.keys(idOrNode.component)[0];
+        const properties = { ...idOrNode.component[type] };
+
+        // Recursively resolve children
+        if (properties.child) {
+          properties.child = resolve(properties.child);
+        }
+        if (properties.children) {
+          if (Array.isArray(properties.children)) {
+            properties.children = properties.children.map((c: any) => resolve(c));
+          } else if (properties.children.explicitList) {
+            properties.children = properties.children.explicitList.map((id: string) => resolve(id));
+          }
+        }
+
+        return {
+          id: idOrNode.id,
+          type,
+          properties,
+        };
+      }
+    }
+    return idOrNode;
+  }
+
+  return resolve(rootId);
+}
 
 @Component({
   template: `<ng-container
@@ -77,6 +129,10 @@ describe('v0.8 Angular Renderer Integration', () => {
         Card: { 'a2ui-card': true },
         Row: { 'a2ui-row': true },
         Column: { 'a2ui-column': true },
+        Image: { all: { 'a2ui-image': true }, avatar: { 'avatar-style': true } },
+        Divider: { 'a2ui-divider': true },
+        Icon: { 'a2ui-icon': true },
+        Button: { 'a2ui-button': true },
       } as any,
       elements: {} as any,
       markdown: {
@@ -200,5 +256,90 @@ describe('v0.8 Angular Renderer Integration', () => {
     }).not.toThrow();
 
     expect(warnSpy).toHaveBeenCalled();
+  });
+
+  describe('Regression Mocks', () => {
+    it('should render the Restaurant Card regression mock correctly', async () => {
+      const mockData = (restaurantCardMock as any).default || restaurantCardMock;
+      const beginMsg = mockData.find((m: any) => m.beginRendering);
+      const dataMsg = mockData.find((m: any) => m.dataModelUpdate);
+      const rootId = beginMsg?.beginRendering.root;
+      const componentTree = resolveComponentTree(mockData, rootId!);
+
+      // Mock data resolution from the mock's own data model
+      const contents = dataMsg?.dataModelUpdate.contents || [];
+      const dataModel = new Map(
+        contents.map((item: any) => [
+          item.key,
+          item.valueString || item.valueImage || item.valueBoolean || item.valueNumber,
+        ]),
+      );
+      processor.getData.and.callFake((node: any, path: string) => {
+        const key = path.startsWith('/') ? path.substring(1) : path;
+        return dataModel.has(key) ? dataModel.get(key) : `resolved:${path}`;
+      });
+
+      fixture.componentInstance.component = componentTree;
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Verify structure
+      const cardEl = fixture.nativeElement.querySelector('a2ui-card');
+      expect(cardEl).toBeTruthy();
+
+      const imageEl = fixture.nativeElement.querySelector('a2ui-image img');
+      expect(imageEl).toBeTruthy();
+      expect(imageEl.src).toContain('unsplash.com');
+
+      const nameEl = fixture.nativeElement.querySelector('a2ui-text section');
+      expect(nameEl).toBeTruthy();
+      expect(nameEl.textContent).toContain('The Italian Kitchen');
+
+      const ratingRow = fixture.nativeElement.querySelectorAll('a2ui-row');
+      // Should find several rows (name-row, rating-row, details-row)
+      expect(ratingRow.length).toBeGreaterThanOrEqual(3);
+    });
+
+    it('should render the Contact Card regression mock correctly', async () => {
+      const mockData = (contactCardMock as any).default || contactCardMock;
+      const beginMsg = mockData.find((m: any) => m.beginRendering);
+      const dataMsg = mockData.find((m: any) => m.dataModelUpdate);
+      const rootId = beginMsg?.beginRendering.root;
+      const componentTree = resolveComponentTree(mockData, rootId!);
+
+      // Mock data resolution from the mock's own data model
+      const contents = dataMsg?.dataModelUpdate.contents || [];
+      const dataModel = new Map(
+        contents.map((item: any) => [
+          item.key,
+          item.valueString || item.valueImage || item.valueBoolean || item.valueNumber,
+        ]),
+      );
+      processor.getData.and.callFake((node: any, path: string) => {
+        const key = path.startsWith('/') ? path.substring(1) : path;
+        return dataModel.has(key) ? dataModel.get(key) : `resolved:${path}`;
+      });
+
+      fixture.componentInstance.component = componentTree;
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Verify structure
+      const cardEl = fixture.nativeElement.querySelector('a2ui-card');
+      expect(cardEl).toBeTruthy();
+
+      const nameEl = fixture.nativeElement.querySelector('a2ui-text section');
+      expect(nameEl).toBeTruthy();
+      expect(nameEl.textContent).toContain('David Park');
+
+      const avatarEl = fixture.nativeElement.querySelector('a2ui-image img');
+      expect(avatarEl).toBeTruthy();
+      expect(avatarEl.src).toContain('unsplash.com');
+
+      const dividerEl = fixture.nativeElement.querySelector('a2ui-divider');
+      expect(dividerEl).toBeTruthy();
+    });
   });
 });
