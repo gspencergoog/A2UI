@@ -17,11 +17,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
-  OnInit,
   Type,
   inject,
   input,
+  Signal,
+  effect,
+  signal,
+  InjectionToken,
 } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { ComponentContext } from '@a2ui/web_core/v0_9';
@@ -29,70 +31,114 @@ import { A2uiRendererService } from './a2ui-renderer.service';
 import { AngularCatalog } from '../catalog/types';
 import { ComponentBinder } from './component-binder.service';
 
+/** Injection token for the A2UI Surface ID. */
+export const A2UI_SURFACE_ID = new InjectionToken<string>('A2UI_SURFACE_ID');
+
+/** Injection token for the A2UI Data Context Path. */
+export const A2UI_DATA_CONTEXT_PATH = new InjectionToken<string>('A2UI_DATA_CONTEXT_PATH');
+
 /**
  * Host component for any A2UI component.
- * Manages the lifecycle of a ComponentContext and ComponentBinding.
+ *
+ * This component is responsible for dynamically rendering an A2UI component
+ * based on its `componentId`. It reactively manages the lifecycle of a
+ * {@link ComponentContext} and uses the {@link ComponentBinder} to resolve
+ * component properties (props) from the {@link DataModel}.
+ *
+ * It uses Angular's `NgComponentOutlet` to instantiate the appropriate
+ * component type defined in the {@link AngularCatalog}.
  */
 @Component({
   selector: 'a2ui-v09-component-host',
   imports: [NgComponentOutlet],
+  providers: [
+    {
+      provide: A2UI_SURFACE_ID,
+      useFactory: () => inject(ComponentHostComponent).surfaceId(),
+    },
+    {
+      provide: A2UI_DATA_CONTEXT_PATH,
+      useFactory: () => inject(ComponentHostComponent).dataContextPath(),
+    },
+  ],
   template: `
-    @if (componentType) {
+    @if (componentType()) {
       <ng-container
         *ngComponentOutlet="
-          componentType;
-          inputs: { props: props, surfaceId: surfaceId(), dataContextPath: dataContextPath() }
+          componentType();
+          inputs: { props: props()?.() }
         "
       ></ng-container>
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ComponentHostComponent implements OnInit {
+export class ComponentHostComponent {
+  /** The unique ID of the component to render within the surface. */
   componentId = input.required<string>();
+  /** The ID of the surface this component belongs to. */
   surfaceId = input.required<string>();
+  /**
+   * The relative data context path for this component (e.g., within a list).
+   * Defaults to root ('/').
+   */
   dataContextPath = input<string>('/');
 
   private rendererService = inject(A2uiRendererService);
   private binder = inject(ComponentBinder);
-  private destroyRef = inject(DestroyRef);
 
-  protected componentType: Type<any> | null = null;
-  protected props: any = {};
-  private context?: ComponentContext;
+  protected componentType = signal<Type<any> | null>(null);
+  protected props = signal<Signal<any> | null>(null);
 
-  ngOnInit(): void {
-    const surface = this.rendererService.surfaceGroup?.getSurface(this.surfaceId());
+  constructor() {
+    effect((onCleanup) => {
+      const surfaceId = this.surfaceId();
+      const componentId = this.componentId();
+      const dataContextPath = this.dataContextPath();
 
-    if (!surface) {
-      console.warn(`Surface ${this.surfaceId()} not found`);
-      return;
-    }
+      console.log(`[ComponentHost] Reacting to surface=${surfaceId}, component=${componentId}, path=${dataContextPath}`);
 
-    const componentModel = surface.componentsModel.get(this.componentId());
+      const surface = this.rendererService.surfaceGroup?.getSurface(surfaceId);
+      if (!surface) {
+        console.warn(`Surface ${surfaceId} not found`);
+        this.componentType.set(null);
+        this.props.set(null);
+        return;
+      }
 
-    if (!componentModel) {
-      console.warn(`Component ${this.componentId()} not found in surface ${this.surfaceId()}`);
-      return;
-    }
+      const componentModel = surface.componentsModel.get(componentId);
+      if (!componentModel) {
+        console.warn(`Component ${componentId} not found in surface ${surfaceId}`);
+        this.componentType.set(null);
+        this.props.set(null);
+        return;
+      }
 
-    // Resolve component from the surface's catalog
-    const catalog = surface.catalog as AngularCatalog;
-    const api = catalog.components.get(componentModel.type);
+      const catalog = surface.catalog as AngularCatalog;
+      const api = catalog.components.get(componentModel.type);
+      if (!api) {
+        console.error(
+          `Component type "${componentModel.type}" not found in catalog "${catalog.id}"`,
+        );
+        this.componentType.set(null);
+        this.props.set(null);
+        return;
+      }
 
-    if (!api) {
-      console.error(`Component type "${componentModel.type}" not found in catalog "${catalog.id}"`);
-      return;
-    }
-    this.componentType = api.component;
+      this.componentType.set(api.component);
 
-    // Create context
-    this.context = new ComponentContext(surface, this.componentId(), this.dataContextPath());
-    this.props = this.binder.bind(this.context);
+      // Create context and bind properties using the component's schema
+      const context = new ComponentContext(surface, componentId, dataContextPath);
+      const binding = this.binder.bind<any>(context, api.schema);
 
-    this.destroyRef.onDestroy(() => {
-      // ComponentContext itself doesn't have a dispose, but its inner components might.
-      // However, SurfaceModel takes care of component disposal.
+      if (binding) {
+        this.props.set(binding.props);
+
+        // Clean up the binding when inputs changes or component is destroyed
+        onCleanup(() => {
+          binding.destroy?.();
+        });
+      }
     });
   }
 }

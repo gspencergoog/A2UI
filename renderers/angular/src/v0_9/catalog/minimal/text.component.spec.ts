@@ -31,9 +31,10 @@ describe('TextComponent', () => {
     fixture = TestBed.createComponent(TextComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('props', {
-      text: { value: signal('Hello World'), raw: 'Hello World', onUpdate: () => {} },
-      weight: { value: signal('bold'), raw: 'bold', onUpdate: () => {} },
-      style: { value: signal('italic'), raw: 'italic', onUpdate: () => {} },
+      text: 'Hello World',
+      variant: 'body',
+      weight: 'bold',
+      style: 'italic',
     });
   });
 

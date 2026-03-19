@@ -21,6 +21,26 @@ import { CustomSliderComponent } from './custom-slider.component';
 import { CardComponent } from './card.component';
 import { AngularComponentApi } from '@a2ui/angular/v0_9';
 import { BASIC_FUNCTIONS } from '@a2ui/web_core/v0_9/basic_catalog';
+import { 
+  DynamicStringSchema, 
+  DynamicNumberSchema, 
+  ComponentIdSchema 
+} from '@a2ui/web_core/v0_9';
+
+export const CustomSliderSchema = z.object({
+  label: DynamicStringSchema.optional(),
+  value: DynamicNumberSchema.optional(),
+  min: DynamicNumberSchema.optional(),
+  max: DynamicNumberSchema.optional(),
+}).strict();
+
+export type CustomSliderApiType = z.infer<typeof CustomSliderSchema>;
+
+export const DemoCardSchema = z.object({
+  child: ComponentIdSchema.optional(),
+}).strict();
+
+export type DemoCardApiType = z.infer<typeof DemoCardSchema>;
 
 /**
  * A catalog specific to the demo, extending the minimal catalog with custom components.
@@ -32,20 +52,13 @@ export class DemoCatalog extends BaseMinimalCatalog {
   constructor() {
     const customSliderApi: AngularComponentApi = {
       name: 'CustomSlider',
-      schema: z.object({
-        label: z.string().optional(),
-        value: z.number().optional(),
-        min: z.number().optional(),
-        max: z.number().optional(),
-      }) as any,
+      schema: CustomSliderSchema,
       component: CustomSliderComponent,
     };
 
     const cardApi: AngularComponentApi = {
       name: 'Card',
-      schema: z.object({
-        child: z.string().optional(),
-      }) as any,
+      schema: DemoCardSchema,
       component: CardComponent,
     };
 

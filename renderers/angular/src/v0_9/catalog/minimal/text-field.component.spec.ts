@@ -24,9 +24,11 @@ describe('TextFieldComponent', () => {
   let component: TextFieldComponent;
   let fixture: ComponentFixture<TextFieldComponent>;
   let mockRendererService: any;
+  let onUpdateSpy: jasmine.Spy;
 
   beforeEach(async () => {
     mockRendererService = {};
+    onUpdateSpy = jasmine.createSpy('onUpdate_value');
 
     await TestBed.configureTestingModule({
       imports: [TextFieldComponent],
@@ -36,14 +38,11 @@ describe('TextFieldComponent', () => {
     fixture = TestBed.createComponent(TextFieldComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('props', {
-      label: { value: signal('Username'), raw: 'Username', onUpdate: () => {} },
-      value: {
-        value: signal('testuser'),
-        raw: 'testuser',
-        onUpdate: jasmine.createSpy('onUpdate'),
-      },
-      placeholder: { value: signal('Enter username'), raw: 'Enter username', onUpdate: () => {} },
-      variant: { value: signal('text'), raw: 'text', onUpdate: () => {} },
+      label: 'Username',
+      value: 'testuser',
+      placeholder: 'Enter username',
+      variant: 'text',
+      setValue: onUpdateSpy,
     });
   });
 
@@ -60,8 +59,11 @@ describe('TextFieldComponent', () => {
 
   it('should not render label if not provided', () => {
     fixture.componentRef.setInput('props', {
-      ...component.props(),
-      label: { value: signal(null), raw: null, onUpdate: () => {} },
+      label: null,
+      value: 'testuser',
+      placeholder: 'Enter username',
+      variant: 'text',
+      setValue: onUpdateSpy,
     });
     fixture.detectChanges();
     const label = fixture.debugElement.query(By.css('label'));
@@ -76,28 +78,37 @@ describe('TextFieldComponent', () => {
   });
 
   it('should return correct input type based on variant', () => {
-    // inputType is now a computed signal
-    expect(component.inputType()).toBe('text');
+    expect(component.inputType).toBe('text');
 
     fixture.componentRef.setInput('props', {
-      ...component.props(),
-      variant: { value: signal('obscured'), raw: 'obscured', onUpdate: () => {} },
+      label: 'Username',
+      value: 'testuser',
+      placeholder: 'Enter username',
+      variant: 'obscured',
+      setValue: onUpdateSpy,
     });
-    expect(component.inputType()).toBe('password');
-
-    fixture.componentRef.setInput('props', {
-      ...component.props(),
-      variant: { value: signal('number'), raw: 'number', onUpdate: () => {} },
-    });
-    expect(component.inputType()).toBe('number');
+    fixture.detectChanges();
+    expect(component.inputType).toBe('password');
   });
 
-  it('should call onUpdate when input changes', () => {
+  it('should return "number" for number variant', () => {
+    fixture.componentRef.setInput('props', {
+      label: 'Username',
+      value: 'testuser',
+      placeholder: 'Enter username',
+      variant: 'number',
+      setValue: onUpdateSpy,
+    });
+    fixture.detectChanges();
+    expect(component.inputType).toBe('number');
+  });
+
+  it('should call setValue when input changes', () => {
     fixture.detectChanges();
     const input = fixture.debugElement.query(By.css('input'));
     input.nativeElement.value = 'newuser';
-    input.triggerEventHandler('input', { target: input.nativeElement });
+    input.triggerEventHandler('input', { target: { value: 'newuser' } });
 
-    expect(component.props()['value'].onUpdate).toHaveBeenCalledWith('newuser');
+    expect(onUpdateSpy).toHaveBeenCalledWith('newuser');
   });
 });

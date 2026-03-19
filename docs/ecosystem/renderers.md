@@ -10,6 +10,7 @@ Community and third-party A2UI renderer implementations.
 
 | Renderer | Platform | v0.8 | v0.9 | Activity | Links |
 |----------|----------|------|------|----------|-------|
+| **@a2ui/angular** | Angular | ✅ | ✅ | ![Stars](https://img.shields.io/github/stars/google/A2UI?style=flat-square&label=⭐) ![Last commit](https://img.shields.io/github/last-commit/google/A2UI?style=flat-square&label=updated) | [GitHub](https://github.com/google/A2UI/tree/main/renderers/angular) |
 | **@a2ui-sdk/react** | React (Web) | ✅ | ❌ | ![Stars](https://img.shields.io/github/stars/easyops-cn/a2ui-sdk?style=flat-square&label=⭐) ![Last commit](https://img.shields.io/github/last-commit/easyops-cn/a2ui-sdk?style=flat-square&label=updated) | [GitHub](https://github.com/easyops-cn/a2ui-sdk) · [npm](https://www.npmjs.com/package/@a2ui-sdk/react) · [Docs](https://a2ui-sdk.js.org/) |
 | **A2UI-Android** | Android (Compose) | ✅ | ❌ | ![Stars](https://img.shields.io/github/stars/lmee/A2UI-Android?style=flat-square&label=⭐) ![Last commit](https://img.shields.io/github/last-commit/lmee/A2UI-Android?style=flat-square&label=updated) | [GitHub](https://github.com/lmee/A2UI-Android) |
 | **a2ui-react-native** | React Native | ✅ | ❌ | ![Stars](https://img.shields.io/github/stars/sivamrudram-eng/a2ui-react-native?style=flat-square&label=⭐) ![Last commit](https://img.shields.io/github/last-commit/sivamrudram-eng/a2ui-react-native?style=flat-square&label=updated) | [GitHub](https://github.com/sivamrudram-eng/a2ui-react-native) |

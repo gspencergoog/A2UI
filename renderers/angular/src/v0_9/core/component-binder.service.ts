@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import { DestroyRef, Injectable, inject, NgZone } from '@angular/core';
-import { ComponentContext } from '@a2ui/web_core/v0_9';
-import { toAngularSignal } from './utils';
-import { BoundProperty } from './types';
+import { DestroyRef, Injectable, inject, NgZone, signal, Signal } from '@angular/core';
+import { ComponentContext, GenericBinder } from '@a2ui/web_core/v0_9';
+import { z } from 'zod';
 
 /**
  * Service that binds A2UI ComponentModel properties to reactive Angular Signals.
+ *
+ * This service leverages the shared `@a2ui/web_core` `GenericBinder` to ensure
+ * that property resolution and data binding logic is consistent across all
+ * web-based renderers, while exposing the resulting properties as an
+ * Angular-native {@link Signal}.
  */
 @Injectable({
   providedIn: 'root',
@@ -30,31 +34,37 @@ export class ComponentBinder {
   private ngZone = inject(NgZone);
 
   /**
-   * Binds all properties of a component to an object of Angular Signals.
+   * Binds all properties of a component tree node to a single Angular Signal.
+   *
+   * The returned signal will automatically emit new values whenever the
+   * underlying data model or component properties change. Updates are
+   * automatically bridged into the Angular zone to ensure change detection
+   * is triggered correctly.
    *
    * @param context The ComponentContext containing the model and data context.
-   * @returns An object where each key corresponds to a component prop and its value is an Angular Signal.
+   * @param schema The Zod schema defining the expected interface of the component.
+   * @returns An object containing the Angular Signal as 'props' and a 'destroy'
+   *          method to terminate the internal subscriptions.
    */
-  bind(context: ComponentContext): Record<string, BoundProperty> {
-    const props = context.componentModel.properties;
-    const bound: Record<string, any> = {};
+  bind<T>(
+    context: ComponentContext,
+    schema: z.ZodTypeAny,
+  ): { props: Signal<T>; destroy: () => void } {
+    const binder = new GenericBinder<T>(context, schema);
 
-    for (const key of Object.keys(props)) {
-      const value = props[key];
-      const preactSig = context.dataContext.resolveSignal(value);
-      const angSig = toAngularSignal(preactSig as any, this.destroyRef, this.ngZone);
+    // Create an Angular Signal initialized with the current binder snapshot
+    const s = signal<T>(binder.snapshot);
 
-      const isBoundPath = value && typeof value === 'object' && 'path' in value;
+    // Subscribe to binder updates and sync to the Angular signal
+    const propsSub = binder.subscribe((props: T) => {
+      console.log(`[ComponentBinder] Resolved props for ${context.componentModel.id}:`, props);
+      // Ensure the signal update runs within the Angular zone to trigger change detection
+      this.ngZone.run(() => s.set(props));
+    });
 
-      bound[key] = {
-        value: angSig,
-        raw: value,
-        onUpdate: isBoundPath
-          ? (newValue: any) => context.dataContext.set(value.path, newValue)
-          : () => {}, // No-op for non-bound values
-      };
-    }
-
-    return bound;
+    return {
+      props: s.asReadonly(),
+      destroy: () => propsSub.unsubscribe(),
+    };
   }
 }

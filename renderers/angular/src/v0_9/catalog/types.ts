@@ -18,14 +18,24 @@ import { Type } from '@angular/core';
 import { Catalog, ComponentApi } from '@a2ui/web_core/v0_9';
 
 /**
- * Extends the generic ComponentApi to include Angular-specific component types.
+ * Defines the interface for an Angular component mapped to an A2UI type.
+ *
+ * This interface extends the platform-agnostic `ComponentApi` by adding
+ * required metadata for the Angular renderer, such as the actual
+ * component class via the `component` property.
  */
 export interface AngularComponentApi extends ComponentApi {
-  /** The Angular component class used to render this component. */
+  /**
+   * The Angular component class (decorated with `@Component`)
+   * used to render this component type.
+   */
   readonly component: Type<any>;
 }
 
 /**
- * Base class for Angular-specific component catalogs.
+ * A collection of component definitions supported by the Angular renderer.
+ *
+ * Catalogs map string identifiers (e.g., 'button', 'text') to their corresponding
+ * implementations and API schemas.
  */
 export class AngularCatalog extends Catalog<AngularComponentApi> {}

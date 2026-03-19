@@ -85,14 +85,25 @@ function getFieldBehavior(type: z.ZodTypeAny, propertyName?: string): BehaviorNo
     if (isAction) return { type: 'ACTION' };
 
     // Dynamic strings/values are unions containing DataBindingSchema { path: ... } but NOT { componentId: ... }
-    const isDynamic = options.some(o => o._def.typeName === "ZodObject" && o._def.shape().path && !o._def.shape().componentId);
+    const isDynamic = options.some(o => {
+      if (o._def.typeName !== "ZodObject") return false;
+      const shape = o._def.shape();
+      return shape.path && !shape.componentId;
+    });
     if (isDynamic) return { type: 'DYNAMIC' };
     
     // ChildList is a union containing an array and an object with { componentId, path }
-    const isChildList = options.some(o => o._def.typeName === "ZodObject" && o._def.shape().componentId && o._def.shape().path);
+    const isChildList = options.some(o => {
+      if (o._def.typeName !== "ZodObject") return false;
+      const shape = o._def.shape();
+      return shape.componentId && shape.path;
+    });
     if (isChildList) return { type: 'STRUCTURAL' };
   } else if (current._def.typeName === "ZodString") {
-    // ComponentId falls back to STATIC since we can't perfectly identify it, which is fine because STATIC returns strings as-is.
+    const desc = current._def.description?.toLowerCase() || '';
+    if (desc.includes("component") && (desc.includes("id") || desc.includes("identifier"))) {
+      return { type: 'STRUCTURAL' };
+    }
   }
 
   // Recursive array scraping
@@ -273,6 +284,19 @@ export class GenericBinder<T> {
             id: value.componentId,
             basePath: listContext.nested(String(i)).path
           }));
+        }
+        
+        // Handle static strings or arrays of strings
+        if (typeof value === 'string') {
+          return { id: value, basePath: this.context.dataContext.path };
+        }
+        if (Array.isArray(value)) {
+          return value.map(id => {
+            if (typeof id === 'string') {
+              return { id, basePath: this.context.dataContext.path };
+            }
+            return id;
+          });
         }
         return value;
       }

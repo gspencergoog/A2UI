@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ComponentHostComponent } from '@a2ui/angular/v0_9';
-import { BoundProperty } from '@a2ui/angular/v0_9';
+import { ResolveA2uiProps } from '@a2ui/web_core/v0_9';
+import { DemoCardApiType } from './demo-catalog';
 
 /**
  * A simple card component for the demo.
@@ -31,17 +32,18 @@ import { BoundProperty } from '@a2ui/angular/v0_9';
       class="demo-card"
       style="border: 1px solid #ccc; padding: 16px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 16px; background-color: white;"
     >
-      <a2ui-v09-component-host
-        *ngIf="props['child']?.value()"
-        [componentId]="props['child'].value()"
-        [surfaceId]="surfaceId"
-      >
-      </a2ui-v09-component-host>
+      @if (props().child) {
+        <a2ui-v09-component-host
+          [componentId]="props().child!"
+          [surfaceId]="surfaceId()"
+        >
+        </a2ui-v09-component-host>
+      }
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CardComponent {
-  @Input() props: Record<string, BoundProperty> = {};
-  @Input() surfaceId!: string;
+  props = input.required<ResolveA2uiProps<DemoCardApiType>>();
+  surfaceId = input.required<string>();
 }

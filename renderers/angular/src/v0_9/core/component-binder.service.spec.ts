@@ -15,129 +15,139 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { DestroyRef } from '@angular/core';
-import { signal as preactSignal } from '@preact/signals-core';
-import { ComponentContext } from '@a2ui/web_core/v0_9';
 import { ComponentBinder } from './component-binder.service';
+import { A2uiRendererService } from './a2ui-renderer.service';
+import { of, Subject } from 'rxjs';
+import { z } from 'zod';
+import { ActionSchema, DataBindingSchema } from '@a2ui/web_core/v0_9';
 
 describe('ComponentBinder', () => {
-  let binder: ComponentBinder;
-  let mockDestroyRef: jasmine.SpyObj<DestroyRef>;
-  let onDestroyCallback: () => void;
+  let service: ComponentBinder;
+  let mockRendererService: any;
+  let mockSurface: any;
+  let mockSurfaceGroup: any;
+
+  // Define a schema that GenericBinder recognizes as having dynamic data and actions
+  const testSchema = z.object({
+    text: z.union([z.string(), DataBindingSchema]).optional(),
+    visible: z.boolean().optional(),
+    action: ActionSchema.optional(),
+  });
 
   beforeEach(() => {
-    onDestroyCallback = () => {};
-    mockDestroyRef = jasmine.createSpyObj('DestroyRef', ['onDestroy']);
-    mockDestroyRef.onDestroy.and.callFake((callback: () => void) => {
-      onDestroyCallback = callback;
-      return () => {}; // Return unregister function
-    });
+    mockSurface = {
+      dispatchAction: jasmine.createSpy('dispatchAction'),
+    };
+
+    mockSurfaceGroup = {
+      getSurface: jasmine.createSpy('getSurface').and.returnValue(mockSurface),
+    };
+
+    mockRendererService = {
+      surfaceGroup: mockSurfaceGroup,
+    };
 
     TestBed.configureTestingModule({
-      providers: [ComponentBinder, { provide: DestroyRef, useValue: mockDestroyRef }],
+      providers: [
+        ComponentBinder,
+        { provide: A2uiRendererService, useValue: mockRendererService },
+      ],
     });
-
-    binder = TestBed.inject(ComponentBinder);
+    service = TestBed.inject(ComponentBinder);
   });
 
   it('should be created', () => {
-    expect(binder).toBeTruthy();
+    expect(service).toBeTruthy();
   });
 
-  it('should bind properties to Angular signals', () => {
-    const mockComponentModel = {
-      properties: {
-        text: 'Hello',
-        visible: true,
+  function createMockContext(properties: any, onUpdated: any = of(null)) {
+    return {
+      componentModel: {
+        id: 'test-component',
+        type: 'Test',
+        properties,
+        onUpdated: onUpdated,
       },
+      dataContext: {
+        path: '/',
+        get: jasmine.createSpy('get').and.returnValue(null),
+        subscribeDynamicValue: jasmine.createSpy('subscribeDynamicValue').and.callFake((val: any, cb: any) => {
+          return { value: val?.path ? 'resolved-value' : val, unsubscribe: () => {} };
+        }),
+        resolveDynamicValue: jasmine.createSpy('resolveDynamicValue').and.callFake((val: any) => {
+           return val?.path ? 'resolved-value' : val;
+        }),
+      },
+      dispatchAction: jasmine.createSpy('dispatchAction'),
     };
+  }
 
-    const mockpSigText = preactSignal('Hello');
-    const mockpSigVisible = preactSignal(true);
-
-    const mockDataContext = {
-      resolveSignal: jasmine.createSpy('resolveSignal').and.callFake((val: any) => {
-        if (val === 'Hello') return mockpSigText;
-        if (val === true) return mockpSigVisible;
-        return preactSignal(val);
-      }),
-      set: jasmine.createSpy('set'),
-    };
-
-    const mockContext = {
-      componentModel: mockComponentModel,
-      dataContext: mockDataContext,
-    } as unknown as ComponentContext;
-
-    const bound = binder.bind(mockContext);
-
-    expect(bound['text']).toBeDefined();
-    expect(bound['visible']).toBeDefined();
-    expect(bound['text'].value()).toBe('Hello');
-    expect(bound['visible'].value()).toBe(true);
-
-    // Verify resolveSignal was called
-    expect(mockDataContext.resolveSignal).toHaveBeenCalledWith('Hello');
-    expect(mockDataContext.resolveSignal).toHaveBeenCalledWith(true);
+  it('should bind properties to a single Angular signal', () => {
+    const mockContext = createMockContext({ text: 'Initial' });
+    const { props } = service.bind<any>(mockContext as any, testSchema);
+    expect(props()).toBeDefined();
+    expect(props().text).toBe('Initial');
   });
 
-  it('should add update() method for data bindings (two-way binding)', () => {
-    const mockComponentModel = {
-      properties: {
-        value: { path: '/data/text' },
-      },
-    };
-
-    const mockpSig = preactSignal('initial');
-    const mockDataContext = {
-      resolveSignal: jasmine.createSpy('resolveSignal').and.returnValue(mockpSig),
-      set: jasmine.createSpy('set'),
-    };
-
-    const mockContext = {
-      componentModel: mockComponentModel,
-      dataContext: mockDataContext,
-    } as unknown as ComponentContext;
-
-    const bound = binder.bind(mockContext);
-
-    expect(bound['value']).toBeDefined();
-    expect(bound['value'].value()).toBe('initial');
-    expect(bound['value'].onUpdate).toBeDefined();
-
-    // Call update
-    bound['value'].onUpdate('new-value');
-
-    // Verify set was called on DataContext
-    expect(mockDataContext.set).toHaveBeenCalledWith('/data/text', 'new-value');
+  it('should include setters directly on the props for dynamic properties', () => {
+    const mockContext = createMockContext({ text: { path: 'user.name' } });
+    const { props } = service.bind<any>(mockContext as any, testSchema);
+    expect(props().setText).toBeDefined();
+    expect(typeof props().setText).toBe('function');
   });
 
-  it('should NOT add update() method for literals', () => {
-    const mockComponentModel = {
-      properties: {
-        text: 'Literal String',
-      },
-    };
+  it('should handle actions by wrapping them in a function', () => {
+    const mockContext = createMockContext({
+      action: { event: { name: 'test-event' } },
+    });
 
-    const mockpSig = preactSignal('Literal String');
-    const mockDataContext = {
-      resolveSignal: jasmine.createSpy('resolveSignal').and.returnValue(mockpSig),
-      set: jasmine.createSpy('set'),
-    };
+    const { props } = service.bind<any>(mockContext as any, testSchema);
+    expect(typeof props().action).toBe('function');
 
-    const mockContext = {
-      componentModel: mockComponentModel,
-      dataContext: mockDataContext,
-    } as unknown as ComponentContext;
+    props().action();
+    expect(mockContext.dispatchAction).toHaveBeenCalled();
+  });
 
-    const bound = binder.bind(mockContext);
+  it('should update the signal when the model changes', () => {
+    let properties = { text: 'Initial' };
+    const onUpdated = new Subject<void>();
+    const mockContext = createMockContext(properties, onUpdated.asObservable());
 
-    expect(bound['text']).toBeDefined();
-    expect(bound['text'].value()).toBe('Literal String');
-    expect(bound['text'].onUpdate).toBeDefined(); // No-op for literals
+    // Override properties getter to be dynamic for this test
+    Object.defineProperty(mockContext.componentModel, 'properties', {
+      get: () => properties,
+    });
 
-    // Call onUpdate on literal, should not crash or call set
-    bound['text'].onUpdate('new');
-    expect(mockDataContext.set).not.toHaveBeenCalled();
+    const { props } = service.bind<any>(mockContext as any, testSchema);
+    expect(props().text).toBe('Initial');
+
+    // Simulate model update
+    properties = { text: 'Reactive Update' };
+    onUpdated.next();
+
+    expect(props().text).toBe('Reactive Update');
+  });
+
+  it('should stop updating after destroy is called', () => {
+    let properties = { text: 'Initial' };
+    const onUpdated = new Subject<void>();
+    const mockContext = createMockContext(properties, onUpdated.asObservable());
+
+    Object.defineProperty(mockContext.componentModel, 'properties', {
+      get: () => properties,
+    });
+
+    const { props, destroy } = service.bind<any>(mockContext as any, testSchema);
+    expect(props().text).toBe('Initial');
+
+    destroy();
+
+    // Simulate model update after destroy
+    properties = { text: 'Update after destroy' };
+    onUpdated.next();
+
+    // Value should NOT have updated if destruction was successful
+    expect(props().text).not.toBe('Update after destroy');
+    expect(props().text).toBe('Initial');
   });
 });

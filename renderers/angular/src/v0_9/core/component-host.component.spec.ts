@@ -16,22 +16,20 @@
 
 import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { ComponentHostComponent } from './component-host.component';
+import { ComponentHostComponent, A2UI_SURFACE_ID, A2UI_DATA_CONTEXT_PATH } from './component-host.component';
 import { A2uiRendererService } from './a2ui-renderer.service';
-import { AngularCatalog } from '../catalog/types';
 import { ComponentBinder } from './component-binder.service';
 import { ComponentContext } from '@a2ui/web_core/v0_9';
-import { Component, Input } from '@angular/core';
+import { Component, input, Signal, signal } from '@angular/core';
+import { z } from 'zod';
 
 @Component({
   selector: 'test-child',
+  standalone: true,
   template: '<div>Child Component</div>',
 })
 class TestChildComponent {
-  @Input() props: any;
-  @Input() surfaceId?: string;
-  @Input() componentId?: string;
-  @Input() dataContextPath?: string;
+  props = input.required<Signal<any>>();
 }
 
 describe('ComponentHostComponent', () => {
@@ -42,11 +40,12 @@ describe('ComponentHostComponent', () => {
   let mockBinder: jasmine.SpyObj<ComponentBinder>;
   let mockSurface: any;
   let mockSurfaceGroup: any;
+  const testSchema = z.object({ text: z.string() });
 
   beforeEach(async () => {
     mockCatalog = {
       id: 'test-catalog',
-      components: new Map([['TestType', { component: TestChildComponent }]]),
+      components: new Map([['TestType', { component: TestChildComponent, schema: testSchema }]]),
     };
 
     mockSurface = {
@@ -66,7 +65,8 @@ describe('ComponentHostComponent', () => {
 
     mockBinder = jasmine.createSpyObj('ComponentBinder', ['bind']);
     mockBinder.bind.and.returnValue({
-      text: { value: () => 'bound-hello', onUpdate: () => {} } as any,
+      props: signal({ text: 'bound-hello' }),
+      destroy: () => {},
     });
 
     await TestBed.configureTestingModule({
@@ -88,32 +88,28 @@ describe('ComponentHostComponent', () => {
   });
 
   describe('ngOnInit', () => {
-    it('should resolve component type and bind props', () => {
-      fixture.detectChanges(); // Triggers ngOnInit
+    it('should resolve component type and bind props with schema', () => {
+      fixture.detectChanges(); // Triggers effect
 
-      // @ts-ignore - Accessing protected property
-      expect(component.componentType).toBe(TestChildComponent);
-      // @ts-ignore - Accessing protected property
-      expect(component.props).toEqual({
-        text: jasmine.objectContaining({ value: jasmine.any(Function) }) as any,
-      });
+      // Accessing protected properties via Signals
+      // @ts-ignore
+      expect(component.componentType()).toBe(TestChildComponent);
+      // @ts-ignore
+      expect(component.props()()).toEqual({ text: 'bound-hello' });
 
       expect(mockSurfaceGroup.getSurface).toHaveBeenCalledWith('surf1');
-      expect(mockBinder.bind).toHaveBeenCalled();
+      expect(mockBinder.bind).toHaveBeenCalledWith(jasmine.any(ComponentContext), testSchema);
 
-      // Verify context creation implicitly by checking if bind was called with a ComponentContext
-      const bindArg = mockBinder.bind.calls.mostRecent().args[0];
-      expect(bindArg).toBeInstanceOf(ComponentContext);
+      const bindArg = mockBinder.bind.calls.mostRecent().args[0] as ComponentContext;
       expect(bindArg.componentModel.id).toBe('comp1');
       expect(bindArg.dataContext.path).toBe('/');
     });
 
-    it('should use provided dataContextPath for ComponentContext', () => {
-      fixture.componentRef.setInput('dataContextPath', '/nested/path');
-      fixture.detectChanges();
-
-      const bindArg = mockBinder.bind.calls.mostRecent().args[0];
-      expect(bindArg.dataContext.path).toBe('/nested/path');
+    it('should provide A2UI paths via DI', async () => {
+        fixture.detectChanges();
+        const injector = fixture.debugElement.injector;
+        expect(injector.get(A2UI_SURFACE_ID)).toBe('surf1');
+        expect(injector.get(A2UI_DATA_CONTEXT_PATH)).toBe('/');
     });
 
     it('should warn and return if surface not found', () => {
@@ -123,7 +119,7 @@ describe('ComponentHostComponent', () => {
       fixture.detectChanges();
 
       // @ts-ignore
-      expect(component.componentType).toBeNull();
+      expect(component.componentType()).toBeNull();
       expect(consoleWarnSpy).toHaveBeenCalledWith('Surface surf1 not found');
     });
 
@@ -134,7 +130,7 @@ describe('ComponentHostComponent', () => {
       fixture.detectChanges();
 
       // @ts-ignore
-      expect(component.componentType).toBeNull();
+      expect(component.componentType()).toBeNull();
       expect(consoleWarnSpy).toHaveBeenCalledWith('Component comp1 not found in surface surf1');
     });
 
@@ -145,20 +141,10 @@ describe('ComponentHostComponent', () => {
       fixture.detectChanges();
 
       // @ts-ignore
-      expect(component.componentType).toBeNull();
+      expect(component.componentType()).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Component type "TestType" not found in catalog "test-catalog"',
       );
-    });
-
-    it('should trigger destroyRef on destroy', () => {
-      fixture.detectChanges(); // Trigger ngOnInit
-
-      // Destroy fixture
-      fixture.destroy();
-
-      // Implicitly verifies no crash on destroy
-      expect(component).toBeTruthy();
     });
   });
 
@@ -168,15 +154,6 @@ describe('ComponentHostComponent', () => {
 
       const compiled = fixture.nativeElement;
       expect(compiled.innerHTML).toContain('Child Component');
-    });
-    it('should pass dataContextPath to the rendered component', () => {
-      fixture.componentRef.setInput('dataContextPath', '/some/path');
-      fixture.detectChanges();
-
-      const childDebugElement = fixture.debugElement.query(By.directive(TestChildComponent));
-      expect(childDebugElement).toBeTruthy();
-      const childInstance = childDebugElement.componentInstance as TestChildComponent;
-      expect(childInstance.dataContextPath).toBe('/some/path');
     });
   });
 });

@@ -15,12 +15,13 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, Input } from '@angular/core';
+import { Component, input, Signal, signal } from '@angular/core';
 import { RowComponent } from './row.component';
-import { signal } from '@angular/core';
 import { A2uiRendererService } from '../../core/a2ui-renderer.service';
 import { ComponentBinder } from '../../core/component-binder.service';
+import { A2UI_SURFACE_ID } from '../../core/component-host.component';
 import { By } from '@angular/platform-browser';
+import { of } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -28,9 +29,7 @@ import { By } from '@angular/platform-browser';
   template: 'Dummy Child',
 })
 class DummyChild {
-  @Input() props: any;
-  @Input() surfaceId?: string;
-  @Input() dataContextPath?: string;
+  props = input.required<any>();
 }
 
 describe('RowComponent', () => {
@@ -42,15 +41,24 @@ describe('RowComponent', () => {
   let mockBinder: any;
 
   beforeEach(async () => {
+    const mockContext = {
+      componentModel: {
+        id: 'test-component',
+        type: 'TextField',
+        properties: { text: 'Initial' },
+        onUpdated: of(null),
+      },
+      dataContext: { path: '/', get: (path: string) => null },
+    };
+
     mockSurface = {
       componentsModel: new Map([
         ['child1', { id: 'child1', type: 'Child', properties: {} }],
         ['child2', { id: 'child2', type: 'Child', properties: {} }],
-        ['template1', { id: 'template1', type: 'Child', properties: {} }],
       ]),
       catalog: {
         id: 'test-catalog',
-        components: new Map([['Child', { component: DummyChild }]]),
+        components: new Map([['Child', { component: DummyChild, schema: {} }]]),
       },
     };
 
@@ -63,27 +71,29 @@ describe('RowComponent', () => {
     };
 
     mockBinder = jasmine.createSpyObj('ComponentBinder', ['bind']);
-    mockBinder.bind.and.returnValue({ text: { value: () => 'bound' } });
+    mockBinder.bind.and.returnValue({
+      props: signal({}),
+      destroy: () => {},
+    });
 
     await TestBed.configureTestingModule({
       imports: [RowComponent],
       providers: [
         { provide: A2uiRendererService, useValue: mockRendererService },
         { provide: ComponentBinder, useValue: mockBinder },
+        { provide: A2UI_SURFACE_ID, useValue: 'surf1' },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(RowComponent);
     component = fixture.componentInstance;
-    fixture.componentRef.setInput('surfaceId', 'surf1');
     fixture.componentRef.setInput('props', {
-      justify: { value: signal('center'), raw: 'center', onUpdate: () => {} },
-      align: { value: signal('baseline'), raw: 'baseline', onUpdate: () => {} },
-      children: {
-        value: signal(['child1', 'child2']),
-        raw: ['child1', 'child2'],
-        onUpdate: () => {},
-      },
+      justify: 'center',
+      align: 'baseline',
+      children: [
+        { id: 'child1', basePath: '/' },
+        { id: 'child2', basePath: '/' },
+      ],
     });
   });
 
@@ -99,33 +109,11 @@ describe('RowComponent', () => {
     expect(div.styles['align-items']).toBe('baseline');
   });
 
-  it('should render non-repeating children', () => {
+  it('should render children using a2ui-v09-child', () => {
     fixture.detectChanges();
-    const hosts = fixture.debugElement.queryAll(By.css('a2ui-v09-component-host'));
-    expect(hosts.length).toBe(2);
-    expect(hosts[0].componentInstance.componentId()).toBe('child1');
-    expect(hosts[1].componentInstance.componentId()).toBe('child2');
-  });
-
-  it('should render repeating children', () => {
-    fixture.componentRef.setInput('props', {
-      ...component.props(),
-      children: {
-        value: signal([{}, {}]), // two items
-        raw: {
-          componentId: 'template1',
-          path: 'items',
-        },
-        onUpdate: () => {},
-      },
-    });
-    fixture.detectChanges();
-
-    const hosts = fixture.debugElement.queryAll(By.css('a2ui-v09-component-host'));
-    expect(hosts.length).toBe(2);
-    expect(hosts[0].componentInstance.componentId()).toBe('template1');
-    expect(hosts[0].componentInstance.dataContextPath()).toBe('/items/0');
-    expect(hosts[1].componentInstance.componentId()).toBe('template1');
-    expect(hosts[1].componentInstance.dataContextPath()).toBe('/items/1');
+    const children = fixture.debugElement.queryAll(By.css('a2ui-v09-child'));
+    expect(children.length).toBe(2);
+    expect(children[0].componentInstance.meta().id).toBe('child1');
+    expect(children[1].componentInstance.meta().id).toBe('child2');
   });
 });

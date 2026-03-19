@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
-import { Component, ChangeDetectionStrategy, inject, input, computed } from '@angular/core';
-import { ComponentHostComponent } from '../../core/component-host.component';
-import { DataContext } from '@a2ui/web_core/v0_9';
-import { A2uiRendererService } from '../../core/a2ui-renderer.service';
-import { BoundProperty } from '../../core/types';
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { ResolveA2uiProps } from '@a2ui/web_core/v0_9';
+import { ButtonApi, ButtonApiType } from '@a2ui/web_core/v0_9/basic_catalog';
+import { ChildComponent } from '../../core/child.component';
 
 /**
  * Angular implementation of the A2UI Button component (v0.9).
+ *
+ * This component renders a clickable button that can dispatch an action
+ * back to the agent. It supports primary and secondary variants and
+ * can contain a single child component.
  */
 @Component({
   selector: 'a2ui-v09-button',
-  imports: [ComponentHostComponent],
+  standalone: true,
+  imports: [ChildComponent],
   template: `
     <button
-      [type]="variant() === 'primary' ? 'submit' : 'button'"
-      [class]="'a2ui-button ' + variant()"
-      (click)="handleClick()"
+      [type]="props().variant === 'primary' ? 'submit' : 'button'"
+      [class]="'a2ui-button ' + (props().variant || 'default')"
+      (click)="props().action?.()"
     >
-      @if (child()) {
-        <a2ui-v09-component-host
-          [componentId]="child()!"
-          [surfaceId]="surfaceId()"
-          [dataContextPath]="dataContextPath()"
-        >
-        </a2ui-v09-component-host>
+      @if (props().child) {
+        <a2ui-v09-child [meta]="props().child!" />
       }
     </button>
   `,
@@ -67,27 +66,8 @@ import { BoundProperty } from '../../core/types';
 })
 export class ButtonComponent {
   /**
-   * Bound properties.
+   * Reactive properties for the button, resolved from the A2UI model.
+   * Includes the button variant, action handler, and optional child.
    */
-  props = input<Record<string, BoundProperty>>({});
-  surfaceId = input.required<string>();
-  dataContextPath = input<string>('/');
-
-  private rendererService = inject(A2uiRendererService);
-
-  variant = computed(() => this.props()['variant']?.value() ?? 'default');
-  child = computed(() => this.props()['child']?.value());
-  action = computed(() => this.props()['action']?.value());
-
-  handleClick() {
-    const action = this.action();
-    if (action) {
-      const surface = this.rendererService.surfaceGroup?.getSurface(this.surfaceId());
-      if (surface) {
-        const dataContext = new DataContext(surface, this.dataContextPath());
-        const resolvedAction = dataContext.resolveAction(action);
-        surface.dispatchAction(resolvedAction);
-      }
-    }
-  }
+  props = input.required<ResolveA2uiProps<ButtonApiType>>();
 }

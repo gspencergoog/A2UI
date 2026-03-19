@@ -9,12 +9,9 @@ to generate or populate rich user interfaces.
 
 *A gallery of A2UI rendered cards, showing a variety of UI compositions that A2UI can achieve.*
 
-## ⚠️ Status: Early stage public preview
+## ⚠️ Status: Public Preview
 
-> **Note:** A2UI is currently in **v0.8 (Public Preview)**. The specification and
-implementations are functional but are still evolving. We are opening the project to
-foster collaboration, gather feedback, and solicit contributions (e.g., on client renderers).
-Expect changes.
+> **Note:** A2UI is currently in public preview. The **v0.8** specification is stable, and **v0.9** (with custom catalogs and client-side functions) is currently in active preview. The specification and implementations are functional but are still evolving. We are opening the project to foster collaboration, gather feedback, and solicit contributions. Expect changes.
 
 ## Summary
 

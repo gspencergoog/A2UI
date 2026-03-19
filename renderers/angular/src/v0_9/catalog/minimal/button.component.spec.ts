@@ -15,11 +15,21 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, Input, signal } from '@angular/core';
+import { Component, input, Signal, signal } from '@angular/core';
 import { ButtonComponent } from './button.component';
 import { A2uiRendererService } from '../../core/a2ui-renderer.service';
 import { ComponentBinder } from '../../core/component-binder.service';
+import { A2UI_SURFACE_ID } from '../../core/component-host.component';
 import { By } from '@angular/platform-browser';
+
+@Component({
+  standalone: true,
+  selector: 'dummy-child',
+  template: 'Dummy Child',
+})
+class DummyChild {
+  props = input.required<any>();
+}
 
 describe('ButtonComponent', () => {
   let component: ButtonComponent;
@@ -27,6 +37,7 @@ describe('ButtonComponent', () => {
   let mockRendererService: any;
   let mockSurface: any;
   let mockSurfaceGroup: any;
+  let mockBinder: any;
 
   beforeEach(async () => {
     mockSurface = {
@@ -40,19 +51,8 @@ describe('ButtonComponent', () => {
           [
             'Text',
             {
-              component: (() => {
-                @Component({
-                  standalone: true,
-                  selector: 'dummy-text',
-                  template: 'Dummy Text',
-                })
-                class DummyText {
-                  @Input() props: any;
-                  @Input() surfaceId?: string;
-                  @Input() dataContextPath?: string;
-                }
-                return DummyText;
-              })(),
+              component: DummyChild,
+              schema: {}
             },
           ],
         ]),
@@ -67,28 +67,27 @@ describe('ButtonComponent', () => {
       surfaceGroup: mockSurfaceGroup,
     };
 
-    const mockBinder = jasmine.createSpyObj('ComponentBinder', ['bind']);
-    mockBinder.bind.and.returnValue({ text: { value: () => 'bound text' } });
+    mockBinder = jasmine.createSpyObj('ComponentBinder', ['bind']);
+    mockBinder.bind.and.returnValue({
+      props: signal({}),
+      destroy: () => {},
+    });
 
     await TestBed.configureTestingModule({
       imports: [ButtonComponent],
       providers: [
         { provide: A2uiRendererService, useValue: mockRendererService },
         { provide: ComponentBinder, useValue: mockBinder },
+        { provide: A2UI_SURFACE_ID, useValue: 'surf1' },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ButtonComponent);
     component = fixture.componentInstance;
-    fixture.componentRef.setInput('surfaceId', 'surf1');
     fixture.componentRef.setInput('props', {
-      variant: { value: signal('primary'), raw: 'primary', onUpdate: () => {} },
-      child: { value: signal('child1'), raw: 'child1', onUpdate: () => {} },
-      action: {
-        value: signal({ type: 'test-action', data: {} }),
-        raw: { type: 'test-action', data: {} },
-        onUpdate: () => {},
-      },
+      variant: 'primary',
+      child: { id: 'child1', basePath: '/' },
+      action: () => {},
     });
   });
 
@@ -105,12 +104,9 @@ describe('ButtonComponent', () => {
 
   it('should set button type to button for non-primary variant', () => {
     fixture.componentRef.setInput('props', {
-      ...component.props(),
-      variant: {
-        value: signal('secondary'),
-        raw: 'secondary',
-        onUpdate: () => {},
-      },
+      variant: 'secondary',
+      child: { id: 'child1', basePath: '/' },
+      action: () => {},
     });
     fixture.detectChanges();
     const button = fixture.debugElement.query(By.css('button'));
@@ -123,30 +119,35 @@ describe('ButtonComponent', () => {
     expect(button.nativeElement.classList).toContain('primary');
   });
 
-  it('should handle click and dispatch action', () => {
+  it('should handle click and call action from props', () => {
+    const actionSpy = jasmine.createSpy('action');
+    fixture.componentRef.setInput('props', {
+      variant: 'primary',
+      child: { id: 'child1', basePath: '/' },
+      action: actionSpy,
+    });
     fixture.detectChanges();
+    
     const button = fixture.debugElement.query(By.css('button'));
     button.triggerEventHandler('click', null);
 
-    expect(mockRendererService.surfaceGroup.getSurface).toHaveBeenCalledWith('surf1');
-    expect(mockSurface.dispatchAction).toHaveBeenCalled();
+    expect(actionSpy).toHaveBeenCalled();
   });
 
   it('should show child component host if child prop is present', () => {
     fixture.detectChanges();
-    const host = fixture.debugElement.query(By.css('a2ui-v09-component-host'));
-    expect(host).toBeTruthy();
-    // componentId is now a signal, so we access it via ()
-    expect(host.componentInstance.componentId()).toBe('child1');
+    const child = fixture.debugElement.query(By.css('a2ui-v09-child'));
+    expect(child).toBeTruthy();
+    expect(child.componentInstance.meta().id).toBe('child1');
   });
 
   it('should not show child component host if child prop is absent', () => {
     fixture.componentRef.setInput('props', {
-      ...component.props(),
-      child: { value: signal(null), raw: null, onUpdate: () => {} },
+      variant: 'primary',
+      action: () => {},
     });
     fixture.detectChanges();
-    const host = fixture.debugElement.query(By.css('a2ui-v09-component-host'));
-    expect(host).toBeFalsy();
+    const child = fixture.debugElement.query(By.css('a2ui-v09-child'));
+    expect(child).toBeFalsy();
   });
 });

@@ -56,7 +56,7 @@ export class SurfaceModel<T extends ComponentApi> {
   constructor(
     readonly id: string,
     readonly catalog: Catalog<T>,
-    readonly theme: any = {},
+    public theme: any = {},
   ) {
     this.dataModel = new DataModel({});
     this.componentsModel = new SurfaceComponentsModel();

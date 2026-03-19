@@ -42,6 +42,8 @@ export const TextApi: ComponentApi = {
   }).strict(),
 };
 
+export type TextApiType = z.infer<typeof TextApi.schema>;
+
 export const ImageApi: ComponentApi = {
   name: "Image",
   schema: z.object({
@@ -121,6 +123,8 @@ export const RowApi: ComponentApi = {
   }).strict().describe("A layout component that arranges its children horizontally. To create a grid layout, nest Columns within this Row."),
 };
 
+export type RowApiType = z.infer<typeof RowApi.schema>;
+
 export const ColumnApi: ComponentApi = {
   name: "Column",
   schema: z.object({
@@ -139,6 +143,8 @@ export const ColumnApi: ComponentApi = {
   }).strict().describe("A layout component that arranges its children vertically. To create a grid layout, nest Rows within this Column."),
 };
 
+export type ColumnApiType = z.infer<typeof ColumnApi.schema>;
+
 export const ListApi: ComponentApi = {
   name: "List",
   schema: z.object({
@@ -156,6 +162,8 @@ export const CardApi: ComponentApi = {
     child: ComponentIdSchema.describe("The ID of the single child component to be rendered inside the card. To display multiple elements, you MUST wrap them in a layout component (like Column or Row) and pass that container's ID here. Do NOT pass multiple IDs or a non-existent ID. Do NOT define the child component inline."),
   }).strict(),
 };
+
+export type CardApiType = z.infer<typeof CardApi.schema>;
 
 export const TabsApi: ComponentApi = {
   name: "Tabs",
@@ -198,6 +206,8 @@ export const ButtonApi: ComponentApi = {
   }).strict(),
 };
 
+export type ButtonApiType = z.infer<typeof ButtonApi.schema>;
+
 export const TextFieldApi: ComponentApi = {
   name: "TextField",
   schema: z.object({
@@ -209,6 +219,8 @@ export const TextFieldApi: ComponentApi = {
     checks: CheckableSchema.shape.checks,
   }).strict(),
 };
+
+export type TextFieldApiType = z.infer<typeof TextFieldApi.schema>;
 
 export const CheckBoxApi: ComponentApi = {
   name: "CheckBox",
@@ -250,6 +262,8 @@ export const SliderApi: ComponentApi = {
     checks: CheckableSchema.shape.checks,
   }).strict(),
 };
+
+export type SliderApiType = z.infer<typeof SliderApi.schema>;
 
 export const DateTimeInputApi: ComponentApi = {
   name: "DateTimeInput",

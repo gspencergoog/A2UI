@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
-import { BoundProperty } from '../../core/types';
-
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { ResolveA2uiProps } from '@a2ui/web_core/v0_9';
+import { TextFieldApi, TextFieldApiType } from '@a2ui/web_core/v0_9/basic_catalog';
 
 /**
  * Angular implementation of the A2UI TextField component (v0.9).
  */
 @Component({
   selector: 'a2ui-v09-text-field',
+  standalone: true,
   imports: [],
   template: `
     <div class="a2ui-text-field-container">
-      @if (label()) {
-        <label>{{ label() }}</label>
+      @if (props().label) {
+        <label>{{ props().label }}</label>
       }
       <input
-        [type]="inputType()"
-        [value]="value()"
+        [type]="inputType"
+        [value]="props().value || ''"
         (input)="handleInput($event)"
-        [placeholder]="placeholder()"
+        [placeholder]="props().placeholder || ''"
       />
-      <!-- Validation errors would go here in a more advanced version -->
     </div>
   `,
   styles: [
@@ -62,22 +62,17 @@ import { BoundProperty } from '../../core/types';
 })
 export class TextFieldComponent {
   /**
-   * Bound properties.
+   * Reactive properties for the text field, resolved from the A2UI model.
+   * Includes the current value, label, placeholder, and setters for data binding.
    */
-  props = input<Record<string, BoundProperty>>({});
-  surfaceId = input<string>();
-  componentId = input<string>();
-  dataContextPath = input<string>();
+  props = input.required<ResolveA2uiProps<TextFieldApiType>>();
 
-
-
-  variant = computed(() => this.props()['variant']?.value());
-  label = computed(() => this.props()['label']?.value());
-  value = computed(() => this.props()['value']?.value() ?? '');
-  placeholder = computed(() => this.props()['placeholder']?.value() ?? '');
-
-  inputType = computed(() => {
-    switch (this.variant()) {
+  /**
+   * Derived property for the HTML input type based on the component variant.
+   */
+  get inputType(): string {
+    const variant = this.props().variant;
+    switch (variant) {
       case 'obscured':
         return 'password';
       case 'number':
@@ -85,12 +80,13 @@ export class TextFieldComponent {
       default:
         return 'text';
     }
-  });
+  }
 
-  handleInput(event: Event) {
+  /**
+   * Handles user input and updates the underlying data model via the proxy setter.
+   */
+  handleInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
-    // Update the data path.  If anything is listening to this path, it will be
-    // notified.
-    this.props()['value']?.onUpdate(value);
+    this.props().setValue?.(value);
   }
 }

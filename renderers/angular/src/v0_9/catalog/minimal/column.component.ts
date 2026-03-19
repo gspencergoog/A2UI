@@ -14,45 +14,27 @@
  * limitations under the License.
  */
 
-import { Component, ChangeDetectionStrategy, computed, input } from '@angular/core';
-import { ComponentHostComponent } from '../../core/component-host.component';
-import { BoundProperty } from '../../core/types';
-
-import { getNormalizedPath } from '../../core/utils';
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { ResolveA2uiProps } from '@a2ui/web_core/v0_9';
+import { ColumnApi, ColumnApiType } from '@a2ui/web_core/v0_9/basic_catalog';
+import { ChildComponent } from '../../core/child.component';
 
 /**
  * Angular implementation of the A2UI Column component (v0.9).
  */
 @Component({
   selector: 'a2ui-v09-column',
-  imports: [ComponentHostComponent],
+  standalone: true,
+  imports: [ChildComponent],
   template: `
     <div
       class="a2ui-column"
-      [style.justify-content]="justify()"
-      [style.align-items]="align()"
+      [style.justify-content]="props().justify"
+      [style.align-items]="props().align"
       style="display: flex; flex-direction: column; width: 100%;"
     >
-      @if (!isRepeating()) {
-        @for (childId of children(); track childId) {
-          <a2ui-v09-component-host
-            [componentId]="childId"
-            [surfaceId]="surfaceId()"
-            [dataContextPath]="dataContextPath()"
-          >
-          </a2ui-v09-component-host>
-        }
-      }
-
-      @if (isRepeating()) {
-        @for (item of children(); track $index) {
-          <a2ui-v09-component-host
-            [componentId]="templateId()!"
-            [surfaceId]="surfaceId()"
-            [dataContextPath]="getNormalizedPath($index)"
-          >
-          </a2ui-v09-component-host>
-        }
+      @for (child of props().children; track child.id) {
+        <a2ui-v09-child [meta]="child" />
       }
     </div>
   `,
@@ -60,29 +42,8 @@ import { getNormalizedPath } from '../../core/utils';
 })
 export class ColumnComponent {
   /**
-   * Bound properties.
+   * Reactive properties for the column, resolved from the A2UI model.
+   * Includes the list of children to render and layout alignment options.
    */
-  props = input<Record<string, BoundProperty>>({});
-  surfaceId = input.required<string>();
-  dataContextPath = input<string>('/');
-
-  protected justify = computed(() => this.props()['justify']?.value());
-  protected align = computed(() => this.props()['align']?.value());
-
-  protected children = computed(() => {
-    const raw = this.props()['children']?.value() || [];
-    return Array.isArray(raw) ? raw : [];
-  });
-
-  protected isRepeating = computed(() => {
-    return !!this.props()['children']?.raw?.componentId;
-  });
-
-  protected templateId = computed(() => {
-    return this.props()['children']?.raw?.componentId;
-  });
-
-  protected getNormalizedPath(index: number) {
-    return getNormalizedPath(this.props()['children']?.raw?.path, this.dataContextPath(), index);
-  }
+  props = input.required<ResolveA2uiProps<ColumnApiType>>();
 }

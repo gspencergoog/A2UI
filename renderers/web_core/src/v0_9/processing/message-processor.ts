@@ -122,8 +122,13 @@ export class MessageProcessor<T extends ComponentApi> {
       throw new A2uiStateError(`Catalog not found: ${catalogId}`);
     }
 
-    if (this.model.getSurface(surfaceId)) {
-      throw new A2uiStateError(`Surface ${surfaceId} already exists.`);
+    const existing = this.model.getSurface(surfaceId);
+    if (existing) {
+      console.warn(`Surface ${surfaceId} already exists. Skipping creation but updating theme.`);
+      if (theme) {
+        existing.theme = theme;
+      }
+      return;
     }
 
     const surface = new SurfaceModel<T>(surfaceId, catalog, theme);

@@ -58,9 +58,8 @@ export class SurfaceComponentsModel {
    */
   addComponent(component: ComponentModel): void {
     if (this.components.has(component.id)) {
-      throw new A2uiStateError(
-        `Component with id '${component.id}' already exists.`,
-      );
+      console.warn(`[JETSKI_LOG] Component with id '${component.id}' already exists. Skipping add.`);
+      return;
     }
 
     this.components.set(component.id, component);

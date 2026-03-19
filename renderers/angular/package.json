@@ -4,6 +4,8 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "ng build && node postprocess-build.mjs",
+    "test": "ng test",
+    "test:ci": "ng test lib --watch=false",
     "demo": "ng serve a2ui_explorer"
   },
   "dependencies": {
