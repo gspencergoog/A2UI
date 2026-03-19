@@ -71,3 +71,4 @@ export class ButtonComponent {
    */
   props = input.required<ResolveA2uiProps<ButtonApiType>>();
 }
+

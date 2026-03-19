@@ -39,3 +39,4 @@ export interface AngularComponentApi extends ComponentApi {
  * implementations and API schemas.
  */
 export class AngularCatalog extends Catalog<AngularComponentApi> {}
+

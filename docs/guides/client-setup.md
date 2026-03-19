@@ -54,46 +54,59 @@ TODO: Add verified setup example.
 > coming days.
 
 ```bash
-npm install @a2ui/angular @a2ui/web-lib
+npm install @a2ui/angular @a2ui/web_core
 ```
 
 The Angular renderer provides:
 
-- **`A2uiRendererService`**: Service that manages the rendering state and processes messages.
-- **`A2UI_RENDERER_CONFIG`**: Injection token for configuring catalogs and action handlers.
-- **`<a2ui-v09-component-host>`**: Component that renders an A2UI component by ID.
+- **`A2uiRendererService`**: A service that manages the A2UI message processor and reactive model.
+- **`SurfaceComponent`**: A high-level component that renders an entire A2UI surface.
+- **`ComponentHostComponent`**: A dynamic component host that renders A2UI components by ID.
+- **`A2UI_RENDERER_CONFIG` token**: Used to configure the renderer with catalogs and action handlers.
 
 ### Setup Example (v0.9)
 
-Register the service and its configuration in your app's providers:
+A2UI uses versioned imports for its protocol-specific implementations. For v0.9, configure your application providers as follows:
 
 ```typescript
-import { A2uiRendererService, A2UI_RENDERER_CONFIG, minimalCatalog } from '@a2ui/angular';
+import { ApplicationConfig } from '@angular/core';
+import { 
+  A2UI_RENDERER_CONFIG, 
+  A2uiRendererService, 
+  MinimalCatalog 
+} from '@a2ui/angular';
 
-bootstrapApplication(AppComponent, {
+export const appConfig: ApplicationConfig = {
   providers: [
-    A2uiRendererService,
     {
       provide: A2UI_RENDERER_CONFIG,
       useValue: {
-        catalogs: [minimalCatalog],
+        catalogs: [new MinimalCatalog()],
         actionHandler: (action) => console.log('Action dispatched:', action),
       },
     },
+    A2uiRendererService
   ],
-});
+};
 ```
 
 Render a surface in your template:
 
 ```html
+<a2ui-v09-surface surfaceId="my-surface"></a2ui-v09-surface>
+```
+
+Or render a specific component:
+
+```html
 <a2ui-v09-component-host 
-  [surfaceId]="'my-surface'" 
-  [componentId]="'root'">
+  surfaceId="my-surface" 
+  componentId="root">
 </a2ui-v09-component-host>
 ```
 
 **See working example:** [A2UI Explorer](https://github.com/google/A2UI/tree/main/renderers/angular/a2ui_explorer)
+
 
 ## React
 

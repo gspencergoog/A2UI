@@ -47,3 +47,4 @@ export class CardComponent {
   props = input.required<ResolveA2uiProps<DemoCardApiType>>();
   surfaceId = input.required<string>();
 }
+

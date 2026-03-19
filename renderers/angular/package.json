@@ -4,10 +4,11 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "ng build && node postprocess-build.mjs",
+    "demo": "ng serve a2ui_explorer",
     "test": "ng test",
-    "test:ci": "ng test lib --watch=false",
-    "demo": "ng serve a2ui_explorer"
+    "test:ci": "ng test --watch=false --browsers=ChromeHeadless"
   },
+
   "dependencies": {
     "@a2ui/web_core": "file:../web_core",
     "tslib": "^2.3.0",

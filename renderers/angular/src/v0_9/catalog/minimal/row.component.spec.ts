@@ -41,16 +41,6 @@ describe('RowComponent', () => {
   let mockBinder: any;
 
   beforeEach(async () => {
-    const mockContext = {
-      componentModel: {
-        id: 'test-component',
-        type: 'TextField',
-        properties: { text: 'Initial' },
-        onUpdated: of(null),
-      },
-      dataContext: { path: '/', get: (path: string) => null },
-    };
-
     mockSurface = {
       componentsModel: new Map([
         ['child1', { id: 'child1', type: 'Child', properties: {} }],
@@ -117,3 +107,4 @@ describe('RowComponent', () => {
     expect(children[1].componentInstance.meta().id).toBe('child2');
   });
 });
+

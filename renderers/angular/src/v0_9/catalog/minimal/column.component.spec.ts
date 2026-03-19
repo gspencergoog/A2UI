@@ -106,3 +106,4 @@ describe('ColumnComponent', () => {
     expect(children[1].componentInstance.meta().id).toBe('child2');
   });
 });
+

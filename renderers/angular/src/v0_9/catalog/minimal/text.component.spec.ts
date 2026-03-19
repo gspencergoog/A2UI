@@ -17,7 +17,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TextComponent } from './text.component';
 import { By } from '@angular/platform-browser';
-import { signal } from '@angular/core';
 
 describe('TextComponent', () => {
   let component: TextComponent;
@@ -56,3 +55,4 @@ describe('TextComponent', () => {
     expect(span.styles['font-style']).toBe('italic');
   });
 });
+

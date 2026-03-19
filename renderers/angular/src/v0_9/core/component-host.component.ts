@@ -74,8 +74,8 @@ export const A2UI_DATA_CONTEXT_PATH = new InjectionToken<string>('A2UI_DATA_CONT
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ComponentHostComponent {
-  /** The unique ID of the component to render within the surface. */
-  componentId = input.required<string>();
+  /** The unique ID of the component to render within the surface. Defaults to 'root'. */
+  componentId = input<string>('root');
   /** The ID of the surface this component belongs to. */
   surfaceId = input.required<string>();
   /**

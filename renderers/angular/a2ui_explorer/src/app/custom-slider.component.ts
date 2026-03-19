@@ -62,3 +62,4 @@ export class CustomSliderComponent {
     this.props().setValue?.(val);
   }
 }
+

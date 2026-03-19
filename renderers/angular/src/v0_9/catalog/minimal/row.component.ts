@@ -47,3 +47,4 @@ export class RowComponent {
    */
   props = input.required<ResolveA2uiProps<RowApiType>>();
 }
+

@@ -83,3 +83,4 @@ export class MinimalCatalog extends BaseMinimalCatalog {
     super();
   }
 }
+

@@ -87,7 +87,7 @@ describe('ComponentHostComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('ngOnInit', () => {
+  describe('ngOnInit (Effect triggers)', () => {
     it('should resolve component type and bind props with schema', () => {
       fixture.detectChanges(); // Triggers effect
 
@@ -110,6 +110,14 @@ describe('ComponentHostComponent', () => {
         const injector = fixture.debugElement.injector;
         expect(injector.get(A2UI_SURFACE_ID)).toBe('surf1');
         expect(injector.get(A2UI_DATA_CONTEXT_PATH)).toBe('/');
+    });
+
+    it('should use provided dataContextPath for ComponentContext', () => {
+      fixture.componentRef.setInput('dataContextPath', '/nested/path');
+      fixture.detectChanges();
+
+      const bindArg = mockBinder.bind.calls.mostRecent().args[0] as ComponentContext;
+      expect(bindArg.dataContext.path).toBe('/nested/path');
     });
 
     it('should warn and return if surface not found', () => {
@@ -157,3 +165,4 @@ describe('ComponentHostComponent', () => {
     });
   });
 });
+

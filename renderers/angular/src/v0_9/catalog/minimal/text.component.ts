@@ -50,3 +50,4 @@ export class TextComponent {
    */
   props = input.required<ResolveA2uiProps<TextApiType>>();
 }
+

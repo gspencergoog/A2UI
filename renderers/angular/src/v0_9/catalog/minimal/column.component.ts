@@ -47,3 +47,4 @@ export class ColumnComponent {
    */
   props = input.required<ResolveA2uiProps<ColumnApiType>>();
 }
+

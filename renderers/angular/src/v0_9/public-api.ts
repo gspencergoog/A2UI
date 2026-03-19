@@ -18,8 +18,10 @@
 export * from './core/a2ui-renderer.service';
 export * from './core/component-host.component';
 export * from './core/child.component';
+export * from './core/surface.component';
 export * from './core/component-binder.service';
-export * from './core/component-binder.service';
+export * from './core/types';
+export * from './core/utils';
 
 // Catalog Types and Implementations
 export * from './catalog/types';
@@ -31,3 +33,4 @@ export * from './catalog/minimal/row.component';
 export * from './catalog/minimal/column.component';
 export * from './catalog/minimal/button.component';
 export * from './catalog/minimal/text-field.component';
+
