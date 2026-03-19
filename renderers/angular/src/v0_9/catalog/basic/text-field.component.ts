@@ -20,6 +20,9 @@ import { A2uiRendererService } from '../../core/a2ui-renderer.service';
 
 /**
  * Angular implementation of the A2UI TextField component (v0.9).
+ *
+ * Renders a text input field with an optional label and placeholder.
+ * Updates the bound data model property on every input change.
  */
 @Component({
   selector: 'a2ui-v09-text-field',
@@ -63,7 +66,13 @@ import { A2uiRendererService } from '../../core/a2ui-renderer.service';
 })
 export class TextFieldComponent {
   /**
-   * Bound properties.
+   * Reactive properties resolved from the A2UI {@link ComponentModel}.
+   *
+   * Expected properties:
+   * - `value`: The current string value of the input.
+   * - `label`: Optional label text to display above the input.
+   * - `placeholder`: Hint text shown when the input is empty.
+   * - `variant`: Input type variant ('default', 'obscured' (password), 'number').
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input<string>();

@@ -20,6 +20,9 @@ import { BoundProperty } from '../../core/types';
 
 /**
  * Angular implementation of the A2UI List component (v0.9).
+ *
+ * Renders a list of child components with support for ordered, unordered,
+ * and unstyled layouts in both vertical and horizontal orientations.
  */
 @Component({
   selector: 'a2ui-v09-list',
@@ -28,10 +31,7 @@ import { BoundProperty } from '../../core/types';
   template: `
     @switch (listTag()) {
       @case ('ol') {
-        <ol
-          [class]="'a2ui-list ' + orientation()"
-          [style.list-style-type]="styleType()"
-        >
+        <ol [class]="'a2ui-list ' + orientation()" [style.list-style-type]="styleType()">
           @for (child of children(); track child) {
             <li>
               <a2ui-v09-component-host
@@ -45,10 +45,7 @@ import { BoundProperty } from '../../core/types';
         </ol>
       }
       @case ('ul') {
-        <ul
-          [class]="'a2ui-list ' + orientation()"
-          [style.list-style-type]="styleType()"
-        >
+        <ul [class]="'a2ui-list ' + orientation()" [style.list-style-type]="styleType()">
           @for (child of children(); track child) {
             <li>
               <a2ui-v09-component-host
@@ -62,10 +59,7 @@ import { BoundProperty } from '../../core/types';
         </ul>
       }
       @default {
-        <div
-          [class]="'a2ui-list ' + orientation()"
-          style="list-style-type: none;"
-        >
+        <div [class]="'a2ui-list ' + orientation()" style="list-style-type: none;">
           @for (child of children(); track child) {
             <div class="a2ui-list-item-none">
               <a2ui-v09-component-host
@@ -108,7 +102,12 @@ import { BoundProperty } from '../../core/types';
 })
 export class ListComponent {
   /**
-   * Bound properties.
+   * Reactive properties resolved from the A2UI {@link ComponentModel}.
+   *
+   * Expected properties:
+   * - `children`: A list of component IDs to render as list items.
+   * - `listStyle`: The type of list ('ordered', 'unordered', 'none').
+   * - `orientation`: The layout direction ('vertical', 'horizontal').
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input.required<string>();

@@ -20,6 +20,9 @@ import { BoundProperty } from '../../core/types';
 
 /**
  * Angular implementation of the A2UI CheckBox component (v0.9).
+ *
+ * Renders a checkbox with a label. Updates the bound data model property
+ * when the checked state changes.
  */
 @Component({
   selector: 'a2ui-v09-check-box',
@@ -59,7 +62,11 @@ import { BoundProperty } from '../../core/types';
 })
 export class CheckBoxComponent {
   /**
-   * Bound properties.
+   * Reactive properties resolved from the A2UI {@link ComponentModel}.
+   *
+   * Expected properties:
+   * - `label`: The text to display next to the checkbox.
+   * - `value`: Boolean indicating whether the checkbox is checked.
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input.required<string>();

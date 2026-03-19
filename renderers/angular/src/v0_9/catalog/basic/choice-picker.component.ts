@@ -20,6 +20,9 @@ import { BoundProperty } from '../../core/types';
 
 /**
  * Angular implementation of the A2UI ChoicePicker component (v0.9).
+ *
+ * Renders a set of options as either radio buttons/checkboxes or chips.
+ * Supports both single and multiple selection.
  */
 @Component({
   selector: 'a2ui-v09-choice-picker',
@@ -104,7 +107,13 @@ import { BoundProperty } from '../../core/types';
 })
 export class ChoicePickerComponent {
   /**
-   * Bound properties.
+   * Reactive properties resolved from the A2UI {@link ComponentModel}.
+   *
+   * Expected properties:
+   * - `value`: The currently selected value(s).
+   * - `choices` or `options`: List of choice objects (label and value).
+   * - `displayStyle`: How to render the choices ('default' or 'chips').
+   * - `variant`: Selection mode ('singleSelection' or 'multipleSelection').
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input.required<string>();
@@ -114,7 +123,9 @@ export class ChoicePickerComponent {
   private rendererService = inject(A2uiRendererService);
 
   displayStyle = computed(() => this.props()['displayStyle']?.value());
-  choices = computed(() => this.props()['choices']?.value() || this.props()['options']?.value() || []);
+  choices = computed(
+    () => this.props()['choices']?.value() || this.props()['options']?.value() || [],
+  );
   variant = computed(() => this.props()['variant']?.value());
   selectedValue = computed(() => this.props()['value']?.value());
 

@@ -60,6 +60,9 @@ import {
 } from '@a2ui/web_core/v0_9/basic_catalog';
 import { FunctionImplementation } from '@a2ui/web_core/v0_9';
 
+/**
+ * The set of Angular UI components provided by the basic catalog.
+ */
 export const BASIC_COMPONENTS: AngularComponentImplementation[] = [
   { ...TextApi, component: TextComponent },
   { ...RowApi, component: RowComponent },
@@ -81,6 +84,9 @@ export const BASIC_COMPONENTS: AngularComponentImplementation[] = [
   { ...DateTimeInputApi, component: DateTimeInputComponent },
 ];
 
+/**
+ * The set of client-side functions provided by the basic catalog.
+ */
 export const BASIC_FUNCTIONS: FunctionImplementation[] = [
   createFunctionImplementation(
     {
@@ -114,6 +120,10 @@ export class BaseBasicCatalog extends AngularCatalog {
 
 /**
  * A basic catalog of components and functions for v0.9 verification.
+ *
+ * This catalog includes a wide range of UI components (Text, Button, Row, etc.)
+ * and utility functions (capitalize, formatString) defined in the A2UI v0.9
+ * basic catalog specification.
  */
 @Injectable({
   providedIn: 'root',

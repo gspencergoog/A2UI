@@ -20,6 +20,8 @@ import { BoundProperty } from '../../core/types';
 
 /**
  * Angular implementation of the A2UI Card component (v0.9).
+ *
+ * Renders a container with a shadow and rounded corners for grouping related content.
  */
 @Component({
   selector: 'a2ui-v09-card',
@@ -52,7 +54,10 @@ import { BoundProperty } from '../../core/types';
 })
 export class CardComponent {
   /**
-   * Bound properties.
+   * Reactive properties resolved from the A2UI {@link ComponentModel}.
+   *
+   * Expected properties:
+   * - `child`: The component ID to render inside the card.
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input.required<string>();

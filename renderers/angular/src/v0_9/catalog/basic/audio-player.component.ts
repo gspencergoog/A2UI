@@ -19,6 +19,8 @@ import { BoundProperty } from '../../core/types';
 
 /**
  * Angular implementation of the A2UI AudioPlayer component (v0.9).
+ *
+ * Renders an audio player with standard controls and an optional description.
  */
 @Component({
   selector: 'a2ui-v09-audio-player',
@@ -57,7 +59,11 @@ import { BoundProperty } from '../../core/types';
 })
 export class AudioPlayerComponent {
   /**
-   * Bound properties.
+   * Reactive properties resolved from the A2UI {@link ComponentModel}.
+   *
+   * Expected properties:
+   * - `url`: The absolute URL of the audio file.
+   * - `description`: Optional text to display above the player.
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input<string>();

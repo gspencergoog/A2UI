@@ -20,6 +20,8 @@ import { BoundProperty } from '../../core/types';
 
 /**
  * Angular implementation of the A2UI Slider component (v0.9).
+ *
+ * Renders a range input slider with a label and its current value.
  */
 @Component({
   selector: 'a2ui-v09-slider',
@@ -65,7 +67,14 @@ import { BoundProperty } from '../../core/types';
 })
 export class SliderComponent {
   /**
-   * Bound properties.
+   * Reactive properties resolved from the A2UI {@link ComponentModel}.
+   *
+   * Expected properties:
+   * - `value`: The current numeric value.
+   * - `label`: Label text to display.
+   * - `min`: Minimum value (default: 0).
+   * - `max`: Maximum value (default: 100).
+   * - `step`: Increment step (default: 1).
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input.required<string>();

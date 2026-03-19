@@ -20,6 +20,8 @@ import { BoundProperty } from '../../core/types';
 
 /**
  * Angular implementation of the A2UI Modal component (v0.9).
+ *
+ * Renders a trigger component that opening an overlay containing a content component.
  */
 @Component({
   selector: 'a2ui-v09-modal',
@@ -105,7 +107,11 @@ import { BoundProperty } from '../../core/types';
 })
 export class ModalComponent {
   /**
-   * Bound properties.
+   * Reactive properties resolved from the A2UI {@link ComponentModel}.
+   *
+   * Expected properties:
+   * - `trigger`: The ID of the component that opens the modal.
+   * - `content`: The ID of the component to display inside the modal.
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input.required<string>();

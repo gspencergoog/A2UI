@@ -20,9 +20,7 @@ import { Types } from '../types';
 
 @Component({
   selector: '[a2ui-renderer]',
-  template: `
-    <ng-template #container />
-  `,
+  template: ` <ng-template #container /> `,
   styles: `
     :host {
       display: contents;
@@ -58,7 +56,6 @@ export class Renderer {
   private async render(container: ViewContainerRef, node: Types.AnyComponentNode, config: any) {
     let componentType: Type<unknown> | null = null;
 
-
     if (typeof config === 'function') {
       const res = config();
       componentType = res instanceof Promise ? await res : res;
@@ -67,15 +64,11 @@ export class Renderer {
         const res = config.type();
         componentType = res instanceof Promise ? await res : res;
       } else {
-         componentType = config.type;
+        componentType = config.type;
       }
-      
-
     }
 
     if (componentType) {
-
-
       const componentRef = container.createComponent(componentType);
       componentRef.setInput('surfaceId', this.surfaceId());
       componentRef.setInput('component', node);

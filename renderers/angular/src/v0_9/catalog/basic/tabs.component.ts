@@ -20,6 +20,9 @@ import { BoundProperty } from '../../core/types';
 
 /**
  * Angular implementation of the A2UI Tabs component (v0.9).
+ *
+ * Renders a set of tabs where each tab has a label and associated content.
+ * Manages the active tab state internally.
  */
 @Component({
   selector: 'a2ui-v09-tabs',
@@ -85,7 +88,10 @@ import { BoundProperty } from '../../core/types';
 })
 export class TabsComponent {
   /**
-   * Bound properties.
+   * Reactive properties resolved from the A2UI {@link ComponentModel}.
+   *
+   * Expected properties:
+   * - `tabs`: A list of tab objects, each containing a `label` and `content` ID.
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input.required<string>();

@@ -63,8 +63,7 @@ import { ActionDispatcher } from './action-dispatcher.service';
         </div>
         <div class="canvas-frame">
           <div *ngIf="surfaceId" class="rendered-content">
-            <a2ui-v09-surface [surfaceId]="surfaceId">
-            </a2ui-v09-surface>
+            <a2ui-v09-surface [surfaceId]="surfaceId"> </a2ui-v09-surface>
           </div>
           <div *ngIf="!surfaceId" class="empty-canvas">
             Select an example from the sidebar to view.

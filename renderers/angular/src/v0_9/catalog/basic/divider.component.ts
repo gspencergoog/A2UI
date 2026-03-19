@@ -19,6 +19,8 @@ import { BoundProperty } from '../../core/types';
 
 /**
  * Angular implementation of the A2UI Divider component (v0.9).
+ *
+ * Renders a horizontal or vertical line to separate content.
  */
 @Component({
   selector: 'a2ui-v09-divider',
@@ -52,7 +54,10 @@ import { BoundProperty } from '../../core/types';
 })
 export class DividerComponent {
   /**
-   * Bound properties.
+   * Reactive properties resolved from the A2UI {@link ComponentModel}.
+   *
+   * Expected properties:
+   * - `axis`: The orientation of the divider ('horizontal' (default) or 'vertical').
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input.required<string>();

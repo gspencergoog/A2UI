@@ -19,6 +19,8 @@ import { BoundProperty } from '../../core/types';
 
 /**
  * Angular implementation of the A2UI Video component (v0.9).
+ *
+ * Renders a video player with standard controls and an optional poster image.
  */
 @Component({
   selector: 'a2ui-v09-video',
@@ -26,12 +28,7 @@ import { BoundProperty } from '../../core/types';
   imports: [],
   template: `
     <div class="a2ui-video-container">
-      <video
-        [src]="url()"
-        controls
-        [poster]="posterUrl()"
-        class="a2ui-video"
-      >
+      <video [src]="url()" controls [poster]="posterUrl()" class="a2ui-video">
         Your browser does not support the video tag.
       </video>
     </div>
@@ -53,7 +50,11 @@ import { BoundProperty } from '../../core/types';
 })
 export class VideoComponent {
   /**
-   * Bound properties.
+   * Reactive properties resolved from the A2UI {@link ComponentModel}.
+   *
+   * Expected properties:
+   * - `url`: The absolute URL of the video file.
+   * - `posterUrl`: The URL of an image to show before the video starts.
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input<string>();

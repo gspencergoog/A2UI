@@ -20,6 +20,9 @@ import { BoundProperty } from '../../core/types';
 
 /**
  * Angular implementation of the A2UI DateTimeInput component (v0.9).
+ *
+ * Renders date and/or time input fields. Combines them into an ISO string
+ * for the bound data model property.
  */
 @Component({
   selector: 'a2ui-v09-date-time-input',
@@ -82,7 +85,13 @@ import { BoundProperty } from '../../core/types';
 })
 export class DateTimeInputComponent {
   /**
-   * Bound properties.
+   * Reactive properties resolved from the A2UI {@link ComponentModel}.
+   *
+   * Expected properties:
+   * - `value`: The current ISO date/time string.
+   * - `label`: Optional label text.
+   * - `enableDate`: Whether to show the date picker (default: true).
+   * - `enableTime`: Whether to show the time picker (default: false).
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input.required<string>();

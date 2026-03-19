@@ -19,6 +19,8 @@ import { BoundProperty } from '../../core/types';
 
 /**
  * Angular implementation of the A2UI Image component (v0.9).
+ *
+ * Renders an image with configurable fit and shape variants.
  */
 @Component({
   selector: 'a2ui-v09-image',
@@ -52,7 +54,13 @@ import { BoundProperty } from '../../core/types';
 })
 export class ImageComponent {
   /**
-   * Bound properties.
+   * Reactive properties resolved from the A2UI {@link ComponentModel}.
+   *
+   * Expected properties:
+   * - `url`: The absolute URL of the image.
+   * - `description`: Accessibility text for the image.
+   * - `fit`: Object-fit mode ('cover', 'contain', 'fill', 'none', 'scale-down').
+   * - `variant`: Style variant ('default', 'circle', 'rounded').
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input<string>();

@@ -22,6 +22,9 @@ import { getNormalizedPath } from '../../core/utils';
 
 /**
  * Angular implementation of the A2UI Column component (v0.9).
+ *
+ * Arranges child components in a vertical flex layout. Supports both static
+ * lists of children and repeating templates bound to a data collection.
  */
 @Component({
   selector: 'a2ui-v09-column',
@@ -61,7 +64,12 @@ import { getNormalizedPath } from '../../core/utils';
 })
 export class ColumnComponent {
   /**
-   * Bound properties.
+   * Reactive properties resolved from the A2UI {@link ComponentModel}.
+   *
+   * Expected properties:
+   * - `children`: A list of component IDs OR a repeating collection definition.
+   * - `justify`: Flexbox justify-content value (e.g., 'flex-start', 'center').
+   * - `align`: Flexbox align-items value (e.g., 'flex-start', 'center').
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input.required<string>();

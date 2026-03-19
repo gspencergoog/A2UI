@@ -19,6 +19,8 @@ import { BoundProperty } from '../../core/types';
 
 /**
  * Angular implementation of the A2UI Icon component (v0.9).
+ *
+ * Supports both Material Icons (by name) and custom SVG icons (by path).
  */
 @Component({
   selector: 'a2ui-v09-icon',
@@ -26,11 +28,7 @@ import { BoundProperty } from '../../core/types';
   imports: [],
   template: `
     @if (isPath()) {
-      <svg
-        class="a2ui-icon svg"
-        viewBox="0 0 24 24"
-        [style.fill]="color() || 'currentColor'"
-      >
+      <svg class="a2ui-icon svg" viewBox="0 0 24 24" [style.fill]="color() || 'currentColor'">
         <path [attr.d]="path()"></path>
       </svg>
     } @else {
@@ -68,7 +66,12 @@ import { BoundProperty } from '../../core/types';
 })
 export class IconComponent {
   /**
-   * Bound properties.
+   * Reactive properties resolved from the A2UI {@link ComponentModel}.
+   *
+   * Expected properties:
+   * - `name`: The name of the icon (e.g., 'home', 'settings') OR an object
+   *           with a `path` property for SVG icons.
+   * - `color`: The CSS color to apply to the icon.
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input<string>();

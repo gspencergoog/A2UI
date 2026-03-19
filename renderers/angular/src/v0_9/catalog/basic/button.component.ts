@@ -22,6 +22,9 @@ import { BoundProperty } from '../../core/types';
 
 /**
  * Angular implementation of the A2UI Button component (v0.9).
+ *
+ * Renders a clickable button with a single child component (usually Text).
+ * Dispatches an action when clicked if an `action` property is provided.
  */
 @Component({
   selector: 'a2ui-v09-button',
@@ -68,7 +71,12 @@ import { BoundProperty } from '../../core/types';
 })
 export class ButtonComponent {
   /**
-   * Bound properties.
+   * Reactive properties resolved from the A2UI {@link ComponentModel}.
+   *
+   * Expected properties:
+   * - `child`: The ID of the component to render inside the button.
+   * - `variant`: Button style variant ('default', 'primary', 'borderless').
+   * - `action`: The A2UI action to dispatch on click.
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input.required<string>();

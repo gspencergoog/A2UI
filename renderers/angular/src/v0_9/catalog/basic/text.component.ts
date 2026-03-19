@@ -19,16 +19,15 @@ import { BoundProperty } from '../../core/types';
 
 /**
  * Angular implementation of the A2UI Text component (v0.9).
+ *
+ * Renders a span of text with configurable font weight and style.
  */
 @Component({
   selector: 'a2ui-v09-text',
   standalone: true,
   imports: [],
   template: `
-    <span
-      [style.font-weight]="weight()"
-      [style.font-style]="style()"
-    >
+    <span [style.font-weight]="weight()" [style.font-style]="style()">
       {{ text() }}
     </span>
   `,
@@ -36,7 +35,12 @@ import { BoundProperty } from '../../core/types';
 })
 export class TextComponent {
   /**
-   * Bound properties.
+   * Reactive properties resolved from the A2UI {@link ComponentModel}.
+   *
+   * Expected properties:
+   * - `text`: The string content to display.
+   * - `weight`: Font weight (e.g., 'bold', 'normal' or numeric string).
+   * - `style`: Font style (e.g., 'italic', 'normal').
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input<string>();
