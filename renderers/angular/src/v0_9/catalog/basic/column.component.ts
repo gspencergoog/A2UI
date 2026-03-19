@@ -35,7 +35,7 @@ import { getNormalizedPath } from '../../core/utils';
       class="a2ui-column"
       [style.justify-content]="justify()"
       [style.align-items]="align()"
-      style="display: flex; flex-direction: column; width: 100%;"
+      style="display: flex; flex-direction: column; width: 100%; gap: 4px;"
     >
       @if (!isRepeating()) {
         @for (childId of children(); track childId) {
