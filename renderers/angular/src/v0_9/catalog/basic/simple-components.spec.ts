@@ -250,10 +250,19 @@ describe('Simple Components', () => {
     it('should render video with url', () => {
       fixture.componentRef.setInput('props', {
         url: createBoundProperty('https://example.com/video.mp4'),
+        posterUrl: createBoundProperty('https://example.com/poster.jpg'),
       });
       fixture.detectChanges();
       const video = fixture.nativeElement.querySelector('video') as HTMLVideoElement;
       expect(video.src).toBeTruthy();
+      expect(video.poster).toContain('poster.jpg');
+    });
+
+    it('should handle missing props', () => {
+      fixture.componentRef.setInput('props', {});
+      fixture.detectChanges();
+      const video = fixture.nativeElement.querySelector('video') as HTMLVideoElement;
+      expect(video.getAttribute('src')).toBeFalsy();
     });
   });
 
@@ -293,6 +302,22 @@ describe('Simple Components', () => {
       expect(audio.src).toBeTruthy();
       const desc = fixture.nativeElement.querySelector('.a2ui-audio-description');
       expect(desc.textContent.trim()).toBe('Test Audio');
+    });
+
+    it('should not render description if not provided', () => {
+      fixture.componentRef.setInput('props', {
+        url: createBoundProperty('https://example.com/audio.mp3'),
+      });
+      fixture.detectChanges();
+      const desc = fixture.nativeElement.querySelector('.a2ui-audio-description');
+      expect(desc).toBeFalsy();
+    });
+
+    it('should handle missing props', () => {
+      fixture.componentRef.setInput('props', {});
+      fixture.detectChanges();
+      const audio = fixture.nativeElement.querySelector('audio') as HTMLAudioElement;
+      expect(audio.getAttribute('src')).toBeFalsy();
     });
   });
 

@@ -28,7 +28,12 @@ import { BoundProperty } from '../../core/types';
   imports: [],
   template: `
     <div class="a2ui-video-container">
-      <video [src]="url()" controls [poster]="posterUrl()" class="a2ui-video">
+      <video
+        [attr.src]="url() || null"
+        controls
+        [attr.poster]="posterUrl() || null"
+        class="a2ui-video"
+      >
         Your browser does not support the video tag.
       </video>
     </div>

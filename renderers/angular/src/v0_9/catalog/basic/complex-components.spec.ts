@@ -407,6 +407,22 @@ describe('Complex Components', () => {
       fixture.detectChanges();
       expect(component.children()).toEqual([]);
     });
+
+    it('should handle missing children property', () => {
+      fixture.componentRef.setInput('props', {});
+      fixture.detectChanges();
+      expect(component.children()).toEqual([]);
+    });
+
+    it('should apply horizontal orientation class', () => {
+      fixture.componentRef.setInput('props', {
+        children: createBoundProperty(['child-1']),
+        orientation: createBoundProperty('horizontal'),
+      });
+      fixture.detectChanges();
+      const list = fixture.nativeElement.querySelector('.a2ui-list');
+      expect(list.classList).toContain('horizontal');
+    });
   });
 
   describe('TabsComponent', () => {
@@ -452,6 +468,22 @@ describe('Complex Components', () => {
       fixture.detectChanges();
       host = fixture.debugElement.query(By.css('a2ui-v09-component-host'));
       expect(host.componentInstance.componentId()).toBe('content-2');
+    });
+
+    it('should handle missing tabs property', () => {
+      fixture.componentRef.setInput('props', {});
+      fixture.detectChanges();
+      expect(component.tabs()).toEqual([]);
+      expect(fixture.nativeElement.querySelectorAll('.a2ui-tab-button').length).toBe(0);
+    });
+
+    it('should handle empty tabs array', () => {
+      fixture.componentRef.setInput('props', {
+        tabs: createBoundProperty([]),
+      });
+      fixture.detectChanges();
+      expect(component.tabs()).toEqual([]);
+      expect(fixture.nativeElement.querySelectorAll('.a2ui-tab-button').length).toBe(0);
     });
   });
 
@@ -533,6 +565,14 @@ describe('Complex Components', () => {
       fixture.nativeElement.querySelector('.a2ui-modal-overlay').click();
       fixture.detectChanges();
       expect(fixture.nativeElement.querySelector('.a2ui-modal-overlay')).toBeFalsy();
+    });
+
+    it('should handle missing trigger or content', () => {
+      fixture.componentRef.setInput('props', {});
+      fixture.detectChanges();
+      expect(component.trigger()).toBeUndefined();
+      expect(component.content()).toBeUndefined();
+      expect(fixture.nativeElement.querySelector('a2ui-v09-component-host')).toBeFalsy();
     });
   });
 });

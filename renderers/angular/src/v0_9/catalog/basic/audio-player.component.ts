@@ -33,7 +33,7 @@ import { BoundProperty } from '../../core/types';
           {{ description() }}
         </div>
       }
-      <audio [src]="url()" controls class="a2ui-audio">
+      <audio [attr.src]="url() || null" controls class="a2ui-audio">
         Your browser does not support the audio tag.
       </audio>
     </div>
