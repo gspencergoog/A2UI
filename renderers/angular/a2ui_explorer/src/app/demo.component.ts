@@ -35,7 +35,7 @@ import { ActionDispatcher } from './action-dispatcher.service';
 @Component({
   selector: 'a2ui-v0-9-demo',
   standalone: true,
-  imports: [CommonModule, ComponentHostComponent, SurfaceComponent],
+  imports: [CommonModule, SurfaceComponent],
   template: `
     <div class="dashboard">
       <!-- Sidebar Navigation -->

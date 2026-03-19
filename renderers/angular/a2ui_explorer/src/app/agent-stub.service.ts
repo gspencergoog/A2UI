@@ -122,6 +122,21 @@ export class AgentStubService {
    * Initializes a demo session with an initial set of messages.
    */
   initializeDemo(initialMessages: A2uiMessage[]) {
+    // Before replaying initial messages (which contains createSurface),
+    // ensure any existing surface with the same ID is cleared.
+    for (const msg of initialMessages) {
+      if ('createSurface' in msg) {
+        const createSurface = msg.createSurface;
+        if (this.rendererService.surfaceGroup.getSurface(createSurface.surfaceId)) {
+          this.rendererService.processMessages([
+            {
+              version: 'v0.9',
+              deleteSurface: { surfaceId: createSurface.surfaceId },
+            },
+          ]);
+        }
+      }
+    }
     this.rendererService.processMessages(initialMessages);
   }
 }
