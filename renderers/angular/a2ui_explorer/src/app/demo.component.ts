@@ -18,14 +18,13 @@ import { ChangeDetectorRef, Component, OnInit, inject, OnDestroy } from '@angula
 import { CommonModule } from '@angular/common';
 import { A2uiRendererService, A2UI_RENDERER_CONFIG } from '@a2ui/angular/v0_9';
 import { AgentStubService } from './agent-stub.service';
-import { ComponentHostComponent, SurfaceComponent } from '@a2ui/angular/v0_9';
+import { SurfaceComponent } from '@a2ui/angular/v0_9';
 import { AngularCatalog, AngularComponentImplementation } from '@a2ui/angular/v0_9';
 import { createFunctionImplementation, FunctionImplementation } from '@a2ui/web_core/v0_9';
 import { DemoCatalog } from './demo-catalog';
 import { A2uiClientAction, A2uiMessage, CreateSurfaceMessage } from '@a2ui/web_core/v0_9';
 import { EXAMPLES } from './examples-bundle';
 import { Example } from './types';
-import { Subscription } from 'rxjs';
 import { ActionDispatcher } from './action-dispatcher.service';
 
 /**
