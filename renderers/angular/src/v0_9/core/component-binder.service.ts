@@ -65,17 +65,7 @@ export class ComponentBinder {
 
       defineSafe(boundProp, 'raw', { value: value, configurable: true });
 
-      // Defensively define properties to avoid "Cannot redefine property" errors
-      try {
-        Object.defineProperty(boundProp, 'name', {
-          value: key,
-          configurable: true,
-          writable: true,
-          enumerable: true,
-        });
-      } catch (e) {
-        console.warn(`Failed to define "name" property on bound signal for "${key}":`, e);
-      }
+      defineSafe(boundProp, 'name', { value: key, configurable: true });
 
       // Only define 'set' if we have a path-bound property to handle
       if (isBoundPath) {

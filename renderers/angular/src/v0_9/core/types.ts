@@ -29,6 +29,8 @@ import { GenericSignal } from '@a2ui/web_core/v0_9';
 export type BoundProperty<T = any> = (Signal<T> | WritableSignal<T> | GenericSignal<T>) & {
   /** The raw property definition from the component model (literal or binding). */
   readonly raw: any;
+  /** The attribute name from the component model. */
+  readonly name: string;
   /** Direct access to the current value (same as calling the signal function). */
   readonly value: T;
   /** Updates the underlying data model if the property is path-bound. */

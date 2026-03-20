@@ -21,41 +21,34 @@ import { GenericSignal, ReactiveProvider } from '@a2ui/web_core/v0_9';
  * Bridges Angular signals to the GenericSignal interface.
  */
 function wrapAngularSignal<T>(sig: any): GenericSignal<T> {
-  // sig is a function in Angular.
-  // We need to add a .value property and .peek() method.
   const wrapper = () => sig();
+
+  const setter = (v: T) => {
+    if (typeof sig.set === 'function') {
+      sig.set(v);
+    } else {
+      console.warn('Cannot set value on a computed Angular signal.');
+    }
+  };
 
   Object.defineProperties(wrapper, {
     value: {
       get: () => sig(),
-      set: (v: T) => {
-        if (typeof sig.set === 'function') {
-          sig.set(v);
-        } else {
-          console.warn('Cannot set value on a computed Angular signal.');
-        }
-      },
+      set: setter,
       configurable: true,
     },
     peek: {
       value: () => untracked(() => sig()),
       configurable: true,
     },
-    // Add set method for direct access as well
     set: {
-      value: (v: T) => {
-        if (typeof sig.set === 'function') {
-          sig.set(v);
-        } else if (typeof sig === 'function' && '_isGenericSignal' in sig && typeof (sig as any).set === 'function') {
-           (sig as any).set(v);
-        }
-      },
+      value: setter,
       configurable: true,
     },
     _isGenericSignal: { value: true, configurable: true },
   });
 
-  return wrapper as any as GenericSignal<T>;
+  return wrapper as unknown as GenericSignal<T>;
 }
 
 /**

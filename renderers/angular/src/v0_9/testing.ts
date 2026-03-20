@@ -45,7 +45,7 @@ export function createAngularTestDataContext(
  * @param val The initial value of the property.
  * @returns A mock BoundProperty.
  */
-export function createBoundProperty<T>(val: T, rawValue?: any): BoundProperty<T> {
+export function createBoundProperty<T>(val: T, rawValue?: any, name = 'test-prop'): BoundProperty<T> {
   const sig = signal(val);
   const prop = () => sig();
   Object.defineProperties(prop, {
@@ -60,8 +60,9 @@ export function createBoundProperty<T>(val: T, rawValue?: any): BoundProperty<T>
       configurable: true,
     },
     raw: { value: rawValue !== undefined ? rawValue : val, configurable: true },
+    name: { value: name, configurable: true },
   });
-  return prop as any;
+  return prop as unknown as BoundProperty<T>;
 }
 
 /**
