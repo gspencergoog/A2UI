@@ -54,3 +54,6 @@ export * from './catalog/basic/check-box.component';
 export * from './catalog/basic/choice-picker.component';
 export * from './catalog/basic/slider.component';
 export * from './catalog/basic/date-time-input.component';
+
+// Testing Utilities
+export * from './testing';

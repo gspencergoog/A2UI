@@ -53,9 +53,13 @@ export class ComponentBinder {
 
       // Defensively define properties only if they don't already exist or are configurable
       const defineSafe = (obj: any, key: string, descriptor: PropertyDescriptor) => {
-        const existing = Object.getOwnPropertyDescriptor(obj, key);
-        if (!existing || existing.configurable) {
-          Object.defineProperty(obj, key, descriptor);
+        try {
+          const existing = Object.getOwnPropertyDescriptor(obj, key);
+          if (!existing || existing.configurable) {
+            Object.defineProperty(obj, key, descriptor);
+          }
+        } catch (e) {
+          console.warn(`Failed to define "${key}" property on bound signal:`, e);
         }
       };
 

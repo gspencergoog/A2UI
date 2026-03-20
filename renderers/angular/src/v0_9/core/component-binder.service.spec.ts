@@ -16,8 +16,7 @@
 
 import { TestBed } from '@angular/core/testing';
 import { DestroyRef } from '@angular/core';
-import { signal as preactSignal } from '@preact/signals-core';
-import { ComponentContext } from '@a2ui/web_core/v0_9';
+import { ComponentContext, PreactReactiveProvider } from '@a2ui/web_core/v0_9';
 import { ComponentBinder } from './component-binder.service';
 
 describe('ComponentBinder', () => {
@@ -52,24 +51,12 @@ describe('ComponentBinder', () => {
       },
     };
 
-    const mockpSigText = preactSignal('Hello');
-    const mockpSigVisible = preactSignal(true);
-
+    const provider = new PreactReactiveProvider();
     const mockDataContext = {
       resolveSignal: jasmine.createSpy('resolveSignal').and.callFake((val: any) => {
-        let sig: any;
-        if (val === 'Hello') sig = mockpSigText;
-        else if (val === true) sig = mockpSigVisible;
-        else sig = preactSignal(val);
-
-        const callableSig = () => sig.value;
-        Object.defineProperties(callableSig, {
-          value: { get: () => sig.value, set: (v) => (sig.value = v) },
-          peek: { value: () => sig.peek() },
-          set: { value: (v: any) => (sig.value = v) },
-        });
-        (callableSig as any).raw = val;
-        return callableSig as any;
+        // For test purposes, bindings resolve to 'initial'
+        if (typeof val === 'object' && val?.path) return provider.toGenericSignal('initial');
+        return provider.toGenericSignal(val);
       }),
       set: jasmine.createSpy('set'),
     };
@@ -98,15 +85,12 @@ describe('ComponentBinder', () => {
       },
     };
 
-    const mockpSig = preactSignal('initial');
+    const provider = new PreactReactiveProvider();
     const mockDataContext = {
-      resolveSignal: jasmine.createSpy('resolveSignal').and.callFake(() => {
-        const callableSig = () => mockpSig.value;
-        Object.defineProperties(callableSig, {
-          value: { get: () => mockpSig.value, set: (v) => (mockpSig.value = v) },
-          peek: { value: () => mockpSig.peek() },
-        });
-        return callableSig as any;
+      resolveSignal: jasmine.createSpy('resolveSignal').and.callFake((val: any) => {
+        // For test purposes, bindings resolve to 'initial'
+        if (typeof val === 'object' && val?.path) return provider.toGenericSignal('initial');
+        return provider.toGenericSignal(val);
       }),
       set: jasmine.createSpy('set'),
     };
@@ -136,16 +120,12 @@ describe('ComponentBinder', () => {
       },
     };
 
-    const mockpSig = preactSignal('Literal String');
+    const provider = new PreactReactiveProvider();
     const mockDataContext = {
-      resolveSignal: jasmine.createSpy('resolveSignal').and.callFake(() => {
-        const callableSig = () => mockpSig.value;
-        Object.defineProperties(callableSig, {
-          value: { get: () => mockpSig.value, set: (v) => (mockpSig.value = v) },
-          peek: { value: () => mockpSig.peek() },
-          set: { value: (v: any) => (mockpSig.value = v) },
-        });
-        return callableSig as any;
+      resolveSignal: jasmine.createSpy('resolveSignal').and.callFake((val: any) => {
+        // For test purposes, bindings resolve to 'initial'
+        if (typeof val === 'object' && val?.path) return provider.toGenericSignal('initial');
+        return provider.toGenericSignal(val);
       }),
       set: jasmine.createSpy('set'),
     };

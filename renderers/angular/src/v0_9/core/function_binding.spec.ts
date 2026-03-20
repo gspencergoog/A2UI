@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-import { DataContext, SurfaceModel, ReactiveProvider } from '@a2ui/web_core/v0_9';
+import { DataContext, SurfaceModel, ReactiveProvider, PreactReactiveProvider } from '@a2ui/web_core/v0_9';
 import { DestroyRef } from '@angular/core';
 import { BasicCatalogBase } from '../catalog/basic/basic-catalog';
-import {
-  signal as preactSignal,
-  computed as preactComputed,
-  effect as preactEffect,
-  batch as preactBatch,
-} from '@preact/signals-core';
 
 describe('Function Bindings', () => {
   let mockDestroyRef: jasmine.SpyObj<DestroyRef>;
@@ -33,48 +27,7 @@ describe('Function Bindings', () => {
     mockDestroyRef = jasmine.createSpyObj('DestroyRef', ['onDestroy']);
     mockDestroyRef.onDestroy.and.returnValue(() => {});
 
-    // Reactive mock provider using Preact
-    mockProvider = {
-      signal: (initial: any) => {
-        const s = preactSignal(initial);
-        const wrapper = () => s.value;
-        Object.defineProperty(wrapper, 'value', { get: () => s.value, set: (v) => (s.value = v) });
-        (wrapper as any).peek = () => s.peek();
-        (wrapper as any).set = (v: any) => (s.value = v);
-        return wrapper as any;
-      },
-      computed: (fn: any) => {
-        const s = preactComputed(fn);
-        const wrapper = () => s.value;
-        Object.defineProperty(wrapper, 'value', { get: () => s.value });
-        (wrapper as any).peek = () => s.peek();
-        return wrapper as any;
-      },
-      effect: preactEffect,
-      batch: preactBatch,
-      isSignal: (v: any): v is any => {
-        return (
-          v &&
-          (v._isGenericSignal ||
-            (typeof v === 'object' && v.brand === Symbol.for('preact-signals')))
-        );
-      },
-      toGenericSignal: function <T>(v: any) {
-        if (v && v._isGenericSignal) return v;
-        if (this.isSignal(v)) {
-          const wrapper = () => v.value;
-          Object.defineProperty(wrapper, 'value', {
-            get: () => v.value,
-            set: (val) => (v.value = val),
-          });
-          (wrapper as any).peek = () => v.peek();
-          (wrapper as any).set = (val: any) => (v.value = val);
-          (wrapper as any)._isGenericSignal = true;
-          return wrapper as any;
-        }
-        return this.signal(v);
-      },
-    };
+    mockProvider = new PreactReactiveProvider();
   });
 
   describe('add', () => {

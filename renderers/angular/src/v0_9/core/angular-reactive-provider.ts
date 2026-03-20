@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  signal,
-  computed,
-  effect,
-  untracked,
-  Injector,
-  runInInjectionContext,
-} from '@angular/core';
+import { signal, computed, effect, untracked, Injector, isSignal } from '@angular/core';
 import { GenericSignal, ReactiveProvider } from '@a2ui/web_core/v0_9';
 
 /**
@@ -50,7 +43,13 @@ function wrapAngularSignal<T>(sig: any): GenericSignal<T> {
     },
     // Add set method for direct access as well
     set: {
-      value: (v: T) => sig.set?.(v),
+      value: (v: T) => {
+        if (typeof sig.set === 'function') {
+          sig.set(v);
+        } else if (typeof sig === 'function' && '_isGenericSignal' in sig && typeof (sig as any).set === 'function') {
+           (sig as any).set(v);
+        }
+      },
       configurable: true,
     },
     _isGenericSignal: { value: true, configurable: true },
@@ -74,32 +73,26 @@ export class AngularReactiveProvider implements ReactiveProvider {
   }
 
   effect(callback: () => void): () => void {
-    const effectRef = runInInjectionContext(this.injector, () => {
-      return effect(() => {
-        callback();
-      });
-    });
+    const effectRef = effect(callback, { injector: this.injector });
     return () => effectRef.destroy();
   }
 
   isSignal(v: any): v is GenericSignal<any> {
-    return v && (v._isGenericSignal || (typeof v === 'function' && !!(v as any).set));
+    return !!v && (v._isGenericSignal || isSignal(v));
   }
 
   toGenericSignal<T>(v: any): GenericSignal<T> {
     if (v && v._isGenericSignal) {
       return v as GenericSignal<T>;
     }
-    if (this.isSignal(v)) {
+    if (isSignal(v)) {
       return wrapAngularSignal(v);
     }
     return this.signal(v);
   }
 
   batch<T>(callback: () => T): T {
-    // Angular doesn't have an explicit global `batch` like Preact,
-    // but signal updates are generally batched by the change detection cycle.
-    // For now, we just execute the callback.
+    // Angular handles batching through its scheduling system.
     return callback();
   }
 }
