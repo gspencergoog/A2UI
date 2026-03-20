@@ -28,7 +28,6 @@ import { Example } from './types';
 import { Subscription } from 'rxjs';
 import { ActionDispatcher } from './action-dispatcher.service';
 
-
 /**
  * Main dashboard component for A2UI v0.9 Angular Renderer.
  * It provides a sidebar of examples, a canvas for rendering,

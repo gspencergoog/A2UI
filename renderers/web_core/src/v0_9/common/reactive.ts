@@ -55,6 +55,19 @@ export interface ReactiveProvider {
   effect(callback: () => void): () => void;
 
   /**
+   * Returns true if the value is a reactive signal (either generic or native).
+   */
+  isSignal(v: any): v is GenericSignal<any>;
+
+  /**
+   * Coerces a value into a GenericSignal.
+   * - If it's already a GenericSignal from this provider, returns it.
+   * - If it's a native signal from this provider's backend, wraps it.
+   * - Otherwise, creates a new signal containing the literal value.
+   */
+  toGenericSignal<T>(value: T | GenericSignal<T>): GenericSignal<T>;
+
+  /**
    * Batches multiple signal updates so that effects and computations are
    * triggered only once at the end of the batch.
    */

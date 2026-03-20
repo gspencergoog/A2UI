@@ -64,6 +64,24 @@ export class PreactReactiveProvider implements ReactiveProvider {
     return effect(callback);
   }
 
+  isSignal(v: any): v is GenericSignal<any> {
+    return (
+      v &&
+      (v._isGenericSignal ||
+        (typeof v === 'object' && v.brand === Symbol.for('preact-signals')))
+    );
+  }
+
+  toGenericSignal<T>(v: any): GenericSignal<T> {
+    if (v && v._isGenericSignal) {
+      return v as GenericSignal<T>;
+    }
+    if (v && typeof v === 'object' && v.brand === Symbol.for('preact-signals')) {
+      return wrapPreactSignal(v);
+    }
+    return this.signal(v);
+  }
+
   batch<T>(callback: () => T): T {
     return batch(callback);
   }

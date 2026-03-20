@@ -61,12 +61,12 @@ describe('ComponentBinder', () => {
         if (val === 'Hello') sig = mockpSigText;
         else if (val === true) sig = mockpSigVisible;
         else sig = preactSignal(val);
-        
+
         const callableSig = () => sig.value;
         Object.defineProperties(callableSig, {
-          value: { get: () => sig.value, set: (v) => sig.value = v },
+          value: { get: () => sig.value, set: (v) => (sig.value = v) },
           peek: { value: () => sig.peek() },
-          set: { value: (v: any) => sig.value = v },
+          set: { value: (v: any) => (sig.value = v) },
         });
         (callableSig as any).raw = val;
         return callableSig as any;
@@ -103,7 +103,7 @@ describe('ComponentBinder', () => {
       resolveSignal: jasmine.createSpy('resolveSignal').and.callFake(() => {
         const callableSig = () => mockpSig.value;
         Object.defineProperties(callableSig, {
-          value: { get: () => mockpSig.value, set: (v) => mockpSig.value = v },
+          value: { get: () => mockpSig.value, set: (v) => (mockpSig.value = v) },
           peek: { value: () => mockpSig.peek() },
         });
         return callableSig as any;
@@ -141,9 +141,9 @@ describe('ComponentBinder', () => {
       resolveSignal: jasmine.createSpy('resolveSignal').and.callFake(() => {
         const callableSig = () => mockpSig.value;
         Object.defineProperties(callableSig, {
-          value: { get: () => mockpSig.value, set: (v) => mockpSig.value = v },
+          value: { get: () => mockpSig.value, set: (v) => (mockpSig.value = v) },
           peek: { value: () => mockpSig.peek() },
-          set: { value: (v: any) => mockpSig.value = v },
+          set: { value: (v: any) => (mockpSig.value = v) },
         });
         return callableSig as any;
       }),

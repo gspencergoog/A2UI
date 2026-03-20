@@ -48,9 +48,9 @@ export class ComponentBinder {
 
       // Augment the signal into a BoundProperty
       const isBoundPath = value && typeof value === 'object' && 'path' in value;
-      
+
       const boundProp = sig as any as BoundProperty;
-      
+
       // Defensively define properties only if they don't already exist or are configurable
       const defineSafe = (obj: any, key: string, descriptor: PropertyDescriptor) => {
         const existing = Object.getOwnPropertyDescriptor(obj, key);
@@ -67,17 +67,17 @@ export class ComponentBinder {
           value: key,
           configurable: true,
           writable: true,
-          enumerable: true
+          enumerable: true,
         });
       } catch (e) {
         console.warn(`Failed to define "name" property on bound signal for "${key}":`, e);
       }
-      
+
       // Only define 'set' if we have a path-bound property to handle
       if (isBoundPath) {
         defineSafe(boundProp, 'set', {
           value: (newValue: any) => context.dataContext.set(value.path, newValue),
-          configurable: true
+          configurable: true,
         });
       }
 

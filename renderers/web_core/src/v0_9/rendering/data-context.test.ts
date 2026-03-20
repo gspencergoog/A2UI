@@ -21,6 +21,7 @@ import { z } from "zod";
 import { DataModel } from "../state/data-model.js";
 import { DataContext } from "./data-context.js";
 import { A2uiExpressionError } from "../errors.js";
+import { PreactReactiveProvider } from "../common/preact-provider.js";
 
 const createTestDataContext = (
   model: DataModel,
@@ -32,6 +33,7 @@ const createTestDataContext = (
     dataModel: model,
     catalog: { invoker: functionInvoker },
     dispatchError,
+    provider: new PreactReactiveProvider(),
   } as any;
   return new DataContext(mockSurface, path);
 };

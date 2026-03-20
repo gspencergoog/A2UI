@@ -48,11 +48,11 @@ import { ComponentBinder } from './component-binder.service';
         *ngComponentOutlet="
           componentType;
           inputs: {
-          props: props,
-          surfaceId: surfaceId(),
-          componentId: componentId(),
-          dataContextPath: dataContextPath(),
-        }
+            props: props,
+            surfaceId: surfaceId(),
+            componentId: componentId(),
+            dataContextPath: dataContextPath(),
+          }
         "
       ></ng-container>
     }

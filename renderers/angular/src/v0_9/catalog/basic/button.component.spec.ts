@@ -61,10 +61,10 @@ describe('ButtonComponent', () => {
                   template: 'Dummy Text',
                 })
                 class DummyText {
-                    props = input<any>();
-                    surfaceId = input<string>();
-                    componentId = input<string>();
-                    dataContextPath = input<string>();
+                  props = input<any>();
+                  surfaceId = input<string>();
+                  componentId = input<string>();
+                  dataContextPath = input<string>();
                 }
                 return DummyText;
               })(),

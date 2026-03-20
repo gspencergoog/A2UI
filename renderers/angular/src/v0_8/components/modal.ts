@@ -25,11 +25,7 @@ import { Types } from '../types';
   template: `
     <div class="a2ui-modal-entry-point" (click)="openModal()">
       @if (entryPointChild()) {
-        <ng-container
-          a2ui-renderer
-          [surfaceId]="surfaceId()!"
-          [component]="entryPointChild()!"
-        />
+        <ng-container a2ui-renderer [surfaceId]="surfaceId()!" [component]="entryPointChild()!" />
       }
     </div>
 
@@ -37,11 +33,7 @@ import { Types } from '../types';
       <div [class]="theme.components.Modal.backdrop" (click)="closeModal()">
         <div [class]="theme.components.Modal.element" (click)="$event.stopPropagation()">
           @if (contentChild()) {
-            <ng-container
-              a2ui-renderer
-              [surfaceId]="surfaceId()!"
-              [component]="contentChild()!"
-            />
+            <ng-container a2ui-renderer [surfaceId]="surfaceId()!" [component]="contentChild()!" />
           }
         </div>
       </div>

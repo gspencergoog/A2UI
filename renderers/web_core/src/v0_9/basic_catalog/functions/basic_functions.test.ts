@@ -30,6 +30,8 @@ function invoke(name: string, args: Record<string, any>, context: DataContext) {
   return testCatalog.invoker(name, args, context);
 }
 
+import { PreactReactiveProvider } from "../../common/preact-provider.js";
+
 const createTestDataContext = (
   model: DataModel,
   path: string,
@@ -39,6 +41,7 @@ const createTestDataContext = (
     dataModel: model,
     catalog: { invoker: functionInvoker },
     dispatchError: () => {},
+    provider: new PreactReactiveProvider(),
   } as any;
   return new DataContext(mockSurface, path);
 };

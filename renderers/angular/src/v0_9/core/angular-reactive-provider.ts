@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-import { signal, computed, effect, untracked, Injector, runInInjectionContext } from '@angular/core';
+import {
+  signal,
+  computed,
+  effect,
+  untracked,
+  Injector,
+  runInInjectionContext,
+} from '@angular/core';
 import { GenericSignal, ReactiveProvider } from '@a2ui/web_core/v0_9';
 
 /**
@@ -24,7 +31,7 @@ function wrapAngularSignal<T>(sig: any): GenericSignal<T> {
   // sig is a function in Angular.
   // We need to add a .value property and .peek() method.
   const wrapper = () => sig();
-  
+
   Object.defineProperties(wrapper, {
     value: {
       get: () => sig(),
@@ -48,7 +55,7 @@ function wrapAngularSignal<T>(sig: any): GenericSignal<T> {
     },
     _isGenericSignal: { value: true, configurable: true },
   });
-  
+
   return wrapper as any as GenericSignal<T>;
 }
 
@@ -75,8 +82,22 @@ export class AngularReactiveProvider implements ReactiveProvider {
     return () => effectRef.destroy();
   }
 
+  isSignal(v: any): v is GenericSignal<any> {
+    return v && (v._isGenericSignal || (typeof v === 'function' && !!(v as any).set));
+  }
+
+  toGenericSignal<T>(v: any): GenericSignal<T> {
+    if (v && v._isGenericSignal) {
+      return v as GenericSignal<T>;
+    }
+    if (this.isSignal(v)) {
+      return wrapAngularSignal(v);
+    }
+    return this.signal(v);
+  }
+
   batch<T>(callback: () => T): T {
-    // Angular doesn't have an explicit global `batch` like Preact, 
+    // Angular doesn't have an explicit global `batch` like Preact,
     // but signal updates are generally batched by the change detection cycle.
     // For now, we just execute the callback.
     return callback();

@@ -123,9 +123,7 @@ export class ChoicePickerComponent {
   private rendererService = inject(A2uiRendererService);
 
   displayStyle = computed(() => this.props()['displayStyle']?.());
-  choices = computed(
-    () => this.props()['choices']?.() || this.props()['options']?.() || [],
-  );
+  choices = computed(() => this.props()['choices']?.() || this.props()['options']?.() || []);
   variant = computed(() => this.props()['variant']?.());
   selectedValue = computed(() => this.props()['value']?.());
 

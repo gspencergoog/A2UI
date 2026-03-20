@@ -115,7 +115,7 @@ export class DataContext {
         return undefined as any;
       }
 
-      return (isSignal(result) ? result.peek() : result) as V;
+      return (this.surface.provider.isSignal(result) ? (result as any).peek() : result) as V;
     }
 
     return value as V;
@@ -177,7 +177,7 @@ export class DataContext {
   resolveSignal<V>(value: DynamicValue): GenericSignal<V> {
     // 1. Literal
     if (typeof value !== "object" || value === null || Array.isArray(value)) {
-      return this.surface.provider.signal(value as V);
+      return this.surface.provider.toGenericSignal(value as V);
     }
 
     // 2. Path Check
@@ -202,9 +202,7 @@ export class DataContext {
           {},
           abortController.signal,
         );
-        const sig = isSignal(result) ? result : this.surface.provider.signal(result);
-        (sig as any).unsubscribe = () => abortController.abort();
-        return sig;
+        return this.surface.provider.toGenericSignal(result as V);
       }
 
       const keys = Object.keys(argSignals);
@@ -236,9 +234,9 @@ export class DataContext {
             abortController.signal,
           );
 
-          if (isSignal(res)) {
+          if (this.surface.provider.isSignal(res)) {
             innerUnsubscribe = this.surface.provider.effect(() => {
-              resultSig.value = res.value;
+              resultSig.value = (res as any).value;
             });
           } else {
             resultSig.value = res;
@@ -265,7 +263,7 @@ export class DataContext {
       return resultSig as unknown as GenericSignal<V>;
     }
 
-    return this.surface.provider.signal(value as unknown as V);
+    return this.surface.provider.toGenericSignal(value as unknown as V);
   }
 
   /**
