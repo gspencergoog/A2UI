@@ -31,6 +31,9 @@ export interface GenericSignal<T = any> {
 
   /** Reads the value without creating a reactive dependency. */
   peek(): T;
+
+  /** Updates the value of the signal. */
+  set(value: T): void;
 }
 
 /**

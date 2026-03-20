@@ -31,12 +31,19 @@ function wrapPreactSignal<T>(sig: Signal<T>): GenericSignal<T> {
       set: (v: T) => {
         sig.value = v;
       },
+      configurable: true,
     },
     peek: {
       value: () => sig.peek(),
+      configurable: true,
     },
-    // We add this to easily detect it as a signal in catalog code.
-    _isGenericSignal: { value: true },
+    set: {
+      value: (v: T) => {
+        sig.value = v;
+      },
+      configurable: true,
+    },
+    _isGenericSignal: { value: true, configurable: true },
   });
   return wrapper as any as GenericSignal<T>;
 }

@@ -35,15 +35,18 @@ function wrapAngularSignal<T>(sig: any): GenericSignal<T> {
           console.warn('Cannot set value on a computed Angular signal.');
         }
       },
+      configurable: true,
     },
     peek: {
       value: () => untracked(() => sig()),
+      configurable: true,
     },
     // Add set method for direct access as well
     set: {
       value: (v: T) => sig.set?.(v),
+      configurable: true,
     },
-    _isGenericSignal: { value: true },
+    _isGenericSignal: { value: true, configurable: true },
   });
   
   return wrapper as any as GenericSignal<T>;
