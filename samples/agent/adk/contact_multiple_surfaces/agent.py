@@ -43,7 +43,13 @@ from prompt_builder import (
     UI_DESCRIPTION,
 )
 from tools import get_contact_info
-from a2ui.core.schema.constants import VERSION_0_9, A2UI_OPEN_TAG, A2UI_CLOSE_TAG
+from a2ui.core.schema.constants import (
+    VERSION_0_8,
+    VERSION_0_9,
+    A2UI_OPEN_TAG,
+    A2UI_CLOSE_TAG,
+    SUPPORTED_VERSIONS,
+)
 from a2ui.core.schema.manager import A2uiSchemaManager
 from a2ui.core.parser.parser import parse_response, ResponsePart
 from a2ui.basic_catalog.provider import BasicCatalog
@@ -58,17 +64,25 @@ class ContactAgent:
 
   SUPPORTED_CONTENT_TYPES = ["text", "text/plain"]
 
-  def __init__(self, base_url: str, use_ui: bool = False):
+  def __init__(
+      self,
+      base_url: str,
+      version: str,
+      examples_path: str,
+      ui_description: str,
+      use_ui: bool = False,
+  ):
     self.base_url = base_url
+    self.version = version
+    self.ui_description = ui_description
     self.use_ui = use_ui
-    self.version = VERSION_0_9
     self.schema_manager = (
         A2uiSchemaManager(
             self.version,
             catalogs=[
                 BasicCatalog.get_config(
                     version=self.version,
-                    examples_path=f"examples/{self.version}",
+                    examples_path=examples_path,
                 )
             ],
             schema_modifiers=[remove_strict_validation],
@@ -88,14 +102,21 @@ class ContactAgent:
     )
 
   def get_agent_card(self) -> AgentCard:
+    extensions = [
+        get_a2ui_agent_extension(
+            version=v,
+            accepts_inline_catalogs=self.schema_manager.accepts_inline_catalogs
+            if self.schema_manager
+            else True,
+            supported_catalog_ids=self.schema_manager.supported_catalog_ids
+            if self.schema_manager
+            else [],
+        )
+        for v in SUPPORTED_VERSIONS
+    ]
     capabilities = AgentCapabilities(
         streaming=True,
-        extensions=[
-            get_a2ui_agent_extension(
-                self.schema_manager.accepts_inline_catalogs,
-                self.schema_manager.supported_catalog_ids,
-            )
-        ],
+        extensions=extensions,
     )
     skill = AgentSkill(
         id="find_contact",
@@ -135,7 +156,7 @@ class ContactAgent:
         self.schema_manager.generate_system_prompt(
             role_description=ROLE_DESCRIPTION,
             workflow_description=WORKFLOW_DESCRIPTION,
-            ui_description=UI_DESCRIPTION,
+            ui_description=self.ui_description,
             include_examples=True,
             include_schema=True,
             validate_examples=False,  # Missing inline_catalogs for OrgChart and WebFrame validation
@@ -438,3 +459,22 @@ class ContactAgent:
         ],
     }
     # --- End: UI Validation and Retry Logic ---
+
+
+class ContactAgentFactory:
+  """Factory for creating ContactAgent instances for specific versions."""
+
+  @staticmethod
+  def get_agent(base_url: str, version: str, use_ui: bool = False) -> ContactAgent:
+    """Returns a version-specific ContactAgent instance."""
+    # pylint: disable=import-outside-toplevel
+    from .v0_8.agent import ContactAgentV08
+    from .v0_9.agent import ContactAgentV09
+    from a2ui.core.schema.constants import VERSION_0_8, VERSION_0_9
+
+    if version == VERSION_0_8:
+      return ContactAgentV08(base_url, use_ui)
+    if version == VERSION_0_9:
+      return ContactAgentV09(base_url, use_ui)
+
+    raise ValueError(f"No agent implementation for A2UI version: {version}")

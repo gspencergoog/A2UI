@@ -31,7 +31,7 @@ from a2a.utils import (
     new_task,
 )
 from a2a.utils.errors import ServerError
-from agent import ContactAgent
+from agent import ContactAgent, ContactAgentFactory
 from a2ui.a2a import try_activate_a2ui_extension
 
 logger = logging.getLogger(__name__)
@@ -40,11 +40,18 @@ logger = logging.getLogger(__name__)
 class ContactAgentExecutor(AgentExecutor):
   """Contact AgentExecutor Example."""
 
-  def __init__(self, ui_agent: ContactAgent, text_agent: ContactAgent):
-    # Instantiate two agents: one for UI and one for text-only.
-    # The appropriate one will be chosen at execution time.
-    self.ui_agent = ui_agent
+  def __init__(self, base_url: str, text_agent: ContactAgent):
+    self.base_url = base_url
     self.text_agent = text_agent
+    self._ui_agents: dict[str, ContactAgent] = {}
+
+  def _get_ui_agent(self, version: str) -> ContactAgent:
+    """Returns a cached or new UI agent for the given version."""
+    if version not in self._ui_agents:
+      self._ui_agents[version] = ContactAgentFactory.get_agent(
+          self.base_url, version, use_ui=True
+      )
+    return self._ui_agents[version]
 
   async def execute(
       self,
@@ -56,12 +63,15 @@ class ContactAgentExecutor(AgentExecutor):
     action = None
 
     logger.info(f"--- Client requested extensions: {context.requested_extensions} ---")
-    use_ui = try_activate_a2ui_extension(context)
+    negotiated_version = try_activate_a2ui_extension(context)
 
     # Determine which agent to use based on whether the a2ui extension is active.
-    if use_ui:
-      agent = self.ui_agent
-      logger.info("--- AGENT_EXECUTOR: A2UI extension is active. Using UI agent. ---")
+    if negotiated_version:
+      agent = self._get_ui_agent(negotiated_version)
+      logger.info(
+          f"--- AGENT_EXECUTOR: A2UI version {negotiated_version} is active. "
+          "Using UI agent. ---"
+      )
     else:
       agent = self.text_agent
       logger.info(

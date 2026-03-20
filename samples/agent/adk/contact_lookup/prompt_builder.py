@@ -12,7 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from a2ui.core.schema.constants import VERSION_0_9, A2UI_OPEN_TAG, A2UI_CLOSE_TAG
+import os
+from a2ui.core.schema.constants import (
+    VERSION_0_8,
+    VERSION_0_9,
+    A2UI_OPEN_TAG,
+    A2UI_CLOSE_TAG,
+)
 from a2ui.core.schema.manager import A2uiSchemaManager
 from a2ui.basic_catalog.provider import BasicCatalog
 
@@ -29,22 +35,24 @@ To generate the response, you MUST follow these rules:
 4.  The JSON part MUST be a single, raw JSON object (usually a list of A2UI messages) and MUST validate against the provided A2UI JSON SCHEMA.
 """
 
-UI_DESCRIPTION = f"""
+UI_DESCRIPTION_V0_8 = f"""
 -   **For finding contacts (e.g., "Who is Alex Jordan?"):**
     a.  You MUST call the `get_contact_info` tool.
-b.  If the tool returns a **single contact**, you MUST use the `CONTACT_CARD_EXAMPLE` template. Populate the `updateDataModel.value` with the contact's details (name, title, email, etc.).
-    c.  If the tool returns **multiple contacts**, you MUST use the `CONTACT_LIST_EXAMPLE` template. Populate the `updateDataModel.value` with the list of contacts for the "contacts" key.
+    b.  If the tool returns a **single contact**, you MUST use the `CONTACT_CARD` component. Populate the `dataModelUpdate.value` with the contact's details.
+    c.  If the tool returns **multiple contacts**, you MUST use the `CONTACT_LIST` component. Populate the `dataModelUpdate.value` with the list of contacts for the "contacts" key.
     d.  If the tool returns an **empty list**, respond with text only and an empty JSON list: "I couldn't find anyone by that name. {A2UI_OPEN_TAG}[]{A2UI_CLOSE_TAG}"
-
--   **For handling a profile view (e.g., "WHO_IS: Alex Jordan..."):**
-    a.  You MUST call the `get_contact_info` tool with the specific name.
-    b.  This will return a single contact. You MUST use the `CONTACT_CARD_EXAMPLE` template.
-
--   **For handling actions (e.g., "follow_contact"):**
-    a.  You MUST use the `FOLLOW_SUCCESS_EXAMPLE` template.
-    b.  This will render a new card with a "Successfully Followed" message.
-    c.  Respond with a text confirmation like "You are now following this contact." along with the JSON.
 """
+
+UI_DESCRIPTION_V0_9 = f"""
+-   **For finding contacts (e.g., "Who is Alex Jordan?"):**
+    a.  You MUST call the `get_contact_info` tool.
+    b.  If the tool returns a **single contact**, you MUST use the `CONTACT_CARD` component. Populate the `updateDataModel.value` with the contact's details.
+    c.  If the tool returns **multiple contacts**, you MUST use the `CONTACT_LIST` component. Populate the `updateDataModel.value` with the list of contacts for the "contacts" key.
+    d.  If the tool returns an **empty list**, respond with text only and an empty JSON list: "I couldn't find anyone by that name. {A2UI_OPEN_TAG}[]{A2UI_CLOSE_TAG}"
+"""
+
+# Keep the original for backward compatibility during refactoring if needed
+UI_DESCRIPTION = UI_DESCRIPTION_V0_9
 
 
 def get_text_prompt() -> str:
@@ -67,25 +75,33 @@ def get_text_prompt() -> str:
 
 
 if __name__ == "__main__":
-  # Example of how to use the A2UI Schema Manager to generate a system prompt
-  my_version = VERSION_0_9
-  contact_prompt = A2uiSchemaManager(
-      my_version,
-      catalogs=[
-          BasicCatalog.get_config(
-              version=my_version,
-              examples_path=f"examples/{my_version}",
-          )
-      ],
-  ).generate_system_prompt(
-      role_description=ROLE_DESCRIPTION,
-      workflow_description=WORKFLOW_DESCRIPTION,
-      ui_description=UI_DESCRIPTION,
-      include_schema=True,
-      include_examples=True,
-      validate_examples=False,  # Use invalid examples to test retry logic
-  )
-  print(contact_prompt)
-  with open("generated_prompt.txt", "w") as f:
-    f.write(contact_prompt)
-  print("\nGenerated prompt saved to generated_prompt.txt")
+  SUPPORTED_VERSIONS = [VERSION_0_9, VERSION_0_8]
+  for version in SUPPORTED_VERSIONS:
+    print(f"\n{'='*20} Generating Prompt for A2UI v{version} {'='*20}")
+    ui_desc = UI_DESCRIPTION_V0_9 if version == VERSION_0_9 else UI_DESCRIPTION_V0_8
+    
+    # Use relative path for examples to match directory structure
+    examples_rel_path = f"v{version.replace('.', '_')}/examples"
+    examples_path = os.path.join(os.path.dirname(__file__), examples_rel_path)
+    
+    contact_prompt = A2uiSchemaManager(
+        version,
+        catalogs=[
+            BasicCatalog.get_config(
+                version=version,
+                examples_path=examples_path,
+            )
+        ],
+    ).generate_system_prompt(
+        role_description=ROLE_DESCRIPTION,
+        workflow_description=WORKFLOW_DESCRIPTION,
+        ui_description=ui_desc,
+        include_schema=True,
+        include_examples=True,
+        validate_examples=False,
+    )
+    
+    out_file = f"generated_prompt_v{version.replace('.', '_')}.txt"
+    with open(out_file, "w") as f:
+      f.write(contact_prompt)
+    print(f"Generated prompt saved to {out_file}")

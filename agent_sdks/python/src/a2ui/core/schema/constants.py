@@ -46,6 +46,7 @@ URI_TO_VERSION = {v: k for k, v in VERSION_TO_URI.items()}
 SPEC_VERSION_MAP = {
     VERSION_0_8: {
         SERVER_TO_CLIENT_SCHEMA_KEY: "specification/v0_8/json/server_to_client.json",
+        COMMON_TYPES_SCHEMA_KEY: "specification/v0_8/json/common_types.json",
     },
     VERSION_0_9: {
         SERVER_TO_CLIENT_SCHEMA_KEY: "specification/v0_9/json/server_to_client.json",

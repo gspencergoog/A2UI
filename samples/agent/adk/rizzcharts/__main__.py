@@ -24,10 +24,13 @@ from a2a.server.tasks import InMemoryTaskStore
 from a2ui.core.schema.constants import VERSION_0_9
 from a2ui.core.schema.manager import A2uiSchemaManager, CatalogConfig
 from a2ui.basic_catalog.provider import BasicCatalog
-from agent_executor import RizzchartsAgentExecutor, get_a2ui_enabled, get_a2ui_catalog, get_a2ui_examples
-from agent import RizzchartsAgent
-from google.adk.artifacts import InMemoryArtifactService
-from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
+from agent import (
+    RizzchartsAgentFactory,
+    get_a2ui_enabled,
+    get_a2ui_catalog,
+    get_a2ui_examples,
+)
+from agent_executor import RizzchartsAgentExecutor
 from google.adk.models.lite_llm import LiteLlm
 from google.adk.runners import Runner
 from google.adk.sessions.in_memory_session_service import InMemorySessionService
@@ -60,52 +63,28 @@ def main(host, port):
     lite_llm_model = os.getenv("LITELLM_MODEL", "gemini/gemini-2.5-flash")
 
     base_url = f"http://{host}:{port}"
-    version = VERSION_0_9
 
-    schema_manager = A2uiSchemaManager(
-        version,
-        catalogs=[
-            CatalogConfig.from_path(
-                name="rizzcharts",
-                catalog_path="rizzcharts_catalog_definition.json",
-                examples_path=f"examples/rizzcharts_catalog/{version}",
-            ),
-            BasicCatalog.get_config(
-                version=version,
-                examples_path=f"examples/standard_catalog/{version}",
-            ),
-        ],
-        accepts_inline_catalogs=True,
-    )
-
-    agent = RizzchartsAgent(
+    temp_agent = RizzchartsAgentFactory.get_agent(
         base_url=base_url,
+        version=VERSION_0_9,
         model=LiteLlm(model=lite_llm_model),
-        schema_manager=schema_manager,
         a2ui_enabled_provider=get_a2ui_enabled,
         a2ui_catalog_provider=get_a2ui_catalog,
         a2ui_examples_provider=get_a2ui_examples,
     )
-    runner = Runner(
-        app_name=agent.name,
-        agent=agent,
-        artifact_service=InMemoryArtifactService(),
-        session_service=InMemorySessionService(),
-        memory_service=InMemoryMemoryService(),
-    )
 
     agent_executor = RizzchartsAgentExecutor(
         base_url=base_url,
-        runner=runner,
-        schema_manager=schema_manager,
+        model=LiteLlm(model=lite_llm_model),
     )
 
     request_handler = DefaultRequestHandler(
         agent_executor=agent_executor,
         task_store=InMemoryTaskStore(),
     )
+
     server = A2AStarletteApplication(
-        agent_card=agent.get_agent_card(), http_handler=request_handler
+        agent_card=temp_agent.get_agent_card(), http_handler=request_handler
     )
     import uvicorn
 

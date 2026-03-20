@@ -37,14 +37,26 @@ class ComponentGalleryAgent:
   def __init__(self, base_url: str):
     self.base_url = base_url
 
-  async def stream(self, query: str, session_id: str) -> AsyncIterable[dict[str, Any]]:
+  async def stream(
+      self, query: str, session_id: str, version: str = "0.9"
+  ) -> AsyncIterable[dict[str, Any]]:
     """Streams the gallery or responses to actions."""
 
-    logger.info(f"Stream called with query: {query}")
+    logger.info(f"Stream called with query: {query} and version: {version}")
+
+    def wrap_component(comp_id: str, comp_def: dict[str, Any]) -> dict[str, Any]:
+      """Wraps a component definition according to the specified protocol version."""
+      if version == "0.8":
+        return {"id": comp_id, "component": comp_def}
+      else:
+        # v0.9 Modular Catalog style
+        type_name = list(comp_def.keys())[0]
+        props = comp_def[type_name]
+        return {"id": comp_id, "component": type_name, **props}
 
     # Initial Load or Reset
     if "WHO_ARE_YOU" in query or "START" in query:  # Simple trigger for initial load
-      gallery_json = get_gallery_json()
+      gallery_json = get_gallery_json(version=version)
       yield {
           "is_task_complete": True,
           "parts": parse_response_to_parts(
@@ -67,19 +79,21 @@ class ComponentGalleryAgent:
       response_update = {
           "surfaceUpdate": {
               "surfaceId": "response-surface",
-              "components": [{
-                  "id": "response-text",
-                  "component": {
-                      "Text": {
-                          "text": {
-                              "literalString": (
-                                  f"Agent Processed Action: {action_name} at"
-                                  f" {timestamp}"
-                              )
+              "components": [
+                  wrap_component(
+                      "response-text",
+                      {
+                          "Text": {
+                              "text": {
+                                  "literalString": (
+                                      f"Agent Processed Action: {action_name} at"
+                                      f" {timestamp}"
+                                  )
+                              }
                           }
-                      }
-                  },
-              }],
+                      },
+                  )
+              ],
           }
       }
 

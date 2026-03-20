@@ -20,6 +20,11 @@ from typing import Any, ClassVar
 from a2a.types import AgentCapabilities, AgentCard, AgentSkill
 from a2ui.a2a import get_a2ui_agent_extension
 from a2ui.adk.a2a_extension.send_a2ui_to_client_toolset import SendA2uiToClientToolset, A2uiEnabledProvider, A2uiCatalogProvider, A2uiExamplesProvider
+from a2ui.core.schema.constants import (
+    VERSION_0_8,
+    VERSION_0_9,
+    SUPPORTED_VERSIONS,
+)
 from a2ui.core.schema.manager import A2uiSchemaManager
 from google.adk.agents.llm_agent import LlmAgent
 from google.adk.agents.readonly_context import ReadonlyContext
@@ -66,7 +71,7 @@ Your task is to analyze the user's request, fetch the necessary data, select the
 5.  **Call the Tool:** Call the `send_a2ui_json_to_client` tool with the fully constructed `a2ui_json` payload.
 """
 
-UI_DESCRIPTION = """
+UI_DESCRIPTION_V0_9 = """
 **Core Objective:** To provide a dynamic and interactive dashboard by constructing UI surfaces with the appropriate visualization components based on user queries.
 
 **Key Components & Examples:**
@@ -80,6 +85,12 @@ You will be provided a schema that defines the A2UI message structure and two ke
 
 You will also use layout components like `Column` (as the `root`) and `Text` (to provide a title).
 """
+
+UI_DESCRIPTION_V0_8 = (
+    UI_DESCRIPTION_V0_9.replace("updateDataModel.value", "updateDataModel.data")
+    .replace("updateComponents", "upsertComponents")
+    .replace("updateDataModel", "upsertDataModels")
+)
 
 
 class RizzchartsAgent(LlmAgent):
@@ -96,26 +107,22 @@ class RizzchartsAgent(LlmAgent):
       self,
       model: Any,
       base_url: str,
+      version: str,
+      ui_description: str,
       schema_manager: A2uiSchemaManager,
       a2ui_enabled_provider: A2uiEnabledProvider,
       a2ui_catalog_provider: A2uiCatalogProvider,
       a2ui_examples_provider: A2uiExamplesProvider,
   ):
-    """Initializes the RizzchartsAgent.
+    """Initializes the RizzchartsAgent."""
 
-    Args:
-        model: The LLM model to use.
-        base_url: The base URL for the agent.
-        schema_manager: The A2UI schema manager.
-        a2ui_enabled_provider: A provider to check if A2UI is enabled.
-        a2ui_catalog_provider: A provider to retrieve the A2UI catalog (A2uiCatalog object).
-        a2ui_examples_provider: A provider to retrieve the A2UI examples (str).
-    """
+    self.version = version
+    self.ui_description = ui_description
 
     system_instructions = schema_manager.generate_system_prompt(
         role_description=ROLE_DESCRIPTION,
         workflow_description=WORKFLOW_DESCRIPTION,
-        ui_description=UI_DESCRIPTION,
+        ui_description=ui_description,
         include_schema=False,
         include_examples=False,
         validate_examples=False,
@@ -168,9 +175,11 @@ class RizzchartsAgent(LlmAgent):
             streaming=True,
             extensions=[
                 get_a2ui_agent_extension(
-                    self.schema_manager.accepts_inline_catalogs,
-                    self.schema_manager.supported_catalog_ids,
+                    version=v,
+                    accepts_inline_catalogs=self.schema_manager.accepts_inline_catalogs,
+                    supported_catalog_ids=self.schema_manager.supported_catalog_ids,
                 )
+                for v in SUPPORTED_VERSIONS
             ],
         ),
         skills=[
@@ -202,3 +211,41 @@ class RizzchartsAgent(LlmAgent):
             ),
         ],
     )
+
+
+class RizzchartsAgentFactory:
+  """Factory for creating RizzchartsAgent instances for specific A2UI versions."""
+
+  @staticmethod
+  def get_agent(
+      base_url: str,
+      version: str,
+      model: Any,
+      a2ui_enabled_provider: A2uiEnabledProvider,
+      a2ui_catalog_provider: A2uiCatalogProvider,
+      a2ui_examples_provider: A2uiExamplesProvider,
+  ) -> "RizzchartsAgent":
+    """Returns a version-specific RizzchartsAgent instance."""
+    # pylint: disable=import-outside-toplevel
+    from .v0_8.agent import RizzchartsAgentV08
+    from .v0_9.agent import RizzchartsAgentV09
+    from a2ui.core.schema.constants import VERSION_0_8, VERSION_0_9
+
+    if version == VERSION_0_8:
+      return RizzchartsAgentV08(
+          base_url=base_url,
+          model=model,
+          a2ui_enabled_provider=a2ui_enabled_provider,
+          a2ui_catalog_provider=a2ui_catalog_provider,
+          a2ui_examples_provider=a2ui_examples_provider,
+      )
+    if version == VERSION_0_9:
+      return RizzchartsAgentV09(
+          base_url=base_url,
+          model=model,
+          a2ui_enabled_provider=a2ui_enabled_provider,
+          a2ui_catalog_provider=a2ui_catalog_provider,
+          a2ui_examples_provider=a2ui_examples_provider,
+      )
+
+    raise ValueError(f"No agent implementation for A2UI version: {version}")

@@ -13,23 +13,22 @@
 # limitations under the License.
 
 import logging
-from pathlib import Path
-from typing import override
+from typing import Any, override
 
-from a2a.server.agent_execution import RequestContext
-from a2a.types import AgentCapabilities, AgentCard, AgentExtension, AgentSkill
-from a2ui.a2a import get_a2ui_agent_extension
+from a2a.server.agent_execution import AgentExecutor, RequestContext
+from a2a.server.events import EventQueue
+from a2a.types import AgentCard, AgentExtension, Task
 from a2ui.a2a import try_activate_a2ui_extension
+from a2ui.core.schema.constants import VERSION_0_9
+from agent import RizzchartsAgentFactory
 from a2ui.adk.a2a_extension.send_a2ui_to_client_toolset import (
     A2uiEventConverter,
-    A2uiPartConverter,
-    SendA2uiToClientToolset,
 )
 from a2ui.core.schema.constants import A2UI_CLIENT_CAPABILITIES_KEY
-from a2ui.core.schema.manager import A2uiSchemaManager
-from google.adk.a2a.converters.request_converter import AgentRunRequest
-from google.adk.a2a.executor.a2a_agent_executor import A2aAgentExecutor
-from google.adk.a2a.executor.a2a_agent_executor import A2aAgentExecutorConfig
+from google.adk.a2a.executor.a2a_agent_executor import (
+    A2aAgentExecutor,
+    A2aAgentExecutorConfig,
+)
 from google.adk.agents.invocation_context import new_invocation_context_id
 from google.adk.agents.readonly_context import ReadonlyContext
 from google.adk.events.event import Event
@@ -79,61 +78,107 @@ def get_a2ui_enabled(ctx: ReadonlyContext):
   return ctx.state.get(_A2UI_ENABLED_KEY, False)
 
 
-class RizzchartsAgentExecutor(A2aAgentExecutor):
+class RizzchartsAgentExecutor(AgentExecutor):
   """Executor for the Rizzcharts agent that handles A2UI session setup."""
 
   def __init__(
       self,
       base_url: str,
-      runner: Runner,
-      schema_manager: A2uiSchemaManager,
+      model: Any,
   ):
     self._base_url = base_url
-    self.schema_manager = schema_manager
+    self._model = model
+    self._executors = {}  # version -> A2aAgentExecutor
 
-    config = A2aAgentExecutorConfig(event_converter=A2uiEventConverter())
-    super().__init__(runner=runner, config=config)
-
-  @override
-  async def _prepare_session(
+  async def execute(
       self,
       context: RequestContext,
-      run_request: AgentRunRequest,
-      runner: Runner,
-  ):
-    logger.info(f"Loading session for message {context.message}")
+      event_queue: EventQueue,
+  ) -> None:
+    version = try_activate_a2ui_extension(context)
+    if not version:
+      # If no version negotiated, default to 0.9 (or error if appropriate)
+      version = VERSION_0_9
 
-    session = await super()._prepare_session(context, run_request, runner)
-
-    if "base_url" not in session.state:
-      session.state["base_url"] = self._base_url
-
-    use_ui = try_activate_a2ui_extension(context)
-    if use_ui:
-      capabilities = (
-          context.message.metadata.get(A2UI_CLIENT_CAPABILITIES_KEY)
-          if context.message and context.message.metadata
-          else None
-      )
-      a2ui_catalog = self.schema_manager.get_selected_catalog(
-          client_ui_capabilities=capabilities
+    if version not in self._executors:
+      # pylint: disable=import-outside-toplevel
+      from google.adk.artifacts import InMemoryArtifactService
+      from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
+      from google.adk.sessions.in_memory_session_service import InMemorySessionService
+      from google.adk.runners import Runner
+      from google.adk.a2a.executor.a2a_agent_executor import (
+          A2aAgentExecutor,
+          A2aAgentExecutorConfig,
       )
 
-      examples = self.schema_manager.load_examples(a2ui_catalog, validate=True)
+      # Create agent, runner, and executor for the negotiated version
+      agent = RizzchartsAgentFactory.get_agent(
+          base_url=self._base_url,
+          version=version,
+          model=self._model,
+          a2ui_enabled_provider=get_a2ui_enabled,
+          a2ui_catalog_provider=get_a2ui_catalog,
+          a2ui_examples_provider=get_a2ui_examples,
+      )
+      runner = Runner(
+          app_name=agent.name,
+          agent=agent,
+          artifact_service=InMemoryArtifactService(),
+          session_service=InMemorySessionService(),
+          memory_service=InMemoryMemoryService(),
+      )
 
-      await runner.session_service.append_event(
-          session,
-          Event(
-              invocation_id=new_invocation_context_id(),
-              author="system",
-              actions=EventActions(
-                  state_delta={
-                      _A2UI_ENABLED_KEY: True,
-                      _A2UI_CATALOG_KEY: a2ui_catalog,
-                      _A2UI_EXAMPLES_KEY: examples,
-                  }
+      # Create specialized executor that overrides _prepare_session
+      class VersionedRizzchartsExecutor(A2aAgentExecutor):
+        def __init__(self, runner, base_url, schema_manager):
+          config = A2aAgentExecutorConfig(event_converter=A2uiEventConverter())
+          super().__init__(runner=runner, config=config)
+          self._base_url = base_url
+          self.schema_manager = schema_manager
+
+        @override
+        async def _prepare_session(self, context, run_request, runner):
+          session = await super()._prepare_session(context, run_request, runner)
+          if "base_url" not in session.state:
+            session.state["base_url"] = self._base_url
+
+          capabilities = (
+              context.message.metadata.get(A2UI_CLIENT_CAPABILITIES_KEY)
+              if context.message and context.message.metadata
+              else None
+          )
+          a2ui_catalog = self.schema_manager.get_selected_catalog(
+              client_ui_capabilities=capabilities
+          )
+          examples = self.schema_manager.load_examples(a2ui_catalog, validate=True)
+
+          await runner.session_service.append_event(
+              session,
+              Event(
+                  invocation_id=new_invocation_context_id(),
+                  author="system",
+                  actions=EventActions(
+                      state_delta={
+                          _A2UI_ENABLED_KEY: True,
+                          _A2UI_CATALOG_KEY: a2ui_catalog,
+                          _A2UI_EXAMPLES_KEY: examples,
+                      }
+                  ),
               ),
-          ),
+          )
+          return session
+
+      self._executors[version] = VersionedRizzchartsExecutor(
+          runner=runner,
+          base_url=self._base_url,
+          schema_manager=agent.schema_manager,
       )
 
-    return session
+    await self._executors[version].execute(context, event_queue)
+
+  async def cancel(
+      self, context: RequestContext, event_queue: EventQueue
+  ) -> Task | None:
+    # No-op for now as individual executors might have state.
+    # We could delegate to all if needed, but usually cancel is specific to a session.
+    return None

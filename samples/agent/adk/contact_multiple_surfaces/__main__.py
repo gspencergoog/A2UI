@@ -19,8 +19,9 @@ import click
 from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers import DefaultRequestHandler
 from a2a.server.tasks import InMemoryTaskStore
-from agent import ContactAgent
+from agent import ContactAgent, ContactAgentFactory
 from agent_executor import ContactAgentExecutor
+from a2ui.core.schema.constants import VERSION_0_9
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
@@ -49,17 +50,17 @@ def main(host, port):
         )
 
     base_url = f"http://{host}:{port}"
-
-    agent = ContactAgent(base_url=base_url, use_ui=True)
-
-    agent_executor = ContactAgentExecutor(agent=agent)
+    temp_agent = ContactAgentFactory.get_agent(
+        base_url=base_url, version=VERSION_0_9, use_ui=True
+    )
+    agent_executor = ContactAgentExecutor(base_url=base_url)
 
     request_handler = DefaultRequestHandler(
         agent_executor=agent_executor,
         task_store=InMemoryTaskStore(),
     )
     server = A2AStarletteApplication(
-        agent_card=agent.get_agent_card(), http_handler=request_handler
+        agent_card=temp_agent.get_agent_card(), http_handler=request_handler
     )
     import uvicorn
 

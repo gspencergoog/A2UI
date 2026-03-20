@@ -169,18 +169,24 @@ class A2uiValidator:
 
     common_types_uri = get_sibling_uri(base_uri, "common_types.json")
 
+    common_types_schema = copy.deepcopy(self._catalog.common_types_schema)
+    if common_types_schema and "$defs" in common_types_schema:
+      comp_common = common_types_schema["$defs"].get("ComponentCommon")
+      if comp_common and "required" in comp_common:
+        comp_common["required"] = [r for r in comp_common["required"] if r != "id"]
+
     resources = [
         (
             common_types_uri,
             Resource.from_contents(
-                self._catalog.common_types_schema,
+                common_types_schema or {},
                 default_specification=DRAFT202012,
             ),
         ),
         (
             "common_types.json",
             Resource.from_contents(
-                self._catalog.common_types_schema,
+                common_types_schema or {},
                 default_specification=DRAFT202012,
             ),
         ),
@@ -267,11 +273,19 @@ class A2uiValidator:
     # Basic schema validation
     error = next(self._validator.iter_errors(messages), None)
     if error is not None:
-      msg = f"Validation failed: {error.message}"
+      error_msgs = []
+      # The error object from jsonschema already contains the path
+      # and instance, but we need to format it nicely.
+      error_msgs.append(f"{error.message} at path: {'->'.join([str(p) for p in error.path])}, instance: {error.instance}")
       if error.context:
-        msg += "\nContext failures:"
         for sub_error in error.context:
-          msg += f"\n  - {sub_error.message}"
+          error_msgs.append(f"{sub_error.message} at path: {'->'.join([str(p) for p in sub_error.path])}, instance: {sub_error.instance}")
+      
+      msg = "Validation failed:\n" + "\n".join(error_msgs)
+      import logging
+      logging.error(msg)
+      import traceback
+      traceback.print_stack()
       raise ValueError(msg)
 
     for message in messages:
@@ -292,7 +306,12 @@ class A2uiValidator:
       if components:
         ref_map = _extract_component_ref_fields(self._catalog)
         root_id = _find_root_id(messages, surface_id)
-        _validate_component_integrity(root_id, components, ref_map)
+        try:
+          _validate_component_integrity(root_id, components, ref_map)
+        except Exception as e:
+          import traceback
+          traceback.print_exc()
+          raise e
         _validate_topology(root_id, components, ref_map)
 
       _validate_recursion_and_paths(message)
@@ -451,12 +470,15 @@ def _extract_component_ref_fields(
 
       # Might be in surfaceUpdate or beginRendering component definitions
       if "surfaceUpdate" in props:
-        su = props["surfaceUpdate"].get("properties", {})
+        su = props.get("surfaceUpdate", {}).get("properties", {})
         if "components" in su:
-          items = su["components"].get("items", {})
-          if "properties" in items:
-            comp_wrapper = items["properties"].get("component", {})
-            all_components = comp_wrapper.get("properties", {})
+          items = su.get("components", {}).get("items", {})
+          if isinstance(items, dict):
+            comp_props = items.get("properties", {})
+            if isinstance(comp_props, dict):
+              comp_wrapper = comp_props.get("component", {})
+              if isinstance(comp_wrapper, dict):
+                all_components = comp_wrapper.get("properties", {})
     except Exception:
       logging.warning("Failed to extract component ref fields from v0.8 schema")
 

@@ -14,12 +14,22 @@
 
 import json
 
-from a2ui.core.schema.constants import VERSION_0_9, A2UI_OPEN_TAG, A2UI_CLOSE_TAG
+from a2ui.core.schema.constants import (
+    VERSION_0_8,
+    VERSION_0_9,
+    A2UI_OPEN_TAG,
+    A2UI_CLOSE_TAG,
+    SUPPORTED_VERSIONS,
+)
 from a2ui.core.schema.manager import A2uiSchemaManager, CatalogConfig
 from a2ui.basic_catalog.provider import BasicCatalog
 from a2ui.core.schema.common_modifiers import remove_strict_validation
-from a2ui.core.schema.catalog_provider import A2uiCatalogProvider, FileSystemCatalogProvider
+from a2ui.core.schema.catalog_provider import (
+    A2uiCatalogProvider,
+    FileSystemCatalogProvider,
+)
 from typing import Dict, Any
+import os
 
 ROLE_DESCRIPTION = (
     "You are a helpful contact lookup assistant. Your final output MUST be a a2ui UI"
@@ -36,7 +46,7 @@ To generate the response, you MUST follow these rules:
 Buttons that represent the main action on a card or view (e.g., 'Follow', 'Email', 'Search') SHOULD include the `"primary": true` attribute.
 """
 
-UI_DESCRIPTION = f"""
+UI_DESCRIPTION_V0_9 = f"""
 -   **For finding contacts (e.g., "Who is Alex Jordan?"):**
     a.  You MUST call the `get_contact_info` tool.
     b.  If the tool returns a **single contact**, you MUST use the `MULTI_SURFACE_EXAMPLE` template. Provide BOTH the Contact Card and the Org Chart in a single response.
@@ -51,6 +61,12 @@ UI_DESCRIPTION = f"""
     a.  You MUST use the `ACTION_CONFIRMATION_EXAMPLE` template.
     b.  Populate the `updateDataModel.value` with a confirmation title and message (e.g., title: "Email Drafted", message: "Drafting an email to Alex Jordan...").
 """
+
+UI_DESCRIPTION_V0_8 = (
+    UI_DESCRIPTION_V0_9.replace("updateDataModel.value", "updateDataModel.data")
+    .replace("updateComponents", "upsertComponents")
+    .replace("updateDataModel", "upsertDataModels")
+)
 
 
 def get_text_prompt() -> str:
@@ -75,51 +91,72 @@ def get_text_prompt() -> str:
 if __name__ == "__main__":
   # Example of how to use the A2UI Schema Manager to generate a system prompt
   my_base_url = "http://localhost:8000"
-  my_version = VERSION_0_9
-  schema_manager = A2uiSchemaManager(
-      my_version,
-      catalogs=[
-          CatalogConfig.from_path(
-              name="contact_multiple_surfaces_inline_catalog",
-              catalog_path="inline_catalog.json",
-              examples_path=f"examples/{my_version}",
-          ),
-      ],
-      accepts_inline_catalogs=True,
-      schema_modifiers=[remove_strict_validation],
-  )
-  contact_prompt = schema_manager.generate_system_prompt(
-      role_description=ROLE_DESCRIPTION,
-      workflow_description=WORKFLOW_DESCRIPTION,
-      ui_description=UI_DESCRIPTION,
-      include_schema=True,
-      include_examples=True,
-      validate_examples=True,
-  )
-  print(contact_prompt)
-  with open("generated_prompt.txt", "w") as f:
-    f.write(contact_prompt)
-  print("\nGenerated prompt saved to generated_prompt.txt")
+  for my_version in SUPPORTED_VERSIONS:
+    print(f"\n==================== Generating Prompt for A2UI {my_version} ====================")
+    version_dir = f"v{my_version.replace('.', '_')}"
+    ui_desc = UI_DESCRIPTION_V0_9 if my_version == VERSION_0_9 else UI_DESCRIPTION_V0_8
+    
+    schema_manager = A2uiSchemaManager(
+        my_version,
+        catalogs=[
+            CatalogConfig.from_path(
+                name="contact_multiple_surfaces_inline_catalog",
+                catalog_path="inline_catalog.json",
+                examples_path=f"{version_dir}/examples",
+            ),
+        ],
+        accepts_inline_catalogs=True,
+        schema_modifiers=[remove_strict_validation],
+    )
+    contact_prompt = schema_manager.generate_system_prompt(
+        role_description=ROLE_DESCRIPTION,
+        workflow_description=WORKFLOW_DESCRIPTION,
+        ui_description=ui_desc,
+        include_schema=True,
+        include_examples=True,
+        validate_examples=True,
+    )
+    # print(contact_prompt)
+    filename = f"generated_prompt_{version_dir}.txt"
+    with open(filename, "w") as f:
+      f.write(contact_prompt)
+    print(f"Generated prompt saved to {filename}")
 
-with open("inline_catalog.json", "r", encoding="utf-8") as f:
-    inline_catalog = json.load(f)
+    # Use v0.9 for the rest of the file logic for now
+    my_version = VERSION_0_9
+    version_dir = f"v{my_version.replace('.', '_')}"
+    schema_manager = A2uiSchemaManager(
+        my_version,
+        catalogs=[
+            CatalogConfig.from_path(
+                name="contact_multiple_surfaces_inline_catalog",
+                catalog_path="inline_catalog.json",
+                examples_path=f"{version_dir}/examples",
+            ),
+        ],
+        accepts_inline_catalogs=True,
+        schema_modifiers=[remove_strict_validation],
+    )
 
-  client_ui_capabilities = {"inlineCatalogs": [inline_catalog]}
-  inline_catalog = schema_manager.get_selected_catalog(
-      client_ui_capabilities=client_ui_capabilities,
-  )
-  request_prompt = inline_catalog.render_as_llm_instructions()
-  print(request_prompt)
-  with open("request_prompt.txt", "w") as f:
-    f.write(request_prompt)
-  print("\nGenerated request prompt saved to request_prompt.txt")
+    with open("inline_catalog.json", "r", encoding="utf-8") as f:
+      inline_catalog = json.load(f)
 
-  basic_catalog = schema_manager.get_selected_catalog()
-  examples = schema_manager.load_examples(
-      basic_catalog,
-      validate=True,
-  )
-  print(examples)
-  with open("examples.txt", "w") as f:
-    f.write(examples)
-  print("\nGenerated examples saved to examples.txt")
+    client_ui_capabilities = {"inlineCatalogs": [inline_catalog]}
+    inline_catalog = schema_manager.get_selected_catalog(
+        client_ui_capabilities=client_ui_capabilities,
+    )
+    request_prompt = inline_catalog.render_as_llm_instructions()
+    print(request_prompt)
+    with open("request_prompt.txt", "w") as f:
+      f.write(request_prompt)
+    print("\nGenerated request prompt saved to request_prompt.txt")
+
+    basic_catalog = schema_manager.get_selected_catalog()
+    examples = schema_manager.load_examples(
+        basic_catalog,
+        validate=True,
+    )
+    print(examples)
+    with open("examples.txt", "w") as f:
+      f.write(examples)
+    print("\nGenerated examples saved to examples.txt")

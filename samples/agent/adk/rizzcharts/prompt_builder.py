@@ -15,70 +15,79 @@
 """Prompt builder for the rizzcharts agent."""
 
 # pylint: disable=g-importing-member, line-too-long
-from a2ui.core.schema.constants import VERSION_0_9
+import os
+from a2ui.core.schema.constants import VERSION_0_8, VERSION_0_9, SUPPORTED_VERSIONS
 from a2ui.core.schema.manager import A2uiSchemaManager, CatalogConfig
 from a2ui.basic_catalog.provider import BasicCatalog
 from a2ui.core.schema.common_modifiers import remove_strict_validation
-from agent import ROLE_DESCRIPTION, WORKFLOW_DESCRIPTION, UI_DESCRIPTION
+from agent import (
+    ROLE_DESCRIPTION,
+    WORKFLOW_DESCRIPTION,
+    UI_DESCRIPTION_V0_8,
+    UI_DESCRIPTION_V0_9,
+)
 
 
 if __name__ == "__main__":
-  version = VERSION_0_9
-  schema_manager = A2uiSchemaManager(
-      version,
-      catalogs=[
-          CatalogConfig.from_path(
-              name="rizzcharts",
-              catalog_path="rizzcharts_catalog_definition.json",
-              examples_path=f"examples/rizzcharts_catalog/{version}",
-          ),
-          BasicCatalog.get_config(
-              version=version,
-              examples_path=f"examples/standard_catalog/{version}",
-          ),
-      ],
-      accepts_inline_catalogs=True,
-      schema_modifiers=[remove_strict_validation],
-  )
+  for my_version in SUPPORTED_VERSIONS:
+    version_dir = f"v{my_version.replace('.', '_')}"
+    ui_desc = UI_DESCRIPTION_V0_8 if my_version == VERSION_0_8 else UI_DESCRIPTION_V0_9
 
-  # Generate prompt for rizzcharts catalog
-  print("Building prompt and validating rizzcharts examples...")
-  system_prompt = schema_manager.generate_system_prompt(
-      role_description=ROLE_DESCRIPTION,
-      workflow_description=WORKFLOW_DESCRIPTION,
-      ui_description=UI_DESCRIPTION,
-      include_schema=True,
-      include_examples=True,
-      validate_examples=True,
-  )
+    schema_manager = A2uiSchemaManager(
+        my_version,
+        catalogs=[
+            CatalogConfig.from_path(
+                name="rizzcharts",
+                catalog_path="rizzcharts_catalog_definition.json",
+                examples_path=f"{version_dir}/examples/rizzcharts_catalog",
+            ),
+            BasicCatalog.get_config(
+                version=my_version,
+                examples_path=f"{version_dir}/examples/standard_catalog",
+            ),
+        ],
+        accepts_inline_catalogs=True,
+        schema_modifiers=[remove_strict_validation],
+    )
 
-  output = system_prompt
+    # Generate prompt for rizzcharts catalog
+    print(f"Building prompt for version {my_version} and validating examples...")
+    system_prompt = schema_manager.generate_system_prompt(
+        role_description=ROLE_DESCRIPTION,
+        workflow_description=WORKFLOW_DESCRIPTION,
+        ui_description=ui_desc,
+        include_schema=True,
+        include_examples=True,
+        validate_examples=True,
+    )
 
-  # Also validate standard catalog examples
-  print("Validating standard catalog examples...")
-  # We can trigger this by selecting the basic catalog
-  std_prompt = schema_manager.generate_system_prompt(
-      role_description=ROLE_DESCRIPTION,
-      workflow_description=WORKFLOW_DESCRIPTION,
-      ui_description=UI_DESCRIPTION,
-      client_ui_capabilities={
-          "supported_catalog_ids": [
-              "https://a2ui.org/specification/v0_9/basic_catalog.json"
-          ]
-      },
-      include_schema=False,
-      include_examples=True,
-      validate_examples=True,
-  )
+    output = system_prompt
 
-  if std_prompt:
-    output += "\n\n### Standard Catalog Examples:\n"
-    # Find the start of examples in std_prompt
-    if "### Examples:" in std_prompt:
-      output += std_prompt.split("### Examples:")[1]
+    # Also validate standard catalog examples
+    print(f"Validating standard catalog examples for version {my_version}...")
+    # We can trigger this by selecting the basic catalog
+    basic_catalog_uri = (
+        "https://a2ui.org/specification/v0_8/basic_catalog.json"
+        if my_version == VERSION_0_8
+        else "https://a2ui.org/specification/v0_9/basic_catalog.json"
+    )
+    std_prompt = schema_manager.generate_system_prompt(
+        role_description=ROLE_DESCRIPTION,
+        workflow_description=WORKFLOW_DESCRIPTION,
+        ui_description=ui_desc,
+        client_ui_capabilities={"supported_catalog_ids": [basic_catalog_uri]},
+        include_schema=False,
+        include_examples=True,
+        validate_examples=True,
+    )
 
-  print(output)
+    if std_prompt:
+      output += "\n\n### Standard Catalog Examples:\n"
+      # Find the start of examples in std_prompt
+      if "### Examples:" in std_prompt:
+        output += std_prompt.split("### Examples:")[1]
 
-  with open("generated_prompt.txt", "w") as f:
-    f.write(output)
-  print("\nGenerated prompt saved to generated_prompt.txt")
+    filename = f"generated_prompt_{version_dir}.txt"
+    with open(filename, "w") as f:
+      f.write(output)
+    print(f"Generated prompt saved to {filename}")

@@ -32,7 +32,7 @@ from a2a.utils import (
     new_task,
 )
 from a2a.utils.errors import ServerError
-from agent import ContactAgent
+from agent import ContactAgent, ContactAgentFactory
 from a2ui.a2a import try_activate_a2ui_extension
 
 logger = logging.getLogger(__name__)
@@ -41,9 +41,9 @@ logger = logging.getLogger(__name__)
 class ContactAgentExecutor(AgentExecutor):
   """Contact AgentExecutor Example."""
 
-  def __init__(self, agent: ContactAgent):
-    # Instantiate the UI agent.
-    self.ui_agent = agent
+  def __init__(self, base_url: str):
+    self._base_url = base_url
+    self._ui_agents = {}  # version -> ContactAgent
 
   async def execute(
       self,
@@ -56,12 +56,19 @@ class ContactAgentExecutor(AgentExecutor):
     client_ui_capabilities = None
 
     logger.info(f"--- Client requested extensions: {context.requested_extensions} ---")
-    use_ui = try_activate_a2ui_extension(context)
+    version = try_activate_a2ui_extension(context)
+    use_ui = version is not None
 
     # Determine which agent to use based on whether the a2ui extension is active.
     if use_ui:
-      agent = self.ui_agent
-      logger.info("--- AGENT_EXECUTOR: A2UI extension is active. Using UI agent. ---")
+      if version not in self._ui_agents:
+        self._ui_agents[version] = ContactAgentFactory.get_agent(
+            base_url=self._base_url, version=version, use_ui=True
+        )
+      agent = self._ui_agents[version]
+      logger.info(
+          f"--- AGENT_EXECUTOR: A2UI extension {version} is active. Using UI agent. ---"
+      )
     else:
       # Enforce A2UI extension as per review comment
       error_msg = "A2UI extension is NOT active. This agent requires A2UI to function."
