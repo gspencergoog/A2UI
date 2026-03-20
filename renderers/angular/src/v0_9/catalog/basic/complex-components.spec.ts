@@ -87,10 +87,15 @@ describe('Complex Components', () => {
 
   function createBoundProperty(val: any): BoundProperty<any> {
     const sig = angularSignal(val);
-    const prop = Object.assign(() => sig(), {
-      value: sig,
-      raw: val,
-      set: jasmine.createSpy('set').and.callFake((v: any) => sig.set(v)),
+    const prop = () => sig();
+    Object.defineProperties(prop, {
+      value: { get: () => sig(), configurable: true },
+      raw: { value: val, configurable: true },
+      set: {
+        value: jasmine.createSpy('set').and.callFake((v: any) => sig.set(v)),
+        configurable: true,
+      },
+      peek: { value: () => sig(), configurable: true },
     });
     return prop as any;
   }

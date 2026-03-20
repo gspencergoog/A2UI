@@ -31,14 +31,20 @@ describe('ButtonComponent', () => {
 
   function createBoundProperty(val: any): BoundProperty<any> {
     const sig = signal(val);
-    const prop = Object.assign(() => sig(), {
-      value: sig,
-      peek: () => sig(),
-      set: jasmine.createSpy('set').and.callFake((v: any) => sig.set(v)),
-      update: jasmine.createSpy('update').and.callFake((fn: any) => sig.update(fn)),
-      raw: val,
+    const prop = () => sig();
+    Object.defineProperties(prop, {
+      value: { get: () => sig(), configurable: true },
+      peek: { value: () => sig(), configurable: true },
+      set: {
+        value: jasmine.createSpy('set').and.callFake((v: any) => sig.set(v)),
+        configurable: true,
+      },
+      update: {
+        value: jasmine.createSpy('update').and.callFake((fn: any) => sig.update(fn)),
+        configurable: true,
+      },
+      raw: { value: val, configurable: true },
     });
-    Object.defineProperty(prop, 'value', { get: () => sig() });
     return prop as any;
   }
 

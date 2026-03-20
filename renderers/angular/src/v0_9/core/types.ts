@@ -30,7 +30,7 @@ export type BoundProperty<T = any> = (Signal<T> | WritableSignal<T> | GenericSig
   /** The raw property definition from the component model (literal or binding). */
   readonly raw: any;
   /** Direct access to the current value (same as calling the signal function). */
-  readonly value: Signal<T>;
+  readonly value: T;
   /** Updates the underlying data model if the property is path-bound. */
   readonly set: (value: T) => void;
 };

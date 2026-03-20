@@ -18,18 +18,24 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TextComponent } from './text.component';
 import { By } from '@angular/platform-browser';
 import { signal } from '@angular/core';
+import { BoundProperty } from '../../core/types';
 
 describe('TextComponent', () => {
   let component: TextComponent;
   let fixture: ComponentFixture<TextComponent>;
 
   beforeEach(async () => {
-    function createBoundProperty(val: any): any {
+    function createBoundProperty(val: any): BoundProperty<any> {
       const sig = signal(val);
-      const prop = Object.assign(() => sig(), {
-        value: sig,
-        raw: val,
-        set: jasmine.createSpy('set').and.callFake((v: any) => sig.set(v)),
+      const prop = () => sig();
+      Object.defineProperties(prop, {
+        value: { get: () => sig(), configurable: true },
+        raw: { value: val, configurable: true },
+        set: {
+          value: jasmine.createSpy('set').and.callFake((v: any) => sig.set(v)),
+          configurable: true,
+        },
+        peek: { value: () => sig(), configurable: true },
       });
       return prop as any;
     }
