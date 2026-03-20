@@ -144,7 +144,7 @@ describe('ButtonComponent', () => {
     button.triggerEventHandler('click', null);
 
     expect(mockSurfaceGroup.getSurface).toHaveBeenCalledWith('surf1');
-    expect(mockSurface.dispatchAction).toHaveBeenCalled();
+    expect(mockSurface.dispatchAction).toHaveBeenCalledWith(jasmine.any(Object), 'test-btn');
   });
 
   it('should show child component host if child prop is present', () => {
