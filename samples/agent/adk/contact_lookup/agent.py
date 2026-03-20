@@ -37,7 +37,14 @@ from a2a.types import (
 )
 
 from google.genai import types
-from prompt_builder import get_text_prompt, ROLE_DESCRIPTION, WORKFLOW_DESCRIPTION, UI_DESCRIPTION
+from prompt_builder import (
+    get_text_prompt,
+    ROLE_DESCRIPTION,
+    WORKFLOW_DESCRIPTION,
+    UI_DESCRIPTION,
+    A2UI_OPEN_TAG,
+    A2UI_CLOSE_TAG,
+)
 from tools import get_contact_info
 from a2ui.core.schema.constants import VERSION_0_9, A2UI_OPEN_TAG, A2UI_CLOSE_TAG
 from a2ui.core.schema.manager import A2uiSchemaManager
@@ -146,7 +153,12 @@ class ContactAgent:
     )
 
   async def stream(self, query, session_id) -> AsyncIterable[dict[str, Any]]:
-    session_state = {"base_url": self.base_url}
+    session_state = {
+        "base_url": self.base_url,
+        "expression": "{expression}",
+        "A2UI_OPEN_TAG": A2UI_OPEN_TAG,
+        "A2UI_CLOSE_TAG": A2UI_CLOSE_TAG,
+    }
 
     session = await self._runner.session_service.get_session(
         app_name=self._agent.name,
@@ -162,33 +174,39 @@ class ContactAgent:
       )
     elif "base_url" not in session.state:
       session.state["base_url"] = self.base_url
+    
+    # Ensure A2UI variables are always present in the session state for prompt injection
+    session.state.setdefault("expression", "{expression}")
+    session.state.setdefault("A2UI_OPEN_TAG", A2UI_OPEN_TAG)
+    session.state.setdefault("A2UI_CLOSE_TAG", A2UI_CLOSE_TAG)
 
     # --- Begin: UI Validation and Retry Logic ---
     max_retries = 1  # Total 2 attempts
     attempt = 0
     current_query_text = query
 
-    # Ensure catalog schema was loaded
-    selected_catalog = self._schema_manager.get_selected_catalog()
-    if self.use_ui and not selected_catalog.catalog_schema:
-      logger.error(
-          "--- ContactAgent.stream: A2UI_SCHEMA is not loaded. "
-          "Cannot perform UI validation. ---"
-      )
-      yield {
-          "is_task_complete": True,
-          "parts": [
-              Part(
-                  root=TextPart(
-                      text=(
-                          "I'm sorry, I'm facing an internal configuration error with"
-                          " my UI components. Please contact support."
-                      )
-                  )
-              )
-          ],
-      }
-      return
+    if self.use_ui:
+      # Ensure catalog schema was loaded
+      selected_catalog = self._schema_manager.get_selected_catalog()
+      if not selected_catalog.catalog_schema:
+        logger.error(
+            "--- ContactAgent.stream: A2UI_SCHEMA is not loaded. "
+            "Cannot perform UI validation. ---"
+        )
+        yield {
+            "is_task_complete": True,
+            "parts": [
+                Part(
+                    root=TextPart(
+                        text=(
+                            "I'm sorry, I'm facing an internal configuration error with"
+                            " my UI components. Please contact support."
+                        )
+                    )
+                )
+            ],
+        }
+        return
 
     while attempt <= max_retries:
       attempt += 1

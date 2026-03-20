@@ -21,7 +21,7 @@ ROLE_DESCRIPTION = (
     " response."
 )
 
-WORKFLOW_DESCRIPTION = """
+WORKFLOW_DESCRIPTION = f"""
 To generate the response, you MUST follow these rules:
 1.  Your response can contain one or more A2UI JSON blocks.
 2.  Each A2UI JSON block MUST be wrapped in `{A2UI_OPEN_TAG}` and `{A2UI_CLOSE_TAG}` tags.

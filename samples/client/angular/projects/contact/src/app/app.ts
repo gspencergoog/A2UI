@@ -14,23 +14,42 @@
  * limitations under the License.
  */
 
-import { MessageProcessor, Surface } from '@a2ui/angular';
-import * as Types from '@a2ui/web_core/types/types';
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { A2uiRendererService, SurfaceComponent } from '@a2ui/angular/v0_9';
 import { Client } from './client';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: 'app.css',
-  imports: [Surface],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [SurfaceComponent, CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
   protected client = inject(Client);
-  protected processor = inject(MessageProcessor);
+  protected renderer = inject(A2uiRendererService);
 
   protected hasData = signal(false);
+  protected surfaceIds = signal<string[]>([]);
+
+  constructor() {
+    // Initial surfaces
+    this.surfaceIds.set(Array.from(this.renderer.surfaceGroup.surfacesMap.keys()));
+
+    // Keep surface list in sync
+    this.renderer.surfaceGroup.onSurfaceCreated.subscribe((surface) => {
+      this.surfaceIds.update((ids) => [...ids, surface.id]);
+    });
+    this.renderer.surfaceGroup.onSurfaceDeleted.subscribe((id) => {
+      this.surfaceIds.update((ids) => ids.filter((sid) => sid !== id));
+    });
+
+    // Bridge messages to renderer
+    this.client.messages$.subscribe((messages) => {
+      this.renderer.processMessages(messages);
+    });
+  }
 
   protected async handleSubmit(event: SubmitEvent) {
     event.preventDefault();
@@ -43,8 +62,7 @@ export class App {
     const body = data.get('body') ?? null;
 
     if (body) {
-      const message = body as Types.A2UIClientEventMessage;
-      await this.client.makeRequest(message);
+      await this.client.makeRequest(body as string);
       this.hasData.set(true);
     }
   }

@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-import { DEFAULT_CATALOG, provideA2UI, provideMarkdownRenderer } from '@a2ui/angular';
-import { renderMarkdown } from '@a2ui/markdown-it';
+import {
+  A2uiRendererService,
+  A2UI_RENDERER_CONFIG,
+  BasicCatalog,
+} from '@a2ui/angular/v0_9';
+import { Client } from './client';
 import { IMAGE_CONFIG } from '@angular/common';
 import {
   ApplicationConfig,
@@ -23,18 +27,21 @@ import {
   provideZonelessChangeDetection,
 } from '@angular/core';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { theme } from './theme';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideClientHydration(withEventReplay()),
-    provideA2UI({
-      catalog: DEFAULT_CATALOG,
-      theme: theme,
-    }),
-    provideMarkdownRenderer(renderMarkdown),
+    {
+      provide: A2UI_RENDERER_CONFIG,
+      useFactory: (basicCatalog: BasicCatalog, client: Client) => ({
+        catalogs: [basicCatalog],
+        actionHandler: (action: any) => client.makeRequest(action),
+      }),
+      deps: [BasicCatalog, Client],
+    },
+    A2uiRendererService,
     {
       provide: IMAGE_CONFIG,
       useValue: {

@@ -168,12 +168,46 @@ describe('Simple Components', () => {
         fit: createBoundProperty('cover'),
         variant: createBoundProperty('avatar'),
       });
-      fixture.detectChanges();
       const img = fixture.nativeElement.querySelector('img') as HTMLImageElement;
       expect(img.src).toBeTruthy();
       expect(img.style.objectFit).toBe('cover');
       expect(img.className).toContain('avatar');
     });
+
+    it('should render image with mediumFeature variant by default', () => {
+      fixture.componentRef.setInput('props', {
+        url: createBoundProperty('https://example.com/image.png'),
+      });
+      fixture.detectChanges();
+      const img = fixture.nativeElement.querySelector('img') as HTMLImageElement;
+      expect(img.className).toContain('mediumFeature');
+    });
+
+    it('should apply correct classes for each variant', () => {
+      const variants = ['icon', 'avatar', 'smallFeature', 'mediumFeature', 'largeFeature', 'header'];
+      for (const variant of variants) {
+        fixture.componentRef.setInput('props', {
+          url: createBoundProperty('https://example.com/image.png'),
+          variant: createBoundProperty(variant),
+        });
+        fixture.detectChanges();
+        const img = fixture.nativeElement.querySelector('img') as HTMLImageElement;
+        expect(img.className).toContain(variant);
+      }
+    });
+
+    it('should have correct dimensions for avatar variant', () => {
+      fixture.componentRef.setInput('props', {
+        url: createBoundProperty('https://example.com/image.png'),
+        variant: createBoundProperty('avatar'),
+      });
+      fixture.detectChanges();
+      const img = fixture.nativeElement.querySelector('img') as HTMLImageElement;
+      expect(img.style.width).toBe('100px');
+      expect(img.style.height).toBe('100px');
+      expect(img.style.borderRadius).toBe('50%');
+    });
+
   });
 
   describe('IconComponent', () => {
@@ -208,6 +242,7 @@ describe('Simple Components', () => {
       });
       fixture.detectChanges();
       const icon = fixture.nativeElement.querySelector('.a2ui-icon');
+      expect(icon.classList).toContain('google-symbols');
       expect(icon.textContent.trim()).toBe('search');
     });
 

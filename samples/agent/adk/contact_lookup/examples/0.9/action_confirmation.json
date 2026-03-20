@@ -5,8 +5,7 @@
       "surfaceId": "action-modal",
       "catalogId": "https://a2ui.org/specification/v0_9/basic_catalog.json",
       "theme": {
-        "primaryColor": "#007BFF",
-        "font": "Roboto"
+        "primaryColor": "#007BFF"
       }
     }
   },

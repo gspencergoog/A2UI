@@ -41,9 +41,30 @@ import { BoundProperty } from '../../core/types';
         max-width: 100%;
         height: auto;
       }
-      .a2ui-image.circle {
+      .a2ui-image.icon {
+        width: 24px;
+        height: 24px;
+      }
+      .a2ui-image.avatar {
         border-radius: 50%;
         aspect-ratio: 1 / 1;
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+      }
+      .a2ui-image.smallFeature {
+        max-width: 200px;
+      }
+      .a2ui-image.mediumFeature {
+        max-width: 400px;
+      }
+      .a2ui-image.largeFeature {
+        max-width: 800px;
+      }
+      .a2ui-image.header {
+        width: 100%;
+        max-height: 300px;
+        object-fit: cover;
       }
       .a2ui-image.rounded {
         border-radius: 8px;
@@ -60,7 +81,7 @@ export class ImageComponent {
    * - `url`: The absolute URL of the image.
    * - `description`: Accessibility text for the image.
    * - `fit`: Object-fit mode ('cover', 'contain', 'fill', 'none', 'scale-down').
-   * - `variant`: Style variant ('default', 'circle', 'rounded').
+   * - `variant`: Style variant ('icon', 'avatar', 'smallFeature', 'mediumFeature', 'largeFeature', 'header').
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input<string>();
@@ -70,5 +91,5 @@ export class ImageComponent {
   url = computed(() => this.props()['url']?.value());
   description = computed(() => this.props()['description']?.value() || '');
   fit = computed(() => this.props()['fit']?.value() || 'cover');
-  variant = computed(() => this.props()['variant']?.value() || 'default');
+  variant = computed(() => this.props()['variant']?.value() || 'mediumFeature');
 }

@@ -20,7 +20,7 @@ from a2a.types import AgentExtension, Part, DataPart, TextPart
 
 logger = logging.getLogger(__name__)
 
-A2UI_EXTENSION_URI = "https://a2ui.org/a2a-extension/a2ui/v0.8"
+A2UI_EXTENSION_URI = "https://a2ui.org/a2a-extension/a2ui/v0.9"
 AGENT_EXTENSION_SUPPORTED_CATALOG_IDS_KEY = "supportedCatalogIds"
 AGENT_EXTENSION_ACCEPTS_INLINE_CATALOGS_KEY = "acceptsInlineCatalogs"
 

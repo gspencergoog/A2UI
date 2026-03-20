@@ -14,34 +14,40 @@
  * limitations under the License.
  */
 
-import { A2AServerPayload, MessageProcessor } from '@a2ui/angular';
-import * as Types from '@a2ui/web_core/types/types';
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
+import { Subject } from 'rxjs';
+import { A2uiMessage } from '@a2ui/web_core/v0_9';
+
+/** A payload wrapper for data sent from the A2UI server to the client. */
+export interface A2DataPayload {
+  kind: 'data';
+  data: A2uiMessage;
+}
+
+/** A payload wrapper for text sent from the A2UI server to the client. */
+export interface A2TextPayload {
+  kind: 'text';
+  text: string;
+}
+
+/** The raw payload format for messages from the v0.9 A2UI server. */
+export type A2AServerPayload =
+  | Array<A2DataPayload | A2TextPayload>
+  | { error: string };
 
 @Injectable({ providedIn: 'root' })
 export class Client {
-  private processor = inject(MessageProcessor);
-
   readonly isLoading = signal(false);
+  readonly messages$ = new Subject<A2uiMessage[]>();
 
-  constructor() {
-    this.processor.events.subscribe(async (event) => {
-      try {
-        const messages = await this.makeRequest(event.message);
-        event.completion.next(messages);
-        event.completion.complete();
-      } catch (err) {
-        event.completion.error(err);
-      }
-    });
-  }
+  constructor() {}
 
-  async makeRequest(request: Types.A2UIClientEventMessage | string) {
-    let messages: Types.ServerToClientMessage[];
+  async makeRequest(request: any) {
+    let messages: A2uiMessage[];
 
     try {
       this.isLoading.set(true);
-      const response = await this.send(request as Types.A2UIClientEventMessage);
+      const response = await this.send(request);
       messages = response;
     } catch (err) {
       console.error(err);
@@ -50,12 +56,11 @@ export class Client {
       this.isLoading.set(false);
     }
 
-    this.processor.clearSurfaces();
-    this.processor.processMessages(messages);
+    this.messages$.next(messages);
     return messages;
   }
 
-  async send(message: Types.A2UIClientEventMessage): Promise<Types.ServerToClientMessage[]> {
+  async send(message: any): Promise<A2uiMessage[]> {
     const response = await fetch('/a2a', {
       body: JSON.stringify(message),
       method: 'POST',
@@ -63,7 +68,7 @@ export class Client {
 
     if (response.ok) {
       const data = (await response.json()) as A2AServerPayload;
-      const messages: Types.ServerToClientMessage[] = [];
+      const messages: A2uiMessage[] = [];
 
       if ('error' in data) {
         throw new Error(data.error);
