@@ -185,20 +185,4 @@ export const AnyComponentSchema = z
 /** A generic A2UI component definition. */
 export type AnyComponent = z.infer<typeof AnyComponentSchema>;
 
-export const CommonSchemas = {
-  ComponentId: ComponentIdSchema,
-  ChildList: ChildListSchema,
-  DataBinding: DataBindingSchema,
-  DynamicValue: DynamicValueSchema,
-  DynamicString: DynamicStringSchema,
-  DynamicNumber: DynamicNumberSchema,
-  DynamicBoolean: DynamicBooleanSchema,
-  DynamicStringList: DynamicStringListSchema,
-  FunctionCall: FunctionCallSchema,
-  LogicExpression: LogicExpressionSchema,
-  CheckRule: CheckRuleSchema,
-  Checkable: CheckableSchema,
-  Action: ActionSchema,
-  AccessibilityAttributes: AccessibilityAttributesSchema,
-  AnyComponent: AnyComponentSchema,
-};
+// CommonSchemas mapping has been moved to schemas.ts

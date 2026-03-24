@@ -434,3 +434,5 @@ export const CardSchema = z.object({
     .string()
     .describe("The ID of the component to be rendered inside the card."),
 });
+
+// CommonSchemas mapping has been moved to schemas.ts

@@ -40,9 +40,9 @@
     "prepack": "npm run build",
     "build": "wireit",
     "build:tsc": "wireit",
+    "gen-types": "tsx scripts/generate-interfaces.ts",
     "test": "wireit",
     "test:coverage": "c8 node --test \"dist/**/*.test.js\""
-
   },
   "wireit": {
     "copy-spec": {
@@ -92,7 +92,8 @@
     "c8": "^11.0.0",
     "typescript": "^5.8.3",
     "wireit": "^0.15.0-pre.2",
-    "zod-to-json-schema": "^3.25.1"
+    "zod-to-json-schema": "^3.25.1",
+    "zod-to-ts": "^1.2.0"
   },
   "dependencies": {
     "@preact/signals-core": "^1.13.0",

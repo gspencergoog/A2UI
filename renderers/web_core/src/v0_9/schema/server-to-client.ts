@@ -131,9 +131,10 @@ export const A2uiMessageSchema = z.union([
   DeleteSurfaceMessageSchema,
 ]);
 
-/** A message sent from the A2UI server to the client. */
 export type A2uiMessage =
   | CreateSurfaceMessage
   | UpdateComponentsMessage
   | UpdateDataModelMessage
   | DeleteSurfaceMessage;
+
+// ServerToClientMessageSchemas mapping has been moved to schemas.ts

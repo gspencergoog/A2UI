@@ -80,3 +80,5 @@ export type A2uiClientAction = z.infer<typeof A2uiClientActionSchema>;
 export type A2uiClientError = z.infer<typeof A2uiClientErrorSchema>;
 export type A2uiClientMessage = z.infer<typeof A2uiClientMessageSchema>;
 export type A2uiClientDataModel = z.infer<typeof A2uiClientDataModelSchema>;
+
+// ClientToServerMessageSchemas mapping has been moved to schemas.ts
