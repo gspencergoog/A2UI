@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { A2aChatCanvas } from '@a2a_chat_canvas/a2a-chat-canvas';
+import { A2aChatCanvas } from '@a2a_chat_canvas/a2a_chat_canvas';
 import { ChatService } from '@a2a_chat_canvas/services/chat-service';
 import {
   ChangeDetectionStrategy,

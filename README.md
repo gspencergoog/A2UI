@@ -135,7 +135,7 @@ The best way to understand A2UI is to run the samples.
 
     ```bash
     # Install and build the Markdown renderer
-    cd renderers/markdown/markdown-it
+    cd renderers/markdown/markdown_it
     npm install
     npm run build
 

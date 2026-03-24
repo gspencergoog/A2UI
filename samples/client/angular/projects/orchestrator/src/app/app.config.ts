@@ -28,11 +28,11 @@ import {
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
-import { DEMO_CATALOG } from '../a2ui-catalog/catalog';
+import { DEMO_CATALOG } from '../a2ui_catalog/catalog';
 import { A2aServiceImpl } from '../services/a2a-service-impl';
 import { routes } from './app.routes';
 import { provideMarkdownRenderer } from '@a2ui/angular';
-import { renderMarkdown } from '@a2ui/markdown-it';
+import { renderMarkdown } from '@a2ui/markdown_it';
 
 export const appConfig: ApplicationConfig = {
   providers: [

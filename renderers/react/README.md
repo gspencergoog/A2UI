@@ -578,9 +578,9 @@ npm run dev
 
 ### Documentation
 
--   **[visual-parity/README.md](./visual-parity/README.md)** - Test suite usage
+-   **[visual_parity/README.md](./visual_parity/README.md)** - Test suite usage
     and fixture creation
--   **[visual-parity/PARITY.md](./visual-parity/PARITY.md)** - CSS
+-   **[visual_parity/PARITY.md](./visual_parity/PARITY.md)** - CSS
     transformation approach and implementation status
 
 ### Key Concepts
@@ -653,4 +653,4 @@ import type {
 3.  Register in `src/registry/defaultCatalog.ts`
 4.  Export from `src/index.ts`
 5.  Add unit tests in `tests/components/{ComponentName}.test.tsx`
-6.  Add visual parity fixtures in `visual-parity/fixtures/components/`
+6.  Add visual parity fixtures in `visual_parity/fixtures/components/`

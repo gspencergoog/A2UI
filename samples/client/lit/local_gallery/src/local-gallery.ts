@@ -21,7 +21,7 @@ import { customElement, state } from "lit/decorators.js";
 import { theme as uiTheme } from "./theme.js";
 import { v0_8 } from "@a2ui/lit";
 import * as UI from "@a2ui/lit/ui";
-import { renderMarkdown } from "@a2ui/markdown-it";
+import { renderMarkdown } from "@a2ui/markdown_it";
 
 interface DemoItem {
   id: string;

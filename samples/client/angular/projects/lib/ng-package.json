@@ -5,7 +5,7 @@
     "entryFile": "src/public-api.ts"
   },
   "allowedNonPeerDependencies": [
-    "markdown-it",
+    "markdown_it",
     "@a2ui/web_core"
   ]
 }

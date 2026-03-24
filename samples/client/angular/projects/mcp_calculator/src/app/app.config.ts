@@ -26,7 +26,7 @@ import {
   provideZonelessChangeDetection,
 } from '@angular/core';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { DEMO_CATALOG } from '../a2ui-catalog/catalog';
+import { DEMO_CATALOG } from '../a2ui_catalog/catalog';
 import { A2aServiceImpl } from '../services/a2a-service-impl';
 
 export const appConfig: ApplicationConfig = {

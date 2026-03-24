@@ -47,7 +47,7 @@ export class Text extends Root {
   accessor usageHint: Types.ResolvedText["usageHint"] | null = null;
 
   // Allow users to specify their own markdown renderer,
-  // or the one provided by @a2ui/markdown-it.
+  // or the one provided by @a2ui/markdown_it.
   @consume({context: Context.markdown})
   accessor markdownRenderer: Types.MarkdownRenderer | undefined = undefined;
 

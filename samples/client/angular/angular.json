@@ -350,20 +350,20 @@
         }
       }
     },
-    "a2a-chat-canvas": {
+    "a2a_chat_canvas": {
       "projectType": "library",
-      "root": "projects/a2a-chat-canvas",
-      "sourceRoot": "projects/a2a-chat-canvas/src",
+      "root": "projects/a2a_chat_canvas",
+      "sourceRoot": "projects/a2a_chat_canvas/src",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular/build:ng-packagr",
           "configurations": {
             "production": {
-              "tsConfig": "projects/a2a-chat-canvas/tsconfig.lib.prod.json"
+              "tsConfig": "projects/a2a_chat_canvas/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/a2a-chat-canvas/tsconfig.lib.json"
+              "tsConfig": "projects/a2a_chat_canvas/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -372,11 +372,11 @@
           "builder": "@angular/build:karma",
           "options": {
             "polyfills": ["zone.js", "zone.js/testing"],
-            "tsConfig": "projects/a2a-chat-canvas/tsconfig.spec.json",
+            "tsConfig": "projects/a2a_chat_canvas/tsconfig.spec.json",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "projects/a2a-chat-canvas/public"
+                "input": "projects/a2a_chat_canvas/public"
               }
             ]
           }

@@ -26,7 +26,7 @@ Since the composer depends on shared renderers in this repository, you must buil
 
 ```bash
 # Build markdown-it renderer
-cd ../../renderers/markdown/markdown-it
+cd ../../renderers/markdown/markdown_it
 npm install
 npm run build
 

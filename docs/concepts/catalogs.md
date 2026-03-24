@@ -274,7 +274,7 @@ export class HelloWorldBanner extends DynamicComponent {
 }
 ```
 
-You can see a working example of a client renderer in the [Rizzcharts demo](../samples/client/angular/projects/rizzcharts/src/a2ui-catalog/catalog.ts).
+You can see a working example of a client renderer in the [Rizzcharts demo](../samples/client/angular/projects/rizzcharts/src/a2ui_catalog/catalog.ts).
 
 ## A2UI Catalog Negotiation
 

@@ -30,7 +30,7 @@ export default defineConfig([
     sourcemap: true,
     clean: true,
     treeshake: true,
-    external: ['react', 'react-dom', 'markdown-it'],
+    external: ['react', 'react-dom', 'markdown_it'],
     esbuildOptions(options) {
       options.jsx = 'automatic';
     },

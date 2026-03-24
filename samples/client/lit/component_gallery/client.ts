@@ -15,7 +15,7 @@
  */
 
 import { v0_8 } from "@a2ui/lit";
-import { registerContactComponents } from "./ui/custom-components/register-components.js";
+import { registerContactComponents } from "./ui/custom_components/register-components.js";
 type A2TextPayload = {
   kind: "text";
   text: string;

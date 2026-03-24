@@ -6,7 +6,7 @@ This guide explains how the **Contact Client** works in tandem with the **Contac
 
 This sample demonstrates a powerful pattern where the **Client** controls the capabilities of the agent:
 
-1.  **Component Definition**: This client defines custom components (`OrgChart`, `WebFrame`) in `ui/custom-components/`.
+1.  **Component Definition**: This client defines custom components (`OrgChart`, `WebFrame`) in `ui/custom_components/`.
 2.  **Schema Generation**: Each custom component has an associated JSON schema.
 3.  **Handshake**: When connecting to the agent, the client sends these schemas in the `metadata.inlineCatalog` field of the initial request.
 4.  **Dynamic Support**: This allows *any* A2UI agent (that supports inline catalogs) to immediately start using these components without prior knowledge.
@@ -14,13 +14,13 @@ This sample demonstrates a powerful pattern where the **Client** controls the ca
 ## Custom Components Implemented
 
 ### 1. `OrgChart`
-*Located in: `ui/custom-components/org-chart.ts`*
+*Located in: `ui/custom_components/org-chart.ts`*
 A visual tree illustrating the organizational hierarchy.
 -   **Implementation**: A standard LitElement component.
 -   **Interaction**: Emits `chart_node_click` events when nodes are clicked, which are sent back to the agent as A2UI Actions.
 
 ### 2. `WebFrame` (Interactive Iframe)
-*Located in: `ui/custom-components/web-frame.ts`*
+*Located in: `ui/custom_components/web-frame.ts`*
 A tailored iframe wrapper for embedding external content or static HTML tools.
 -   **Use Case**: Used here to render the "Office Floor Plan" map.
 -   **Security**: Uses `sandbox` attributes to restrict script execution while allowing necessary interactions.

@@ -40,10 +40,10 @@ import * as UI from "@a2ui/lit/ui";
 
 // Demo elements.
 import "./ui/ui.js";
-import { registerContactComponents } from "./ui/custom-components/register-components.js";
+import { registerContactComponents } from "./ui/custom_components/register-components.js";
 import { Context } from "@a2ui/lit/ui";
 // @ts-ignore
-import { renderMarkdown } from "@a2ui/markdown-it";
+import { renderMarkdown } from "@a2ui/markdown_it";
 
 // Register custom components for the contact app
 registerContactComponents();

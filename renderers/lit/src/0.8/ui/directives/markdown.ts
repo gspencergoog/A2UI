@@ -64,7 +64,7 @@ class MarkdownDirective extends Directive {
     if (!MarkdownDirective.defaultMarkdownWarningLogged) {
       console.warn("[MarkdownDirective]",
         "can't render markdown because no markdown renderer is configured.\n",
-        "Use `@a2ui/markdown-it`, or your own markdown renderer.");
+        "Use `@a2ui/markdown_it`, or your own markdown renderer.");
       MarkdownDirective.defaultMarkdownWarningLogged = true;
     }
     return html`<span class="no-markdown-renderer">${value}</span>`;

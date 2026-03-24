@@ -46,7 +46,7 @@ import { Video } from "./video.js";
 export * as Context from "./context/context.js";
 export * as Utils from "./utils/utils.js";
 export { ComponentRegistry, componentRegistry } from "./component-registry.js";
-export { registerCustomComponents } from "./custom-components/index.js";
+export { registerCustomComponents } from "./custom_components/index.js";
 
 export {
   Audio,

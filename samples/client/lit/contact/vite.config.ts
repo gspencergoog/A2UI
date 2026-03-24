@@ -42,7 +42,7 @@ export default async () => {
     resolve: {
       dedupe: ["lit"],
       alias: {
-        "@a2ui/markdown-it": resolve(__dirname, "../../../../renderers/markdown/markdown-it/dist/src/markdown.js")
+        "@a2ui/markdown_it": resolve(__dirname, "../../../../renderers/markdown/markdown_it/dist/src/markdown.js")
       }
     },
     optimizeDeps: {
