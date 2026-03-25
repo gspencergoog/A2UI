@@ -6,7 +6,7 @@
     "generate-examples": "node scripts/generate-examples.mjs",
     "build": "npm run generate-examples && ng build && node postprocess-build.mjs",
     "demo": "npm run generate-examples && ng serve a2ui_explorer",
-    "test": "npm run generate-examples && ng test",
+    "test": "npm run generate-examples && ng test --browsers=ChromeHeadless",
     "test:ci": "npm run generate-examples && ng test --watch=false --browsers=ChromeHeadless"
   },
   "dependencies": {
