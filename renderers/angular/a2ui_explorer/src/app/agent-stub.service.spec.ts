@@ -82,14 +82,16 @@ describe('AgentStubService', () => {
 
       // Should have called processMessages twice:
       // First with deleteSurface, then with initial messages
-      expect(mockRendererService.processMessages).toHaveBeenCalledTimes(2);
-      expect(mockRendererService.processMessages.calls.argsFor(0)[0]).toEqual([
+      const deleteMessages = [
         {
-          version: 'v0.9',
+          version: 'v0.9' as const,
           deleteSurface: { surfaceId },
         },
+      ];
+      expect(mockRendererService.processMessages.calls.allArgs()).toEqual([
+        [deleteMessages],
+        [messages],
       ]);
-      expect(mockRendererService.processMessages.calls.argsFor(1)[0]).toEqual(messages);
     });
 
     it('should NOT send deleteSurface if surface does not exist', () => {

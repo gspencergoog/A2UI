@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
+import { signal as preactSignal } from '@a2ui/web_core/v0_9';
 import { DestroyRef } from '@angular/core';
 import { toAngularSignal, getNormalizedPath } from './utils';
-import { signal as preactSignal } from '@a2ui/web_core/v0_9';
 
 describe('toAngularSignal', () => {
   let mockDestroyRef: jasmine.SpyObj<DestroyRef>;
