@@ -121,6 +121,19 @@
                           }
                         }
                       },
+                      "altText": {
+                        "type": "object",
+                        "description": "The alt text for the image. This can be a literal string ('literal') or a reference to a value in the data model ('path', e.g. '/thumbnail/altText').",
+                        "additionalProperties": false,
+                        "properties": {
+                          "literalString": {
+                            "type": "string"
+                          },
+                          "path": {
+                            "type": "string"
+                          }
+                        }
+                      },
                       "fit": {
                         "type": "string",
                         "description": "Specifies how the image should be resized to fit its container. This corresponds to the CSS 'object-fit' property.",
