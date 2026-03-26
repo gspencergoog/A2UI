@@ -22,12 +22,12 @@ import type {
   DataBinding,
   FunctionCall,
   Action,
-} from "../schema/common-types.js";
-import { A2uiExpressionError } from "../errors.js";
-import { isSignal } from "../catalog/types.js";
+} from '../schema/common-types.js';
+import {A2uiExpressionError} from '../errors.js';
+import {isSignal} from '../catalog/types.js';
 
-import { FunctionInvoker } from "../catalog/function_invoker.js";
-import { SurfaceModel } from "../state/surface-model.js";
+import {FunctionInvoker} from '../catalog/function_invoker.js';
+import {SurfaceModel} from '../state/surface-model.js';
 
 /**
  * A contextual view of the main DataModel, serving as the unified interface for resolving
@@ -84,18 +84,18 @@ export class DataContext {
    */
   resolveDynamicValue<V>(value: DynamicValue): V {
     // 1. Literal check (excluding arrays and objects)
-    if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    if (value === null || typeof value !== 'object' || Array.isArray(value)) {
       return value as V;
     }
 
     // 2. Path Check: { path: "..." }
-    if ("path" in value) {
+    if ('path' in value) {
       const absolutePath = this.resolvePath((value as DataBinding).path);
       return this.dataModel.get(absolutePath);
     }
 
     // 3. Function Call: { call: "...", args: ... }
-    if ("call" in value) {
+    if ('call' in value) {
       const call = value as FunctionCall;
       const args: Record<string, any> = {};
 
@@ -181,13 +181,13 @@ export class DataContext {
     }
 
     // 2. Path Check
-    if ("path" in value) {
+    if ('path' in value) {
       const absolutePath = this.resolvePath((value as DataBinding).path);
       return this.dataModel.getSignal<V>(absolutePath) as GenericSignal<V>;
     }
 
     // 3. Function Call
-    if ("call" in value) {
+    if ('call' in value) {
       const call = value as FunctionCall;
       const argSignals: Record<string, GenericSignal<any>> = {};
 
@@ -277,7 +277,7 @@ export class DataContext {
    * DynamicValue types and prevents arbitrary nesting.
    */
   resolveAction(action: Action): any {
-    if ("event" in action) {
+    if ('event' in action) {
       const resolvedContext: Record<string, any> = {};
       if (action.event.context) {
         for (const [key, value] of Object.entries(action.event.context)) {
@@ -291,7 +291,7 @@ export class DataContext {
         },
       };
     }
-    if ("functionCall" in action) {
+    if ('functionCall' in action) {
       return this.resolveDynamicValue(action.functionCall);
     }
     return action;
@@ -311,31 +311,32 @@ export class DataContext {
   }
 
   private dispatchExpressionError(e: any, name: string): void {
-    if (e?.name === "ZodError" || e instanceof z.ZodError) {
+    if (e?.name === 'ZodError' || e instanceof z.ZodError) {
       const err = new A2uiExpressionError(
         `Validation failed for function '${name}': ${e.message}`,
         name,
         e.errors ?? e.issues,
       );
       this.surface.dispatchError({
-        code: "EXPRESSION_ERROR",
+        code: 'EXPRESSION_ERROR',
         message: err.message,
         expression: name,
         details: err.details,
       });
     } else if (e instanceof A2uiExpressionError) {
       this.surface.dispatchError({
-        code: "EXPRESSION_ERROR",
+        code: 'EXPRESSION_ERROR',
         message: e.message,
         expression: e.expression,
         details: e.details,
       });
     } else {
       this.surface.dispatchError({
-        code: "EXPRESSION_ERROR",
-        message: e.message ?? `An unexpected error occurred in function ${name}.`,
+        code: 'EXPRESSION_ERROR',
+        message:
+          e.message ?? `An unexpected error occurred in function ${name}.`,
         expression: name,
-        details: { stack: e.stack },
+        details: {stack: e.stack},
       });
     }
   }
@@ -355,18 +356,18 @@ export class DataContext {
   }
 
   private resolvePath(path: string): string {
-    if (path.startsWith("/")) {
+    if (path.startsWith('/')) {
       return path;
     }
-    if (path === "" || path === ".") {
+    if (path === '' || path === '.') {
       return this.path;
     }
 
     let base = this.path;
-    if (base.endsWith("/") && base.length > 1) {
+    if (base.endsWith('/') && base.length > 1) {
       base = base.slice(0, -1);
     }
-    if (base === "/") base = "";
+    if (base === '/') base = '';
 
     return `${base}/${path}`;
   }

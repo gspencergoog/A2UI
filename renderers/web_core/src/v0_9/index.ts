@@ -40,9 +40,9 @@ export * from "./errors.js";
 export * from "./testing.js";
 
 export { PreactReactiveProvider } from "./common/preact-provider.js";
-export { effect, Signal } from "@preact/signals-core";
+export { effect, Signal, signal } from "@preact/signals-core";
 
-import A2uiMessageSchemaRaw from "./schemas/server_to_client.json" with { type: "json" };
+import A2uiMessageSchemaRaw from './schemas/server_to_client.json' with {type: 'json'};
 
 export const Schemas = {
   A2uiMessageSchemaRaw,

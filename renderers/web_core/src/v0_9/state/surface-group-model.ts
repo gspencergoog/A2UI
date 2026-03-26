@@ -60,7 +60,7 @@ export class SurfaceGroupModel<T extends ComponentApi> {
     this.surfaces.set(surface.id, surface);
 
     // Subscribe to surface actions and propagate
-    const sub = surface.onAction.subscribe((action) =>
+    const sub = surface.onAction.subscribe(action =>
       this._onAction.emit(action),
     );
     this.surfaceUnsubscribers.set(surface.id, sub);
