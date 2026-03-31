@@ -48,8 +48,7 @@ import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-brows
       display: flex;
       flex-direction: column;
       width: 100%;
-      height: 100%;
-      min-height: 450px; /* Minimum height to ensure visibility */
+      height: 500px;
       border: 1px solid var(--mat-sys-outline-variant);
       border-radius: 8px;
       overflow: hidden;
@@ -143,10 +142,16 @@ export class McpApp
 
     window.addEventListener('message', this.messageHandler);
 
-    // Set src to trigger load AFTER listener is ready
-    // TODO: Make the sandbox URL configurable. To ensure CORS encapsulation, the sandbox
-    // should be served from a different origin than the host app.
-    const sandboxUrl = 'sandbox_iframe/sandbox.html';
+    
+    // Check for query param to opt-out of origin toggle (for testing)
+    const urlParams = new URLSearchParams(window.location.search);
+    const disableSecuritySelfTest = urlParams.get('disable_security_self_test') === 'true';
+
+    const currentOrigin = window.location.origin;
+    let sandboxUrl = `${currentOrigin}/mcp_apps_inner_iframe/sandbox.html`;
+    if (disableSecuritySelfTest) {
+      sandboxUrl += '?disable_security_self_test=true';
+    }
     this.iframeSrc.set(
       this.sanitizer.bypassSecurityTrustResourceUrl(sandboxUrl),
     );
@@ -195,26 +200,41 @@ export class McpApp
     };
 
     bridge.oncalltool = async (params) => {
-      // TODO: Implement tool execution security and dispatch
-      // Reference implementation in mcp-apps-custom-component.ts:
-      // 1. Check if params.name is in this.allowedTools()
-      // 2. If allowed, dispatch an event (e.g. 'a2ui.action') to the host
-      // 3. If not allowed, throw an error or warn
-      //
-      // Current implementation is read-only/logging only.
-      //
-      // Pseudo-code for dispatch:
-      // const actionName = params.name;
-      // if (this.allowedTools().includes(actionName)) {
-      //   // Dispatch action to host store
-      //   // events.dispatch('host.action', { name: actionName, ... });
-      //   return { content: [{ type: "text", text: "Action dispatched" }] };
-      // } else {
-      //   console.warn(`Tool '${actionName}' blocked.`);
-      //   throw new Error("Tool not allowed");
-      // }
       console.log(`[MCP App] Tool call requested: ${params.name}`, params);
-      throw new Error('Tool execution not yet implemented');
+
+      if (!this.allowedTools().includes(params.name)) {
+        console.warn(`[MCP App] Tool '${params.name}' not allowed.`);
+        throw new Error(`Tool '${params.name}' not allowed`);
+      }
+
+      const args = params.arguments || {};
+      
+      // Map arguments to A2UI Action context
+      const context: any[] = [];
+      for (const [key, value] of Object.entries(args)) {
+        if (typeof value === 'number') {
+          context.push({ key, value: { literalNumber: value } });
+        } else if (typeof value === 'string') {
+          context.push({ key, value: { literalString: value } });
+        } else if (typeof value === 'boolean') {
+          context.push({ key, value: { literalBoolean: value } });
+        }
+      }
+
+      const action: Types.Action = {
+        name: params.name,
+        context: context.length > 0 ? context : undefined,
+      };
+
+      console.log('Sending action:', action);
+
+      // Dispatch action asynchronously to the host/agent
+      super.sendAction(action).catch((err) =>
+        console.error('Failed to send action:', err),
+      );
+
+      // Return empty result immediately (calculator UI can forget about it)
+      return { content: [] };
     };
 
     // Connect the bridge
