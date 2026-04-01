@@ -1,5 +1,5 @@
 {
-  "name": "@a2ui/markdown_it",
+  "name": "@a2ui/markdown-it",
   "version": "0.0.2",
   "description": "A Markdown renderer using markdown-it and dompurify.",
   "repository": {

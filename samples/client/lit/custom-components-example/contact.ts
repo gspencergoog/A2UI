@@ -43,7 +43,7 @@ import "./ui/ui.js";
 import { registerContactComponents } from "./ui/custom_components/register-components.js";
 import { Context } from "@a2ui/lit/ui";
 // @ts-ignore
-import { renderMarkdown } from "@a2ui/markdown_it";
+import { renderMarkdown } from "@a2ui/markdown-it";
 
 // Register custom components for the contact app
 registerContactComponents();

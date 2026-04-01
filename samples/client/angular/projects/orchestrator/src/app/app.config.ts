@@ -32,7 +32,7 @@ import { DEMO_CATALOG } from '../a2ui_catalog/catalog';
 import { A2aServiceImpl } from '../services/a2a-service-impl';
 import { routes } from './app.routes';
 import { provideMarkdownRenderer } from '@a2ui/angular';
-import { renderMarkdown } from '@a2ui/markdown_it';
+import { renderMarkdown } from '@a2ui/markdown-it';
 
 export const appConfig: ApplicationConfig = {
   providers: [

@@ -19,7 +19,7 @@ import * as UI from '@a2ui/lit/ui';
 import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { provide } from '@lit/context';
-import { renderMarkdown } from '@a2ui/markdown_it';
+import { renderMarkdown } from '@a2ui/markdown-it';
 import { allFixtures, type FixtureName, type ComponentFixture } from '../../fixtures';
 import { getTheme, themeNames, type ThemeName } from '../../fixtures/themes';
 

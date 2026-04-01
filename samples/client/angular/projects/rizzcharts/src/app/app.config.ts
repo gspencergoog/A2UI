@@ -35,7 +35,7 @@ import { theme } from './theme';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { routes } from './app.routes';
 import { provideMarkdownRenderer } from '@a2ui/angular';
-import { renderMarkdown } from '@a2ui/markdown_it';
+import { renderMarkdown } from '@a2ui/markdown-it';
 
 export const appConfig: ApplicationConfig = {
   providers: [

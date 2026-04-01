@@ -15,7 +15,7 @@
  */
 
 import { DEFAULT_CATALOG, provideA2UI, provideMarkdownRenderer } from '@a2ui/angular';
-import { renderMarkdown } from '@a2ui/markdown_it';
+import { renderMarkdown } from '@a2ui/markdown-it';
 import { IMAGE_CONFIG } from '@angular/common';
 import {
   ApplicationConfig,
