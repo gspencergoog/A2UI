@@ -17,7 +17,7 @@
 import { Injectable } from '@angular/core';
 import { A2uiRendererService } from '@a2ui/angular/v0_9';
 
-import { A2uiClientAction, A2uiMessage } from '@a2ui/web_core/v0_9';
+import { A2uiClientAction, A2uiMessage } from '@a2ui/web-core/v0_9';
 import { ActionDispatcher } from './action-dispatcher.service';
 
 /**

@@ -21,7 +21,7 @@ import { AgentStubService } from './agent-stub.service';
 import { SurfaceComponent } from '@a2ui/angular/v0_9';
 import { AngularCatalog } from '@a2ui/angular/v0_9';
 import { DemoCatalog } from './demo-catalog';
-import { A2uiClientAction, CreateSurfaceMessage } from '@a2ui/web_core/v0_9';
+import { A2uiClientAction, CreateSurfaceMessage } from '@a2ui/web-core/v0_9';
 import { EXAMPLES } from './generated/examples-bundle';
 import { Example } from './types';
 import { ActionDispatcher } from './action-dispatcher.service';

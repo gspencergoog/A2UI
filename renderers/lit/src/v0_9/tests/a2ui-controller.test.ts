@@ -19,8 +19,8 @@ import { describe, it, beforeEach, mock, after, before } from "node:test";
 import { setupTestDom, teardownTestDom, asyncUpdate } from "./dom-setup.js";
 
 import { A2uiController } from "../a2ui-controller.js";
-import { MessageProcessor, ComponentContext } from "@a2ui/web_core/v0_9";
-import { TextApi } from "@a2ui/web_core/v0_9/basic_catalog";
+import { MessageProcessor, ComponentContext } from "@a2ui/web-core/v0_9";
+import { TextApi } from "@a2ui/web-core/v0_9/basic_catalog";
 
 /**
  * These tests verify:

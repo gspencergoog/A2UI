@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Catalog } from "@a2ui/web_core/v0_9";
+import { Catalog } from "@a2ui/web-core/v0_9";
 import { A2uiText } from "./components/Text.js";
 import { A2uiButton } from "./components/Button.js";
 import { A2uiTextField } from "./components/TextField.js";

@@ -15,7 +15,7 @@
  */
 
 import {useState, useEffect, useSyncExternalStore, useCallback} from 'react';
-import {MessageProcessor, SurfaceModel} from '@a2ui/web_core/v0_9';
+import {MessageProcessor, SurfaceModel} from '@a2ui/web-core/v0_9';
 import {minimalCatalog, basicCatalog, A2uiSurface, type ReactComponentImplementation} from '@a2ui/react/v0_9';
 import {exampleFiles, getMessages} from './examples';
 

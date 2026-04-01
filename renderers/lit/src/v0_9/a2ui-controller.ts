@@ -21,7 +21,7 @@ import {
   ComponentApi,
   ResolveA2uiProps,
   InferredComponentApiSchemaType,
-} from "@a2ui/web_core/v0_9";
+} from "@a2ui/web-core/v0_9";
 import { A2uiLitElement } from "./a2ui-lit-element.js";
 
 /**

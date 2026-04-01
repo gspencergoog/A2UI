@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type * as Types from '@a2ui/web_core/types/types';
+import type * as Types from '@a2ui/web-core/types/types';
 
 /**
  * Default theme for A2UI React components.

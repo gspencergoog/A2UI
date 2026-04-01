@@ -55,8 +55,8 @@ import {
   ChoicePickerApi,
   SliderApi,
   DateTimeInputApi,
-} from '@a2ui/web_core/v0_9/basic_catalog';
-import { FunctionImplementation } from '@a2ui/web_core/v0_9';
+} from '@a2ui/web-core/v0_9/basic_catalog';
+import { FunctionImplementation } from '@a2ui/web-core/v0_9';
 
 /**
  * The set of default Angular implementations for each component in the basic catalog.

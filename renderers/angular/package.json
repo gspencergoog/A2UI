@@ -29,7 +29,7 @@
     "test:ci": "npm run generate-examples && ng test --watch=false --browsers=ChromeHeadless"
   },
   "dependencies": {
-    "@a2ui/web_core": "file:../web_core",
+    "@a2ui/web-core": "file:../web_core",
     "tslib": "^2.3.0",
     "zod": "^3.25.76"
   },

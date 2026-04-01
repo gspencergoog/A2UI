@@ -31,7 +31,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@a2ui/web_core": ["../../web_core"]
+      "@a2ui/web-core": ["../../web_core"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.json"]

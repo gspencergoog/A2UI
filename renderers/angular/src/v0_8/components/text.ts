@@ -24,8 +24,8 @@ import {
 } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { DynamicComponent } from '../rendering/dynamic-component';
-import * as Primitives from '@a2ui/web_core/types/primitives';
-import * as Styles from '@a2ui/web_core/styles/index';
+import * as Primitives from '@a2ui/web-core/types/primitives';
+import * as Styles from '@a2ui/web-core/styles/index';
 import { Types } from '../types';
 import { MarkdownRenderer } from '../data/markdown';
 

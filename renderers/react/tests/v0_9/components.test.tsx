@@ -16,7 +16,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { ComponentContext, ComponentModel, SurfaceModel, Catalog } from '@a2ui/web_core/v0_9';
+import { ComponentContext, ComponentModel, SurfaceModel, Catalog } from '@a2ui/web-core/v0_9';
 
 import { Text } from '../../src/v0_9/catalog/minimal/components/Text';
 import { Button } from '../../src/v0_9/catalog/minimal/components/Button';

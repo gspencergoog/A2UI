@@ -43,15 +43,15 @@ if (!existsSync(resolvedDistDir)) {
   mkdirSync(resolvedDistDir, { recursive: true });
 }
 
-// 1. Get current @a2ui/web_core version
+// 1. Get current @a2ui/web-core version
 const corePkgPath = join(rootDir, 'renderers/web_core/package.json');
 const coreVersion = JSON.parse(readFileSync(corePkgPath, 'utf8')).version;
 
 const pkg = JSON.parse(readFileSync(resolvedSourcePkg, 'utf8'));
 
-// 2. Update @a2ui/web_core dependency
-if (pkg.dependencies && pkg.dependencies['@a2ui/web_core']) {
-  pkg.dependencies['@a2ui/web_core'] = '^' + coreVersion;
+// 2. Update @a2ui/web-core dependency
+if (pkg.dependencies && pkg.dependencies['@a2ui/web-core']) {
+  pkg.dependencies['@a2ui/web-core'] = '^' + coreVersion;
 }
 
 // 3. Adjust paths

@@ -17,7 +17,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
-import type * as Types from '@a2ui/web_core/types/types';
+import type * as Types from '@a2ui/web-core/types/types';
 import {
   TestWrapper,
   TestRenderer,

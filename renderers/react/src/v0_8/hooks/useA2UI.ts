@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type * as Types from '@a2ui/web_core/types/types';
+import type * as Types from '@a2ui/web-core/types/types';
 import {useA2UIActions, useA2UIState} from '../core/A2UIProvider';
 
 /**

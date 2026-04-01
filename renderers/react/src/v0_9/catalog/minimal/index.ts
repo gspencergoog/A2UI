@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Catalog, createFunctionImplementation} from '@a2ui/web_core/v0_9';
+import {Catalog, createFunctionImplementation} from '@a2ui/web-core/v0_9';
 import {Text} from './components/Text';
 import {Button} from './components/Button';
 import {Row} from './components/Row';

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {type A2uiMessage} from '@a2ui/web_core/v0_9';
+import {type A2uiMessage} from '@a2ui/web-core/v0_9';
 
 // Dynamically import all examples from the specification folder
 const exampleModules = import.meta.glob(

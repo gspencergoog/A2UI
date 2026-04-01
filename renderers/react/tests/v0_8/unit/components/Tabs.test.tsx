@@ -18,7 +18,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { TestWrapper, TestRenderer, createSurfaceUpdate, createBeginRendering } from '../../utils';
-import type * as Types from '@a2ui/web_core/types/types';
+import type * as Types from '@a2ui/web-core/types/types';
 
 /**
  * Tabs tests following A2UI specification.

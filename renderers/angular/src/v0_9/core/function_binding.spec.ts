@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DataContext, SurfaceModel } from '@a2ui/web_core/v0_9';
+import { DataContext, SurfaceModel } from '@a2ui/web-core/v0_9';
 import { DestroyRef } from '@angular/core';
 import { BasicCatalogBase } from '../catalog/basic/basic-catalog';
 import { toAngularSignal } from './utils';

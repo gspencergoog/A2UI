@@ -16,7 +16,7 @@
 
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { A2uiClientAction } from '@a2ui/web_core/v0_9';
+import { A2uiClientAction } from '@a2ui/web-core/v0_9';
 
 @Injectable({ providedIn: 'root' })
 export class ActionDispatcher {

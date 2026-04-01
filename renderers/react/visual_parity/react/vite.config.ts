@@ -31,8 +31,8 @@ export default defineConfig({
     // Pre-bundle web_core subpath imports so Vite doesn't discover them lazily
     // (which causes "optimized dependencies changed. reloading" mid-page-load)
     include: [
-      '@a2ui/web_core/styles/index',
-      '@a2ui/web_core/data/model-processor',
+      '@a2ui/web-core/styles/index',
+      '@a2ui/web-core/data/model-processor',
     ],
     exclude: [
       '@a2ui/react',

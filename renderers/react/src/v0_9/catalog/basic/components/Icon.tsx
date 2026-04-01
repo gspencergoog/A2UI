@@ -16,7 +16,7 @@
 
 import React from 'react';
 import {createReactComponent} from '../../../adapter';
-import {IconApi} from '@a2ui/web_core/v0_9/basic_catalog';
+import {IconApi} from '@a2ui/web-core/v0_9/basic_catalog';
 import {getBaseLeafStyle} from '../utils';
 
 export const Icon = createReactComponent(IconApi, ({props}) => {

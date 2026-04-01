@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import * as Styles from '@a2ui/web_core/styles/index';
-import * as Types from '@a2ui/web_core/types/types';
+import * as Styles from '@a2ui/web-core/styles/index';
+import * as Types from '@a2ui/web-core/types/types';
 
 /** Elements */
 

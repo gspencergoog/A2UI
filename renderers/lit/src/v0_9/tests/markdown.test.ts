@@ -17,7 +17,7 @@
 import { setupTestDom, teardownTestDom, asyncUpdate } from "./dom-setup.js";
 import assert from "node:assert";
 import { describe, it, before, after } from "node:test";
-import * as Types from "@a2ui/web_core/types/types";
+import * as Types from "@a2ui/web-core/types/types";
 
 describe("Markdown Directive", () => {
   before(() => {

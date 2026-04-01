@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { Catalog } from "@a2ui/web_core/v0_9";
-import { BASIC_FUNCTIONS } from "@a2ui/web_core/v0_9/basic_catalog";
+import { Catalog } from "@a2ui/web-core/v0_9";
+import { BASIC_FUNCTIONS } from "@a2ui/web-core/v0_9/basic_catalog";
 import { LitComponentApi } from "@a2ui/lit/v0_9";
 
 import { A2uiText } from "./components/Text.js";
@@ -43,7 +43,7 @@ import { A2uiModal } from "./components/Modal.js";
  * This catalog includes a wider range of components compared to the minimal catalog,
  * such as list, image, icon, video, audio player, card, divider, checkbox, slider,
  * date-time input, choice picker, tabs, and modal. It also includes the basic functions
- * from package @a2ui/web_core.
+ * from package @a2ui/web-core.
  */
 export const basicCatalog = new Catalog<LitComponentApi>(
   "https://a2ui.org/specification/v0_9/basic_catalog.json",

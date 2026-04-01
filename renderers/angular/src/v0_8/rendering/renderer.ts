@@ -25,7 +25,7 @@ import {
   ComponentRef,
 } from '@angular/core';
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { structuralStyles } from '@a2ui/web_core/styles/index';
+import { structuralStyles } from '@a2ui/web-core/styles/index';
 import { Catalog } from './catalog';
 import { MessageProcessor } from '../data';
 import { Types } from '../types';

@@ -32,7 +32,7 @@
   "dependencies": {
     "@a2a-js/sdk": "^0.3.4",
     "@a2ui/markdown-it": "file:../../../renderers/markdown/markdown_it",
-    "@a2ui/web_core": "file:../../../renderers/web_core",
+    "@a2ui/web-core": "file:../../../renderers/web_core",
     "@angular/cdk": "^20.2.10",
     "@angular/common": "^21.2.0",
     "@angular/compiler": "^21.2.0",

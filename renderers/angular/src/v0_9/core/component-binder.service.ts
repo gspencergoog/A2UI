@@ -15,7 +15,7 @@
  */
 
 import { DestroyRef, Injectable, inject, NgZone } from '@angular/core';
-import { ComponentContext } from '@a2ui/web_core/v0_9';
+import { ComponentContext } from '@a2ui/web-core/v0_9';
 import { toAngularSignal } from './utils';
 import { BoundProperty } from './types';
 

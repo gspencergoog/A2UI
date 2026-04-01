@@ -1,6 +1,6 @@
-# @a2ui/web_core
+# @a2ui/web-core
 
-The `@a2ui/web_core` package contains the core logic, state management, and protocol handling for the A2UI framework. It is designed to be framework-agnostic, providing the foundation for specific renderer implementations like Angular, React, or Lit.
+The `@a2ui/web-core` package contains the core logic, state management, and protocol handling for the A2UI framework. It is designed to be framework-agnostic, providing the foundation for specific renderer implementations like Angular, React, or Lit.
 
 ## Features
 
@@ -27,7 +27,7 @@ Maintains compatibility with the initial A2UI specification version, focusing on
 ## Installation
 
 ```bash
-npm install @a2ui/web_core
+npm install @a2ui/web-core
 ```
 
 ## Development

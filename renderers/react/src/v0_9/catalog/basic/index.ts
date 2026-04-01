@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Catalog} from '@a2ui/web_core/v0_9';
-import {BASIC_FUNCTIONS} from '@a2ui/web_core/v0_9/basic_catalog';
+import {Catalog} from '@a2ui/web-core/v0_9';
+import {BASIC_FUNCTIONS} from '@a2ui/web-core/v0_9/basic_catalog';
 import type {ReactComponentImplementation} from '../../adapter';
 
 import {Text} from './components/Text';

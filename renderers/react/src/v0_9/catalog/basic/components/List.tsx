@@ -16,7 +16,7 @@
 
 import React from 'react';
 import {createReactComponent} from '../../../adapter';
-import {ListApi} from '@a2ui/web_core/v0_9/basic_catalog';
+import {ListApi} from '@a2ui/web-core/v0_9/basic_catalog';
 import {ChildList} from './ChildList';
 import {mapAlign} from '../utils';
 

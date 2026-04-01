@@ -24,7 +24,7 @@ import {
   input,
 } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
-import { ComponentContext } from '@a2ui/web_core/v0_9';
+import { ComponentContext } from '@a2ui/web-core/v0_9';
 import { A2uiRendererService } from './a2ui-renderer.service';
 import { AngularCatalog } from '../catalog/types';
 import { ComponentBinder } from './component-binder.service';

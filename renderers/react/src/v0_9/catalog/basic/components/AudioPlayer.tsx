@@ -16,7 +16,7 @@
 
 import React from 'react';
 import {createReactComponent} from '../../../adapter';
-import {AudioPlayerApi} from '@a2ui/web_core/v0_9/basic_catalog';
+import {AudioPlayerApi} from '@a2ui/web-core/v0_9/basic_catalog';
 import {getBaseLeafStyle} from '../utils';
 
 export const AudioPlayer = createReactComponent(AudioPlayerApi, ({props}) => {

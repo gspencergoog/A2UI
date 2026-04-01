@@ -15,8 +15,8 @@
  */
 
 import { DynamicComponent } from '@a2ui/angular';
-import * as Primitives from '@a2ui/web_core/types/primitives';
-import * as Types from '@a2ui/web_core/types/types';
+import * as Primitives from '@a2ui/web-core/types/primitives';
+import * as Types from '@a2ui/web-core/types/types';
 import {
   AppBridge,
   PostMessageTransport,

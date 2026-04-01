@@ -16,7 +16,7 @@
 
 import React from 'react';
 import {createReactComponent} from '../../../adapter';
-import {DateTimeInputApi} from '@a2ui/web_core/v0_9/basic_catalog';
+import {DateTimeInputApi} from '@a2ui/web-core/v0_9/basic_catalog';
 import {LEAF_MARGIN, STANDARD_BORDER, STANDARD_RADIUS} from '../utils';
 
 export const DateTimeInput = createReactComponent(DateTimeInputApi, ({props}) => {

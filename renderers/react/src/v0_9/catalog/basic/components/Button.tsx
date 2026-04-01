@@ -16,7 +16,7 @@
 
 import React from 'react';
 import {createReactComponent} from '../../../adapter';
-import {ButtonApi} from '@a2ui/web_core/v0_9/basic_catalog';
+import {ButtonApi} from '@a2ui/web-core/v0_9/basic_catalog';
 import {LEAF_MARGIN} from '../utils';
 
 export const Button = createReactComponent(ButtonApi, ({props, buildChild}) => {

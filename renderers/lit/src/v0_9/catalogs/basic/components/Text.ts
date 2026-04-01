@@ -17,9 +17,9 @@
 import { html, nothing } from "lit";
 import { customElement } from "lit/decorators.js";
 import { consume } from "@lit/context";
-import { TextApi } from "@a2ui/web_core/v0_9/basic_catalog";
+import { TextApi } from "@a2ui/web-core/v0_9/basic_catalog";
 import { A2uiLitElement, A2uiController, Context } from "@a2ui/lit/v0_9";
-import * as Types from "@a2ui/web_core/types/types";
+import * as Types from "@a2ui/web-core/types/types";
 
 import { markdown } from "../../../directives/directives.js";
 

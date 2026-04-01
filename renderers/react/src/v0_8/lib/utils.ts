@@ -15,7 +15,7 @@
  */
 
 import {clsx, type ClassValue} from 'clsx';
-import * as Styles from '@a2ui/web_core/styles/index';
+import * as Styles from '@a2ui/web-core/styles/index';
 
 /**
  * Utility function to merge class names.

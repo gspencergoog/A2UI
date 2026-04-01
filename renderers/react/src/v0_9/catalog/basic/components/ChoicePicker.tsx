@@ -16,7 +16,7 @@
 
 import React, {useState} from 'react';
 import {createReactComponent} from '../../../adapter';
-import {ChoicePickerApi} from '@a2ui/web_core/v0_9/basic_catalog';
+import {ChoicePickerApi} from '@a2ui/web-core/v0_9/basic_catalog';
 import {LEAF_MARGIN, STANDARD_BORDER, STANDARD_RADIUS} from '../utils';
 
 // The type of an option is deeply nested into the ChoicePickerApi schema, and

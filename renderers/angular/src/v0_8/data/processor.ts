@@ -16,7 +16,7 @@
 
 import { Injectable, signal } from '@angular/core';
 import { Subject, Observable } from 'rxjs';
-import * as WebCore from '@a2ui/web_core/v0_8';
+import * as WebCore from '@a2ui/web-core/v0_8';
 
 import { Types } from '../types';
 

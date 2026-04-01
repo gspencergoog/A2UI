@@ -15,7 +15,7 @@
  */
 
 import React, {useSyncExternalStore, memo, useMemo, useCallback} from 'react';
-import {type SurfaceModel, ComponentContext, type ComponentModel} from '@a2ui/web_core/v0_9';
+import {type SurfaceModel, ComponentContext, type ComponentModel} from '@a2ui/web-core/v0_9';
 import type {ReactComponentImplementation} from './adapter';
 
 const ResolvedChild = memo(

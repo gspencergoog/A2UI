@@ -15,7 +15,7 @@
  */
 
 import { Type } from '@angular/core';
-import { Catalog, ComponentApi } from '@a2ui/web_core/v0_9';
+import { Catalog, ComponentApi } from '@a2ui/web-core/v0_9';
 
 /**
  * Extends the generic {@link ComponentApi} to include Angular-specific component metadata.

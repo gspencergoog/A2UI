@@ -16,7 +16,7 @@
 
 import {useState} from 'react';
 import {createReactComponent} from '../../../adapter';
-import {TabsApi} from '@a2ui/web_core/v0_9/basic_catalog';
+import {TabsApi} from '@a2ui/web-core/v0_9/basic_catalog';
 import {LEAF_MARGIN} from '../utils';
 
 // The type of a tab is deeply nested into the TabsApi schema, and

@@ -15,7 +15,7 @@
  */
 
 import { MessageProcessor, Surface } from '@a2ui/angular';
-import * as Types from '@a2ui/web_core/types/types';
+import * as Types from '@a2ui/web-core/types/types';
 import { ChangeDetectionStrategy, Component, DOCUMENT, inject, signal } from '@angular/core';
 import { Client } from './client';
 

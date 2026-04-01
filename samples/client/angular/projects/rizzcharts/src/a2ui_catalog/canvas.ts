@@ -15,7 +15,7 @@
  */
 
 import { DynamicComponent } from '@a2ui/angular';
-import * as Types from '@a2ui/web_core/types/types';
+import * as Types from '@a2ui/web-core/types/types';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
 import { CanvasService } from '@a2a_chat_canvas/services/canvas-service';
 

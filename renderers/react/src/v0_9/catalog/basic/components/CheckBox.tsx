@@ -16,7 +16,7 @@
 
 import React from 'react';
 import {createReactComponent} from '../../../adapter';
-import {CheckBoxApi} from '@a2ui/web_core/v0_9/basic_catalog';
+import {CheckBoxApi} from '@a2ui/web-core/v0_9/basic_catalog';
 import {LEAF_MARGIN} from '../utils';
 
 export const CheckBox = createReactComponent(CheckBoxApi, ({props}) => {

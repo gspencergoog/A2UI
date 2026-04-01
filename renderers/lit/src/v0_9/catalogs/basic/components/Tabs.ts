@@ -16,7 +16,7 @@
 
 import { html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { TabsApi } from "@a2ui/web_core/v0_9/basic_catalog";
+import { TabsApi } from "@a2ui/web-core/v0_9/basic_catalog";
 import { A2uiLitElement, A2uiController } from "@a2ui/lit/v0_9";
 
 @customElement("a2ui-tabs")

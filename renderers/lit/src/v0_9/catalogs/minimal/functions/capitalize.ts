@@ -15,7 +15,7 @@
  */
 
 import { z } from "zod";
-import { createFunctionImplementation } from "@a2ui/web_core/v0_9";
+import { createFunctionImplementation } from "@a2ui/web-core/v0_9";
 
 export const CapitalizeApi = {
   name: "capitalize" as const,

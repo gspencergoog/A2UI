@@ -2,7 +2,7 @@
 
 - \[v0_9\] Modify Text widget from the basic catalog to support markdown.
 - \[v0_9\] Add `Context.markdown` to the public API
-- \[CI\] Fix post-build script. This pins the dependency on `@a2ui/web_core` to
+- \[CI\] Fix post-build script. This pins the dependency on `@a2ui/web-core` to
   the latest available in the repo when publishing.
 
 ## 0.8.4

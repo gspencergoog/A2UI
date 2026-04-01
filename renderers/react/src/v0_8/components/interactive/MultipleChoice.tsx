@@ -15,7 +15,7 @@
  */
 
 import {useCallback, useId, memo} from 'react';
-import type * as Types from '@a2ui/web_core/types/types';
+import type * as Types from '@a2ui/web-core/types/types';
 import type {A2UIComponentProps} from '../../types';
 import {useA2UIComponent} from '../../hooks/useA2UIComponent';
 import {classMapToString, stylesToObject} from '../../lib/utils';

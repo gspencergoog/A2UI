@@ -17,7 +17,7 @@
 import { TestBed } from '@angular/core/testing';
 import { DestroyRef } from '@angular/core';
 import { signal as preactSignal } from '@preact/signals-core';
-import { ComponentContext } from '@a2ui/web_core/v0_9';
+import { ComponentContext } from '@a2ui/web-core/v0_9';
 import { ComponentBinder } from './component-binder.service';
 
 describe('ComponentBinder', () => {

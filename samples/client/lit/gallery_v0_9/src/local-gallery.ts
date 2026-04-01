@@ -17,7 +17,7 @@
 import { LitElement, html, css, nothing } from "lit";
 import { provide } from "@lit/context";
 import { customElement, state } from "lit/decorators.js";
-import { MessageProcessor } from "@a2ui/web_core/v0_9";
+import { MessageProcessor } from "@a2ui/web-core/v0_9";
 import { minimalCatalog, basicCatalog, Context } from "@a2ui/lit/v0_9";
 import { renderMarkdown } from "@a2ui/markdown-it";
 // Try avoiding direct deep import if A2uiMessage is not exported at the top level, using any for now as this is just a type for the array of messages

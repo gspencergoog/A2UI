@@ -2,7 +2,7 @@
 
 This guide is for project maintainers. It details the manual publishing process to the npm registry for all four web-related packages in this repository:
 
-1. `@a2ui/web_core`
+1. `@a2ui/web-core`
 2. `@a2ui/lit`
 3. `@a2ui/angular`
 4. `@a2ui/markdown-it`
@@ -24,7 +24,7 @@ Ensure you have an NPM Access Token with rights to the `@a2ui` organization.
 
 ---
 
-## 📦 1. Publishing `@a2ui/web_core`
+## 📦 1. Publishing `@a2ui/web-core`
 
 This package does not have internal `file:` dependencies, so it can be published directly from its root.
 
@@ -48,7 +48,7 @@ Because this is a scoped package (`@a2ui/`), you have two options:
 2. Verify the package looks correct on the npm website.
 3. Promote to public:
    ```sh
-   npm access public @a2ui/web_core
+   npm access public @a2ui/web-core
    ```
 
 **Option B: Publish directly as Public (Free or Paid NPM Account)**
@@ -68,12 +68,12 @@ The package is automatically published under the `Apache-2.0` open-source licens
 
 ## 📦 2. Publishing `@a2ui/lit`, `@a2ui/angular`, and `@a2ui/markdown-it`
 
-These packages depend on `@a2ui/web_core` via a local `file:../web_core` path for development. Therefore, **they must be published from their generated `dist/` folders.** We use specialized scripts to automatically rewrite their `package.json` with the correct `@a2ui/web_core` npm version before publishing.
+These packages depend on `@a2ui/web-core` via a local `file:../web_core` path for development. Therefore, **they must be published from their generated `dist/` folders.** We use specialized scripts to automatically rewrite their `package.json` with the correct `@a2ui/web-core` npm version before publishing.
 
 If you attempt to run `npm publish` in their root directories, it will fail and throw an error to protect against publishing broken paths.
 
 ### Pre-flight Checks
-1. Ensure `@a2ui/web_core` is already published (or its version string is correctly updated) since these packages will read that version number.
+1. Ensure `@a2ui/web-core` is already published (or its version string is correctly updated) since these packages will read that version number.
 2. Update the `version` in the package you want to publish (e.g., `renderers/lit/package.json`).
 3. Ensure all tests pass.
 
@@ -103,7 +103,7 @@ npm run publish:package
 **What happens during `npm run publish:package`?**
 Before publishing, the script runs the necessary `build` command which processes the code. For Lit and Markdown-it, `prepare-publish.mjs` runs, and for Angular, `postprocess-build.mjs` runs. These scripts:
 1. Copy `package.json`, `README.md`, and `LICENSE` to the `dist/` folder.
-2. Read the `version` from `@a2ui/web_core`.
+2. Read the `version` from `@a2ui/web-core`.
 3. Update the `file:` dependency in the `dist/package.json` to the actual core version (e.g., `^0.8.0`).
 4. Adjust exports and paths to be relative to `dist/`.
 5. Remove any build scripts (`prepublishOnly`, `scripts`) so they don't interfere with the publish process.

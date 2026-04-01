@@ -19,7 +19,7 @@ import { AgentStubService } from './agent-stub.service';
 import { A2uiRendererService } from '@a2ui/angular/v0_9';
 import { ActionDispatcher } from './action-dispatcher.service';
 import { Subject } from 'rxjs';
-import { A2uiMessage } from '@a2ui/web_core/v0_9';
+import { A2uiMessage } from '@a2ui/web-core/v0_9';
 
 describe('AgentStubService', () => {
   let service: AgentStubService;

@@ -18,7 +18,7 @@ import { TestBed } from '@angular/core/testing';
 import { MessageProcessor, A2UIClientEvent } from './processor';
 import { Catalog } from '../rendering/catalog';
 import { Types } from '../types';
-import * as WebCore from '@a2ui/web_core/v0_8';
+import * as WebCore from '@a2ui/web-core/v0_8';
 
 describe('MessageProcessor', () => {
   let service: MessageProcessor;

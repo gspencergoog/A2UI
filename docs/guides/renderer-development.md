@@ -26,18 +26,18 @@ All three web renderers follow the same pattern — `web_core` handles the proto
 
 ```typescript
 // Types — shared across all renderers
-import type * as Types from '@a2ui/web_core/types/types';
-import type * as Primitives from '@a2ui/web_core/types/primitives';
+import type * as Types from '@a2ui/web-core/types/types';
+import type * as Primitives from '@a2ui/web-core/types/primitives';
 
 // v0.8: Message processing and state
-import { A2uiMessageProcessor } from '@a2ui/web_core/data/model-processor';
+import { A2uiMessageProcessor } from '@a2ui/web-core/data/model-processor';
 
 // v0.9: Message processing, surfaces, catalogs
-import { MessageProcessor } from '@a2ui/web_core/v0_9';
-import { SurfaceModel } from '@a2ui/web_core/v0_9';
+import { MessageProcessor } from '@a2ui/web-core/v0_9';
+import { SurfaceModel } from '@a2ui/web-core/v0_9';
 
 // Styles and layout helpers
-import * as Styles from '@a2ui/web_core/styles/index';
+import * as Styles from '@a2ui/web-core/styles/index';
 ```
 
 Your renderer only needs to:
@@ -52,9 +52,9 @@ See the [React renderer](https://github.com/google/A2UI/tree/main/renderers/reac
 
 `web_core` exports both v0.8 and v0.9 APIs:
 
-- `@a2ui/web_core/v0_8` or `@a2ui/web_core` (default) — stable v0.8
-- `@a2ui/web_core/v0_9` — v0.9 with `createSurface`, custom catalogs, client-side functions
-- `@a2ui/web_core/v0_9/basic_catalog` — v0.9 basic catalog expression parser and built-in functions
+- `@a2ui/web-core/v0_8` or `@a2ui/web-core` (default) — stable v0.8
+- `@a2ui/web-core/v0_9` — v0.9 with `createSurface`, custom catalogs, client-side functions
+- `@a2ui/web-core/v0_9/basic_catalog` — v0.9 basic catalog expression parser and built-in functions
 
 !!! tip "Start with `web_core`"
     Building a web renderer without `web_core` means reimplementing ~3,000 lines of message processing, state management, and schema validation. Unless you have a specific reason to diverge, use it.

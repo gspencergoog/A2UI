@@ -16,7 +16,7 @@
 
 import { LitElement, nothing } from "lit";
 import { property } from "lit/decorators.js";
-import { ComponentContext, ComponentApi } from "@a2ui/web_core/v0_9";
+import { ComponentContext, ComponentApi } from "@a2ui/web-core/v0_9";
 import { renderA2uiNode } from "./surface/render-a2ui-node.js";
 import { A2uiController } from "@a2ui/lit/v0_9";
 

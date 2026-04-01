@@ -15,7 +15,7 @@
  */
 
 import {createContext, useContext, type ReactNode} from 'react';
-import type * as Types from '@a2ui/web_core/types/types';
+import type * as Types from '@a2ui/web-core/types/types';
 import {defaultTheme} from './litTheme';
 
 /**

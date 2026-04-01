@@ -54,7 +54,7 @@ TODO: Add verified setup example.
 > coming days.
 
 ```bash
-npm install @a2ui/angular @a2ui/web_core
+npm install @a2ui/angular @a2ui/web-core
 ```
 
 The Angular renderer provides:

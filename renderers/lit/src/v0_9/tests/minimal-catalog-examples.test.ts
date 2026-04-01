@@ -20,9 +20,9 @@ import {
   MessageProcessor,
   GenericBinder,
   ComponentContext,
-} from "@a2ui/web_core/v0_9";
+} from "@a2ui/web-core/v0_9";
 import { minimalCatalog } from "../catalogs/minimal/index.js";
-import { TextApi } from "@a2ui/web_core/v0_9/basic_catalog";
+import { TextApi } from "@a2ui/web-core/v0_9/basic_catalog";
 import fs from "fs";
 import path from "path";
 

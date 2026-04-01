@@ -15,7 +15,7 @@
  */
 
 import {createReactComponent} from '../../../adapter';
-import {ColumnApi} from '@a2ui/web_core/v0_9/basic_catalog';
+import {ColumnApi} from '@a2ui/web-core/v0_9/basic_catalog';
 import {ChildList} from './ChildList';
 import {mapJustify, mapAlign} from '../utils';
 

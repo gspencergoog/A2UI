@@ -21,7 +21,7 @@ import {
   ActionListener as ActionHandler,
   A2uiMessage,
   A2uiClientAction as Action,
-} from '@a2ui/web_core/v0_9';
+} from '@a2ui/web-core/v0_9';
 import { AngularComponentImplementation, AngularCatalog } from '../catalog/types';
 
 /**

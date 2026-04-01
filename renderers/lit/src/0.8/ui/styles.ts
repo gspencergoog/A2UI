@@ -15,7 +15,7 @@
  */
 
 import type { CSSResultGroup } from "lit";
-import * as Styles from "@a2ui/web_core/styles/index";
+import * as Styles from "@a2ui/web-core/styles/index";
 
 const buildStructuralStyles = (): CSSResultGroup => {
   if (typeof window === "undefined") {

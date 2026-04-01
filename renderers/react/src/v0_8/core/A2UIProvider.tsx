@@ -15,8 +15,8 @@
  */
 
 import {createContext, useContext, useRef, useState, useMemo, type ReactNode} from 'react';
-import type * as Types from '@a2ui/web_core/types/types';
-import {A2uiMessageProcessor} from '@a2ui/web_core/data/model-processor';
+import type * as Types from '@a2ui/web-core/types/types';
+import {A2uiMessageProcessor} from '@a2ui/web-core/data/model-processor';
 import type {A2UIContextValue, A2UIActions} from './store';
 import {ThemeProvider} from '../theme/ThemeContext';
 import {initializeDefaultCatalog} from '../registry/defaultCatalog';

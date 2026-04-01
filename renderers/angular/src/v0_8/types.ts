@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as WebCore from '@a2ui/web_core/v0_8';
+import * as WebCore from '@a2ui/web-core/v0_8';
 
 /**
  * Centralized namespace for v0.8 renderer types.

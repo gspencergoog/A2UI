@@ -15,7 +15,7 @@
  */
 
 import { createContext } from "@lit/context";
-import * as Types from "@a2ui/web_core/types/types";
+import * as Types from "@a2ui/web-core/types/types";
 
 /**
  * The markdown renderer context.

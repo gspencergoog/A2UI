@@ -16,7 +16,7 @@
 
 import React from 'react';
 import {createReactComponent} from '../../../adapter';
-import {VideoApi} from '@a2ui/web_core/v0_9/basic_catalog';
+import {VideoApi} from '@a2ui/web-core/v0_9/basic_catalog';
 import {getBaseLeafStyle} from '../utils';
 
 export const Video = createReactComponent(VideoApi, ({props}) => {

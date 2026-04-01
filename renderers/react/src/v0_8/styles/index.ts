@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Styles from '@a2ui/web_core/styles/index';
+import * as Styles from '@a2ui/web-core/styles/index';
 import {resetStyles} from './reset';
 
 /**

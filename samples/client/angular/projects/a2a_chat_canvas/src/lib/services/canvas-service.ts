@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import * as Types from '@a2ui/web_core/types/types';
+import * as Types from '@a2ui/web-core/types/types';
 import { Injectable, signal } from '@angular/core';
 
 /**

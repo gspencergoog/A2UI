@@ -16,7 +16,7 @@
 
 import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent, act } from '@testing-library/react';
-import { ComponentModel } from '@a2ui/web_core/v0_9';
+import { ComponentModel } from '@a2ui/web-core/v0_9';
 import { renderA2uiComponent } from '../utils';
 
 import {

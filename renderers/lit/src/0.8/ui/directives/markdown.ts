@@ -23,7 +23,7 @@ import {
 } from "lit/directive.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { until } from "lit/directives/until.js";
-import * as Types from "@a2ui/web_core/types/types";
+import * as Types from "@a2ui/web-core/types/types";
 
 class MarkdownDirective extends Directive {
   #lastValue: string | null = null;
