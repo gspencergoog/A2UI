@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import markdownit from 'markdown_it';
+import markdownit from 'markdown-it';
 import * as Types from '@a2ui/web_core';
 
 /**
