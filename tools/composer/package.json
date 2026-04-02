@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack --port 3001",
-    "build": "next build",
+    "build": "wireit",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
@@ -61,5 +61,19 @@
     "typescript": "5.9.3",
     "typescript-eslint": "^8.40.0",
     "vitest": "^4.0.18"
+  },
+  "wireit": {
+    "build": {
+      "command": "next build",
+      "files": [
+        "src/**/*",
+        "public/**/*",
+        "tsconfig.json",
+        "*.config.*"
+      ],
+      "output": [
+        ".next/"
+      ]
+    }
   }
 }

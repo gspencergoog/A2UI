@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "google-artifactregistry-auth": "^3.5.0",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "wireit": "^0.15.0-pre.2"
   }
 }

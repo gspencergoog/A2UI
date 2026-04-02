@@ -7,7 +7,7 @@
   "scripts": {
     "sync-specs": "node scripts/sync-specs.js",
     "dev": "yarn sync-specs && vite",
-    "build": "yarn sync-specs && tsc && vite build",
+    "build": "wireit",
     "serve": "vite preview"
   },
   "dependencies": {
@@ -20,5 +20,24 @@
   "devDependencies": {
     "typescript": "5.9.3",
     "vite": "^7.1.11"
+  },
+  "wireit": {
+    "build": {
+      "command": "yarn sync-specs && tsc && vite build",
+      "dependencies": [
+        "../../../../renderers/lit:build",
+        "../../../../renderers/markdown/markdown-it:build"
+      ],
+      "files": [
+        "src/**/*",
+        "index.html",
+        "tsconfig.json",
+        "vite.config.*",
+        "scripts/**/*"
+      ],
+      "output": [
+        "dist/"
+      ]
+    }
   }
 }

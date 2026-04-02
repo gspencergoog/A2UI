@@ -12,7 +12,20 @@
     "tslib": "^2.3.0"
   },
   "scripts": {
-    "build": "yarn workspace angular-a2ui ng build a2a-chat-canvas"
+    "build": "wireit"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "wireit": {
+    "build": {
+      "command": "yarn workspace angular-a2ui ng build a2a-chat-canvas",
+      "dependencies": [
+        "../../../../../renderers/angular:build"
+      ],
+      "files": [
+        "src/**/*",
+        "tsconfig.lib.json",
+        "ng-package.json"
+      ]
+    }
+  }
 }

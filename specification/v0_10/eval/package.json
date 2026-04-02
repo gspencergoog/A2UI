@@ -4,7 +4,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
+    "build": "wireit",
     "eval": "dotenv -- tsx src/index.ts",
     "evalAll": "yarn eval --clean-results",
     "evalGemini": "yarn eval --model=gemini-3-flash --clean-results",
@@ -43,5 +43,17 @@
     "js-yaml": "^4.1.1",
     "winston": "^3.19.0",
     "zod": "^3.25.76"
+  },
+  "wireit": {
+    "build": {
+      "command": "tsc",
+      "files": [
+        "src/**/*",
+        "tsconfig.json"
+      ],
+      "output": [
+        "lib/"
+      ]
+    }
   }
 }

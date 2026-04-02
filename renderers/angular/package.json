@@ -21,7 +21,7 @@
   ],
   "scripts": {
     "generate-examples": "node scripts/generate-examples.mjs",
-    "build": "yarn generate-examples && ng build && node ../scripts/prepare-publish.mjs --source ./dist/package.json --skip-path-adjustment",
+    "build": "wireit",
     "prepublishOnly": "node -e \"if(!process.cwd().endsWith('dist')) { console.error('Error: This package must be published from the dist/ directory. Run `yarn build` then `cd dist && yarn npm publish`'); process.exit(1); }\"",
     "publish:package": "yarn build && cd dist && yarn npm publish --access public",
     "demo": "yarn generate-examples && ng serve a2ui_explorer",
@@ -78,5 +78,22 @@
         }
       }
     ]
+  },
+  "wireit": {
+    "build": {
+      "command": "yarn generate-examples && ng build && node ../scripts/prepare-publish.mjs --source ./dist/package.json --skip-path-adjustment",
+      "dependencies": [
+        "../../renderers/web_core:build",
+        "../../renderers/markdown/markdown-it:build"
+      ],
+      "files": [
+        "src/**/*",
+        "tsconfig.json",
+        "scripts/**/*"
+      ],
+      "output": [
+        "dist/"
+      ]
+    }
   }
 }

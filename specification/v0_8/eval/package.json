@@ -4,7 +4,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
+    "build": "wireit",
     "eval": "dotenv -- tsx src/index.ts",
     "evalAll": "yarn eval",
     "evalGemini": "yarn eval -- --model=gemini-2.5-flash --prompt=travelItinerary",
@@ -32,5 +32,17 @@
     "@genkit-ai/vertexai": "^1.19.3",
     "genkit": "^1.19.2",
     "genkitx-anthropic": "^0.25.0"
+  },
+  "wireit": {
+    "build": {
+      "command": "tsc",
+      "files": [
+        "src/**/*",
+        "tsconfig.json"
+      ],
+      "output": [
+        "lib/"
+      ]
+    }
   }
 }

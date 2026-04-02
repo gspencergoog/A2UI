@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "wireit",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -21,5 +21,22 @@
     "@vitejs/plugin-react": "^4.3.0",
     "typescript": "5.9.3",
     "vite": "^6.0.0"
+  },
+  "wireit": {
+    "build": {
+      "command": "tsc -b && vite build",
+      "dependencies": [
+        "../../../../renderers/react:build"
+      ],
+      "files": [
+        "src/**/*",
+        "index.html",
+        "tsconfig.json",
+        "vite.config.*"
+      ],
+      "output": [
+        "dist/"
+      ]
+    }
   }
 }
