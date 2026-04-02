@@ -40,6 +40,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '20'
+          cache: 'yarn'
 
       - name: Build web_core dependency
         working-directory: ./renderers/web_core
@@ -68,6 +69,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '20'
+          cache: 'yarn'
 
       - name: Build web_core dependency
         working-directory: ./renderers/web_core
@@ -96,6 +98,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: '20'
+          cache: 'yarn'
 
       - name: Build web_core dependency
         working-directory: ./renderers/web_core
