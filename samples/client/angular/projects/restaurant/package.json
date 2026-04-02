@@ -5,6 +5,9 @@
   "scripts": {
     "build": "wireit"
   },
+  "devDependencies": {
+    "wireit": "^0.15.0-pre.2"
+  },
   "wireit": {
     "build": {
       "command": "yarn workspace angular-a2ui ng build restaurant",

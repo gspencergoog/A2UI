@@ -115,6 +115,8 @@ __metadata:
 "@a2ui/contact@workspace:samples/client/angular/projects/contact":
   version: 0.0.0-use.local
   resolution: "@a2ui/contact@workspace:samples/client/angular/projects/contact"
+  dependencies:
+    wireit: "npm:^0.15.0-pre.2"
   languageName: unknown
   linkType: soft
 
@@ -157,6 +159,8 @@ __metadata:
 "@a2ui/gallery@workspace:samples/client/angular/projects/gallery":
   version: 0.0.0-use.local
   resolution: "@a2ui/gallery@workspace:samples/client/angular/projects/gallery"
+  dependencies:
+    wireit: "npm:^0.15.0-pre.2"
   languageName: unknown
   linkType: soft
 
@@ -243,6 +247,7 @@ __metadata:
     lit: "npm:^3.3.1"
     typescript: "npm:5.9.3"
     vite: "npm:^7.1.11"
+    wireit: "npm:^0.15.0-pre.2"
   languageName: unknown
   linkType: soft
 
@@ -257,6 +262,7 @@ __metadata:
     lit: "npm:^3.3.1"
     typescript: "npm:5.9.3"
     vite: "npm:^7.1.11"
+    wireit: "npm:^0.15.0-pre.2"
   languageName: unknown
   linkType: soft
 
@@ -283,12 +289,16 @@ __metadata:
 "@a2ui/mcp_calculator@workspace:samples/client/angular/projects/mcp_calculator":
   version: 0.0.0-use.local
   resolution: "@a2ui/mcp_calculator@workspace:samples/client/angular/projects/mcp_calculator"
+  dependencies:
+    wireit: "npm:^0.15.0-pre.2"
   languageName: unknown
   linkType: soft
 
 "@a2ui/orchestrator@workspace:samples/client/angular/projects/orchestrator":
   version: 0.0.0-use.local
   resolution: "@a2ui/orchestrator@workspace:samples/client/angular/projects/orchestrator"
+  dependencies:
+    wireit: "npm:^0.15.0-pre.2"
   languageName: unknown
   linkType: soft
 
@@ -343,6 +353,7 @@ __metadata:
     typescript-eslint: "npm:^8.0.0"
     vite: "npm:^7.3.1"
     vitest: "npm:^4.0.18"
+    wireit: "npm:^0.15.0-pre.2"
     zod: "npm:^3.23.8"
   peerDependencies:
     react: ^18.0.0 || ^19.0.0
@@ -354,12 +365,16 @@ __metadata:
 "@a2ui/restaurant@workspace:samples/client/angular/projects/restaurant":
   version: 0.0.0-use.local
   resolution: "@a2ui/restaurant@workspace:samples/client/angular/projects/restaurant"
+  dependencies:
+    wireit: "npm:^0.15.0-pre.2"
   languageName: unknown
   linkType: soft
 
 "@a2ui/rizzcharts@workspace:samples/client/angular/projects/rizzcharts":
   version: 0.0.0-use.local
   resolution: "@a2ui/rizzcharts@workspace:samples/client/angular/projects/rizzcharts"
+  dependencies:
+    wireit: "npm:^0.15.0-pre.2"
   languageName: unknown
   linkType: soft
 
@@ -12032,6 +12047,7 @@ __metadata:
   resolution: "a2a-chat-canvas@workspace:samples/client/angular/projects/a2a-chat-canvas"
   dependencies:
     tslib: "npm:^2.3.0"
+    wireit: "npm:^0.15.0-pre.2"
   peerDependencies:
     "@a2ui/angular": "workspace:*"
     "@a2ui/web_core": "workspace:*"
