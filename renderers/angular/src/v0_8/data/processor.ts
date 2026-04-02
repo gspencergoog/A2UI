@@ -93,7 +93,7 @@ export class MessageProcessor {
     const allSurfaces = this.baseProcessor.getSurfaces();
     const readySurfaces = new Map<string, WebCore.Surface>();
     for (const [id, surface] of allSurfaces.entries()) {
-      if (surface.rootComponentId !== null && surface.rootComponentId !== undefined) {
+      if (surface.rootComponentId != null) {
         readySurfaces.set(id, surface);
       }
     }
