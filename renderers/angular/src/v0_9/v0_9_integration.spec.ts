@@ -19,6 +19,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { A2uiRendererService, A2UI_RENDERER_CONFIG } from './core/a2ui-renderer.service';
 import { SurfaceComponent } from './core/surface.component';
 import { BasicCatalog } from './catalog/basic/basic-catalog';
+import { A2uiMessage } from '@a2ui/web_core/v0_9';
 
 import * as restaurantCardMock from './test_data/mocks/restaurant-card.json';
 import * as contactCardMock from './test_data/mocks/contact-card.json';
@@ -66,7 +67,7 @@ describe('v0.9 Angular Renderer Integration', () => {
   });
 
   it('should render a basic component tree from protocol messages', async () => {
-    const messages = [
+    const messages: A2uiMessage[] = [
       {
         version: 'v0.9',
         createSurface: {
@@ -102,7 +103,7 @@ describe('v0.9 Angular Renderer Integration', () => {
           ],
         },
       },
-    ] as any[];
+    ];
 
     rendererService.processMessages(messages);
     fixture.detectChanges();
@@ -144,7 +145,7 @@ describe('v0.9 Angular Renderer Integration', () => {
           ],
         },
       },
-    ] as any[]);
+    ] as A2uiMessage[]);
 
     fixture.detectChanges();
     await fixture.whenStable();
@@ -163,7 +164,7 @@ describe('v0.9 Angular Renderer Integration', () => {
           value: 'Alice',
         },
       },
-    ] as any[]);
+    ] as A2uiMessage[]);
 
     fixture.detectChanges();
     await fixture.whenStable();
@@ -206,7 +207,7 @@ describe('v0.9 Angular Renderer Integration', () => {
           ],
         },
       },
-    ] as any[]);
+    ] as A2uiMessage[]);
 
     fixture.detectChanges();
     await fixture.whenStable();
