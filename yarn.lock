@@ -50,7 +50,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@a2ui/angular@workspace:renderers/angular":
+"@a2ui/angular@workspace:*, @a2ui/angular@workspace:renderers/angular":
   version: 0.0.0-use.local
   resolution: "@a2ui/angular@workspace:renderers/angular"
   dependencies:
@@ -116,6 +116,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@a2ui/contact@workspace:samples/client/angular/projects/contact"
   dependencies:
+    "@a2ui/angular": "workspace:*"
+    "@a2ui/markdown-it": "workspace:*"
+    "@a2ui/web_core": "workspace:*"
     wireit: "npm:^0.15.0-pre.2"
   languageName: unknown
   linkType: soft
@@ -160,6 +163,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@a2ui/gallery@workspace:samples/client/angular/projects/gallery"
   dependencies:
+    "@a2ui/angular": "workspace:*"
+    "@a2ui/web_core": "workspace:*"
     wireit: "npm:^0.15.0-pre.2"
   languageName: unknown
   linkType: soft
@@ -290,6 +295,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@a2ui/mcp_calculator@workspace:samples/client/angular/projects/mcp_calculator"
   dependencies:
+    "@a2ui/angular": "workspace:*"
+    "@a2ui/web_core": "workspace:*"
     wireit: "npm:^0.15.0-pre.2"
   languageName: unknown
   linkType: soft
@@ -298,6 +305,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@a2ui/orchestrator@workspace:samples/client/angular/projects/orchestrator"
   dependencies:
+    "@a2ui/angular": "workspace:*"
+    "@a2ui/markdown-it": "workspace:*"
+    "@a2ui/web_core": "workspace:*"
     wireit: "npm:^0.15.0-pre.2"
   languageName: unknown
   linkType: soft
@@ -366,6 +376,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@a2ui/restaurant@workspace:samples/client/angular/projects/restaurant"
   dependencies:
+    "@a2ui/angular": "workspace:*"
+    "@a2ui/markdown-it": "workspace:*"
+    "@a2ui/web_core": "workspace:*"
     wireit: "npm:^0.15.0-pre.2"
   languageName: unknown
   linkType: soft
@@ -374,6 +387,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@a2ui/rizzcharts@workspace:samples/client/angular/projects/rizzcharts"
   dependencies:
+    "@a2ui/angular": "workspace:*"
+    "@a2ui/markdown-it": "workspace:*"
+    "@a2ui/web_core": "workspace:*"
     wireit: "npm:^0.15.0-pre.2"
   languageName: unknown
   linkType: soft

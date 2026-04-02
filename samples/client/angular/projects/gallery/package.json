@@ -5,6 +5,10 @@
   "scripts": {
     "build": "wireit"
   },
+  "dependencies": {
+    "@a2ui/angular": "workspace:*",
+    "@a2ui/web_core": "workspace:*"
+  },
   "devDependencies": {
     "wireit": "^0.15.0-pre.2"
   },
