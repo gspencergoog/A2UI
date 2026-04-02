@@ -4,9 +4,9 @@
   "peerDependencies": {
     "@a2ui/angular": "workspace:*",
     "@a2ui/web_core": "workspace:*",
-    "@angular/common": "^21.2.0",
-    "@angular/core": "^21.2.0",
-    "@angular/platform-browser": "^21.2.0"
+    "@angular/common": "^21.2.5",
+    "@angular/core": "^21.2.5",
+    "@angular/platform-browser": "^21.2.5"
   },
   "dependencies": {
     "tslib": "^2.3.0"
