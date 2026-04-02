@@ -44,6 +44,6 @@ jobs:
 
       - name: Build all lit samples workspaces
         working-directory: ./samples/client/lit
-        run: yarn workspaces foreach run build
+        run: yarn workspaces foreach -R --exclude '@a2ui/lit-samples' run build
 
 
