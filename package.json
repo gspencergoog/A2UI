@@ -17,7 +17,10 @@
     "tools/*"
   ],
   "scripts": {
-    "build:all": "yarn workspaces foreach -A -p --topological-dev --ignore-missing run build",
-    "test:all": "yarn workspaces foreach -A -p --topological-dev --ignore-missing run test"
+    "build:all": "yarn workspaces foreach -A -p --topological-dev run build",
+    "test:all": "yarn workspaces foreach -A -p --topological-dev run test"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
   }
 }

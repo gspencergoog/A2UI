@@ -12,7 +12,7 @@
     "tslib": "^2.3.0"
   },
   "scripts": {
-    "build": "yarn --cwd ../.. ng build a2a-chat-canvas"
+    "build": "yarn workspace angular-a2ui ng build a2a-chat-canvas"
   },
   "sideEffects": false
 }

@@ -3,6 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "yarn --cwd ../.. ng build orchestrator"
+    "build": "yarn workspace angular-a2ui ng build orchestrator"
   }
 }
