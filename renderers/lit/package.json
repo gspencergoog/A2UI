@@ -103,7 +103,7 @@
     "wireit": "^0.15.0-pre.2"
   },
   "peerDependencies": {
-    "@a2ui/markdown-it": "file:../markdown/markdown-it"
+    "@a2ui/markdown-it": "*"
   },
   "peerDependenciesMeta": {
     "@a2ui/markdown-it": {

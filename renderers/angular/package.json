@@ -34,10 +34,10 @@
     "zod": "^3.25.76"
   },
   "peerDependencies": {
+    "@a2ui/markdown-it": "*",
     "@angular/common": "^21.2.0",
     "@angular/core": "^21.2.0",
-    "@angular/platform-browser": "^21.2.0",
-    "@a2ui/markdown-it": "file:../markdown/markdown-it"
+    "@angular/platform-browser": "^21.2.0"
   },
   "peerDependenciesMeta": {
     "@a2ui/markdown-it": {
