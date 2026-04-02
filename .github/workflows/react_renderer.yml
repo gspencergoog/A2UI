@@ -44,20 +44,19 @@ jobs:
       - name: Build web_core dependency
         working-directory: ./renderers/web_core
         run: |
-          npm ci
-          npm run build
+          yarn install --immutable
+          yarn build
 
       - name: Install React renderer deps
-        working-directory: ./renderers/react
-        run: npm ci
+        run: yarn install --immutable
 
       - name: Build React renderer
         working-directory: ./renderers/react
-        run: npm run build
+        run: yarn build
 
       - name: Test React renderer
         working-directory: ./renderers/react
-        run: npm test
+        run: yarn test
 
   build-and-test-demo:
     runs-on: ubuntu-latest
@@ -73,20 +72,19 @@ jobs:
       - name: Build web_core dependency
         working-directory: ./renderers/web_core
         run: |
-          npm ci
-          npm run build
+          yarn install --immutable
+          yarn build
 
       - name: Install React renderer deps
-        working-directory: ./renderers/react
-        run: npm ci
+        run: yarn install --immutable
 
       - name: Build React Demo
         working-directory: ./renderers/react
-        run: npm run build:demo
+        run: yarn build:demo
 
       - name: Test React Demo
         working-directory: ./renderers/react
-        run: npm run test:demo
+        run: yarn test:demo
 
   lint:
     runs-on: ubuntu-latest
@@ -102,14 +100,13 @@ jobs:
       - name: Build web_core dependency
         working-directory: ./renderers/web_core
         run: |
-          npm ci
-          npm run build
+          yarn install --immutable
+          yarn build
 
       - name: Install React renderer deps
-        working-directory: ./renderers/react
-        run: npm ci
+        run: yarn install --immutable
 
       - name: Build React renderer and its dependencies
         working-directory: ./renderers/react
-        run: npm run lint
+        run: yarn lint
 

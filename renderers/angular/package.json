@@ -21,15 +21,15 @@
   ],
   "scripts": {
     "generate-examples": "node scripts/generate-examples.mjs",
-    "build": "npm run generate-examples && ng build && node ../scripts/prepare-publish.mjs --source ./dist/package.json --skip-path-adjustment",
-    "prepublishOnly": "node -e \"if(!process.cwd().endsWith('dist')) { console.error('Error: This package must be published from the dist/ directory. Run `npm run build` then `npm publish dist/`'); process.exit(1); }\"",
-    "publish:package": "npm run build && npm publish dist/ --access public",
-    "demo": "npm run generate-examples && ng serve a2ui_explorer",
-    "test": "npm run generate-examples && ng test lib --browsers=ChromeHeadless",
-    "test:ci": "npm run generate-examples && ng test lib --watch=false --browsers=ChromeHeadless"
+    "build": "yarn generate-examples && ng build && node ../scripts/prepare-publish.mjs --source ./dist/package.json --skip-path-adjustment",
+    "prepublishOnly": "node -e \"if(!process.cwd().endsWith('dist')) { console.error('Error: This package must be published from the dist/ directory. Run `yarn build` then `cd dist && yarn npm publish`'); process.exit(1); }\"",
+    "publish:package": "yarn build && cd dist && yarn npm publish --access public",
+    "demo": "yarn generate-examples && ng serve a2ui_explorer",
+    "test": "yarn generate-examples && ng test lib --browsers=ChromeHeadless",
+    "test:ci": "yarn generate-examples && ng test lib --watch=false --browsers=ChromeHeadless"
   },
   "dependencies": {
-    "@a2ui/web_core": "file:../web_core",
+    "@a2ui/web_core": "workspace:*",
     "tslib": "^2.3.0",
     "zod": "^3.25.76"
   },

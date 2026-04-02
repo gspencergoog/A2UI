@@ -30,8 +30,8 @@ def run_ajv(schema_path, data_paths, refs=None):
     if os.path.exists(local_ajv):
         cmd = [local_ajv, "validate", "-s", schema_path, "--spec=draft2020", "--strict=false", "-c", "ajv-formats"]
     else:
-        # Fallback to pnpm dlx with both packages
-        cmd = ["pnpm", "dlx", "--package=ajv-cli", "--package=ajv-formats", "ajv", "validate", "-s", schema_path, "--spec=draft2020", "--strict=false", "-c", "ajv-formats"]
+        # Fallback to yarn dlx with both packages
+        cmd = ["yarn", "dlx", "--package=ajv-cli", "--package=ajv-formats", "ajv", "validate", "-s", schema_path, "--spec=draft2020", "--strict=false", "-c", "ajv-formats"]
         
     if refs:
         for ref in refs:

@@ -1,0 +1,8 @@
+{
+  "name": "@a2ui/mcp_calculator",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "yarn --cwd ../.. ng build mcp_calculator"
+  }
+}
