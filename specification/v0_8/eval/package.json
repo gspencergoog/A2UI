@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"No tests specified for eval package\"",
     "build": "wireit",
     "eval": "dotenv -- tsx src/index.ts",
     "evalAll": "yarn eval",
