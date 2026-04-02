@@ -24,6 +24,7 @@
     "prettier": "^3.6.2",
     "tsx": "^4.20.5",
     "typescript": "5.9.3",
+    "wireit": "^0.15.0-pre.2",
     "yargs": "^18.0.0"
   },
   "dependencies": {
