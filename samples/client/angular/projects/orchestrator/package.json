@@ -17,6 +17,9 @@
       "files": [
         "src/**/*",
         "tsconfig.app.json"
+      ],
+      "output": [
+        "dist"
       ]
     }
   }

@@ -28,6 +28,9 @@
         "src/**/*",
         "tsconfig.lib.json",
         "ng-package.json"
+      ],
+      "output": [
+        "dist"
       ]
     }
   }
