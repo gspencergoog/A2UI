@@ -15,7 +15,9 @@
  */
 
 import { DestroyRef, Signal, signal as angularSignal } from '@angular/core';
-import { Signal as PreactSignal, effect } from '@a2ui/web_core/v0_9';
+import { Signal as PreactSignal } from '@a2ui/web_core/v0_9';
+import { effect, signal as preactSignal } from '@preact/signals-core';
+export { preactSignal };
 
 /**
  * Bridges a Preact Signal (from A2UI web_core) to a reactive Angular Signal.

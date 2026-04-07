@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Component, input, signal } from '@angular/core';
 import { ButtonComponent } from './button.component';
 import { A2uiRendererService } from '../../core/a2ui-renderer.service';
 import { ComponentBinder } from '../../core/component-binder.service';
 import { By } from '@angular/platform-browser';
+import { preactSignal } from '../../core/utils';
 
 describe('ButtonComponent', () => {
   let component: ButtonComponent;
@@ -149,5 +150,38 @@ describe('ButtonComponent', () => {
     fixture.detectChanges();
     const host = fixture.debugElement.query(By.css('a2ui-v09-component-host'));
     expect(host).toBeFalsy();
+  });
+
+  it('should be disabled when checks fail', async () => {
+    const failSig = preactSignal(true);
+    
+    mockSurface.dataModel = {
+      getSignal: jasmine.createSpy('getSignal').and.returnValue(failSig)
+    };
+    mockSurface.componentsModel.set('comp1', { id: 'comp1', type: 'Button', properties: {} });
+    mockSurface.catalog.invoker = {};
+
+    fixture.componentRef.setInput('props', {
+      ...component.props(),
+      checks: {
+        value: () => [{ condition: { path: 'mock/condition' }, message: 'Condition not met' }],
+        peek: () => [{ condition: { path: 'mock/condition' }, message: 'Condition not met' }]
+      }
+    });
+    
+    fixture.detectChanges();
+    
+    failSig.value = false;
+    await new Promise(resolve => setTimeout(resolve, 100));
+    fixture.detectChanges();
+    
+    const button = fixture.debugElement.query(By.css('button'));
+    expect(button.nativeElement.disabled).toBeTrue();
+    
+    failSig.value = true;
+    await new Promise(resolve => setTimeout(resolve, 100));
+    fixture.detectChanges();
+    
+    expect(button.nativeElement.disabled).toBeFalse();
   });
 });

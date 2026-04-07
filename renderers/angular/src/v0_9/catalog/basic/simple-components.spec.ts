@@ -185,7 +185,21 @@ describe('Simple Components', () => {
       const img = fixture.nativeElement.querySelector('img') as HTMLImageElement;
       expect(img.alt).toBe('A cute cat');
     });
+
+    it('should support all specified variants', () => {
+      const variants = ['icon', 'avatar', 'smallFeature', 'mediumFeature', 'largeFeature', 'header'];
+      for (const variant of variants) {
+        fixture.componentRef.setInput('props', {
+          url: createBoundProperty('https://example.com/image.png'),
+          variant: createBoundProperty(variant),
+        });
+        fixture.detectChanges();
+        const img = fixture.nativeElement.querySelector('img') as HTMLImageElement;
+        expect(img.className).toContain(variant);
+      }
+    });
   });
+
 
   describe('IconComponent', () => {
     let component: IconComponent;

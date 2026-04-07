@@ -16,6 +16,7 @@
 
 import { DestroyRef, Injectable, inject, NgZone } from '@angular/core';
 import { ComponentContext } from '@a2ui/web_core/v0_9';
+import { computed } from '@preact/signals-core';
 import { toAngularSignal } from './utils';
 import { BoundProperty } from './types';
 
@@ -46,10 +47,28 @@ export class ComponentBinder {
 
     for (const key of Object.keys(props)) {
       const value = props[key];
-      const preactSig = context.dataContext.resolveSignal(value);
+      
+      let preactSig;
+      const isChildListTemplate = value && typeof value === 'object' && 'componentId' in value && 'path' in value;
+      
+      if (isChildListTemplate) {
+        const listSig = context.dataContext.resolveSignal({ path: value.path });
+        const listContext = context.dataContext.nested(value.path);
+        preactSig = computed(() => {
+          const arr = listSig.value;
+          const currentArr = Array.isArray(arr) ? arr : [];
+          return currentArr.map((_, i) => ({
+            id: value.componentId,
+            basePath: listContext.nested(String(i)).path,
+          }));
+        });
+      } else {
+        preactSig = context.dataContext.resolveSignal(value);
+      }
+
       const angSig = toAngularSignal(preactSig as any, this.destroyRef, this.ngZone);
 
-      const isBoundPath = value && typeof value === 'object' && 'path' in value;
+      const isBoundPath = value && typeof value === 'object' && 'path' in value && !('componentId' in value);
 
       bound[key] = {
         value: angSig,
