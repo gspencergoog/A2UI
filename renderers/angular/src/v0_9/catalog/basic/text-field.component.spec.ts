@@ -107,11 +107,11 @@ describe('TextFieldComponent', () => {
     mockRendererService.surfaceGroup = {
       getSurface: jasmine.createSpy('getSurface').and.returnValue({
         dataModel: {
-          getSignal: jasmine.createSpy('getSignal').and.returnValue(failSig)
+          getSignal: jasmine.createSpy('getSignal').and.returnValue(failSig),
         },
         componentsModel: new Map([['comp1', { id: 'comp1', type: 'TextField', properties: {} }]]),
-        catalog: { invoker: {} }
-      })
+        catalog: { invoker: {} },
+      }),
     };
 
     fixture.componentRef.setInput('surfaceId', 'surf1');
@@ -120,14 +120,14 @@ describe('TextFieldComponent', () => {
       ...component.props(),
       checks: {
         value: () => [{ condition: { path: 'mock/condition' }, message: 'Value is required' }],
-        peek: () => [{ condition: { path: 'mock/condition' }, message: 'Value is required' }]
-      }
+        peek: () => [{ condition: { path: 'mock/condition' }, message: 'Value is required' }],
+      },
     });
 
     fixture.detectChanges();
 
     failSig.value = false;
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     fixture.detectChanges();
 
     const errorMsg = fixture.debugElement.query(By.css('.a2ui-error-message'));
@@ -135,7 +135,7 @@ describe('TextFieldComponent', () => {
     expect(errorMsg.nativeElement.textContent).toContain('Value is required');
 
     failSig.value = true;
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     fixture.detectChanges();
 
     const errorMsg2 = fixture.debugElement.query(By.css('.a2ui-error-message'));
@@ -147,16 +147,16 @@ describe('TextFieldComponent', () => {
       ...component.props(),
       checks: {
         value: () => null,
-        peek: () => null
-      }
+        peek: () => null,
+      },
     });
     fixture.detectChanges();
-    expect(component.resolvedChecks.length).toBe(0);
+    expect(component.resolvedChecks().length).toBe(0);
   });
 
   it('should handle missing surface when resolving checks', () => {
     mockRendererService.surfaceGroup = {
-      getSurface: jasmine.createSpy('getSurface').and.returnValue(null)
+      getSurface: jasmine.createSpy('getSurface').and.returnValue(null),
     };
 
     fixture.componentRef.setInput('surfaceId', 'non-existent-surf');
@@ -164,12 +164,51 @@ describe('TextFieldComponent', () => {
       ...component.props(),
       checks: {
         value: () => [{ condition: { path: 'mock/condition' }, message: 'Error' }],
-        peek: () => [{ condition: { path: 'mock/condition' }, message: 'Error' }]
-      }
+        peek: () => [{ condition: { path: 'mock/condition' }, message: 'Error' }],
+      },
     });
 
     fixture.detectChanges();
-    expect(component.resolvedChecks.length).toBe(0);
+    expect(component.resolvedChecks().length).toBe(0);
+  });
+  it('should be reactive to changes in checks property', async () => {
+    const checksSig = signal([{ condition: { path: 'mock/condition' }, message: 'Error 1' }]);
+
+    const conditionSig = preactSignal(false);
+
+    mockRendererService.surfaceGroup = {
+      getSurface: jasmine.createSpy('getSurface').and.returnValue({
+        dataModel: {
+          getSignal: jasmine.createSpy('getSignal').and.returnValue(conditionSig),
+        },
+        componentsModel: new Map([['comp1', { id: 'comp1', type: 'TextField', properties: {} }]]),
+        catalog: { invoker: {} },
+      }),
+    };
+
+    fixture.componentRef.setInput('surfaceId', 'surf1');
+    fixture.componentRef.setInput('componentId', 'comp1');
+    fixture.componentRef.setInput('props', {
+      ...component.props(),
+      checks: {
+        value: checksSig,
+        peek: () => checksSig(),
+      },
+    });
+
+    fixture.detectChanges();
+
+    const errorMsg = fixture.debugElement.query(By.css('.a2ui-error-message'));
+    expect(errorMsg).toBeTruthy();
+    expect(errorMsg.nativeElement.textContent).toContain('Error 1');
+
+    // Change the checks!
+    checksSig.set([{ condition: { path: 'mock/condition' }, message: 'Error 2' }]);
+    fixture.detectChanges();
+
+    const errorMsg2 = fixture.debugElement.query(By.css('.a2ui-error-message'));
+    expect(errorMsg2).toBeTruthy();
+    expect(errorMsg2.nativeElement.textContent).toContain('Error 2');
+    expect(errorMsg2.nativeElement.textContent).not.toContain('Error 1');
   });
 });
-

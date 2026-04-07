@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-import { Component, input, computed, ChangeDetectionStrategy, inject, OnInit, DestroyRef, NgZone, Signal } from '@angular/core';
+import {
+  Component,
+  input,
+  computed,
+  ChangeDetectionStrategy,
+  inject,
+  DestroyRef,
+  NgZone,
+  Signal,
+  signal,
+  effect,
+} from '@angular/core';
 import { ComponentHostComponent } from '../../core/component-host.component';
-import { ComponentContext, DataContext } from '@a2ui/web_core/v0_9';
+import { ComponentContext, DataContext, effect as preactEffect } from '@a2ui/web_core/v0_9';
 import { A2uiRendererService } from '../../core/a2ui-renderer.service';
 import { BoundProperty } from '../../core/types';
-import { toAngularSignal } from '../../core/utils';
 
 /**
  * Angular implementation of the A2UI Button component (v0.9).
@@ -77,7 +87,7 @@ import { toAngularSignal } from '../../core/utils';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ButtonComponent implements OnInit {
+export class ButtonComponent {
   /**
    * Reactive properties resolved from the A2UI {@link ComponentModel}.
    *
@@ -96,34 +106,61 @@ export class ButtonComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private ngZone = inject(NgZone);
 
-  resolvedChecks: { message: string; condition: Signal<boolean> }[] = [];
+  resolvedChecks = signal<{ message: string; condition: Signal<boolean> }[]>([]);
 
   variant = computed(() => this.props()['variant']?.value() ?? 'default');
   child = computed(() => this.props()['child']?.value());
   action = computed(() => this.props()['action']?.value());
 
-  ngOnInit() {
-    const checksProp = this.props()['checks'];
-    if (checksProp) {
-      const checksArray = (checksProp.value() as any[]) || [];
+  constructor() {
+    effect((onCleanup) => {
+      const checksProp = this.props()['checks'];
+      const checksArray = checksProp ? (checksProp.value() as any[]) || [] : [];
+
+      if (checksArray.length === 0) {
+        this.resolvedChecks.set([]);
+        return;
+      }
+
+      if (!this.rendererService.surfaceGroup) return;
       const surface = this.rendererService.surfaceGroup.getSurface(this.surfaceId());
       if (!surface) return;
-      
+
       const context = new ComponentContext(surface, this.componentId(), this.dataContextPath());
 
-      this.resolvedChecks = checksArray.map((check) => {
+      const disposes: (() => void)[] = [];
+
+      const resolved = checksArray.map((check) => {
         const conditionSig = context.dataContext.resolveSignal(check.condition);
-        const angSig = toAngularSignal(conditionSig as any, this.destroyRef, this.ngZone);
+        const s = signal<boolean>(!!conditionSig.peek());
+
+        const dispose = preactEffect(() => {
+          const val = !!conditionSig.value;
+          if (this.ngZone) {
+            this.ngZone.run(() => s.set(val));
+          } else {
+            s.set(val);
+          }
+        });
+
+        disposes.push(dispose);
+
         return {
           message: check.message,
-          condition: angSig as unknown as Signal<boolean>,
+          condition: s.asReadonly(),
         };
       });
-    }
+
+      this.resolvedChecks.set(resolved);
+
+      onCleanup(() => {
+        disposes.forEach((d) => d());
+      });
+    });
   }
 
   failedChecks = computed(() => {
-    return this.resolvedChecks.filter((check) => !check.condition());
+    return this.resolvedChecks().filter((check) => !check.condition());
   });
 
   handleClick() {
