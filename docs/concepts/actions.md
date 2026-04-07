@@ -1,17 +1,17 @@
-# A2UI Client-to-Server Actions
+# A2UI Renderer-to-Agent Actions
 
-Interactivity in A2UI relies on a bidirectional communication loop. While the Agent drives the UI by streaming component and data updates, the Client communicates user intent back to the Agent through **Actions** and **Data Model Synchronization**.
+Interactivity in A2UI relies on a bidirectional communication loop. While the Agent drives the UI by streaming component and data updates, the Renderer communicates user intent back to the Agent through **Actions** and **Data Model Synchronization**.
 
 ## Action Architecture
 
 Actions allow UI components to trigger behavior. They are defined in the `Action` schema in [`common_types.json`](../specification/v0_9/json/common_types.json) and come in two flavors:
 
-1.  **Server Events**: Dispatched to the Agent for processing (e.g., clicking "Submit").
-2.  **Local Function Calls**: Executed entirely on the client (e.g., opening a URL).
+1.  **Agent Events**: Dispatched to the Agent for processing (e.g., clicking "Submit").
+2.  **Local Function Calls**: Executed entirely on the renderer (e.g., opening a URL).
 
 ### Action Wiring in Schema
 
-Components like `Button` expose an `action` property. Here is how a server event is wired:
+Components like `Button` expose an `action` property. Here is how an agent event is wired:
 
 ```json
 {
@@ -36,9 +36,9 @@ Components like `Button` expose an `action` property. Here is how a server event
 > [!NOTE]
 > **Context vs. Data Model**: While the Data Model represents the entire state tree of a surface, the `context` in an action is effectively a hand-picked **"view"** or subset of that state. This simplifies the Agent's job by providing exactly the values needed for a specific event, without requiring the Agent to navigate a potentially large and complex data model.
 
-### Local Actions vs. Server Events
+### Local Actions vs. Agent Events
 
-While Server Events are the primary way to interact with an agent, **Local Actions** allow for immediate client-side behavior without a network round-trip. This is essential for responsive UI patterns.
+While Agent Events are the primary way to interact with an agent, **Local Actions** allow for immediate renderer-side behavior without a network round-trip. This is essential for responsive UI patterns.
 
 ```json
 {
@@ -56,14 +56,14 @@ While Server Events are the primary way to interact with an agent, **Local Actio
 
 Common uses for Local Actions include:
 
-- **Validation**: Validating inputs for a form before submitting it to the server.
+- **Validation**: Validating inputs for a form before submitting it to the agent.
 - **Formatting**: Using `formatString` to format a local display value.
 
 ### Basic Catalog Action Validation (Checks)
 
-The basic catalog defines a limited set of checks that can be performed on the client. Interactive components can define a list of `checks` (using the `Checkable` schema in [`common_types.json`](../specification/v0_9/json/common_types.json)). For a `Button`, if any check fails, the button is **automatically disabled** on the client.
+The basic catalog defines a limited set of checks that can be performed on the renderer. Interactive components can define a list of `checks` (using the `Checkable` schema in [`common_types.json`](../specification/v0_9/json/common_types.json)). For a `Button`, if any check fails, the button is **automatically disabled** on the renderer.
 
-- **UX Focus**: Action checks are designed to manage **UI State (User Experience)** by preventing invalid interactions before they happen. They are not a replacement for **Data Integrity** checks, which must still be performed on the server.
+- **UX Focus**: Action checks are designed to manage **UI State (User Experience)** by preventing invalid interactions before they happen. They are not a replacement for **Data Integrity** checks, which must still be performed on the agent.
 
 This allows the UI to enforce requirements (like a non-empty field) before the user even tries to submit.
 
@@ -87,12 +87,12 @@ This allows the UI to enforce requirements (like a non-empty field) before the u
 
 ## Local State Updates & The "Write" Contract
 
-Before an action is even dispatched, the client is already managing the state of the UI locally. A2UI defines a **Read/Write Contract** for all input components (like `TextField`, `CheckBox`, or `Slider`).
+Before an action is even dispatched, the renderer is already managing the state of the UI locally. A2UI defines a **Read/Write Contract** for all input components (like `TextField`, `CheckBox`, or `Slider`).
 
 1.  **Read (Model → View)**: When a component renders, it pulls its value from the bound `path` in the Data Model.
-2.  **Write (View → Model)**: As soon as a user interacts (e.g., typing a character or clicking a checkbox), the client **immediately** writes the new value into the local Data Model.
+2.  **Write (View → Model)**: As soon as a user interacts (e.g., typing a character or clicking a checkbox), the renderer **immediately** writes the new value into the local Data Model.
 
-This means the local model is **always** the source of truth for the UI's current state. This "View-to-Model" synchronization happens purely on the client. Only when a User Action (like a Button click) is triggered is this state synchronized back to the server.
+This means the local model is **always** the source of truth for the UI's current state. This "View-to-Model" synchronization happens purely on the renderer. Only when a User Action (like a Button click) is triggered is this state synchronized back to the agent.
 
 > [!IMPORTANT]
 > **Synchronous Updates**: Local model updates are **synchronous**. This guarantees that the Data Model is fully updated before any Action resolves its `context` paths or a `DataModelSync` payload is packaged. There are no race conditions between typing and clicking; the "Write" is always committed first.
@@ -105,19 +105,19 @@ This separation allows for a robust form submission pattern:
 
 - **Binding**: A `TextField` is bound to `/reservationTime`.
 - **Interaction**: The user types "7:00 PM". The local model at `/reservationTime` is updated instantly.
-- **Submission**: The user clicks a "Book" button. The button's action resolves the `path: "/reservationTime"` from the local model and sends the current value to the server.
+- **Submission**: The user clicks a "Book" button. The button's action resolves the `path: "/reservationTime"` from the local model and sends the current value to the agent.
 
 ## User Interaction Flow
 
 When a user interacts with a component (e.g., clicks a button):
 
-1.  **Resolve**: The client resolves all `path` references in the `context` against the local **Data Model**.
-2.  **Construct**: The client builds an `action` payload conforming to [`client_to_server.json`](../specification/v0_9/json/client_to_server.json).
+1.  **Resolve**: The renderer resolves all `path` references in the `context` against the local **Data Model**.
+2.  **Construct**: The renderer builds an `action` payload conforming to [`client_to_server.json`](../specification/v0_9/json/client_to_server.json).
 3.  **Dispatch**: The payload is sent via the chosen transport (e.g., A2A, WebSockets).
 
 ### Example: The Action Payload (v0.9)
 
-If a user clicks the button above with a data model containing `{"reservationTime": "7:00 PM", "partySize": 4}`, the client sends a message using the `action` key:
+If a user clicks the button above with a data model containing `{"reservationTime": "7:00 PM", "partySize": 4}`, the renderer sends a message using the `action` key:
 
 ```json
 {
@@ -153,13 +153,13 @@ if action_name == "submit_reservation":
     response = await llm.generate(query)
 ```
 
-## Client-to-Server Error Reporting
+## Renderer-to-Agent Error Reporting
 
-In addition to user actions, the client can report system-level errors back to the server using the `error` payload defined in [`client_to_server.json`](../specification/v0_9/json/client_to_server.json).
+In addition to user actions, the renderer can report system-level errors back to the agent using the `error` payload defined in [`client_to_server.json`](../specification/v0_9/json/client_to_server.json).
 
 ### Validation Failures
 
-If the agent sends A2UI JSON that violates the catalog schema or protocol rules, the client sends a `VALIDATION_FAILED` error. This is a critical feedback loop for agentic systems:
+If the agent sends A2UI JSON that violates the catalog schema or protocol rules, the renderer sends a `VALIDATION_FAILED` error. This is a critical feedback loop for agentic systems:
 
 ```json
 {
@@ -177,11 +177,11 @@ The agent can catch this error, apologize (or self-correct internally), and re-s
 
 ## Data Model Sync (v0.9)
 
-In A2UI v0.9, we introduced a powerful "stateless" synchronization feature. This allows the client to automatically include the **entire data model** of a surface in the metadata of every message it sends to the server.
+In A2UI v0.9, we introduced a powerful "stateless" synchronization feature. This allows the renderer to automatically include the **entire data model** of a surface in the metadata of every message it sends to the agent.
 
 ### Enabling Sync
 
-Synchronization is requested by the agent during surface initialization. By setting `sendDataModel: true` in the `createSurface` message, the agent instructs the client to start the sync loop.
+Synchronization is requested by the agent during surface initialization. By setting `sendDataModel: true` in the `createSurface` message, the agent instructs the renderer to start the sync loop.
 
 ```json
 {
@@ -196,7 +196,7 @@ Synchronization is requested by the agent during surface initialization. By sett
 
 ### Sync on the Wire
 
-When sync is enabled, the client does not send the data model as a separate message. Instead, it attaches it as **metadata** to the outgoing transport envelope (e.g., an A2A message).
+When sync is enabled, the renderer does not send the data model as a separate message. Instead, it attaches it as **metadata** to the outgoing transport envelope (e.g., an A2A message).
 
 In an A2A (Agent-to-Agent) binding, the data model is placed in an `a2uiClientDataModel` object within the envelope's `metadata` field.
 
@@ -226,13 +226,13 @@ In an A2A (Agent-to-Agent) binding, the data model is placed in an `a2uiClientDa
 - **Stateless Agents**: The agent doesn't need to maintain local state for every user session; it receives the full current context with every single interaction.
 - **Verbal Shortcuts**: Allows the user to trigger actions via voice or text (e.g., "okay submit") even without clicking a specific button. Since the agent receives the updated data model with the text message, it can process the request immediately.
 
-## Client Metadata & Capabilities
+## Renderer Metadata & Capabilities
 
-Before an agent can safely send a UI, the client must advertise which component catalogs it supports. This is handled via the `a2uiClientCapabilities` object.
+Before an agent can safely send a UI, the renderer must advertise which component catalogs it supports. This is handled via the `a2uiClientCapabilities` object.
 
 ### Advertising Capabilities
 
-Clients include an `a2uiClientCapabilities` object in the **metadata** of their messages to the server (e.g., in the `metadata` field of an A2A envelope).
+Renderers include an `a2uiClientCapabilities` object in the **metadata** of their messages to the agent (e.g., in the `metadata` field of an A2A envelope).
 
 ```json
 {
@@ -246,7 +246,7 @@ Clients include an `a2uiClientCapabilities` object in the **metadata** of their 
 }
 ```
 
-- **`supportedCatalogIds`**: An array of catalog URIs the client can render.
+- **`supportedCatalogIds`**: An array of catalog URIs the renderer can render.
 - **`inlineCatalogs`**: (Optional) For development or specialized environments, allows sending the full catalog schema inline.
 
 Without this handshake, an agent cannot be certain that the renderer can handle the specific components being sent.
@@ -287,18 +287,18 @@ A2UI is designed with secure, sandboxed communication as a core principle. Becau
 
 ### Sandboxed Execution
 
-A core selling point of A2UI is security through restriction. By prohibiting arbitrary code execution (like injecting raw JavaScript) from the agent, A2UI ensures that agents can only trigger pre-registered, client-side behaviors. The `functionCall` mechanism acts as a safe, sandboxed way for the agent to interact with the client environment without exposing the user to malicious scripts.
+A core selling point of A2UI is security through restriction. By prohibiting arbitrary code execution (like injecting raw JavaScript) from the agent, A2UI ensures that agents can only trigger pre-registered behaviors. The `functionCall` mechanism acts as a safe, sandboxed way for the agent to interact with the renderer's environment without exposing the user to malicious scripts.
 
 ### Data Model Isolation and Orchestrator Routing
 
-When `sendDataModel: true` is enabled, the client includes the surface's entire data model in outgoing messages. Developers must understand the visibility of this data:
+When `sendDataModel: true` is enabled, the renderer includes the surface's entire data model in outgoing messages. Developers must understand the visibility of this data:
 
 - **Point-to-Point Visibility**: Only the backend receiving the transport envelope (the Agent that created the surface, or an intermediate Orchestrator) can read this payload.
 - **The Orchestrator's Responsibility**: In a multi-agent architecture, a central Orchestrator often routes user intents to specialized sub-agents. The Orchestrator must enforce **data isolation**. It is responsible for parsing the `a2uiClientDataModel`, identifying the `surfaceId`, and ensuring that the data model is only passed to the specific sub-agent that owns that surface. Data from one agent's surface must never leak to another agent.
 
 ## Orchestration & Routing
 
-In multi-agent systems, a central **Orchestrator** often manages interactions between a user and several specialized sub-agents. A key challenge is ensuring that `action` messages from the client are routed back to the specific sub-agent that generated the UI surface.
+In multi-agent systems, a central **Orchestrator** often manages interactions between a user and several specialized sub-agents. A key challenge is ensuring that `action` messages from the renderer are routed back to the specific sub-agent that generated the UI surface.
 
 ### The Surface Ownership Pattern
 
@@ -317,7 +317,7 @@ def on_surface_created(surface_id, agent_name, session):
 
 #### 2. Routing User Actions
 
-When the client sends an `action` back to the orchestrator, the orchestrator looks up the `surfaceId` and transfers the request to the correct sub-agent.
+When the renderer sends an `action` back to the orchestrator, the orchestrator looks up the `surfaceId` and transfers the request to the correct sub-agent.
 
 ```python
 # Simplified Orchestrator Logic: Route Action
@@ -412,8 +412,8 @@ The agent created the surface with `sendDataModel: true`:
 }
 ```
 
-**Client Transmission:**
-The client sends an A2A message containing the user's text and the data model in the metadata:
+**Renderer Transmission:**
+The renderer sends an A2A message containing the user's text and the data model in the metadata:
 
 ```json
 {

@@ -33,8 +33,10 @@ from .constants import (
     VERSION_0_9,
 )
 
-# RFC 6901 compliant regex for JSON Pointer
-JSON_POINTER_PATTERN = re.compile(r"^(?:\/(?:[^~\/]|~[01])*)*$")
+# A2UI relaxed path pattern (extends RFC 6901 to support relative paths)
+RELAXED_PATH_PATTERN = re.compile(
+    r"^(?:(?:\/(?:[^~\/]|~[01])*)*|(?:[^~\/]|~[01])+(?:\/(?:[^~\/]|~[01])*)*)$"
+)
 
 # Recursion Limits
 MAX_GLOBAL_DEPTH = 50
@@ -750,8 +752,8 @@ def _validate_recursion_and_paths(data: Any) -> None:
       # Check for path
       if PATH in item and isinstance(item[PATH], str):
         path = item[PATH]
-        if not re.fullmatch(JSON_POINTER_PATTERN, path):
-          raise ValueError(f"Invalid JSON Pointer syntax: '{path}'")
+        if not re.fullmatch(RELAXED_PATH_PATTERN, path):
+          raise ValueError(f"Invalid path syntax: '{path}'")
 
       # Check for FunctionCall
       is_func = CALL in item and ARGS in item
