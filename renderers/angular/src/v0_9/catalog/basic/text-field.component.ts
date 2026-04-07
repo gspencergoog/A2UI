@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import { Component, input, computed, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, input, computed, ChangeDetectionStrategy, inject, OnInit, DestroyRef, NgZone, Signal, signal, effect } from '@angular/core';
+import { effect as preactEffect } from '@preact/signals-core';
 import { BoundProperty } from '../../core/types';
 import { A2uiRendererService } from '../../core/a2ui-renderer.service';
+import { ComponentContext } from '@a2ui/web_core/v0_9';
+import { toAngularSignal } from '../../core/utils';
 
 /**
  * Angular implementation of the A2UI TextField component (v0.9).
@@ -38,8 +41,11 @@ import { A2uiRendererService } from '../../core/a2ui-renderer.service';
         [value]="value()"
         (input)="handleInput($event)"
         [placeholder]="placeholder()"
+        [class.invalid]="failedChecks().length > 0"
       />
-      <!-- Validation errors would go here in a more advanced version -->
+      @for (check of failedChecks(); track check.message) {
+        <div class="a2ui-error-message">{{ check.message }}</div>
+      }
     </div>
   `,
   styles: [
@@ -60,6 +66,13 @@ import { A2uiRendererService } from '../../core/a2ui-renderer.service';
         border: 1px solid #ccc;
         border-radius: 4px;
       }
+      input.invalid {
+        border-color: red;
+      }
+      .a2ui-error-message {
+        color: red;
+        font-size: 12px;
+      }
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -73,6 +86,7 @@ export class TextFieldComponent {
    * - `label`: Optional label text to display above the input.
    * - `placeholder`: Hint text shown when the input is empty.
    * - `variant`: Input type variant ('default', 'obscured' (password), 'number').
+   * - `checks`: Optional validation rules.
    */
   props = input<Record<string, BoundProperty>>({});
   surfaceId = input.required<string>();
@@ -80,11 +94,61 @@ export class TextFieldComponent {
   dataContextPath = input<string>('/');
 
   private rendererService = inject(A2uiRendererService);
+  private destroyRef = inject(DestroyRef);
+  private ngZone = inject(NgZone);
+
+  resolvedChecks = signal<{ message: string; condition: Signal<boolean> }[]>([]);
 
   label = computed(() => this.props()['label']?.value());
   value = computed(() => this.props()['value']?.value() || '');
   placeholder = computed(() => this.props()['placeholder']?.value() || '');
   variant = computed(() => this.props()['variant']?.value());
+
+  constructor() {
+    effect((onCleanup) => {
+      const checksProp = this.props()['checks'];
+      const checksArray = checksProp ? (checksProp.value() as any[]) || [] : [];
+      
+      if (!this.rendererService.surfaceGroup) return;
+      const surface = this.rendererService.surfaceGroup.getSurface(this.surfaceId());
+      if (!surface) return;
+      
+      const context = new ComponentContext(surface, this.componentId() || '', this.dataContextPath());
+
+      const disposes: (() => void)[] = [];
+      
+      const resolved = checksArray.map((check) => {
+        const conditionSig = context.dataContext.resolveSignal(check.condition);
+        const s = signal<boolean>(!!conditionSig.peek());
+        
+        const dispose = preactEffect(() => {
+          const val = !!conditionSig.value;
+          console.log('TextFieldComponent check effect', check.message, val);
+          if (this.ngZone) {
+            this.ngZone.run(() => s.set(val));
+          } else {
+            s.set(val);
+          }
+        });
+        
+        disposes.push(dispose);
+        return {
+          message: check.message as string,
+          condition: s.asReadonly(),
+        };
+      });
+      
+      this.resolvedChecks.set(resolved);
+      
+      onCleanup(() => {
+        disposes.forEach((d) => d());
+      });
+    });
+  }
+
+  failedChecks = computed(() => {
+    return this.resolvedChecks().filter((check) => !check.condition());
+  });
 
   inputType = computed(() => {
     switch (this.variant()) {
@@ -99,6 +163,7 @@ export class TextFieldComponent {
 
   handleInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;
+    console.log('TextFieldComponent handleInput', value);
     // Update the data path.  If anything is listening to this path, it will be
     // notified.
     this.props()['value']?.onUpdate(value);

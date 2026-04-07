@@ -16,6 +16,7 @@
 
 import { DestroyRef, Injectable, inject, NgZone } from '@angular/core';
 import { ComponentContext } from '@a2ui/web_core/v0_9';
+import { computed } from '@preact/signals-core';
 import { toAngularSignal } from './utils';
 import { BoundProperty } from './types';
 
@@ -46,16 +47,38 @@ export class ComponentBinder {
 
     for (const key of Object.keys(props)) {
       const value = props[key];
-      const preactSig = context.dataContext.resolveSignal(value);
-      const angSig = toAngularSignal(preactSig as any, this.destroyRef, this.ngZone);
+      
+      let preactSig;
+      const isChildListTemplate = value && typeof value === 'object' && 'componentId' in value && 'path' in value;
+      const isBoundPath = value && typeof value === 'object' && ('path' in value || 'call' in value) && !('componentId' in value);
+      
+      console.log('Binding prop', key, value, 'isBoundPath', isBoundPath);
+      
+      if (isChildListTemplate) {
+        const listSig = context.dataContext.resolveSignal({ path: value.path });
+        const listContext = context.dataContext.nested(value.path);
+        preactSig = computed(() => {
+          const arr = listSig.value;
+          const currentArr = Array.isArray(arr) ? arr : [];
+          return currentArr.map((_, i) => ({
+            id: value.componentId,
+            basePath: listContext.nested(String(i)).path,
+          }));
+        });
+      } else {
+        preactSig = context.dataContext.resolveSignal(value);
+      }
 
-      const isBoundPath = value && typeof value === 'object' && 'path' in value;
+      const angSig = toAngularSignal(preactSig as any, this.destroyRef, this.ngZone);
 
       bound[key] = {
         value: angSig,
         raw: value,
         onUpdate: isBoundPath
-          ? (newValue: any) => context.dataContext.set(value.path, newValue)
+          ? (newValue: any) => {
+              console.log('ComponentBinder onUpdate called', value.path, newValue);
+              context.dataContext.set(value.path, newValue);
+            }
           : () => {}, // No-op for non-bound values
       };
     }

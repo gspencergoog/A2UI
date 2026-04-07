@@ -51,7 +51,7 @@ import { ComponentBinder } from './component-binder.service';
           props: props,
           surfaceId: surfaceId(),
           componentId: componentId(),
-          dataContextPath: dataContextPath(),
+          dataContextPath: resolvedDataContextPath,
         }
         "
       ></ng-container>
@@ -61,7 +61,7 @@ import { ComponentBinder } from './component-binder.service';
 })
 export class ComponentHostComponent implements OnInit {
   /** The ID of the component to render. Defaults to 'root'. */
-  componentId = input<string>('root');
+  componentId = input<string | { id: string; basePath: string }>('root');
 
   /** The unique identifier of the surface this component belongs to. */
   surfaceId = input.required<string>();
@@ -80,6 +80,10 @@ export class ComponentHostComponent implements OnInit {
   protected props: any = {};
   private context?: ComponentContext;
 
+  protected get resolvedDataContextPath(): string {
+    return this.context?.dataContext.path || this.dataContextPath();
+  }
+
   ngOnInit(): void {
     const surface = this.rendererService.surfaceGroup?.getSurface(this.surfaceId());
 
@@ -88,10 +92,22 @@ export class ComponentHostComponent implements OnInit {
       return;
     }
 
-    const componentModel = surface.componentsModel.get(this.componentId());
+    const compId = this.componentId();
+    let id: string;
+    let basePath: string;
+
+    if (typeof compId === 'object' && compId !== null && 'id' in compId) {
+      id = compId.id;
+      basePath = compId.basePath || this.dataContextPath();
+    } else {
+      id = compId as string;
+      basePath = this.dataContextPath();
+    }
+
+    const componentModel = surface.componentsModel.get(id);
 
     if (!componentModel) {
-      console.warn(`Component ${this.componentId()} not found in surface ${this.surfaceId()}`);
+      console.warn(`Component ${id} not found in surface ${this.surfaceId()}`);
       return;
     }
 
@@ -106,7 +122,7 @@ export class ComponentHostComponent implements OnInit {
     this.componentType = api.component;
 
     // Create context
-    this.context = new ComponentContext(surface, this.componentId(), this.dataContextPath());
+    this.context = new ComponentContext(surface, id, basePath);
     this.props = this.binder.bind(this.context);
 
     this.destroyRef.onDestroy(() => {

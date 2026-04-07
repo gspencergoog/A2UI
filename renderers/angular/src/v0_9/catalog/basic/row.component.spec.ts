@@ -129,4 +129,43 @@ describe('RowComponent', () => {
     expect(hosts[1].componentInstance.componentId()).toBe('template1');
     expect(hosts[1].componentInstance.dataContextPath()).toBe('/items/1');
   });
+
+  it('should handle non-array children value', () => {
+    fixture.componentRef.setInput('props', {
+      ...component.props(),
+      children: {
+        value: signal('not-an-array'),
+        raw: 'not-an-array',
+        onUpdate: () => {},
+      },
+    });
+    fixture.detectChanges();
+    const hosts = fixture.debugElement.queryAll(By.css('a2ui-v09-component-host'));
+    expect(hosts.length).toBe(0);
+  });
+
+  it('should handle missing children property', () => {
+    fixture.componentRef.setInput('props', {
+      justify: { value: signal('center'), raw: 'center', onUpdate: () => {} },
+      align: { value: signal('baseline'), raw: 'baseline', onUpdate: () => {} },
+    });
+    fixture.detectChanges();
+    const hosts = fixture.debugElement.queryAll(By.css('a2ui-v09-component-host'));
+    expect(hosts.length).toBe(0);
+  });
+
+  it('should handle missing justify and align properties', () => {
+    fixture.componentRef.setInput('props', {
+      children: {
+        value: signal(['child1']),
+        raw: ['child1'],
+        onUpdate: () => {},
+      },
+    });
+    fixture.detectChanges();
+    const div = fixture.debugElement.query(By.css('.a2ui-row'));
+    expect(div.styles['justify-content']).toBeFalsy();
+    expect(div.styles['align-items']).toBeFalsy();
+  });
 });
+

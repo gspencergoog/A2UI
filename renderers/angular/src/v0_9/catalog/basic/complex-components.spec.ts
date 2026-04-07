@@ -337,7 +337,24 @@ describe('Complex Components', () => {
       timeInput.dispatchEvent(new Event('change'));
       expect(onUpdateSpy).toHaveBeenCalled();
     });
+
+    it('should handle empty value by returning empty strings', () => {
+      fixture.componentRef.setInput('props', {
+        value: createBoundProperty(''),
+        enableDate: createBoundProperty(true),
+        enableTime: createBoundProperty(true),
+      });
+      fixture.detectChanges();
+      
+      const dateInput = fixture.nativeElement.querySelector('input[type="date"]');
+      const timeInput = fixture.nativeElement.querySelector('input[type="time"]');
+      
+      expect(dateInput.value).toBe('');
+      expect(timeInput.value).toBe('');
+    });
   });
+
+
 
   describe('ListComponent', () => {
     let component: ListComponent;
