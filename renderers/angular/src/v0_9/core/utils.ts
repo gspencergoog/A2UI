@@ -15,8 +15,7 @@
  */
 
 import { DestroyRef, Signal, signal as angularSignal } from '@angular/core';
-import { Signal as PreactSignal } from '@a2ui/web_core/v0_9';
-import { effect, signal as preactSignal } from '@preact/signals-core';
+import { Signal as PreactSignal, effect, signal as preactSignal } from '@a2ui/web_core/v0_9';
 export { preactSignal };
 
 /**

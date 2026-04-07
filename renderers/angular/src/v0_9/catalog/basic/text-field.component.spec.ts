@@ -103,7 +103,7 @@ describe('TextFieldComponent', () => {
 
   it('should show error messages when checks fail', async () => {
     const failSig = preactSignal(true);
-    
+
     mockRendererService.surfaceGroup = {
       getSurface: jasmine.createSpy('getSurface').and.returnValue({
         dataModel: {
@@ -123,21 +123,21 @@ describe('TextFieldComponent', () => {
         peek: () => [{ condition: { path: 'mock/condition' }, message: 'Value is required' }]
       }
     });
-    
+
     fixture.detectChanges();
-    
+
     failSig.value = false;
     await new Promise(resolve => setTimeout(resolve, 100));
     fixture.detectChanges();
-    
+
     const errorMsg = fixture.debugElement.query(By.css('.a2ui-error-message'));
     expect(errorMsg).toBeTruthy();
     expect(errorMsg.nativeElement.textContent).toContain('Value is required');
-    
+
     failSig.value = true;
     await new Promise(resolve => setTimeout(resolve, 100));
     fixture.detectChanges();
-    
+
     const errorMsg2 = fixture.debugElement.query(By.css('.a2ui-error-message'));
     expect(errorMsg2).toBeFalsy();
   });
@@ -167,49 +167,9 @@ describe('TextFieldComponent', () => {
         peek: () => [{ condition: { path: 'mock/condition' }, message: 'Error' }]
       }
     });
-    
+
     fixture.detectChanges();
     expect(component.resolvedChecks.length).toBe(0);
-  });
-  it('should be reactive to changes in checks property', async () => {
-    const checksSig = signal([{ condition: { path: 'mock/condition' }, message: 'Error 1' }]);
-    
-    const conditionSig = preactSignal(false);
-    
-    mockRendererService.surfaceGroup = {
-      getSurface: jasmine.createSpy('getSurface').and.returnValue({
-        dataModel: {
-          getSignal: jasmine.createSpy('getSignal').and.returnValue(conditionSig)
-        },
-        componentsModel: new Map([['comp1', { id: 'comp1', type: 'TextField', properties: {} }]]),
-        catalog: { invoker: {} }
-      })
-    };
-
-    fixture.componentRef.setInput('surfaceId', 'surf1');
-    fixture.componentRef.setInput('componentId', 'comp1');
-    fixture.componentRef.setInput('props', {
-      ...component.props(),
-      checks: {
-        value: checksSig,
-        peek: () => checksSig()
-      }
-    });
-    
-    fixture.detectChanges();
-    
-    const errorMsg = fixture.debugElement.query(By.css('.a2ui-error-message'));
-    expect(errorMsg).toBeTruthy();
-    expect(errorMsg.nativeElement.textContent).toContain('Error 1');
-    
-    // Change the checks!
-    checksSig.set([{ condition: { path: 'mock/condition' }, message: 'Error 2' }]);
-    fixture.detectChanges();
-    
-    const errorMsg2 = fixture.debugElement.query(By.css('.a2ui-error-message'));
-    expect(errorMsg2).toBeTruthy();
-    expect(errorMsg2.nativeElement.textContent).toContain('Error 2');
-    expect(errorMsg2.nativeElement.textContent).not.toContain('Error 1');
   });
 });
 

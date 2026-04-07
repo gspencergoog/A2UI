@@ -15,8 +15,7 @@
  */
 
 import { DestroyRef, Injectable, inject, NgZone } from '@angular/core';
-import { ComponentContext } from '@a2ui/web_core/v0_9';
-import { computed } from '@preact/signals-core';
+import { ComponentContext, computed } from '@a2ui/web_core/v0_9';
 import { toAngularSignal } from './utils';
 import { BoundProperty } from './types';
 
@@ -50,9 +49,7 @@ export class ComponentBinder {
       
       let preactSig;
       const isChildListTemplate = value && typeof value === 'object' && 'componentId' in value && 'path' in value;
-      const isBoundPath = value && typeof value === 'object' && ('path' in value || 'call' in value) && !('componentId' in value);
-      
-      console.log('Binding prop', key, value, 'isBoundPath', isBoundPath);
+      const isBoundPath = value && typeof value === 'object' && 'path' in value && !('componentId' in value);
       
       if (isChildListTemplate) {
         const listSig = context.dataContext.resolveSignal({ path: value.path });
@@ -66,20 +63,26 @@ export class ComponentBinder {
           }));
         });
       } else {
+        console.log('Binder calling resolveSignal for:', value);
+        console.log('Binder resolveSignal source:', context.dataContext.resolveSignal.toString());
         preactSig = context.dataContext.resolveSignal(value);
+        console.log('Binder resolveSignal returned:', preactSig);
       }
 
       const angSig = toAngularSignal(preactSig as any, this.destroyRef, this.ngZone);
+
+      console.log('Binder dataContext:', context.dataContext);
+      console.log('Binder binding key:', key, 'isBoundPath:', isBoundPath, 'value:', value);
 
       bound[key] = {
         value: angSig,
         raw: value,
         onUpdate: isBoundPath
           ? (newValue: any) => {
-              console.log('ComponentBinder onUpdate called', value.path, newValue);
+              console.log('Binder onUpdate calling set:', value.path, newValue);
               context.dataContext.set(value.path, newValue);
             }
-          : () => {}, // No-op for non-bound values
+          : () => { console.log('Binder onUpdate no-op for:', key); }, // No-op for non-bound values
       };
     }
 

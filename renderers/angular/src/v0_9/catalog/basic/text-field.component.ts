@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { Component, input, computed, ChangeDetectionStrategy, inject, OnInit, DestroyRef, NgZone, Signal, signal, effect } from '@angular/core';
-import { effect as preactEffect } from '@preact/signals-core';
+import { Component, input, computed, ChangeDetectionStrategy, inject, OnInit, DestroyRef, NgZone, Signal } from '@angular/core';
 import { BoundProperty } from '../../core/types';
 import { A2uiRendererService } from '../../core/a2ui-renderer.service';
 import { ComponentContext } from '@a2ui/web_core/v0_9';
@@ -77,7 +76,7 @@ import { toAngularSignal } from '../../core/utils';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TextFieldComponent {
+export class TextFieldComponent implements OnInit {
   /**
    * Reactive properties resolved from the A2UI {@link ComponentModel}.
    *
@@ -97,57 +96,36 @@ export class TextFieldComponent {
   private destroyRef = inject(DestroyRef);
   private ngZone = inject(NgZone);
 
-  resolvedChecks = signal<{ message: string; condition: Signal<boolean> }[]>([]);
+  resolvedChecks: { message: string; condition: Signal<boolean> }[] = [];
 
   label = computed(() => this.props()['label']?.value());
   value = computed(() => this.props()['value']?.value() || '');
   placeholder = computed(() => this.props()['placeholder']?.value() || '');
   variant = computed(() => this.props()['variant']?.value());
 
-  constructor() {
-    effect((onCleanup) => {
-      const checksProp = this.props()['checks'];
-      const checksArray = checksProp ? (checksProp.value() as any[]) || [] : [];
-      
+  ngOnInit() {
+    const checksProp = this.props()['checks'];
+    if (checksProp) {
+      const checksArray = (checksProp.value() as any[]) || [];
       if (!this.rendererService.surfaceGroup) return;
       const surface = this.rendererService.surfaceGroup.getSurface(this.surfaceId());
       if (!surface) return;
       
       const context = new ComponentContext(surface, this.componentId() || '', this.dataContextPath());
 
-      const disposes: (() => void)[] = [];
-      
-      const resolved = checksArray.map((check) => {
+      this.resolvedChecks = checksArray.map((check) => {
         const conditionSig = context.dataContext.resolveSignal(check.condition);
-        const s = signal<boolean>(!!conditionSig.peek());
-        
-        const dispose = preactEffect(() => {
-          const val = !!conditionSig.value;
-          console.log('TextFieldComponent check effect', check.message, val);
-          if (this.ngZone) {
-            this.ngZone.run(() => s.set(val));
-          } else {
-            s.set(val);
-          }
-        });
-        
-        disposes.push(dispose);
+        const angSig = toAngularSignal(conditionSig as any, this.destroyRef, this.ngZone);
         return {
-          message: check.message as string,
-          condition: s.asReadonly(),
+          message: check.message,
+          condition: angSig as unknown as Signal<boolean>,
         };
       });
-      
-      this.resolvedChecks.set(resolved);
-      
-      onCleanup(() => {
-        disposes.forEach((d) => d());
-      });
-    });
+    }
   }
 
   failedChecks = computed(() => {
-    return this.resolvedChecks().filter((check) => !check.condition());
+    return this.resolvedChecks.filter((check) => !check.condition());
   });
 
   inputType = computed(() => {
@@ -163,7 +141,7 @@ export class TextFieldComponent {
 
   handleInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;
-    console.log('TextFieldComponent handleInput', value);
+    console.log('TextField handleInput:', value);
     // Update the data path.  If anything is listening to this path, it will be
     // notified.
     this.props()['value']?.onUpdate(value);
