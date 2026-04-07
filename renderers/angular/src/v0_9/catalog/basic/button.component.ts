@@ -20,7 +20,6 @@ import {
   computed,
   ChangeDetectionStrategy,
   inject,
-  DestroyRef,
   NgZone,
   Signal,
   signal,
@@ -103,7 +102,6 @@ export class ButtonComponent {
   dataContextPath = input<string>('/');
 
   private rendererService = inject(A2uiRendererService);
-  private destroyRef = inject(DestroyRef);
   private ngZone = inject(NgZone);
 
   resolvedChecks = signal<{ message: string; condition: Signal<boolean> }[]>([]);

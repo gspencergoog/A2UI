@@ -20,7 +20,6 @@ import {
   computed,
   ChangeDetectionStrategy,
   inject,
-  DestroyRef,
   NgZone,
   Signal,
   signal,
@@ -29,7 +28,6 @@ import {
 import { BoundProperty } from '../../core/types';
 import { A2uiRendererService } from '../../core/a2ui-renderer.service';
 import { ComponentContext, effect as preactEffect } from '@a2ui/web_core/v0_9';
-import { toAngularSignal } from '../../core/utils';
 
 /**
  * Angular implementation of the A2UI TextField component (v0.9).
@@ -104,7 +102,6 @@ export class TextFieldComponent {
   dataContextPath = input<string>('/');
 
   private rendererService = inject(A2uiRendererService);
-  private destroyRef = inject(DestroyRef);
   private ngZone = inject(NgZone);
 
   resolvedChecks = signal<{ message: string; condition: Signal<boolean> }[]>([]);
@@ -177,7 +174,6 @@ export class TextFieldComponent {
 
   handleInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;
-    console.log('TextField handleInput:', value);
     // Update the data path.  If anything is listening to this path, it will be
     // notified.
     this.props()['value']?.onUpdate(value);

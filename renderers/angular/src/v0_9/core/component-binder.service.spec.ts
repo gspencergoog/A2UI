@@ -23,13 +23,10 @@ import { ComponentBinder } from './component-binder.service';
 describe('ComponentBinder', () => {
   let binder: ComponentBinder;
   let mockDestroyRef: jasmine.SpyObj<DestroyRef>;
-  let onDestroyCallback: () => void;
 
   beforeEach(() => {
-    onDestroyCallback = () => {};
     mockDestroyRef = jasmine.createSpyObj('DestroyRef', ['onDestroy']);
     mockDestroyRef.onDestroy.and.callFake((callback: () => void) => {
-      onDestroyCallback = callback;
       return () => {}; // Return unregister function
     });
 

@@ -63,26 +63,18 @@ export class ComponentBinder {
           }));
         });
       } else {
-        console.log('Binder calling resolveSignal for:', value);
-        console.log('Binder resolveSignal source:', context.dataContext.resolveSignal.toString());
         preactSig = context.dataContext.resolveSignal(value);
-        console.log('Binder resolveSignal returned:', preactSig);
+
       }
 
       const angSig = toAngularSignal(preactSig as any, this.destroyRef, this.ngZone);
-
-      console.log('Binder dataContext:', context.dataContext);
-      console.log('Binder binding key:', key, 'isBoundPath:', isBoundPath, 'value:', value);
 
       bound[key] = {
         value: angSig,
         raw: value,
         onUpdate: isBoundPath
-          ? (newValue: any) => {
-              console.log('Binder onUpdate calling set:', value.path, newValue);
-              context.dataContext.set(value.path, newValue);
-            }
-          : () => { console.log('Binder onUpdate no-op for:', key); }, // No-op for non-bound values
+          ? (newValue: any) => context.dataContext.set(value.path, newValue)
+          : () => {}, // No-op for non-bound values
       };
     }
 
