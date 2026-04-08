@@ -19,10 +19,12 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
+  HostBinding,
   OnInit,
   Type,
   inject,
   input,
+  signal,
 } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { ComponentContext } from '@a2ui/web_core/v0_9';
@@ -49,11 +51,11 @@ import { ComponentBinder } from './component-binder.service';
         *ngComponentOutlet="
           componentType;
           inputs: {
-          props: props,
-          surfaceId: surfaceId(),
-          componentId: componentId(),
-          dataContextPath: resolvedDataContextPath,
-        }
+            props: props,
+            surfaceId: surfaceId(),
+            componentId: componentId(),
+            dataContextPath: resolvedDataContextPath,
+          }
         "
       ></ng-container>
     }
@@ -81,6 +83,13 @@ export class ComponentHostComponent implements OnInit {
   protected componentType: Type<any> | null = null;
   protected props: any = {};
   private context?: ComponentContext;
+  protected weight = signal<string | number | null>(null);
+
+  @HostBinding('style.flex')
+  get flexStyle() {
+    const w = this.weight();
+    return w ? `${w}` : '';
+  }
 
   protected get resolvedDataContextPath(): string {
     return this.context?.dataContext.path || this.dataContextPath();
@@ -110,7 +119,7 @@ export class ComponentHostComponent implements OnInit {
 
     if (!componentModel) {
       console.warn(`Component ${id} not found in surface ${this.surfaceId()}. Waiting for it...`);
-      
+
       const sub = surface.componentsModel.onCreated.subscribe((comp) => {
         if (comp.id === id) {
           console.log(`Component ${id} arrived! Initializing...`);
@@ -119,7 +128,7 @@ export class ComponentHostComponent implements OnInit {
           sub.unsubscribe();
         }
       });
-      
+
       this.destroyRef.onDestroy(() => sub.unsubscribe());
       return;
     }
@@ -127,7 +136,12 @@ export class ComponentHostComponent implements OnInit {
     this.initializeComponent(surface, componentModel, id, basePath);
   }
 
-  private initializeComponent(surface: any, componentModel: any, id: string, basePath: string): void {
+  private initializeComponent(
+    surface: any,
+    componentModel: any,
+    id: string,
+    basePath: string,
+  ): void {
     // Resolve component from the surface's catalog
     const catalog = surface.catalog as AngularCatalog;
     const api = catalog.components.get(componentModel.type);
@@ -141,6 +155,10 @@ export class ComponentHostComponent implements OnInit {
     // Create context
     this.context = new ComponentContext(surface, id, basePath);
     this.props = this.binder.bind(this.context);
+
+    if (componentModel.weight) {
+      this.weight.set(componentModel.weight);
+    }
 
     this.destroyRef.onDestroy(() => {
       // ComponentContext itself doesn't have a dispose, but its inner components might.
