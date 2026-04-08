@@ -114,7 +114,8 @@ export class TextFieldComponent {
   constructor() {
     effect((onCleanup) => {
       const checksProp = this.props()['checks'];
-      const checksArray = checksProp ? (checksProp.value() as any[]) || [] : [];
+      const checksValue = checksProp?.value();
+      const checksArray = Array.isArray(checksValue) ? checksValue : [];
 
       if (!this.rendererService.surfaceGroup) return;
       const surface = this.rendererService.surfaceGroup.getSurface(this.surfaceId());
@@ -129,16 +130,19 @@ export class TextFieldComponent {
       const disposes: (() => void)[] = [];
 
       const resolved = checksArray.map((check) => {
+        if (!check || !check.condition) {
+          return {
+            message: check?.message || 'Malformed validation check',
+            condition: signal(false).asReadonly(),
+          };
+        }
+
         const conditionSig = context.dataContext.resolveSignal(check.condition);
         const s = signal<boolean>(!!conditionSig.peek());
 
         const dispose = preactEffect(() => {
           const val = !!conditionSig.value;
-          if (this.ngZone) {
-            this.ngZone.run(() => s.set(val));
-          } else {
-            s.set(val);
-          }
+          this.ngZone.run(() => s.set(val));
         });
 
         disposes.push(dispose);

@@ -51,6 +51,7 @@ export class TextComponent {
   text = computed(() => this.props()['text']?.value() || '');
 
   resolvedText = signal<string>('');
+  private renderRequestId = 0;
 
   constructor() {
     effect(() => {
@@ -67,8 +68,11 @@ export class TextComponent {
         case 'caption': value = `*${text}*`; break;
       }
 
+      const requestId = ++this.renderRequestId;
       this.markdownRenderer.render(value).then(rendered => {
-        this.resolvedText.set(rendered);
+        if (requestId === this.renderRequestId) {
+          this.resolvedText.set(rendered);
+        }
       });
     });
   }
