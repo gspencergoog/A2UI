@@ -18,7 +18,6 @@ import { Injectable } from '@angular/core';
 import { z } from 'zod';
 import { BasicCatalogBase, BASIC_FUNCTIONS } from '@a2ui/angular/v0_9';
 import { CustomSliderComponent } from './custom-slider.component';
-import { CardComponent } from './card.component';
 import { AngularComponentImplementation } from '@a2ui/angular/v0_9';
 import { createFunctionImplementation, FunctionImplementation } from '@a2ui/web_core/v0_9';
 

@@ -374,7 +374,7 @@ describe('Simple Components', () => {
 
     it('should render component-host for child', () => {
       fixture.componentRef.setInput('props', {
-        child: createBoundProperty('child-1'),
+        child: createBoundProperty({ id: 'child-1', basePath: '/' }),
       });
       fixture.detectChanges();
       const host = fixture.debugElement.query(By.css('a2ui-v09-component-host'));

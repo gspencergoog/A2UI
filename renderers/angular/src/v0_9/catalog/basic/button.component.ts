@@ -43,9 +43,9 @@ import { BoundProperty } from '../../core/types';
       (click)="handleClick()"
       [disabled]="props()['isValid']?.value() === false"
     >
-      @if (normalizedChild()) {
+      @if (child()) {
         <a2ui-v09-component-host
-          [componentKey]="normalizedChild()!"
+          [componentKey]="child()!"
           [surfaceId]="surfaceId()"
         >
         </a2ui-v09-component-host>
@@ -102,14 +102,7 @@ export class ButtonComponent {
   child = computed(() => this.props()['child']?.value());
   action = computed(() => this.props()['action']?.value());
 
-  protected normalizedChild = computed(() => {
-    const child = this.child();
-    if (!child) return null;
-    if (typeof child === 'object' && child !== null && 'id' in child) {
-      return child as { id: string; basePath: string };
-    }
-    return { id: child as string, basePath: this.dataContextPath() };
-  });
+
 
   handleClick() {
     const action = this.action();

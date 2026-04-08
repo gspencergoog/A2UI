@@ -64,7 +64,30 @@ export class ComponentBinder {
         });
       } else {
         preactSig = context.dataContext.resolveSignal(value);
+      }
 
+      if (['child', 'trigger', 'content'].includes(key)) {
+        const originalSig = preactSig;
+        preactSig = computed(() => {
+          const val = originalSig.value;
+          if (!val) return null;
+          if (typeof val === 'object' && val !== null && 'id' in val) {
+            return val;
+          }
+          return { id: val, basePath: context.dataContext.path };
+        });
+      } else if (key === 'children') {
+        const originalSig = preactSig;
+        preactSig = computed(() => {
+          const val = originalSig.value;
+          const arr = Array.isArray(val) ? val : [];
+          return arr.map(item => {
+            if (typeof item === 'object' && item !== null && 'id' in item) {
+              return item;
+            }
+            return { id: item, basePath: context.dataContext.path };
+          });
+        });
       }
 
       const angSig = toAngularSignal(preactSig as any, this.destroyRef, this.ngZone);

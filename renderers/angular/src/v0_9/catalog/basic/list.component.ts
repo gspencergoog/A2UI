@@ -32,7 +32,7 @@ import { BoundProperty } from '../../core/types';
     @switch (listTag()) {
       @case ('ol') {
         <ol [class]="'a2ui-list ' + orientation()" [style.list-style-type]="styleType()">
-          @for (child of normalizedChildren(); track child.id) {
+          @for (child of children(); track child.id) {
             <li>
               <a2ui-v09-component-host
                 [componentKey]="child"
@@ -45,7 +45,7 @@ import { BoundProperty } from '../../core/types';
       }
       @case ('ul') {
         <ul [class]="'a2ui-list ' + orientation()" [style.list-style-type]="styleType()">
-          @for (child of normalizedChildren(); track child.id) {
+          @for (child of children(); track child.id) {
             <li>
               <a2ui-v09-component-host
                 [componentKey]="child"
@@ -58,7 +58,7 @@ import { BoundProperty } from '../../core/types';
       }
       @default {
         <div [class]="'a2ui-list ' + orientation()" style="list-style-type: none;">
-          @for (child of normalizedChildren(); track child.id) {
+          @for (child of children(); track child.id) {
             <div class="a2ui-list-item-none">
               <a2ui-v09-component-host
                 [componentKey]="child"
@@ -118,14 +118,7 @@ export class ListComponent {
     return Array.isArray(raw) ? raw : [];
   });
 
-  protected normalizedChildren = computed(() => {
-    return this.children().map(child => {
-      if (typeof child === 'object' && child !== null && 'id' in child) {
-        return child as { id: string; basePath: string };
-      }
-      return { id: child as string, basePath: this.dataContextPath() };
-    });
-  });
+
 
   listTag = computed(() => {
     const style = this.listStyle();

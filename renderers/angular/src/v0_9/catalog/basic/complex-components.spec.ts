@@ -531,8 +531,8 @@ describe('Complex Components', () => {
 
     it('should render trigger and open modal on click', () => {
       fixture.componentRef.setInput('props', {
-        trigger: createBoundProperty('trigger-btn'),
-        content: createBoundProperty('modal-content'),
+        trigger: createBoundProperty({ id: 'trigger-btn', basePath: '/' }),
+        content: createBoundProperty({ id: 'modal-content', basePath: '/' }),
       });
       fixture.detectChanges();
       const triggerHost = fixture.debugElement.query(
@@ -555,8 +555,8 @@ describe('Complex Components', () => {
 
     it('should close modal when close button clicked', () => {
       fixture.componentRef.setInput('props', {
-        trigger: createBoundProperty('trigger-btn'),
-        content: createBoundProperty('modal-content'),
+        trigger: createBoundProperty({ id: 'trigger-btn', basePath: '/' }),
+        content: createBoundProperty({ id: 'modal-content', basePath: '/' }),
       });
       fixture.detectChanges();
 
@@ -571,8 +571,8 @@ describe('Complex Components', () => {
 
     it('should close modal when overlay clicked', () => {
       fixture.componentRef.setInput('props', {
-        trigger: createBoundProperty('trigger-btn'),
-        content: createBoundProperty('modal-content'),
+        trigger: createBoundProperty({ id: 'trigger-btn', basePath: '/' }),
+        content: createBoundProperty({ id: 'modal-content', basePath: '/' }),
       });
       fixture.detectChanges();
 

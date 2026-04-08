@@ -20,7 +20,6 @@ import { ButtonComponent } from './button.component';
 import { A2uiRendererService } from '../../core/a2ui-renderer.service';
 import { ComponentBinder } from '../../core/component-binder.service';
 import { By } from '@angular/platform-browser';
-import { preactSignal } from '../../core/utils';
 
 describe('ButtonComponent', () => {
   let component: ButtonComponent;
@@ -86,7 +85,7 @@ describe('ButtonComponent', () => {
     fixture.componentRef.setInput('componentId', 'comp1');
     fixture.componentRef.setInput('props', {
       variant: { value: signal('primary'), raw: 'primary', onUpdate: () => {} },
-      child: { value: signal('child1'), raw: 'child1', onUpdate: () => {} },
+      child: { value: signal({ id: 'child1', basePath: '/' }), raw: 'child1', onUpdate: () => {} },
       action: {
         value: signal({ type: 'test-action', data: {} }),
         raw: { type: 'test-action', data: {} },
