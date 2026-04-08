@@ -19,6 +19,7 @@ import { TextFieldComponent } from './text-field.component';
 import { signal } from '@angular/core';
 import { A2uiRendererService } from '../../core/a2ui-renderer.service';
 import { By } from '@angular/platform-browser';
+import { preactSignal } from '../../core/utils';
 
 describe('TextFieldComponent', () => {
   let component: TextFieldComponent;
