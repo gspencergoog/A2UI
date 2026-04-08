@@ -17,18 +17,30 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { A2uiDataPart } from './a2ui-data-part';
+import { A2A_SERVICE } from '../../../interfaces/a2a-service';
 
 describe('A2uiDataPart', () => {
   let component: A2uiDataPart;
   let fixture: ComponentFixture<A2uiDataPart>;
 
   beforeEach(async () => {
+    const mockA2aService = {
+      sendMessage: jasmine.createSpy('sendMessage').and.returnValue(Promise.resolve({})),
+      getAgentCard: jasmine.createSpy('getAgentCard').and.returnValue(Promise.resolve({})),
+    };
+
     await TestBed.configureTestingModule({
       imports: [A2uiDataPart],
+      providers: [{ provide: A2A_SERVICE, useValue: mockA2aService }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(A2uiDataPart);
     component = fixture.componentInstance;
+    
+    fixture.componentRef.setInput('uiMessageContent', {
+      data: {},
+    });
+
     fixture.detectChanges();
   });
 

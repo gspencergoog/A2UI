@@ -15,7 +15,7 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, signal as angularSignal, signal, input } from '@angular/core';
+import { Component, signal as angularSignal, input } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { DividerComponent } from './divider.component';
 import { ImageComponent } from './image.component';

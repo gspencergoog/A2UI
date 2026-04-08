@@ -17,14 +17,21 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { InputArea } from './input-area';
+import { A2A_SERVICE } from '../../../interfaces/a2a-service';
 
 describe('InputArea', () => {
   let component: InputArea;
   let fixture: ComponentFixture<InputArea>;
 
   beforeEach(async () => {
+    const mockA2aService = {
+      sendMessage: jasmine.createSpy('sendMessage').and.returnValue(Promise.resolve({})),
+      getAgentCard: jasmine.createSpy('getAgentCard').and.returnValue(Promise.resolve({})),
+    };
+
     await TestBed.configureTestingModule({
       imports: [InputArea],
+      providers: [{ provide: A2A_SERVICE, useValue: mockA2aService }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(InputArea);

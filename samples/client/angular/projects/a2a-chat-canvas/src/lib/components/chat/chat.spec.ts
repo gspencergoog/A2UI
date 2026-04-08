@@ -17,14 +17,21 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { Chat } from './chat';
+import { A2A_SERVICE } from '../../interfaces/a2a-service';
 
 describe('Chat', () => {
   let component: Chat;
   let fixture: ComponentFixture<Chat>;
 
   beforeEach(async () => {
+    const mockA2aService = {
+      sendMessage: jasmine.createSpy('sendMessage').and.returnValue(Promise.resolve({})),
+      getAgentCard: jasmine.createSpy('getAgentCard').and.returnValue(Promise.resolve({})),
+    };
+
     await TestBed.configureTestingModule({
       imports: [Chat],
+      providers: [{ provide: A2A_SERVICE, useValue: mockA2aService }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Chat);

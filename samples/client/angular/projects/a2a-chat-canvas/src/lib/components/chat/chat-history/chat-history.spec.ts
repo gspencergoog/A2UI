@@ -17,18 +17,28 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ChatHistory } from './chat-history';
+import { A2A_SERVICE } from '../../../interfaces/a2a-service';
 
 describe('ChatHistory', () => {
   let component: ChatHistory;
   let fixture: ComponentFixture<ChatHistory>;
 
   beforeEach(async () => {
+    const mockA2aService = {
+      sendMessage: jasmine.createSpy('sendMessage').and.returnValue(Promise.resolve({})),
+      getAgentCard: jasmine.createSpy('getAgentCard').and.returnValue(Promise.resolve({})),
+    };
+
     await TestBed.configureTestingModule({
       imports: [ChatHistory],
+      providers: [{ provide: A2A_SERVICE, useValue: mockA2aService }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ChatHistory);
     component = fixture.componentInstance;
+    
+    fixture.componentRef.setInput('history', []);
+
     fixture.detectChanges();
   });
 

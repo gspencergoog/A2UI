@@ -18,7 +18,6 @@ import { TestBed, ComponentFixture } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ComponentHostComponent } from './component-host.component';
 import { A2uiRendererService } from './a2ui-renderer.service';
-import { AngularCatalog } from '../catalog/types';
 import { ComponentBinder } from './component-binder.service';
 import { ComponentContext } from '@a2ui/web_core/v0_9';
 import { Component, Input } from '@angular/core';

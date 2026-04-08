@@ -29,6 +29,11 @@ describe('DefaultTextPart', () => {
 
     fixture = TestBed.createComponent(DefaultTextPart);
     component = fixture.componentInstance;
+    
+    fixture.componentRef.setInput('uiMessageContent', {
+      data: { text: 'test text' },
+    });
+
     fixture.detectChanges();
   });
 

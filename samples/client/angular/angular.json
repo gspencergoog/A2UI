@@ -183,7 +183,7 @@
               }
             ],
             "styles": [
-              "projects/rizzcharts/src/styles.css"
+              "projects/rizzcharts/src/styles.scss"
             ]
           }
         }

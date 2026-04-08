@@ -48,8 +48,8 @@ export default defineConfig({
   resolve: {
     alias: {
       // Dedupe React to avoid "Invalid hook call" errors with linked packages
-      react: path.resolve(__dirname, '../node_modules/react'),
-      'react-dom': path.resolve(__dirname, '../node_modules/react-dom'),
+      react: path.resolve(__dirname, '../../node_modules/react'),
+      'react-dom': path.resolve(__dirname, '../../node_modules/react-dom'),
     },
   },
 });

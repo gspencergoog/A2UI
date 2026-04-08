@@ -17,14 +17,21 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { A2aChatCanvas } from './a2a-chat-canvas';
+import { A2A_SERVICE } from './interfaces/a2a-service';
 
 describe('A2aChatCanvas', () => {
   let component: A2aChatCanvas;
   let fixture: ComponentFixture<A2aChatCanvas>;
 
   beforeEach(async () => {
+    const mockA2aService = {
+      sendMessage: jasmine.createSpy('sendMessage').and.returnValue(Promise.resolve({})),
+      getAgentCard: jasmine.createSpy('getAgentCard').and.returnValue(Promise.resolve({})),
+    };
+
     await TestBed.configureTestingModule({
       imports: [A2aChatCanvas],
+      providers: [{ provide: A2A_SERVICE, useValue: mockA2aService }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(A2aChatCanvas);
