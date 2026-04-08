@@ -16,7 +16,7 @@
 
 import { Component, input, computed, ChangeDetectionStrategy, inject, OnInit, DestroyRef, NgZone, Signal } from '@angular/core';
 import { ComponentHostComponent } from '../../core/component-host.component';
-import { ComponentContext, DataContext } from '@a2ui/web_core/v0_9';
+import { DataContext, ComponentContext } from '@a2ui/web_core/v0_9';
 import { A2uiRendererService } from '../../core/a2ui-renderer.service';
 import { BoundProperty } from '../../core/types';
 import { toAngularSignal } from '../../core/utils';

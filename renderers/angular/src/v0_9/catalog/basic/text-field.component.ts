@@ -15,9 +15,9 @@
  */
 
 import { Component, input, computed, ChangeDetectionStrategy, inject, OnInit, DestroyRef, NgZone, Signal } from '@angular/core';
-import { BoundProperty } from '../../core/types';
-import { A2uiRendererService } from '../../core/a2ui-renderer.service';
 import { ComponentContext } from '@a2ui/web_core/v0_9';
+import { A2uiRendererService } from '../../core/a2ui-renderer.service';
+import { BoundProperty } from '../../core/types';
 import { toAngularSignal } from '../../core/utils';
 
 /**
@@ -110,7 +110,7 @@ export class TextFieldComponent implements OnInit {
       if (!this.rendererService.surfaceGroup) return;
       const surface = this.rendererService.surfaceGroup.getSurface(this.surfaceId());
       if (!surface) return;
-      
+
       const context = new ComponentContext(surface, this.componentId() || '', this.dataContextPath());
 
 
