@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-import {
-  Component,
-  input,
-  computed,
-  ChangeDetectionStrategy,
-  inject,
-} from '@angular/core';
+import { Component, input, computed, ChangeDetectionStrategy } from '@angular/core';
 import { BoundProperty } from '../../core/types';
 
 /**
