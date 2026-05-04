@@ -293,22 +293,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@a2ui/react@npm:0.9.0-alpha.0":
-  version: 0.9.0-alpha.0
-  resolution: "@a2ui/react@npm:0.9.0-alpha.0"
-  dependencies:
-    "@a2ui/web_core": "npm:^0.9.1-alpha.0"
-    clsx: "npm:^2.1.0"
-    markdown-it: "npm:^14.0.0"
-    zod: "npm:^3.23.8"
-  peerDependencies:
-    react: ^18.0.0 || ^19.0.0
-    react-dom: ^18.0.0 || ^19.0.0
-    zod: ^3.23.8
-  checksum: 10c0/585290c3223a7f480013ee1dd555dc13c841ecc0e7a048e508f95949b9ff44f1ffdc2e330bbb6288d091ea102d136d12af893a2911a52f7433639e042a947965
-  languageName: node
-  linkType: hard
-
 "@a2ui/react@workspace:*, @a2ui/react@workspace:renderers/react":
   version: 0.0.0-use.local
   resolution: "@a2ui/react@workspace:renderers/react"
@@ -440,18 +424,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@a2ui/web_core@npm:0.9.1-alpha.0":
-  version: 0.9.1-alpha.0
-  resolution: "@a2ui/web_core@npm:0.9.1-alpha.0"
-  dependencies:
-    "@preact/signals-core": "npm:^1.13.0"
-    date-fns: "npm:^4.1.0"
-    zod: "npm:^3.25.76"
-    zod-to-json-schema: "npm:^3.25.1"
-  checksum: 10c0/09b9bb65b3a2d3e0d0f03f8ae6937f3d02b5507be56891b970e271353c67fcfba242ccd7a427c85bba677350c05e8cd048212940bb655db92b41886915cd1953
-  languageName: node
-  linkType: hard
-
 "@a2ui/web_core@npm:^0.8.0":
   version: 0.8.0
   resolution: "@a2ui/web_core@npm:0.8.0"
@@ -462,7 +434,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@a2ui/web_core@npm:^0.9.1-alpha.0, @a2ui/web_core@workspace:*, @a2ui/web_core@workspace:renderers/web_core":
+"@a2ui/web_core@workspace:*, @a2ui/web_core@workspace:renderers/web_core":
   version: 0.0.0-use.local
   resolution: "@a2ui/web_core@workspace:renderers/web_core"
   dependencies:
@@ -27923,8 +27895,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "widget-builder@workspace:tools/composer"
   dependencies:
-    "@a2ui/react": "npm:0.9.0-alpha.0"
-    "@a2ui/web_core": "npm:0.9.1-alpha.0"
+    "@a2ui/react": "workspace:*"
+    "@a2ui/web_core": "workspace:*"
     "@copilotkit/react-core": "npm:^1.50.1"
     "@copilotkit/react-ui": "npm:^1.50.1"
     "@copilotkit/runtime": "npm:^1.50.1"

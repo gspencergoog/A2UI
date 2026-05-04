@@ -183,7 +183,7 @@
               }
             ],
             "styles": [
-              "projects/rizzcharts/src/styles.css"
+              "projects/rizzcharts/src/styles.scss"
             ]
           }
         }
@@ -401,7 +401,7 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "codeCoverage": true,
+            "codeCoverage": false,
             "tsConfig": "projects/orchestrator/tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -512,7 +512,7 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
-            "codeCoverage": true,
+            "codeCoverage": false,
             "tsConfig": "projects/mcp_calculator/tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [

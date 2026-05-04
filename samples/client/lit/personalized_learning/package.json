@@ -38,7 +38,7 @@
     "build": {
       "command": "tsc && vite build",
       "dependencies": [
-        "../../renderers/lit:build"
+        "../../../../renderers/lit:build"
       ],
       "files": [
         "src/**/*",

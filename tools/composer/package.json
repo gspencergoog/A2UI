@@ -17,8 +17,8 @@
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
-    "@a2ui/react": "0.9.0-alpha.0",
-    "@a2ui/web_core": "0.9.1-alpha.0",
+    "@a2ui/react": "workspace:*",
+    "@a2ui/web_core": "workspace:*",
     "@copilotkit/react-core": "^1.50.1",
     "@copilotkit/react-ui": "^1.50.1",
     "@copilotkit/runtime": "^1.50.1",
@@ -74,7 +74,7 @@
   },
   "wireit": {
     "build": {
-      "command": "node scripts/sync-gallery.mjs && next build",
+      "command": "node scripts/sync-gallery.mjs && next build --webpack",
       "files": [
         "src/**/*",
         "public/**/*",
