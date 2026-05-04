@@ -28,6 +28,7 @@ import { ComponentHostComponent } from './component-host.component';
   selector: 'a2ui-v09-surface',
   standalone: true,
   imports: [ComponentHostComponent],
+  host: { style: 'display: block;' },
   template: `
     <a2ui-v09-component-host
       [componentKey]="{ id: 'root', basePath: dataContextPath() }"

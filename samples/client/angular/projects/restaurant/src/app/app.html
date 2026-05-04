@@ -29,9 +29,7 @@
 </form>
 } @else {
 <div class="surfaces">
-  @let surfaces = renderer.surfaceGroup.surfacesMap;
-
-  @if (client.isLoading() && surfaces.size === 0) {
+  @if (client.isLoading() && surfaces().length === 0) {
   <div class="pending">
     <div class="spinner"></div>
     <div class="loading-text">{{loadingTextLines[loadingTextIndex()]}}</div>
@@ -44,8 +42,8 @@
   </div>
   }
 
-  @for (entry of surfaces; track entry[0]) {
-  <a2ui-v09-surface [surfaceId]="entry[0]" />
+  @for (surfaceId of surfaces(); track surfaceId) {
+  <a2ui-v09-surface [surfaceId]="surfaceId" />
   }
   }
 </div>

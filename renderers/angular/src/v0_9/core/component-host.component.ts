@@ -45,6 +45,7 @@ import { ComponentBinder } from './component-binder.service';
 @Component({
   selector: 'a2ui-v09-component-host',
   imports: [NgComponentOutlet],
+  host: { style: 'display: block;' },
   template: `
     @if (componentType) {
       <ng-container
@@ -114,8 +115,20 @@ export class ComponentHostComponent implements OnInit {
     if (!componentModel) {
       console.warn(`Component ${id} not found in surface ${this.surfaceId()}. Waiting for it...`);
 
+      // Check again in a microtask to handle the case where the component was created
+      // in the same message batch but after this component was initialized.
+      Promise.resolve().then(() => {
+        const comp = surface.componentsModel.get(id);
+        if (comp) {
+          console.log(`[ComponentHost] Component ${id} found in microtask!`);
+          this.initializeComponent(surface, comp, id, basePath);
+          this.cdr.markForCheck();
+        }
+      });
+
       const sub = surface.componentsModel.onCreated.subscribe((comp) => {
         if (comp.id === id) {
+          console.log(`[ComponentHost] Component ${id} found in onCreated!`);
           this.initializeComponent(surface, comp, id, basePath);
           this.cdr.markForCheck();
           sub.unsubscribe();
@@ -135,24 +148,36 @@ export class ComponentHostComponent implements OnInit {
     id: string,
     basePath: string,
   ): void {
-    // Resolve component from the surface's catalog
-    const catalog = surface.catalog as AngularCatalog;
-    const api = catalog.components.get(componentModel.type);
+    console.log(`[ComponentHost] initializeComponent starting for ${id}`);
+    try {
+      // Resolve component from the surface's catalog
+      const catalog = surface.catalog as AngularCatalog;
+      const api = catalog.components.get(componentModel.type);
 
-    if (!api) {
-      console.error(`Component type "${componentModel.type}" not found in catalog "${catalog.id}"`);
-      return;
+      if (!api) {
+        console.error(`Component type "${componentModel.type}" not found in catalog "${catalog.id}"`);
+        return;
+      }
+      this.componentType = api.component;
+
+      // Create context
+      this.context = new ComponentContext(surface, id, basePath);
+      
+      console.log(`[ComponentHost] Calling binder.bind for ${id}`);
+      this.props = this.binder.bind(this.context);
+      console.log(`[ComponentHost] Bound props for ${id}:`, Object.keys(this.props));
+      for (const [key, prop] of Object.entries(this.props)) {
+        console.log(`[ComponentHost]   prop ${key} value:`, (prop as any).value());
+      }
+      this.resolvedDataContextPath = this.context.dataContext.path;
+
+      if (componentModel.weight) {
+        this.weight.set(componentModel.weight);
+      }
+    } catch (error) {
+      console.error(`[ComponentHost] Error in initializeComponent for ${id}:`, error);
     }
-    this.componentType = api.component;
-
-    // Create context
-    this.context = new ComponentContext(surface, id, basePath);
-    this.props = this.binder.bind(this.context);
-    this.resolvedDataContextPath = this.context.dataContext.path;
-
-    if (componentModel.weight) {
-      this.weight.set(componentModel.weight);
-    }
+  }
 
     this.destroyRef.onDestroy(() => {
       // ComponentContext itself doesn't have a dispose, but its inner components might.

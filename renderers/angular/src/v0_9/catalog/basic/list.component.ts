@@ -32,7 +32,7 @@ import { BoundProperty } from '../../core/types';
     @switch (listTag()) {
       @case ('ol') {
         <ol [class]="'a2ui-list ' + orientation()" [style.list-style-type]="styleType()">
-          @for (child of children(); track child.id) {
+          @for (child of children(); track child.basePath + '-' + child.id) {
             <li>
               <a2ui-v09-component-host
                 [componentKey]="child"
@@ -45,7 +45,7 @@ import { BoundProperty } from '../../core/types';
       }
       @case ('ul') {
         <ul [class]="'a2ui-list ' + orientation()" [style.list-style-type]="styleType()">
-          @for (child of children(); track child.id) {
+          @for (child of children(); track child.basePath + '-' + child.id) {
             <li>
               <a2ui-v09-component-host
                 [componentKey]="child"
@@ -58,7 +58,7 @@ import { BoundProperty } from '../../core/types';
       }
       @default {
         <div [class]="'a2ui-list ' + orientation()" style="list-style-type: none;">
-          @for (child of children(); track child.id) {
+          @for (child of children(); track child.basePath + '-' + child.id) {
             <div class="a2ui-list-item-none">
               <a2ui-v09-component-host
                 [componentKey]="child"

@@ -16,7 +16,8 @@
 
 import { SurfaceComponent, A2uiRendererService } from '@a2ui/angular/v0_9';
 import * as Types from '@a2ui/web_core/types/types';
-import { ChangeDetectionStrategy, Component, DOCUMENT, inject, signal } from '@angular/core';
+import { Subscription } from '@a2ui/web_core/v0_9';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DOCUMENT, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { Client } from './client';
 
 @Component({
@@ -26,9 +27,49 @@ import { Client } from './client';
   imports: [SurfaceComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
 })
-export class App {
+export class App implements OnInit, OnDestroy {
   protected client = inject(Client);
   protected renderer = inject(A2uiRendererService);
+
+  private cdr = inject(ChangeDetectorRef);
+  private subscriptions: Subscription[] = [];
+  protected surfaces = signal<string[]>([]);
+
+  ngOnInit() {
+    console.log('[App] ngOnInit');
+    this.updateSurfaces();
+    
+    this.subscriptions.push(
+      this.renderer.surfaceGroup.onSurfaceCreated.subscribe((surface) => {
+        console.log('[App] onSurfaceCreated:', surface.id);
+        this.updateSurfaces();
+      })
+    );
+    
+    this.subscriptions.push(
+      this.renderer.surfaceGroup.onSurfaceDeleted.subscribe((id) => {
+        console.log('[App] onSurfaceDeleted:', id);
+        this.updateSurfaces();
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(s => s.unsubscribe());
+    this.stopLoadingAnimation();
+  }
+
+  private updateSurfaces() {
+    const map = this.renderer.surfaceGroup.surfacesMap;
+    const keys = Array.from(map.keys());
+    console.log('[App] updateSurfaces, keys:', keys);
+    console.log('[App] updateSurfaces, map size:', map.size);
+    for (const [key, value] of map.entries()) {
+      console.log(`[App] updateSurfaces, key: ${key}, value:`, value);
+    }
+    this.surfaces.set(keys);
+    this.cdr.markForCheck();
+  }
 
   private document = inject(DOCUMENT);
   private loadingInterval: number | undefined;
