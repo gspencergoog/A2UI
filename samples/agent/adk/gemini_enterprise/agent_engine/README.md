@@ -136,7 +136,7 @@ To run the script using `uv`:
     -   `uv venv`
     -   `source .venv/bin/activate`
 3.  **Install dependencies:**
-    -   `uv sync`
+    -   `uv sync --locked`
 4.  **Run the script:**
     -   `uv run deploy.py`
     -   It may take 5-10 minutes to finish.
@@ -175,7 +175,7 @@ register it on Gemini Enterprise without running "main.py" script.
       ],
       "version": "1.0.0",
       "capabilities": {
-        "streaming": true,
+        "streaming": false,
         "extensions": [
           {
             "uri": "https://a2ui.org/a2a-extension/a2ui/v0.8",
@@ -197,7 +197,7 @@ register it on Gemini Enterprise without running "main.py" script.
         "text/plain"
       ],
       "supportsAuthenticatedExtendedCard": true,
-      "preferredTransport": "HTTP+JSON"
+      "preferredTransport": "JSONRPC"
     }
     ```
 

@@ -42,14 +42,24 @@ describe('Row Component Integration (Real Renderer)', () => {
   let processor: jasmine.SpyObj<MessageProcessor>;
 
   beforeEach(async () => {
-    processor = jasmine.createSpyObj('MessageProcessor', ['getData', 'dispatch', 'resolvePath', 'version']);
+    processor = jasmine.createSpyObj('MessageProcessor', [
+      'getData',
+      'dispatch',
+      'resolvePath',
+      'version',
+    ]);
 
     await TestBed.configureTestingModule({
       imports: [TestHost],
       providers: [
         { provide: MessageProcessor, useValue: processor },
         { provide: Catalog, useValue: DEFAULT_CATALOG },
-        { provide: MarkdownRenderer, useClass: DefaultMarkdownRenderer },
+        {
+          provide: MarkdownRenderer,
+          useValue: {
+            render: (val: string) => Promise.resolve(val),
+          },
+        },
         Theme,
       ],
     }).compileComponents();

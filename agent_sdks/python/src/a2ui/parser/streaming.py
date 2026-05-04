@@ -76,6 +76,7 @@ class A2uiStreamParser:
     return super().__new__(cls)
 
   def __init__(self, catalog: "A2uiCatalog" = None):
+    self._version = getattr(catalog, "version", None) if catalog else None
     self._ref_fields_map = extract_component_ref_fields(catalog) if catalog else {}
     self._required_fields_map = (
         extract_component_required_fields(catalog) if catalog else {}
@@ -129,6 +130,7 @@ class A2uiStreamParser:
     )
     self._topology_dirty = False  # Set to true if components are added out of order
     self._in_top_level_list = False
+    self._found_valid_json_in_block = False
 
   @property
   def _placeholder_component(self) -> Dict[str, Any]:
@@ -303,10 +305,15 @@ class A2uiStreamParser:
           parts = self._buffer.split(A2UI_CLOSE_TAG, 1)
           json_fragment = parts[0]
           self._process_json_chunk(json_fragment, messages)
+          if not self._found_valid_json_in_block:
+            raise ValueError(
+                "Failed to parse JSON: No valid JSON object found in A2UI block."
+            )
 
           # End of block: reset JSON state but keep seen_components
           self._found_delimiter = False
           self._reset_json_state()
+
           self._buffer = parts[1]
           # Continue loop to look for next A2UI_OPEN_TAG in remaining buffer
         else:
@@ -363,7 +370,9 @@ class A2uiStreamParser:
     self._in_string = False
     self._string_escaped = False
     self._msg_types = []
+    self._found_valid_json_in_block = False
     # Note: we do NOT reset _active_msg_type or _yielded_contents here
+
     # so re-yielding works between blocks
 
   def _fix_json(self, fragment: str) -> str:
@@ -507,6 +516,7 @@ class A2uiStreamParser:
                 try:
                   obj = json.loads(obj_buffer)
                   if isinstance(obj, dict):
+                    self._found_valid_json_in_block = True
                     logger.debug(
                         f"[Parsed Dict] Keys: {list(obj.keys())}, protocol check"
                         " follows..."
@@ -998,11 +1008,12 @@ class A2uiStreamParser:
         ):
           path = obj["path"]
           key = path.lstrip("/")
-          if "componentId" not in obj:
-            obj.clear()
-          obj.update({"path": "/" + key})
-        else:
-          # If not in data model, still ensure path has leading slash if it's a bindable object
+          if self._version != VERSION_0_9:
+            if "componentId" not in obj:
+              obj.clear()
+            obj.update({"path": "/" + key})
+        elif self._version != VERSION_0_9:
+          # If not in data model, still ensure path has leading slash if it's a bindable object (v0.8 only)
           current_path = obj.get("path")
           if current_path is not None:
             if not isinstance(current_path, str) or not current_path.startswith("/"):

@@ -1,6 +1,6 @@
 {
   "name": "@a2ui/angular",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "license": "Apache-2.0",
   "homepage": "https://a2ui.org/",
   "repository": {
@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@a2ui/web_core": "workspace:*",
+    "@preact/signals-core": "^1.13.0",
     "tslib": "^2.3.0",
     "zod": "^3.25.76"
   },
@@ -45,6 +46,7 @@
     }
   },
   "devDependencies": {
+    "@a2ui/markdown-it": "workspace:*",
     "@angular/build": "^21.2.5",
     "@angular/cli": "^21.2.5",
     "@angular/compiler": "^21.2.5",
@@ -102,5 +104,8 @@
         "dist/"
       ]
     }
+  },
+  "resolutions": {
+    "@preact/signals-core": "^1.13.0"
   }
 }

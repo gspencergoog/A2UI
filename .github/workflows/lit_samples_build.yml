@@ -33,7 +33,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'yarn'
 
       - name: Install workspaces' dependencies
@@ -46,5 +46,3 @@ jobs:
       - name: Build all lit samples workspaces
         working-directory: ./samples/client/lit
         run: yarn workspaces foreach -R --exclude '@a2ui/lit-samples' run build
-
-

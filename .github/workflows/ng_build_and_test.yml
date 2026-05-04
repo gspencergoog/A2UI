@@ -33,7 +33,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'yarn'
 
       - name: Install top-level deps
@@ -43,9 +43,9 @@ jobs:
         working-directory: ./samples/client/angular
         run: yarn build:renderer
 
-      - name: Build contact sample
-        working-directory: ./samples/client/angular
-        run: yarn ng build contact
+      - name: Test Angular renderer
+        working-directory: ./renderers/angular
+        run: yarn test
 
       - name: Build restaurant sample
         working-directory: ./samples/client/angular

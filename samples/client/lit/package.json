@@ -9,15 +9,11 @@
   ],
   "scripts": {
     "serve:agent:restaurant": "cd ../../agent/adk/restaurant_finder && uv run .",
-    "serve:agent:contact_lookup": "cd ../../agent/adk/contact_lookup && uv run .",
     "serve:agent:orchestrator": "cd ../../agent/adk/orchestrator && uv run .",
     "serve:shell": "yarn workspace @a2ui/shell dev",
-    "serve:gallery09": "yarn workspace @a2ui/local-gallery-v09 dev",
     "build:renderer": "yarn workspace @a2ui/web_core build && yarn workspace @a2ui/markdown-it build && yarn workspace @a2ui/lit build",
     "demo:restaurant": "yarn build:renderer && concurrently -k -n \"SHELL,REST\" -c \"magenta,blue\" \"yarn serve:shell\" \"yarn serve:agent:restaurant\"",
-    "demo:contact": "yarn build:renderer && concurrently -k -n \"SHELL,CONT1\" -c \"magenta,green\" \"yarn serve:shell\" \"yarn serve:agent:contact_lookup\"",
-    "demo:orchestrator": "yarn build:renderer && concurrently -k -n \"SHELL,ORCH\" -c \"magenta,cyan\" \"yarn serve:shell\" \"yarn serve:agent:orchestrator\"",
-    "demo:gallery09": "yarn build:renderer && concurrently -k -n \"SHELL,GALLERY09\" -c \"magenta,yellow\" \"yarn serve:gallery09\""
+    "demo:orchestrator": "yarn build:renderer && concurrently -k -n \"SHELL,ORCH\" -c \"magenta,cyan\" \"yarn serve:shell\" \"yarn serve:agent:orchestrator\""
   },
   "devDependencies": {
     "concurrently": "9.2.1"

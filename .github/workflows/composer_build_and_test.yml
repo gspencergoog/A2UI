@@ -18,10 +18,14 @@ on:
   push:
     paths:
       - 'tools/composer/**'
+      - 'renderers/react/**'
+      - 'renderers/web_core/**'
       - '.github/workflows/composer_build_and_test.yml'
   pull_request:
     paths:
       - 'tools/composer/**'
+      - 'renderers/react/**'
+      - 'renderers/web_core/**'
       - '.github/workflows/composer_build_and_test.yml'
 
 jobs:
@@ -34,11 +38,17 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'yarn'
 
       - name: Install dependencies
         run: yarn install --immutable
+
+      - name: Build web_core (dependency of @a2ui/react)
+        run: yarn workspace @a2ui/web_core build
+
+      - name: Build React renderer (local file dependency)
+        run: yarn workspace @a2ui/react build
 
       - name: Lint
         working-directory: ./tools/composer

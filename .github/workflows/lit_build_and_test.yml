@@ -37,18 +37,15 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'yarn'
 
-      - name: Install web_core dependencies
+      - name: Install dependencies
         run: yarn install --immutable
 
       - name: Build web_core
         working-directory: ./renderers/web_core
         run: yarn build
-
-      - name: Install Lit renderer dependencies
-        run: yarn install --immutable
 
       - name: Build Lit renderer
         working-directory: ./renderers/lit

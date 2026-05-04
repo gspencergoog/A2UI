@@ -22,7 +22,7 @@ Before diving into the protocol details, let's get a working example running. Th
 ```bash
 # Clone the repo (if you haven't already)
 git clone https://github.com/google/A2UI.git
-cd A2UI/samples/agent/mcp/a2ui-over-mcp-recipe
+cd A2UI/samples/mcp/a2ui-over-mcp-recipe
 
 # Start the MCP server (SSE transport on port 8000)
 uv run .
@@ -48,7 +48,7 @@ In the Inspector:
 > pip install a2ui-agent-sdk
 > ```
 
-See all samples at [`samples/agent/mcp/`](https://github.com/google/A2UI/tree/main/samples/agent/mcp).
+See all samples at [`samples/mcp/`](https://github.com/google/A2UI/tree/main/samples/mcp).
 
 ## How It Works
 
@@ -346,5 +346,5 @@ See the full [Agent Development Guide](agent-development.md) for details on sche
 
 - [A2UI Specification](../specification/v0.9-a2ui.md) — full protocol reference
 - [Component Gallery](../reference/components.md) — browse available components
-- [MCP Apps in A2UI Surface](mcp-apps-in-a2ui-surface.md) — embed HTML-based MCP apps inside A2UI
+- [MCP Apps in A2UI Surface](mcp-apps-in-a2ui.md) — embed HTML-based MCP apps inside A2UI
 - [Client Setup](client-setup.md) — build a renderer that displays A2UI

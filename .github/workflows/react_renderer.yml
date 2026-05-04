@@ -39,17 +39,17 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'yarn'
 
-      - name: Build web_core dependency
-        working-directory: ./renderers/web_core
-        run: |
-          yarn install --immutable
-          yarn build
-
-      - name: Install React renderer deps
+      - name: Install dependencies
         run: yarn install --immutable
+
+      - name: Build web_core dependency
+        run: yarn workspace @a2ui/web_core build
+
+      - name: Build markdown-it dependency
+        run: yarn workspace @a2ui/markdown-it build
 
       - name: Build React renderer
         working-directory: ./renderers/react
@@ -68,17 +68,17 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'yarn'
 
-      - name: Build web_core dependency
-        working-directory: ./renderers/web_core
-        run: |
-          yarn install --immutable
-          yarn build
-
-      - name: Install React renderer deps
+      - name: Install dependencies
         run: yarn install --immutable
+
+      - name: Build web_core dependency
+        run: yarn workspace @a2ui/web_core build
+
+      - name: Build markdown-it dependency
+        run: yarn workspace @a2ui/markdown-it build
 
       - name: Build React Demo
         working-directory: ./renderers/react
@@ -97,19 +97,18 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'yarn'
 
-      - name: Build web_core dependency
-        working-directory: ./renderers/web_core
-        run: |
-          yarn install --immutable
-          yarn build
-
-      - name: Install React renderer deps
+      - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Build React renderer and its dependencies
+      - name: Build web_core dependency
+        run: yarn workspace @a2ui/web_core build
+
+      - name: Build markdown-it dependency
+        run: yarn workspace @a2ui/markdown-it build
+
+      - name: Run lint
         working-directory: ./renderers/react
         run: yarn lint
-

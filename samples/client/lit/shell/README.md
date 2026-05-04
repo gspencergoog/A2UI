@@ -4,11 +4,12 @@ This is a UI to generate and visualize A2UI responses.
 
 ## Prerequisites
 
-1. [nodejs](https://nodejs.org/en)
+* [nodejs](https://nodejs.org/en)
+* [uv](https://docs.astral.sh/uv/getting-started/installation/)
 
 ## Running
 
-This sample depends on the Lit renderer. Before running this sample, you need to build the renderer.
+### Run agent
 
 1. **Install and build dependencies:**
    From the repository root, install dependencies and build all packages:
@@ -26,21 +27,11 @@ This sample depends on the Lit renderer. Before running this sample, you need to
    - Run the [Restaurant Finder Agent](../../../agent/adk/restaurant_finder/) (Default): `yarn demo:restaurant`
    - Run the dev server: `yarn dev`
 
-### Running the Contact Sample
+### Open UI
 
-The shell app supports multiple configured applications. To run the Contact sample:
+Follow the link in console output of the last command above. 
 
-1. **Start the Contact Agent:**
-   ```bash
-   yarn demo:contact
-   ```
-
-2. **Open the Contact App:**
-   - Open `http://localhost:5173/?app=contacts`
-
-> **Note:** The `?app=` query parameter only supports apps that are actively configured in `app.ts` (e.g., `restaurant`, `contacts`). You cannot run arbitrary agents by passing their URL as a query string without first adding them to the shell configuration.
-
-After starting the dev server, you can open http://localhost:5173/ to view the sample.
+## Security Notice
 
 Important: The sample code provided is for demonstration purposes and illustrates the mechanics of A2UI and the Agent-to-Agent (A2A) protocol. When building production applications, it is critical to treat any agent operating outside of your direct control as a potentially untrusted entity.
 
