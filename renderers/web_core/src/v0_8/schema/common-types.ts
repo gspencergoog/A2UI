@@ -65,7 +65,7 @@ const DataValueMapItemSchema: z.ZodType<any> = z.lazy(() =>
     }),
 );
 
-export function createDataValueSchema(options: { maxDepth?: number } = {}) {
+export function createDataValueSchema(options: {maxDepth?: number} = {}) {
   const maxDepth = options.maxDepth ?? 5;
   return DataValueMapItemSchema.superRefine((val: any, ctx: z.RefinementCtx) => {
     const checkDepth = (v: any, currentDepth: number) => {

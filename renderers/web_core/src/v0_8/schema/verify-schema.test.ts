@@ -102,7 +102,9 @@ function getObjectDiff(obj1: any, obj2: any, path = ''): Record<string, any> {
 
     // Zod generates a $ref for recursive structures (DataValueMapItemSchema),
     // which differs from the inline definition in the JSON spec.
-    if (currentPath.includes('dataModelUpdate.properties.contents.items.properties.valueMap.items')) {
+    if (
+      currentPath.includes('dataModelUpdate.properties.contents.items.properties.valueMap.items')
+    ) {
       continue;
     }
 

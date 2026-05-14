@@ -83,12 +83,15 @@ describe('DataValueSchema recursion depth', () => {
     const result = DataValueSchema.safeParse(invalidData);
     assert.strictEqual(result.success, false);
     if (!result.success) {
-      assert.strictEqual(result.error.issues[0].message, 'valueMap recursion exceeded maximum depth of 5.');
+      assert.strictEqual(
+        result.error.issues[0].message,
+        'valueMap recursion exceeded maximum depth of 5.',
+      );
     }
   });
 
   it('should allow overriding depth limit', () => {
-    const CustomSchema = createDataValueSchema({ maxDepth: 2 });
+    const CustomSchema = createDataValueSchema({maxDepth: 2});
 
     const validData = {
       key: 'root',
@@ -121,7 +124,10 @@ describe('DataValueSchema recursion depth', () => {
     const invalidResult = CustomSchema.safeParse(invalidData);
     assert.strictEqual(invalidResult.success, false);
     if (!invalidResult.success) {
-      assert.strictEqual(invalidResult.error.issues[0].message, 'valueMap recursion exceeded maximum depth of 2.');
+      assert.strictEqual(
+        invalidResult.error.issues[0].message,
+        'valueMap recursion exceeded maximum depth of 2.',
+      );
     }
   });
 });
