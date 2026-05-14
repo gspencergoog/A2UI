@@ -382,6 +382,8 @@ describe('BASIC_FUNCTIONS', () => {
         invoke('pluralize', {value: 5, one: 'apple', other: 'apples'}, context),
         'apples',
       );
+      assert.strictEqual(invoke('pluralize', {value: 1, other: 'apples'}, context), 'apples');
+      assert.strictEqual(invoke('pluralize', {value: 0, other: 'apples'}, context), 'apples');
     });
   });
 
