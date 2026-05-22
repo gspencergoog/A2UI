@@ -7,6 +7,19 @@ tailored for prompt tokens compression.
 from typing import Any
 from .schema_helper import CatalogSchemaHelper
 
+def _flatten_data_model(data_dict: dict) -> list[tuple[str, Any]]:
+    """Flattens a nested dictionary dataModel structure into JSON Pointer path segments."""
+    results = []
+    def recurse(current: Any, path: str):
+        if isinstance(current, dict) and current:
+            for k, v in current.items():
+                recurse(v, f"{path}/{k}")
+        else:
+            results.append((path, current))
+    recurse(data_dict, "")
+    return results
+
+
 
 class ExpressDecompiler:
     """Converts standard A2UI wire JSON trees back into A2UI Express syntax.
@@ -37,10 +50,18 @@ class ExpressDecompiler:
         """
         create_surface = envelope_json.get("createSurface", {})
         components = create_surface.get("components", [])
+        data_model = create_surface.get("dataModel", {})
 
         dsl_lines = []
         # Index components by ID for hierarchy mapping
         comp_ids = {c["id"] for c in components}
+
+        # Decompile dataModel paths first
+        if data_model:
+            for path, val in sorted(_flatten_data_model(data_model)):
+                val_str = self._decompile_value(val, comp_ids)
+                dsl_lines.append(f"${path} = {val_str}")
+
 
         for c in components:
             comp_id = c["id"]

@@ -8,6 +8,27 @@ import re
 from typing import Any, Optional
 from .schema_helper import CatalogSchemaHelper
 
+def _set_nested_path(d: dict, path_str: str, val: Any) -> None:
+    """Populates a nested dictionary path from a JSON pointer-like string."""
+    if path_str.startswith("$/"):
+        clean_path = path_str[2:]
+    elif path_str.startswith("$"):
+        clean_path = path_str[1:]
+    else:
+        clean_path = path_str
+
+    if not clean_path:
+        return
+
+    keys = clean_path.split("/")
+    current = d
+    for key in keys[:-1]:
+        if key not in current or not isinstance(current[key], dict):
+            current[key] = {}
+        current = current[key]
+    current[keys[-1]] = val
+
+
 # Scanner rules for lexical tokenizing
 TOKEN_SPEC = [
     ('STRING', r'"(?:[^"\\]|\\.)*"'),
@@ -257,29 +278,73 @@ class ExpressCompiler:
         Raises:
             ValueError: If the root component variable is missing.
         """
-        lines = [
-            line.strip() for line in dsl_text.splitlines() if line.strip()
-        ]
+        # Detect if sentinel tags exist in the input
+        has_sentinels = "<a2ui>" in dsl_text
+        lines = []
+        inside_a2ui = not has_sentinels
+        for line in dsl_text.splitlines():
+            trimmed = line.strip()
+            if not trimmed:
+                continue
+            if "<a2ui>" in trimmed:
+                inside_a2ui = True
+                continue
+            if "</a2ui>" in trimmed:
+                inside_a2ui = False
+                continue
+            if inside_a2ui:
+                lines.append(trimmed)
+
+        statements = []
+        current_statement = []
+        assignment_start_regex = re.compile(
+            r'^(?:[a-zA-Z_][a-zA-Z0-9_-]*|\$[a-zA-Z0-9_/]+)\s*='
+        )
+
+        for line in lines:
+            if assignment_start_regex.match(line):
+                if current_statement:
+                    statements.append("\n".join(current_statement))
+                current_statement = [line]
+            else:
+                if current_statement:
+                    current_statement.append(line)
+        if current_statement:
+            statements.append("\n".join(current_statement))
+
         raw_symbols = {}
+        data_path_assignments = {}
 
         # Line parser and error recovery loop
-        for line in lines:
-            if "=" not in line:
+        for stmt in statements:
+            if "=" not in stmt:
                 continue
-            var_part, expr_part = line.split("=", 1)
+            var_part, expr_part = stmt.split("=", 1)
             var_name = var_part.strip()
             expr_text = expr_part.strip()
 
             try:
                 tokens = tokenize(expr_text)
                 parser = TokenParser(tokens)
-                raw_symbols[var_name] = parser.parse_expression()
+                parsed_val = parser.parse_expression()
+                if var_name.startswith("$"):
+                    data_path_assignments[var_name] = parsed_val
+                else:
+                    raw_symbols[var_name] = parsed_val
             except Exception:
-                # Recover gracefully: register dummy loading text for the failed branch
-                raw_symbols[var_name] = {
-                    "call": "Text",
-                    "args": ["Loading..."]
-                }
+                if var_name.startswith("$"):
+                    data_path_assignments[var_name] = None
+                else:
+                    raw_symbols[var_name] = {
+                        "call": "Text",
+                        "args": ["Loading..."]
+                    }
+
+        # Compile data model paths
+        data_model = {}
+        for path_name, ast_val in data_path_assignments.items():
+            compiled_val = self._compile_value(ast_val, raw_symbols)
+            _set_nested_path(data_model, path_name, compiled_val)
 
         compiled_components = []
 
@@ -306,6 +371,9 @@ class ExpressCompiler:
                 "components": compiled_components
             }
         }
+        if data_model:
+            envelope["createSurface"]["dataModel"] = data_model
+
         return envelope
 
     def _compile_ast_node(self, var_name: str, ast: Any,

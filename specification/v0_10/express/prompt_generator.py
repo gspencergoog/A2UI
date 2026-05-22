@@ -75,6 +75,7 @@ class ExpressPromptGenerator:
         prompt = f"""# A2UI Express Output Contract
 
 You must output the user interface using the compact A2UI Express DSL notation.
+You MUST surround the entire A2UI Express DSL block with the sentinel tags `<a2ui>` and `</a2ui>`.
 
 ## Grammar Rules
 
@@ -103,6 +104,8 @@ You must output the user interface using the compact A2UI Express DSL notation.
 8. Nested functions: call client functions directly using catalog signatures,
    for example openUrl("https://example.com").
 
+9. Data model population: Assign a value directly to an absolute data path (e.g. $/path/to/key = "value") to populate or initialize values inside the shared dataModel. The value can be a primitive, array, or map.
+
 ## Positional Component Signatures
 
 Use these exact positional signatures to instantiate components. Do not output property keys:
@@ -116,9 +119,13 @@ Use these exact positional signatures to instantiate check rules or logic functi
 ## Examples
 
 ```
+<a2ui>
 root = Column([repField, valueField])
 repField = TextField("Representative", $/form/rep, "Enter name")
 valueField = TextField("Deal Value", $/form/value, "0.00", "number", [?required])
+$/form/rep = "John Doe"
+$/form/value = 1500.00
+</a2ui>
 ```
 """
         return prompt

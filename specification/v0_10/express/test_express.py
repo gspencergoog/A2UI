@@ -241,6 +241,44 @@ saveLabel = Text("Save")"""
         print(f"\nSuccessfully completed round-trip validation across "
               f"{tested_count} standard catalog examples.")
 
+    def test_data_model_compilation_and_decompilation(self):
+        """Validates compiling and decompiling shared data model assignments in the DSL."""
+        compiler = ExpressCompiler(self.catalog_path)
+        decompiler = ExpressDecompiler(self.catalog_path)
+
+        dsl = """$/icon = "check"
+$/title = "Enable notification"
+$/user/firstName = "Alice"
+$/user/age = 30
+root = Card(main-column)
+main-column = Column([icon, title], null, "center")
+icon = Icon($/icon)
+title = Text($/title, "h3")"""
+
+        envelope = compiler.compile(dsl, surface_id="test_data_surf")
+        self.assertEqual(envelope["version"], "v0.10")
+        create_surface = envelope["createSurface"]
+        self.assertEqual(create_surface["surfaceId"], "test_data_surf")
+
+        # Verify compiled dataModel dict structures
+        data_model = create_surface["dataModel"]
+        self.assertEqual(data_model["icon"], "check")
+        self.assertEqual(data_model["title"], "Enable notification")
+        self.assertEqual(data_model["user"]["firstName"], "Alice")
+        self.assertEqual(data_model["user"]["age"], 30)
+
+        # Verify decompiled dataModel DSL output
+        decompiled_dsl = decompiler.decompile(envelope)
+        self.assertIn('$/icon = "check"', decompiled_dsl)
+        self.assertIn('$/title = "Enable notification"', decompiled_dsl)
+        self.assertIn('$/user/age = 30', decompiled_dsl)
+        self.assertIn('$/user/firstName = "Alice"', decompiled_dsl)
+        self.assertIn('root = Card(main-column)', decompiled_dsl)
+
+        # Round-trip check
+        compiled_envelope_2 = compiler.compile(decompiled_dsl, surface_id="test_data_surf")
+        self.assertEqual(compiled_envelope_2["createSurface"]["dataModel"], data_model)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -13,7 +13,15 @@ The design of A2UI Express focuses on four main requirements:
 
 ## Syntax and grammar
 
-Every instruction in A2UI Express is a single variable assignment written on a single line:
+A2UI Express layout blocks must be enclosed inside the `<a2ui>` and `</a2ui>` sentinel tags to cleanly separate the user interface DSL from any accompanying conversational text:
+
+```
+<a2ui>
+variable_name = ComponentName(argument1, argument2, ...)
+</a2ui>
+```
+
+Every instruction in A2UI Express is a variable assignment statement. Statements are separated by newlines, and a single assignment can format-span multiple lines:
 
 ```
 variable_name = ComponentName(argument1, argument2, ...)
@@ -42,6 +50,24 @@ Arrays are represented using square brackets, for example `[component1, componen
 To connect component properties to the application data model, properties accept bound paths prefixed with the `$` symbol:
 * Absolute paths start with a forward slash after the prefix, for example `$/user/email`. These paths resolve from the root of the shared data model.
 * Relative paths omit the slash, for example `$lastName`. These resolve within list iteration contexts.
+
+### Data model population
+
+To populate or initialize values within the shared data model directly from the generated output, A2UI Express supports data model assignments. A statement with a left-hand side that represents an absolute data path will populate that path in the surface's `dataModel`:
+
+```
+$/path/to/key = value_expression
+```
+
+Where `value_expression` is any valid literal primitive, array, or map. For example:
+
+```
+$/icon = "check"
+$/title = "Enable notification"
+$/user = {firstName: "Alice", age: 30}
+```
+
+The compiler resolves these statements and generates the structured `dataModel` JSON object at the root of the `createSurface` payload.
 
 ### Nested function calls and actions
 
@@ -115,6 +141,128 @@ The compiled component list and any extracted default data models are wrapped in
 }
 ```
 
+## Compilation example
+
+This section shows an input text stream in A2UI Express and the compiled A2UI v0.10 JSON payload.
+
+### Input text stream
+
+The input file defines a notification permission card, using positional arguments and absolute data paths enclosed within the `<a2ui>` and `</a2ui>` sentinel tags:
+
+```
+<a2ui>
+root = Card(main-column)
+main-column = Column([icon, title, description, actions], null, "center")
+icon = Icon($/icon)
+title = Text($/title, "h3")
+description = Text($/description, "body")
+actions = Row([yes-btn, no-btn], "center")
+yes-btn-text = Text("Yes")
+yes-btn = Button(yes-btn-text, null, Event("accept"))
+no-btn-text = Text("No")
+no-btn = Button(no-btn-text, null, Event("decline"))
+</a2ui>
+```
+
+### Compiled A2UI JSON output
+
+The compiler parses the text stream, resolves the parent-child references, maps positional arguments to the catalog schema, and produces the following flat component layout inside the `createSurface` message:
+
+```json
+{
+  "version": "v0.10",
+  "createSurface": {
+    "surfaceId": "gallery-notification-permission",
+    "catalogId": "https://a2ui.org/specification/v0_10/catalogs/basic/catalog.json",
+    "components": [
+      {
+        "id": "root",
+        "component": "Card",
+        "child": "main-column"
+      },
+      {
+        "id": "main-column",
+        "component": "Column",
+        "children": [
+          "icon",
+          "title",
+          "description",
+          "actions"
+        ],
+        "justify": null,
+        "align": "center"
+      },
+      {
+        "id": "icon",
+        "component": "Icon",
+        "name": {
+          "path": "/icon"
+        }
+      },
+      {
+        "id": "title",
+        "component": "Text",
+        "text": {
+          "path": "/title"
+        },
+        "variant": "h3"
+      },
+      {
+        "id": "description",
+        "component": "Text",
+        "text": {
+          "path": "/description"
+        },
+        "variant": "body"
+      },
+      {
+        "id": "actions",
+        "component": "Row",
+        "children": [
+          "yes-btn",
+          "no-btn"
+        ],
+        "justify": "center"
+      },
+      {
+        "id": "yes-btn-text",
+        "component": "Text",
+        "text": "Yes"
+      },
+      {
+        "id": "yes-btn",
+        "component": "Button",
+        "child": "yes-btn-text",
+        "variant": null,
+        "action": {
+          "event": {
+            "name": "accept",
+            "context": {}
+          }
+        }
+      },
+      {
+        "id": "no-btn-text",
+        "component": "Text",
+        "text": "No"
+      },
+      {
+        "id": "no-btn",
+        "component": "Button",
+        "child": "no-btn-text",
+        "variant": null,
+        "action": {
+          "event": {
+            "name": "decline",
+            "context": {}
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
 ## Ecosystem integration
 
 A2UI Express is completely catalog-agnostic, making sure it integrates into any environment using custom catalogs.
@@ -151,7 +299,6 @@ class CatalogSignatureCompiler:
                 is_req = prop_name in required
                 optional_marker = "" if is_req else "?"
                 ordered_args.append(f"{prop_name}{optional_marker}")
-            
             sig = f"{name}({', '.join(ordered_args)})"
             signatures.append(sig)
         return "\n".join(signatures)
