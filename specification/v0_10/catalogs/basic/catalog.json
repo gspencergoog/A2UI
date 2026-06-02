@@ -4,7 +4,7 @@
   "title": "A2UI Basic Catalog",
   "description": "Unified catalog of basic A2UI components and functions.",
   "catalogId": "https://a2ui.org/specification/v0_10/catalogs/basic/catalog.json",
-  "instructions": "**REQUIRED PROPERTIES:** You MUST include ALL required properties for every component, even if they are inside a template or will be bound to data.\n- For 'Text', you MUST provide 'text'. If dynamic, use { \"path\": \"...\" }.\n- For 'Image', you MUST provide 'url'. If dynamic, use { \"path\": \"...\" }.\n- For 'Button', you MUST provide 'action'.\n- For 'TextField', 'CheckBox', etc., you MUST provide 'label'.",
+  "instructions": "**REQUIRED PROPERTIES:** You MUST include ALL required properties for every component, even if they are inside a template or will be bound to data.",
   "components": {
     "Text": {
       "type": "object",
