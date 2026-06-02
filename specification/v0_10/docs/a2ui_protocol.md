@@ -335,7 +335,7 @@ This message is sent by the server to execute a function registered on the clien
 - `callFunction` (object, required): The description of the function call.
   - `call` (string, required): The registered name of the function to execute.
   - `args` (object, optional): Arguments passed to the function, as defined by its schema in the catalog.
-  - `returnType` (string, required): The expected return type of the function call. Snaps to one of `array`, `boolean`, `number`, `object`, `string`, or `void`.
+  - `returnType` (string, required): The expected return type of the function call. Must be one of `array`, `boolean`, `number`, `object`, `string`, or `void`.
 
 **Security Boundaries and Verification:**
 
