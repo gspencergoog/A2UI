@@ -27,9 +27,6 @@
       "type": "object",
       "description": "Opens the specified URL in a browser or handler. This function has no return value.",
       "properties": {
-        "callableFrom": {
-          "const": "clientOrRemote"
-        },
         "call": {
           "const": "openUrl"
         },
@@ -56,9 +53,6 @@
       "type": "object",
       "description": "Pings the server from the client side.",
       "properties": {
-        "callableFrom": {
-          "const": "remoteOnly"
-        },
         "call": {
           "const": "pingServer"
         },
