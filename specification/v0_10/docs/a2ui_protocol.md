@@ -324,6 +324,70 @@ Server responds with:
 }
 ```
 
+### `callFunction`
+
+This message is sent by the server to execute a function registered on the client. Functions are catalog-defined abstractions that avoid sending raw executable code across the wire.
+
+**Properties:**
+
+- `functionCallId` (string, required): A unique identifier for this invocation instance. The client MUST copy this ID verbatim into the subsequent `functionResponse` or `error` message.
+- `wantResponse` (boolean, optional, default `false`): Specifies whether the server expects a response payload back from the client. If set to `true`, the client MUST reply with either a `functionResponse` or an `error` message.
+- `callFunction` (object, required): The description of the function call.
+  - `call` (string, required): The registered name of the function to execute.
+  - `args` (object, optional): Arguments passed to the function, as defined by its schema in the catalog.
+  - `returnType` (string, required): The expected return type of the function call. Snaps to one of `array`, `boolean`, `number`, `object`, `string`, or `void`.
+
+**Security Boundaries and Verification:**
+
+Execution boundary verification (`remoteOnly` vs `clientOnly`) is enforced strictly at runtime by the client application:
+- When a client receives a `callFunction` message, it MUST look up the requested function name in its active catalog registry.
+- If the requested function is configured in the catalog as `clientOnly`, or if the function is not registered at all, the client MUST immediately reject the call and return a client-to-server `error` message with `code: "INVALID_FUNCTION_CALL"`.
+
+**Example:**
+
+Server sends this message to the client:
+
+```json
+{
+  "version": "v0.10",
+  "functionCallId": "get_device_resolution_123",
+  "wantResponse": true,
+  "callFunction": {
+    "call": "getScreenResolution",
+    "args": {
+      "screenIndex": 0
+    },
+    "returnType": "array"
+  }
+}
+```
+
+If the function executes successfully, the client responds with:
+
+```json
+{
+  "version": "v0.10",
+  "functionResponse": {
+    "functionCallId": "get_device_resolution_123",
+    "call": "getScreenResolution",
+    "value": [1920, 1080]
+  }
+}
+```
+
+If the server attempts to call a `clientOnly` function (e.g., a local-only component validator), the client responds with an error:
+
+```json
+{
+  "version": "v0.10",
+  "error": {
+    "code": "INVALID_FUNCTION_CALL",
+    "message": "Function 'validateLocalInput' is clientOnly and cannot be invoked remotely.",
+    "functionCallId": "get_device_resolution_123"
+  }
+}
+```
+
 ## Example Stream
 
 The following example demonstrates a complete interaction to render a Contact Form, expressed as a JSONL stream.
