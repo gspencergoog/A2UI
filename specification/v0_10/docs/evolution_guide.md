@@ -15,7 +15,7 @@ Version 0.10 differs from 0.9 in the following ways:
 
 - Added `posterUrl` property to the `Video` component in `catalogs/basic/catalog.json`, allowing a preview image to be displayed before the video plays.
 - Added `placeholder` prop to the `TextField` component schema.
-- <TBD>
+- Added an optional `instructions` field to the `Catalog` schema (`catalogs/basic/catalog.json`) to embed design guidelines and component usage rules directly in the catalog, deprecating and removing the external `rules.txt` file.
 
 ### 2.2. Server-to-Client Message List Schema
 
@@ -29,7 +29,7 @@ Version 0.10 differs from 0.9 in the following ways:
 
 ### 2.4. Client Capabilities Schema
 
-- <TBD>
+- Added an optional `instructions` field to the `Catalog` object definition (`client_capabilities.json`) to support design principles or component rules associated with a catalog.
 
 ### 2.5. AgentCard
 
