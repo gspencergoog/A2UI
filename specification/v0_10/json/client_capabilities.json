@@ -46,6 +46,12 @@
           "type": "string",
           "enum": ["string", "number", "boolean", "array", "object", "any", "void"],
           "description": "The type of value this function returns."
+        },
+        "callableFrom": {
+          "type": "string",
+          "enum": ["clientOnly", "remoteOnly", "clientOrRemote"],
+          "default": "clientOnly",
+          "description": "Specifies where this function can be invoked from."
         }
       },
       "required": ["name", "parameters", "returnType"],

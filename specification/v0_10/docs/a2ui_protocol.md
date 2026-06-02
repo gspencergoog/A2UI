@@ -340,6 +340,7 @@ This message is sent by the server to execute a function registered on the clien
 **Security Boundaries and Verification:**
 
 Execution boundary verification (`remoteOnly` vs `clientOnly`) is enforced strictly at runtime by the client application:
+
 - When a client receives a `callFunction` message, it MUST look up the requested function name in its active catalog registry.
 - If the requested function is configured in the catalog as `clientOnly`, or if the function is not registered at all, the client MUST immediately reject the call and return a client-to-server `error` message with `code: "INVALID_FUNCTION_CALL"`.
 
@@ -1022,7 +1023,7 @@ The `a2uiClientCapabilities` object in the transport metadata follows the [`clie
 
 - `v0.10` (object, required): The capability structure for version 0.10 of the A2UI protocol.
   - `supportedCatalogIds` (array of strings, required): The URIs of supported component and function catalogs.
-  - `inlineCatalogs` (array, optional): An array of custom catalog definitions provided inline by the client.
+  - `inlineCatalogs` (array, optional): An array of custom catalog definitions provided inline by the client. Functions defined within inline catalogs support declaring execution boundaries (`callableFrom: "clientOnly" | "remoteOnly" | "clientOrRemote"`) to statically specify remote invocation safety.
 
 ### Client data model
 
