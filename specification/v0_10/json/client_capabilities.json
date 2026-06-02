@@ -59,6 +59,10 @@
           "type": "string",
           "description": "Unique identifier for this catalog."
         },
+        "instructions": {
+          "type": "string",
+          "description": "Markdown formatted instructions or guidelines specific to this catalog. For example, design principles, or general component usage rules that don't belong as part of a component description."
+        },
         "components": {
           "type": "object",
           "description": "Definitions for UI components supported by this catalog.",
