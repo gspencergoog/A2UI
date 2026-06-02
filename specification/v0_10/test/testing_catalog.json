@@ -41,9 +41,6 @@
           },
           "required": ["url"],
           "additionalProperties": false
-        },
-        "returnType": {
-          "const": "void"
         }
       },
       "required": ["call", "args"],
@@ -55,9 +52,6 @@
       "properties": {
         "call": {
           "const": "pingServer"
-        },
-        "returnType": {
-          "const": "void"
         }
       },
       "required": ["call"],

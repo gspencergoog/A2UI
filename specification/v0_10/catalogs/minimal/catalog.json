@@ -164,8 +164,7 @@
           },
           "required": ["value"],
           "unevaluatedProperties": false
-        },
-        "returnType": {"const": "string"}
+        }
       },
       "required": ["call", "args"],
       "unevaluatedProperties": false

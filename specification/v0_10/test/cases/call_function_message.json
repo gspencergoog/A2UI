@@ -11,8 +11,7 @@
           "call": "openUrl",
           "args": {
             "url": "https://example.com"
-          },
-          "returnType": "void"
+          }
         },
         "functionCallId": "unique-call-id-123",
         "wantResponse": true
@@ -24,8 +23,7 @@
       "data": {
         "version": "v0.10",
         "callFunction": {
-          "call": "pingServer",
-          "returnType": "void"
+          "call": "pingServer"
         },
         "functionCallId": "unique-call-id-123a",
         "wantResponse": false
@@ -40,8 +38,7 @@
           "call": "openUrl",
           "args": {
             "url": "https://example.com"
-          },
-          "returnType": "void"
+          }
         },
         "functionCallId": "unique-call-id-124"
       }
@@ -53,8 +50,9 @@
         "version": "v0.10",
         "callFunction": {
           "call": "required",
-          "args": {"value": "bar"},
-          "returnType": "boolean"
+          "args": {
+            "value": "bar"
+          }
         }
       }
     },
@@ -66,7 +64,6 @@
         "functionCallId": "unique-call-id-125"
       }
     },
-
     {
       "description": "CallFunctionMessage: Invalid args (nested object in a single value)",
       "valid": false,
@@ -75,9 +72,10 @@
         "callFunction": {
           "call": "required",
           "args": {
-            "value": {"nested": "object"}
-          },
-          "returnType": "boolean"
+            "value": {
+              "nested": "object"
+            }
+          }
         },
         "functionCallId": "unique-call-id-127"
       }
@@ -90,9 +88,12 @@
         "callFunction": {
           "call": "required",
           "args": {
-            "value": [{"nested": "object"}]
-          },
-          "returnType": "boolean"
+            "value": [
+              {
+                "nested": "object"
+              }
+            ]
+          }
         },
         "functionCallId": "unique-call-id-128"
       }
@@ -104,7 +105,9 @@
         "version": "v0.10",
         "callFunction": {
           "call": "required",
-          "args": {"value": "bar"},
+          "args": {
+            "value": "bar"
+          },
           "returnType": "object"
         },
         "functionCallId": "unique-call-id-129"
@@ -119,8 +122,7 @@
           "call": "required",
           "args": {
             "value": "test"
-          },
-          "returnType": "boolean"
+          }
         },
         "functionCallId": "id-3"
       }

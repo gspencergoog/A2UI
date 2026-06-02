@@ -150,7 +150,7 @@
               "$ref": "common_types.json#/$defs/FunctionCall"
             }
           ],
-          "required": ["call", "returnType"],
+          "required": ["call"],
           "unevaluatedProperties": false
         }
       },
