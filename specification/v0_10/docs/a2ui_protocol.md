@@ -341,7 +341,7 @@ This message is sent by the server to execute a function registered on the clien
 
 Execution boundary verification (`remoteOnly` vs `clientOnly`) is enforced strictly at runtime by the client application:
 
-- When a client receives a `callFunction` message, it MUST look up the requested function name in its active catalog registry.
+- When a client receives a `callFunction` message, it MUST look up the requested function name in its active catalog registry. (Note: The client determines the execution boundary of a function by reading the `callableFrom` metadata property or schema annotation declared in the catalog; if omitted, the boundary defaults to `"clientOnly"`.)
 - If the requested function is configured in the catalog as `clientOnly`, or if the function is not registered at all, the client MUST immediately reject the call and return a client-to-server `error` message with `code: "INVALID_FUNCTION_CALL"`.
 
 **Example:**
