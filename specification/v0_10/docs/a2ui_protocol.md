@@ -1008,14 +1008,21 @@ In A2UI v0.10, capabilities and other metadata are exchanged via **transport met
 
 A server (or agent) advertises its capabilities using the [`server_capabilities.json`] schema. This indicates which catalogs it can generate UI for, and whether it accepts inline catalogs from the client. The exact mechanism depends on the transport (e.g., the `params` object in an A2A AgentCard, or server capabilities in MCP).
 
+**Properties:**
+
+- `v0.10` (object, required): The capability structure for version 0.10 of the A2UI protocol.
+  - `supportedCatalogIds` (array of strings, required): An array of strings identifying the Catalog Definition Schemas the server can generate.
+  - `acceptsInlineCatalogs` (boolean, optional, default `false`): Indicates if the server can accept custom inline component/function catalogs in the client's capabilities metadata.
+
 ### Client capabilities
 
-The `a2uiClientCapabilities` object in the transport metadata follows the [`client_capabilities.json`] schema.
+The `a2uiClientCapabilities` object in the transport metadata follows the [`client_capabilities.json`] schema to describe the client's rendering capabilities.
 
 **Properties:**
 
-- `supportedCatalogIds` (array of strings, required): URIs of supported catalogs.
-- `inlineCatalogs` (array, optional): An array of inline catalog definitions provided directly by the client (useful for custom or ad-hoc components and functions).
+- `v0.10` (object, required): The capability structure for version 0.10 of the A2UI protocol.
+  - `supportedCatalogIds` (array of strings, required): The URIs of supported component and function catalogs.
+  - `inlineCatalogs` (array, optional): An array of custom catalog definitions provided inline by the client.
 
 ### Client data model
 
@@ -1023,7 +1030,8 @@ When `sendDataModel` is enabled for a surface, the client includes the `a2uiClie
 
 **Properties:**
 
-- `surfaces` (object, required): A map of surface IDs to their current data models.
+- `version` (string, required): Must be the constant `"v0.10"`.
+- `surfaces` (object, required): A map of surface IDs to their current local data models.
 
 [`catalogs/basic/catalog.json`]: ../catalogs/basic/catalog.json
 [`common_types.json`]: ../json/common_types.json
