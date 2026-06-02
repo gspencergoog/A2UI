@@ -72,7 +72,7 @@ A2UI messages are encoded as an A2A `DataPart`.
 
 To identify a `DataPart` as containing A2UI data, it must have the following metadata:
 
-- `mimeType`: `application/a2ui+json`
+- `mimeType`: `application/json+a2ui`
 
 The `data` field of the `DataPart` contains a **list** of A2UI JSON messages (e.g., `createSurface`, `updateComponents`, `action`). It MUST be an array of messages.
 
@@ -116,7 +116,7 @@ Example DataPart:
   ],
   "kind": "data",
   "metadata": {
-    "mimeType": "application/a2ui+json"
+    "mimeType": "application/json+a2ui"
   }
 }
 ```
@@ -145,7 +145,7 @@ Example `action` DataPart:
   ],
   "kind": "data",
   "metadata": {
-    "mimeType": "application/a2ui+json"
+    "mimeType": "application/json+a2ui"
   }
 }
 ```
