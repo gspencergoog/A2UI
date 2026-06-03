@@ -26,6 +26,7 @@
     "openUrl": {
       "type": "object",
       "description": "Opens the specified URL in a browser or handler. This function has no return value.",
+      "returnType": "void",
       "properties": {
         "call": {
           "const": "openUrl"
@@ -49,6 +50,7 @@
     "pingServer": {
       "type": "object",
       "description": "Pings the server from the client side.",
+      "returnType": "void",
       "properties": {
         "call": {
           "const": "pingServer"

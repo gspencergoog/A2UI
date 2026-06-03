@@ -811,6 +811,7 @@
     "required": {
       "type": "object",
       "description": "Checks that the value is not null, undefined, or empty.",
+      "returnType": "boolean",
       "properties": {
         "call": {
           "const": "required"
@@ -832,6 +833,7 @@
     "regex": {
       "type": "object",
       "description": "Checks that the value matches a regular expression string.",
+      "returnType": "boolean",
       "properties": {
         "call": {
           "const": "regex"
@@ -857,6 +859,7 @@
     "length": {
       "type": "object",
       "description": "Checks string length constraints.",
+      "returnType": "boolean",
       "properties": {
         "call": {
           "const": "length"
@@ -896,6 +899,7 @@
     "numeric": {
       "type": "object",
       "description": "Checks numeric range constraints.",
+      "returnType": "boolean",
       "properties": {
         "call": {
           "const": "numeric"
@@ -933,6 +937,7 @@
     "email": {
       "type": "object",
       "description": "Checks that the value is a valid email address.",
+      "returnType": "boolean",
       "properties": {
         "call": {
           "const": "email"
@@ -954,6 +959,7 @@
     "formatString": {
       "type": "object",
       "description": "Performs string interpolation of data model values and other functions in the catalog functions list and returns the resulting string. The value string can contain interpolated expressions in the `${expression}` format. Supported expression types include: JSON Pointer paths to the data model (e.g., `${/absolute/path}` or `${relative/path}`), and client-side function calls (e.g., `${now()}`). Function arguments must be named (e.g., `${formatDate(value:${/currentDate}, format:'MM-dd')}`). To include a literal `${` sequence, escape it as `\\${`.",
+      "returnType": "string",
       "properties": {
         "call": {
           "const": "formatString"
@@ -975,6 +981,7 @@
     "formatNumber": {
       "type": "object",
       "description": "Formats a number with the specified grouping and decimal precision.",
+      "returnType": "string",
       "properties": {
         "call": {
           "const": "formatNumber"
@@ -1005,6 +1012,7 @@
     "formatCurrency": {
       "type": "object",
       "description": "Formats a number as a currency string.",
+      "returnType": "string",
       "properties": {
         "call": {
           "const": "formatCurrency"
@@ -1039,6 +1047,7 @@
     "formatDate": {
       "type": "object",
       "description": "Formats a timestamp into a string using a pattern.",
+      "returnType": "string",
       "properties": {
         "call": {
           "const": "formatDate"
@@ -1065,6 +1074,7 @@
     "pluralize": {
       "type": "object",
       "description": "Returns a localized string based on the Common Locale Data Repository (CLDR) plural category of the count (zero, one, two, few, many, other). Requires an 'other' fallback. For English, just use 'one' and 'other'.",
+      "returnType": "string",
       "properties": {
         "call": {
           "const": "pluralize"
@@ -1111,6 +1121,7 @@
     "openUrl": {
       "type": "object",
       "description": "Opens the specified URL in a browser or handler. This function has no return value.",
+      "returnType": "void",
       "properties": {
         "call": {
           "const": "openUrl"
@@ -1134,6 +1145,7 @@
     "and": {
       "type": "object",
       "description": "Performs a logical AND operation on a list of boolean values.",
+      "returnType": "boolean",
       "properties": {
         "call": {
           "const": "and"
@@ -1160,6 +1172,7 @@
     "or": {
       "type": "object",
       "description": "Performs a logical OR operation on a list of boolean values.",
+      "returnType": "boolean",
       "properties": {
         "call": {
           "const": "or"
@@ -1186,6 +1199,7 @@
     "not": {
       "type": "object",
       "description": "Performs a logical NOT operation on a boolean value.",
+      "returnType": "boolean",
       "properties": {
         "call": {
           "const": "not"

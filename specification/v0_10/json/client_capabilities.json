@@ -27,35 +27,29 @@
   "$defs": {
     "FunctionDefinition": {
       "type": "object",
-      "description": "Describes a function's interface.",
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "The unique name of the function."
-        },
-        "description": {
-          "type": "string",
-          "description": "A human-readable description of what the function does and how to use it."
-        },
-        "parameters": {
-          "type": "object",
-          "description": "A JSON Schema describing the expected arguments (args) for this function.",
+      "description": "Describes a function's validation schema and interface metadata.",
+      "allOf": [
+        {
           "$ref": "https://json-schema.org/draft/2020-12/schema"
         },
-        "returnType": {
-          "type": "string",
-          "enum": ["string", "number", "boolean", "array", "object", "any", "void"],
-          "description": "The type of value this function returns."
-        },
-        "callableFrom": {
-          "type": "string",
-          "enum": ["clientOnly", "remoteOnly", "clientOrRemote"],
-          "default": "clientOnly",
-          "description": "Specifies where this function can be invoked from."
+        {
+          "type": "object",
+          "properties": {
+            "returnType": {
+              "type": "string",
+              "enum": ["string", "number", "boolean", "array", "object", "any", "void"],
+              "description": "The type of value this function returns."
+            },
+            "callableFrom": {
+              "type": "string",
+              "enum": ["clientOnly", "remoteOnly", "clientOrRemote"],
+              "default": "clientOnly",
+              "description": "Specifies where this function can be invoked from."
+            }
+          },
+          "required": ["returnType"]
         }
-      },
-      "required": ["name", "parameters", "returnType"],
-      "additionalProperties": false
+      ]
     },
     "Catalog": {
       "type": "object",
@@ -73,9 +67,9 @@
           }
         },
         "functions": {
-          "type": "array",
+          "type": "object",
           "description": "Definitions for functions supported by this catalog.",
-          "items": {
+          "additionalProperties": {
             "$ref": "#/$defs/FunctionDefinition"
           }
         },
