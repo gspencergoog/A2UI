@@ -41,7 +41,7 @@
             "call": {
               "type": "object",
               "properties": {
-                "const": { "type": "string" }
+                "const": {"type": "string"}
               },
               "required": ["const"]
             },
@@ -56,8 +56,8 @@
         },
         "required": {
           "type": "array",
-          "items": { "type": "string" },
-          "contains": { "const": "call" }
+          "items": {"type": "string"},
+          "contains": {"const": "call"}
         },
         "unevaluatedProperties": {
           "type": "boolean"
@@ -99,6 +99,11 @@
       "type": "object",
       "description": "A collection of component and function definitions.",
       "properties": {
+        "$schema": {"type": "string"},
+        "$id": {"type": "string"},
+        "title": {"type": "string"},
+        "description": {"type": "string"},
+        "$defs": {"type": "object"},
         "catalogId": {
           "type": "string",
           "description": "Unique identifier for this catalog."
