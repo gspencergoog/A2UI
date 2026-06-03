@@ -55,14 +55,6 @@
       "type": "object",
       "description": "A collection of component and function definitions.",
       "properties": {
-        "$schema": {
-          "type": "string",
-          "description": "The JSON Schema meta-schema URI."
-        },
-        "$id": {
-          "type": "string",
-          "description": "The unique URI identifier for the catalog schema."
-        },
         "title": {
           "type": "string",
           "description": "The title of the catalog."
