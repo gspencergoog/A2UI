@@ -78,7 +78,7 @@ interface ComponentImplementation extends ComponentApi {
    */
   build(
     ctx: ComponentContext<ComponentImplementation>,
-    buildChild: (id: string) => NativeWidget,
+    buildChild: (id: string, basePath?: string) => NativeWidget,
   ): NativeWidget;
 }
 ```
@@ -500,7 +500,7 @@ This provides the ultimate "happy path" developer experience. The developer writ
 interface ButtonResolvedProps {
   label?: string;      // Resolved from DynamicString
   action: () => void;  // Resolved from Action
-  child?: string;      // Resolved structural ComponentId
+  child?: { id: string; basePath: string };  // Resolved structural ComponentId
 }
 
 // 2. The developer writes a simple, stateless UI component.
@@ -508,7 +508,7 @@ interface ButtonResolvedProps {
 const ReactButton = createReactComponent(ButtonBinder, ({ props, buildChild }) => {
   return (
     <button onClick={props.action}>
-      {props.child ? buildChild(props.child) : props.label}
+      {props.child ? buildChild(props.child.id, props.child.basePath) : props.label}
     </button>
   );
 });

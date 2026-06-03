@@ -15,7 +15,7 @@ Displays text content.
 **Rendering Guidelines:** Text should be rendered using a Markdown parser when possible. If markdown rendering is unavailable or fails, gracefully fallback to rendering the raw text. In such cases, renderers should ideally attempt to strip common Markdown markers (like `**` or `#`) to ensure the text remains legible and aesthetically consistent with the intended presentation.
 **Property Mapping:**
 
-- `variant="h1"` through `h5"`: Apply heading styling. Suggested relative font sizes: `h1` (2.5x base), `h2` (2x base), `h3` (1.75x base), `h4` (1.5x base), `h5` (1.25x base).
+- `variant="h1"` through `variant="h5"`: Apply heading styling. Suggested relative font sizes: `h1` (2.5x base), `h2` (2x base), `h3` (1.75x base), `h4` (1.5x base), `h5` (1.25x base).
 - `variant="caption"`: Render as smaller text, typically italicized or in a lighter/muted color. Suggested font size: 0.8x base.
 - `variant="body"` (default): Standard body text. Uses the base font size (e.g., 16dp/16px).
 
@@ -154,7 +154,7 @@ A component for selecting one or more options from a list.
 
 **Rendering Guidelines:**
 
-- `displayStyle="checkbox"` (default): Render as a dropdown menu, picker wheel, or an expanding vertical list of selectable options. A dropdown wrapper is preferred to save space.
+- `displayStyle="checkbox"` (default): Render as a list of checkboxes (for `multipleSelection`) or radio buttons (for `mutuallyExclusive`) alongside their text labels.
 - `displayStyle="chips"`: Render as a horizontal, wrapping row of selectable chips/pills. Selected chips should have a distinct background/border.
 - If `filterable` is true, render a text input above the list of options. As the user types, filter the visible options using a case-insensitive substring match on the option labels.
 
