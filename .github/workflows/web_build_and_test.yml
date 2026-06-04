@@ -16,14 +16,17 @@ name: Web core
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'renderers/web_core/**/*'
-      - '.github/workflows/web_build_and_test.yml'
+      - "renderers/web_core/**/*"
+      - ".github/workflows/web_build_and_test.yml"
   pull_request:
     paths:
-      - 'renderers/web_core/**/*'
-      - '.github/workflows/web_build_and_test.yml'
+      - "renderers/web_core/**/*"
+      - ".github/workflows/web_build_and_test.yml"
+
+permissions:
+  contents: read
 
 jobs:
   build-and-test:

@@ -14,32 +14,40 @@
  * limitations under the License.
  */
 
-import { Component, signal, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
+import {Component, signal, ViewChild, ElementRef, AfterViewInit} from '@angular/core';
+import {Client} from '@modelcontextprotocol/sdk/client/index.js';
+import {SSEClientTransport} from '@modelcontextprotocol/sdk/client/sse.js';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
-  styleUrls: ['./app.css']
+  styleUrls: ['./app.css'],
 })
 export class App implements AfterViewInit {
   @ViewChild('appIframe') appIframe!: ElementRef<HTMLIFrameElement>;
 
   protected readonly status = signal<string>('Not connected');
-  
+
   private htmlContent: string | null = null;
   private messageListenerAdded = false;
   protected readonly mcpAppHtmlUrl = signal<string | null>(null);
   protected readonly isAppLoading = signal<boolean>(false);
+  protected readonly selectedApp = signal<'editor' | 'basic'>('editor');
 
   private mcpClient: Client | null = null;
-  
+
+  private readonly allowedTools = new Set([
+    'fetch_counter_a2ui',
+    'increase_counter',
+    'smart_editor_get_controls',
+    'smart_editor_apply',
+  ]);
+
   ngAfterViewInit() {
     if (this.messageListenerAdded) return;
     this.messageListenerAdded = true;
 
-    window.addEventListener('message', (event) => {
+    window.addEventListener('message', event => {
       // Security: Validate origin
       if (event.origin !== window.location.origin) return;
 
@@ -51,81 +59,106 @@ export class App implements AfterViewInit {
       const data = event.data;
 
       if (data?.method === 'ui/notifications/sandbox-proxy-ready') {
-          if (this.htmlContent) {
-              console.log('[Host] Sandbox proxy ready, sending resource...');
-              iframe.contentWindow?.postMessage({
-                  jsonrpc: "2.0",
-                  method: "ui/notifications/sandbox-resource-ready",
-                  params: {
-                      html: this.htmlContent
-                  }
-              }, window.location.origin);
-          }
+        if (this.htmlContent) {
+          console.log('[Host] Sandbox proxy ready, sending resource...');
+          iframe.contentWindow?.postMessage(
+            {
+              jsonrpc: '2.0',
+              method: 'ui/notifications/sandbox-resource-ready',
+              params: {
+                html: this.htmlContent,
+              },
+            },
+            window.location.origin,
+          );
+        }
       } else if (data?.method === 'ui/ping') {
-          if (data.id && target) {
-               target.postMessage({
-                   jsonrpc: "2.0",
-                   id: data.id,
-                   result: {}
-               }, window.location.origin);
-          }
-      } else if (data?.method === 'ui/fetch_counter_a2ui') {
-          if (data.id && target && this.mcpClient) {
-               this.mcpClient.callTool({
-                   name: "fetch_counter_a2ui",
-                   arguments: {}
-               }).then(result => {
-                   target.postMessage({
-                       jsonrpc: "2.0",
-                       id: data.id,
-                       result: result.content
-                   }, window.location.origin);
-               }).catch(error => {
-                   target.postMessage({
-                       jsonrpc: "2.0",
-                       id: data.id,
-                       error: { message: error.message }
-                   }, window.location.origin);
-               });
-          }
-      } else if (data?.method === 'ui/increase_counter') {
-          if (data.id && target && this.mcpClient) {
-               this.mcpClient.callTool({
-                   name: "increase_counter",
-                   arguments: {}
-               }).then(result => {
-                   target.postMessage({
-                       jsonrpc: "2.0",
-                       id: data.id,
-                       result: result.content
-                   }, window.location.origin);
-               }).catch(error => {
-                   target.postMessage({
-                       jsonrpc: "2.0",
-                       id: data.id,
-                       error: { message: error.message }
-                   }, window.location.origin);
-               });
-          }
+        if (data.id && target) {
+          target.postMessage(
+            {
+              jsonrpc: '2.0',
+              id: data.id,
+              result: {},
+            },
+            window.location.origin,
+          );
+        }
       } else if (data?.method === 'ui/initialize') {
-          if (data.id && target) {
-              target.postMessage({
-                  jsonrpc: "2.0",
-                  id: data.id,
-                  result: {
-                      hostCapabilities: {
-                          displayModes: ["inline"]
-                      }
-                  }
-              }, window.location.origin);
-          }
+        if (data.id && target) {
+          target.postMessage(
+            {
+              jsonrpc: '2.0',
+              id: data.id,
+              result: {
+                hostCapabilities: {
+                  displayModes: ['inline'],
+                },
+              },
+            },
+            window.location.origin,
+          );
+        }
       } else if (data?.method === 'ui/resize') {
-          const height = data.params?.height;
-          if (typeof height === 'number') {
-              iframe.style.height = `${height}px`;
+        const height = data.params?.height;
+        if (typeof height === 'number') {
+          iframe.style.height = `${height}px`;
+        }
+      } else if (data?.method?.startsWith('ui/')) {
+        // Generic tool relay for unknown verbs
+        const toolName = data.method.replace('ui/', '');
+
+        if (!this.allowedTools.has(toolName)) {
+          console.warn(`[Host] Blocked unauthorized tool call: ${toolName}`);
+          if (data.id && target) {
+            target.postMessage(
+              {
+                jsonrpc: '2.0',
+                id: data.id,
+                error: {message: `Tool '${toolName}' is not whitelisted.`},
+              },
+              window.location.origin,
+            );
           }
+          return;
+        }
+
+        if (data.id && target && this.mcpClient) {
+          this.mcpClient
+            .callTool({
+              name: toolName,
+              arguments: data.params || {},
+            })
+            .then(result => {
+              target.postMessage(
+                {
+                  jsonrpc: '2.0',
+                  id: data.id,
+                  result: result.content,
+                },
+                window.location.origin,
+              );
+            })
+            .catch(error => {
+              target.postMessage(
+                {
+                  jsonrpc: '2.0',
+                  id: data.id,
+                  error: {message: error.message},
+                },
+                window.location.origin,
+              );
+            });
+        }
       }
     });
+  }
+
+  onAppChange(value: string) {
+    if (value === 'editor' || value === 'basic') {
+      this.selectedApp.set(value);
+    } else {
+      console.error(`[Host] Invalid app selected: ${value}`);
+    }
   }
 
   async connectAndLoadApp() {
@@ -135,22 +168,27 @@ export class App implements AfterViewInit {
     try {
       // 1. Connect to SSE
       const transport = new SSEClientTransport(new URL('http://127.0.0.1:8000/sse'));
-      const client = new Client({
-        name: "basic-host",
-        version: "1.0.0"
-      }, {
-        capabilities: {}
-      });
+      const client = new Client(
+        {
+          name: 'editor-host',
+          version: '1.0.0',
+        },
+        {
+          capabilities: {},
+        },
+      );
 
       this.status.set('Initializing MCP Client...');
       await client.connect(transport);
       this.mcpClient = client;
 
-      this.status.set('Calling get_basic_app tool...');
+      this.status.set('Calling MCP App tool...');
+      const toolName = this.selectedApp() === 'editor' ? 'get_editor_app' : 'get_basic_app';
+
       // 2. Call the tool to get the app
       const result = await client.callTool({
-        name: "get_basic_app",
-        arguments: {}
+        name: toolName,
+        arguments: {},
       });
 
       // 3. Extract resource URI
@@ -163,9 +201,11 @@ export class App implements AfterViewInit {
       this.status.set(`Reading resource: ${resourceUri}`);
 
       // 4. Read the resource
-      const appResource = await client.readResource({ uri: resourceUri });
-      const htmlContentObj = appResource.contents.find((c: any) => c.mimeType === 'text/html;profile=mcp-app' || 'text' in c) as any;
-      
+      const appResource = await client.readResource({uri: resourceUri});
+      const htmlContentObj = appResource.contents.find(
+        (c: any) => c.mimeType === 'text/html;profile=mcp-app' || 'text' in c,
+      ) as any;
+
       if (!htmlContentObj || typeof htmlContentObj.text !== 'string') {
         throw new Error('Resource did not return valid HTML content');
       }
@@ -174,10 +214,9 @@ export class App implements AfterViewInit {
       this.status.set('App loaded successfully!');
 
       if (this.appIframe && this.appIframe.nativeElement) {
-         this.appIframe.nativeElement.src = '/sandbox_iframe/sandbox.html?disable_security_self_test=true';
+        this.appIframe.nativeElement.src =
+          '/sandbox_iframe/sandbox.html?disable_security_self_test=true';
       }
-
-
     } catch (e: any) {
       this.status.set(`Error: ${e.message}`);
     } finally {

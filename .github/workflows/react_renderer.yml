@@ -16,22 +16,29 @@ name: React renderer
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
-      - 'renderers/angular/**'
-      - 'renderers/flutter/**'
-      - 'renderers/lit/**'
-      - 'samples/agent/adk/**'
+      - "renderers/angular/**"
+      - "renderers/flutter/**"
+      - "renderers/lit/**"
+      - "samples/agent/adk/**"
   pull_request:
     paths-ignore:
-      - 'renderers/angular/**'
-      - 'renderers/flutter/**'
-      - 'renderers/lit/**'
-      - 'samples/agent/adk/**'
+      - "renderers/angular/**"
+      - "renderers/flutter/**"
+      - "renderers/lit/**"
+      - "samples/agent/adk/**"
+
+permissions:
+  contents: read
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        task: [test, demo, lint]
+      fail-fast: false
 
     steps:
       - uses: actions/checkout@v6
@@ -51,64 +58,19 @@ jobs:
       - name: Build markdown-it dependency
         run: yarn workspace @a2ui/markdown-it build
 
-      - name: Build React renderer
+      - name: Run task
         working-directory: ./renderers/react
-        run: yarn build
-
-      - name: Test React renderer
-        working-directory: ./renderers/react
-        run: yarn test
-
-  build-and-test-demo:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --immutable
-
-      - name: Build web_core dependency
-        run: yarn workspace @a2ui/web_core build
-
-      - name: Build markdown-it dependency
-        run: yarn workspace @a2ui/markdown-it build
-
-      - name: Build React Demo
-        working-directory: ./renderers/react
-        run: yarn build:demo
-
-      - name: Test React Demo
-        working-directory: ./renderers/react
-        run: yarn test:demo
-
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --immutable
-
-      - name: Build web_core dependency
-        run: yarn workspace @a2ui/web_core build
-
-      - name: Build markdown-it dependency
-        run: yarn workspace @a2ui/markdown-it build
-
-      - name: Run lint
-        working-directory: ./renderers/react
-        run: yarn lint
+        run: |
+          case "${{ matrix.task }}" in
+            test)
+              yarn build
+              yarn test
+              ;;
+            demo)
+              yarn build:demo
+              yarn test:demo
+              ;;
+            lint)
+              yarn lint
+              ;;
+          esac
