@@ -1,5 +1,5 @@
 {
-  "name": "basic-mcp-app-angular",
+  "name": "basic-mcp-app-angular-editor",
   "version": "1.0.0",
   "dependencies": {
     "@a2ui/angular": "file:../../../../../../renderers/angular/dist",
