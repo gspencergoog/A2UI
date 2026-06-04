@@ -69,6 +69,9 @@
     },
     "build:tsc": {
       "command": "tsc -b --pretty",
+      "dependencies": [
+        "../../renderers/web_core:build"
+      ],
       "env": {
         "FORCE_COLOR": "1"
       },

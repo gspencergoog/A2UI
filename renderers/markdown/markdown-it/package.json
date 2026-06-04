@@ -61,6 +61,9 @@
   "wireit": {
     "build": {
       "command": "tsc -b --pretty",
+      "dependencies": [
+        "../../../renderers/web_core:build"
+      ],
       "files": [
         "src/**/*.ts",
         "src/**/*.json",
