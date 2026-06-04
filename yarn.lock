@@ -50,46 +50,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@a2ui/angular@file:../../../../../../renderers/angular/dist::locator=basic-mcp-app-angular%40workspace%3Asamples%2Fmcp%2Fa2ui-in-mcpapps%2Fserver%2Fapps%2Fsrc":
-  version: 0.9.1
-  resolution: "@a2ui/angular@file:../../../../../../renderers/angular/dist#../../../../../../renderers/angular/dist::hash=4f2d4b&locator=basic-mcp-app-angular%40workspace%3Asamples%2Fmcp%2Fa2ui-in-mcpapps%2Fserver%2Fapps%2Fsrc"
-  dependencies:
-    "@a2ui/web_core": "workspace:*"
-    "@preact/signals-core": "npm:^1.13.0"
-    tslib: "npm:^2.3.0"
-    zod: "npm:^3.25.76"
-  peerDependencies:
-    "@a2ui/markdown-it": "*"
-    "@angular/common": ^21.2.5
-    "@angular/core": ^21.2.5
-    "@angular/platform-browser": ^21.2.5
-  peerDependenciesMeta:
-    "@a2ui/markdown-it":
-      optional: true
-  checksum: 10c0/82a0308fe1ffb637f57d32d0b6f14c5834940f850521b0e4d0c9d3b2d8bd376c98ed9667a73fa45f06fb5648dc881778113698e73307776a50ceb3d1c59f511a
-  languageName: node
-  linkType: hard
-
-"@a2ui/angular@file:../../../../../../renderers/angular/dist::locator=basic-mcp-app-angular-editor%40workspace%3Asamples%2Fmcp%2Fa2ui-in-mcpapps%2Fserver%2Fapps%2Feditor":
-  version: 0.9.1
-  resolution: "@a2ui/angular@file:../../../../../../renderers/angular/dist#../../../../../../renderers/angular/dist::hash=4f2d4b&locator=basic-mcp-app-angular-editor%40workspace%3Asamples%2Fmcp%2Fa2ui-in-mcpapps%2Fserver%2Fapps%2Feditor"
-  dependencies:
-    "@a2ui/web_core": "workspace:*"
-    "@preact/signals-core": "npm:^1.13.0"
-    tslib: "npm:^2.3.0"
-    zod: "npm:^3.25.76"
-  peerDependencies:
-    "@a2ui/markdown-it": "*"
-    "@angular/common": ^21.2.5
-    "@angular/core": ^21.2.5
-    "@angular/platform-browser": ^21.2.5
-  peerDependenciesMeta:
-    "@a2ui/markdown-it":
-      optional: true
-  checksum: 10c0/82a0308fe1ffb637f57d32d0b6f14c5834940f850521b0e4d0c9d3b2d8bd376c98ed9667a73fa45f06fb5648dc881778113698e73307776a50ceb3d1c59f511a
-  languageName: node
-  linkType: hard
-
 "@a2ui/angular@workspace:*, @a2ui/angular@workspace:renderers/angular":
   version: 0.0.0-use.local
   resolution: "@a2ui/angular@workspace:renderers/angular"
@@ -98,9 +58,11 @@ __metadata:
     "@a2ui/web_core": "workspace:*"
     "@angular/build": "npm:^21.2.5"
     "@angular/cli": "npm:^21.2.5"
+    "@angular/common": "npm:^21.2.5"
     "@angular/compiler": "npm:^21.2.5"
     "@angular/compiler-cli": "npm:^21.2.5"
     "@angular/core": "npm:^21.2.5"
+    "@angular/platform-browser": "npm:^21.2.5"
     "@preact/signals-core": "npm:^1.13.0"
     "@types/express": "npm:^5.0.1"
     "@types/jasmine": "npm:~5.1.0"
@@ -216,25 +178,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@a2ui/lit@file:../../../../renderers/lit::locator=a2ui-over-mcp-recipe-client%40workspace%3Asamples%2Fmcp%2Fa2ui-over-mcp-recipe%2Fclient":
-  version: 0.10.0
-  resolution: "@a2ui/lit@file:../../../../renderers/lit#../../../../renderers/lit::hash=940be5&locator=a2ui-over-mcp-recipe-client%40workspace%3Asamples%2Fmcp%2Fa2ui-over-mcp-recipe%2Fclient"
-  dependencies:
-    "@a2ui/web_core": "workspace:*"
-    "@lit-labs/signals": "npm:^0.1.3"
-    "@lit/context": "npm:^1.1.4"
-    lit: "npm:^3.3.1"
-    signal-utils: "npm:^0.21.1"
-    zod: "npm:^3.25.76"
-  peerDependencies:
-    "@a2ui/markdown-it": "*"
-  peerDependenciesMeta:
-    "@a2ui/markdown-it":
-      optional: true
-  checksum: 10c0/b961463f1463e4217e3a8d67d11f38ef4dc16ffc7ece72c6bfeb17012f44092892aa62ab50402a052c6ab89b9b862f18c03e7fe43d7f0740ced604450f155378
-  languageName: node
-  linkType: hard
-
 "@a2ui/lit@npm:^0.8.1":
   version: 0.8.3
   resolution: "@a2ui/lit@npm:0.8.3"
@@ -271,42 +214,6 @@ __metadata:
       optional: true
   languageName: unknown
   linkType: soft
-
-"@a2ui/markdown-it@file:../../../../../../renderers/markdown/markdown-it::locator=basic-mcp-app-angular%40workspace%3Asamples%2Fmcp%2Fa2ui-in-mcpapps%2Fserver%2Fapps%2Fsrc":
-  version: 0.0.4
-  resolution: "@a2ui/markdown-it@file:../../../../../../renderers/markdown/markdown-it#../../../../../../renderers/markdown/markdown-it::hash=4b23ba&locator=basic-mcp-app-angular%40workspace%3Asamples%2Fmcp%2Fa2ui-in-mcpapps%2Fserver%2Fapps%2Fsrc"
-  dependencies:
-    dompurify: "npm:3.3.1"
-    markdown-it: "npm:^14.1.0"
-  peerDependencies:
-    "@a2ui/web_core": "workspace:*"
-  checksum: 10c0/ac0d647903cd093b9cf70b83ed152f29d13bcaf7eeb01127b5efabe41f4c0280908fafd5b5f15d6f8738a3581595bcea25d60c8f16f48438d95a201b86b95d94
-  languageName: node
-  linkType: hard
-
-"@a2ui/markdown-it@file:../../../../../../renderers/markdown/markdown-it::locator=basic-mcp-app-angular-editor%40workspace%3Asamples%2Fmcp%2Fa2ui-in-mcpapps%2Fserver%2Fapps%2Feditor":
-  version: 0.0.4
-  resolution: "@a2ui/markdown-it@file:../../../../../../renderers/markdown/markdown-it#../../../../../../renderers/markdown/markdown-it::hash=4b23ba&locator=basic-mcp-app-angular-editor%40workspace%3Asamples%2Fmcp%2Fa2ui-in-mcpapps%2Fserver%2Fapps%2Feditor"
-  dependencies:
-    dompurify: "npm:3.3.1"
-    markdown-it: "npm:^14.1.0"
-  peerDependencies:
-    "@a2ui/web_core": "workspace:*"
-  checksum: 10c0/ac0d647903cd093b9cf70b83ed152f29d13bcaf7eeb01127b5efabe41f4c0280908fafd5b5f15d6f8738a3581595bcea25d60c8f16f48438d95a201b86b95d94
-  languageName: node
-  linkType: hard
-
-"@a2ui/markdown-it@file:../../../../renderers/markdown/markdown-it::locator=a2ui-over-mcp-recipe-client%40workspace%3Asamples%2Fmcp%2Fa2ui-over-mcp-recipe%2Fclient":
-  version: 0.0.4
-  resolution: "@a2ui/markdown-it@file:../../../../renderers/markdown/markdown-it#../../../../renderers/markdown/markdown-it::hash=4b23ba&locator=a2ui-over-mcp-recipe-client%40workspace%3Asamples%2Fmcp%2Fa2ui-over-mcp-recipe%2Fclient"
-  dependencies:
-    dompurify: "npm:3.3.1"
-    markdown-it: "npm:^14.1.0"
-  peerDependencies:
-    "@a2ui/web_core": "workspace:*"
-  checksum: 10c0/ac0d647903cd093b9cf70b83ed152f29d13bcaf7eeb01127b5efabe41f4c0280908fafd5b5f15d6f8738a3581595bcea25d60c8f16f48438d95a201b86b95d94
-  languageName: node
-  linkType: hard
 
 "@a2ui/markdown-it@workspace:*, @a2ui/markdown-it@workspace:renderers/markdown/markdown-it":
   version: 0.0.0-use.local
@@ -524,18 +431,6 @@ __metadata:
     vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
-
-"@a2ui/web_core@file:../../../../renderers/web_core::locator=a2ui-over-mcp-recipe-client%40workspace%3Asamples%2Fmcp%2Fa2ui-over-mcp-recipe%2Fclient":
-  version: 0.10.0
-  resolution: "@a2ui/web_core@file:../../../../renderers/web_core#../../../../renderers/web_core::hash=196b84&locator=a2ui-over-mcp-recipe-client%40workspace%3Asamples%2Fmcp%2Fa2ui-over-mcp-recipe%2Fclient"
-  dependencies:
-    "@preact/signals-core": "npm:^1.13.0"
-    date-fns: "npm:^4.1.0"
-    zod: "npm:^3.25.76"
-    zod-to-json-schema: "npm:^3.25.1"
-  checksum: 10c0/118eb5eeca4bc94501c797e7a3c733e0eb224d7c6447c4542b47146667df01ab7b3c82a2805354312503564b4eba1774a2c8eb1b595215b982fcfce5daed1cbe
-  languageName: node
-  linkType: hard
 
 "@a2ui/web_core@npm:^0.8.0":
   version: 0.8.0
@@ -996,18 +891,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular-devkit/architect@npm:0.2102.14":
-  version: 0.2102.14
-  resolution: "@angular-devkit/architect@npm:0.2102.14"
-  dependencies:
-    "@angular-devkit/core": "npm:21.2.14"
-    rxjs: "npm:7.8.2"
-  bin:
-    architect: bin/cli.js
-  checksum: 10c0/f63eaf99fa648b0ba3c859862aae0709494b467db2ad75b794f1d99096408866be67129fba80ae01180200559970a5fc6fd84bc458b55cc97ec5fab6ab64cdc9
-  languageName: node
-  linkType: hard
-
 "@angular-devkit/architect@npm:0.2102.6":
   version: 0.2102.6
   resolution: "@angular-devkit/architect@npm:0.2102.6"
@@ -1017,25 +900,6 @@ __metadata:
   bin:
     architect: bin/cli.js
   checksum: 10c0/55c7f00b3097db16db4760172d7bd2e92a71c9b042d9131db5ba619833da25c4d4dea8d60304ff9d9d2753e20e79e1e1b55688af2bade1f69947edc1dc2b40a3
-  languageName: node
-  linkType: hard
-
-"@angular-devkit/core@npm:21.2.14":
-  version: 21.2.14
-  resolution: "@angular-devkit/core@npm:21.2.14"
-  dependencies:
-    ajv: "npm:8.18.0"
-    ajv-formats: "npm:3.0.1"
-    jsonc-parser: "npm:3.3.1"
-    picomatch: "npm:4.0.4"
-    rxjs: "npm:7.8.2"
-    source-map: "npm:0.7.6"
-  peerDependencies:
-    chokidar: ^5.0.0
-  peerDependenciesMeta:
-    chokidar:
-      optional: true
-  checksum: 10c0/7c7afaced9b4d5ac101013152dfcac8f2c1a56d21c0cff27e4af36743a61bdd10ad5f90a511fdc91db67294bf9ae6b666e07ba4ab95005ea55081bbe6700ed4b
   languageName: node
   linkType: hard
 
@@ -1058,19 +922,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular-devkit/schematics@npm:21.2.14":
-  version: 21.2.14
-  resolution: "@angular-devkit/schematics@npm:21.2.14"
-  dependencies:
-    "@angular-devkit/core": "npm:21.2.14"
-    jsonc-parser: "npm:3.3.1"
-    magic-string: "npm:0.30.21"
-    ora: "npm:9.3.0"
-    rxjs: "npm:7.8.2"
-  checksum: 10c0/8bde712e14a02de436e490dc538dea1abb054c8740daaa199078b9088aaae54e639917deadac40df377a0eeec9179e15f884dafa677dc2ec95d4ed708a4163a3
-  languageName: node
-  linkType: hard
-
 "@angular-devkit/schematics@npm:21.2.6":
   version: 21.2.6
   resolution: "@angular-devkit/schematics@npm:21.2.6"
@@ -1081,87 +932,6 @@ __metadata:
     ora: "npm:9.3.0"
     rxjs: "npm:7.8.2"
   checksum: 10c0/b286dc6dca144a389ec162ec118588ca77a5b11bc8f895e00ff7ed6fabd210ad96ab24830831de7947c2988edbb81dbfa19d9d055e13614bb21cf385d07cda0e
-  languageName: node
-  linkType: hard
-
-"@angular/build@npm:^21.2.0":
-  version: 21.2.14
-  resolution: "@angular/build@npm:21.2.14"
-  dependencies:
-    "@ampproject/remapping": "npm:2.3.0"
-    "@angular-devkit/architect": "npm:0.2102.14"
-    "@babel/core": "npm:7.29.0"
-    "@babel/helper-annotate-as-pure": "npm:7.27.3"
-    "@babel/helper-split-export-declaration": "npm:7.24.7"
-    "@inquirer/confirm": "npm:5.1.21"
-    "@vitejs/plugin-basic-ssl": "npm:2.1.4"
-    beasties: "npm:0.4.1"
-    browserslist: "npm:^4.26.0"
-    esbuild: "npm:0.27.3"
-    https-proxy-agent: "npm:7.0.6"
-    istanbul-lib-instrument: "npm:6.0.3"
-    jsonc-parser: "npm:3.3.1"
-    listr2: "npm:9.0.5"
-    lmdb: "npm:3.5.1"
-    magic-string: "npm:0.30.21"
-    mrmime: "npm:2.0.1"
-    parse5-html-rewriting-stream: "npm:8.0.0"
-    picomatch: "npm:4.0.4"
-    piscina: "npm:5.1.4"
-    rolldown: "npm:1.0.0-rc.4"
-    sass: "npm:1.97.3"
-    semver: "npm:7.7.4"
-    source-map-support: "npm:0.5.21"
-    tinyglobby: "npm:0.2.15"
-    undici: "npm:7.24.4"
-    vite: "npm:7.3.2"
-    watchpack: "npm:2.5.1"
-  peerDependencies:
-    "@angular/compiler": ^21.0.0
-    "@angular/compiler-cli": ^21.0.0
-    "@angular/core": ^21.0.0
-    "@angular/localize": ^21.0.0
-    "@angular/platform-browser": ^21.0.0
-    "@angular/platform-server": ^21.0.0
-    "@angular/service-worker": ^21.0.0
-    "@angular/ssr": ^21.2.14
-    karma: ^6.4.0
-    less: ^4.2.0
-    ng-packagr: ^21.0.0
-    postcss: ^8.4.0
-    tailwindcss: ^2.0.0 || ^3.0.0 || ^4.0.0
-    tslib: ^2.3.0
-    typescript: ">=5.9 <6.0"
-    vitest: ^4.0.8
-  dependenciesMeta:
-    lmdb:
-      optional: true
-  peerDependenciesMeta:
-    "@angular/core":
-      optional: true
-    "@angular/localize":
-      optional: true
-    "@angular/platform-browser":
-      optional: true
-    "@angular/platform-server":
-      optional: true
-    "@angular/service-worker":
-      optional: true
-    "@angular/ssr":
-      optional: true
-    karma:
-      optional: true
-    less:
-      optional: true
-    ng-packagr:
-      optional: true
-    postcss:
-      optional: true
-    tailwindcss:
-      optional: true
-    vitest:
-      optional: true
-  checksum: 10c0/bf9afb698dc8efe54f09c08456c8aec7e050f23d84123edda8a0be7165fa490e9bbe7d95ed7aeb6d6a32c4b0ef9b9928807d1647aae23f9a3f10ba5359cc56af
   languageName: node
   linkType: hard
 
@@ -1260,34 +1030,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/cli@npm:^21.2.0":
-  version: 21.2.14
-  resolution: "@angular/cli@npm:21.2.14"
-  dependencies:
-    "@angular-devkit/architect": "npm:0.2102.14"
-    "@angular-devkit/core": "npm:21.2.14"
-    "@angular-devkit/schematics": "npm:21.2.14"
-    "@inquirer/prompts": "npm:7.10.1"
-    "@listr2/prompt-adapter-inquirer": "npm:3.0.5"
-    "@modelcontextprotocol/sdk": "npm:1.26.0"
-    "@schematics/angular": "npm:21.2.14"
-    "@yarnpkg/lockfile": "npm:1.1.0"
-    algoliasearch: "npm:5.48.1"
-    ini: "npm:6.0.0"
-    jsonc-parser: "npm:3.3.1"
-    listr2: "npm:9.0.5"
-    npm-package-arg: "npm:13.0.2"
-    pacote: "npm:21.3.1"
-    parse5-html-rewriting-stream: "npm:8.0.0"
-    semver: "npm:7.7.4"
-    yargs: "npm:18.0.0"
-    zod: "npm:4.3.6"
-  bin:
-    ng: bin/ng.js
-  checksum: 10c0/469682dc5543386339717dea7591e09fa47d9b5977d43c238f887bb2015c3f3282babdef851554db1eebd59e78bc7b8321acbea11e0fc1fd97641c1b69e59b9d
-  languageName: node
-  linkType: hard
-
 "@angular/cli@npm:^21.2.5":
   version: 21.2.6
   resolution: "@angular/cli@npm:21.2.6"
@@ -1316,18 +1058,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/common@npm:^21.2.0":
-  version: 21.2.16
-  resolution: "@angular/common@npm:21.2.16"
-  dependencies:
-    tslib: "npm:^2.3.0"
-  peerDependencies:
-    "@angular/core": 21.2.16
-    rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/ca666a27381cc0cdaf951f71df9c62d7d9b12420b725545d232f07aa6e4f1bf9f7baa3b5cc863c6c55b81b630430fcff3c73629d4c9aa76b702fabb0755aa548
-  languageName: node
-  linkType: hard
-
 "@angular/common@npm:^21.2.5":
   version: 21.2.7
   resolution: "@angular/common@npm:21.2.7"
@@ -1337,31 +1067,6 @@ __metadata:
     "@angular/core": 21.2.7
     rxjs: ^6.5.3 || ^7.4.0
   checksum: 10c0/3d365406cc12a479e1bb3c7b4656621a9b65dba370c45c24a76323eb9874d1b7d2ff5c2621fd9bc98419dec1f7531c84a649afd5e7d8f12c77e72b50625ae96d
-  languageName: node
-  linkType: hard
-
-"@angular/compiler-cli@npm:^21.2.0":
-  version: 21.2.16
-  resolution: "@angular/compiler-cli@npm:21.2.16"
-  dependencies:
-    "@babel/core": "npm:7.29.0"
-    "@jridgewell/sourcemap-codec": "npm:^1.4.14"
-    chokidar: "npm:^5.0.0"
-    convert-source-map: "npm:^1.5.1"
-    reflect-metadata: "npm:^0.2.0"
-    semver: "npm:^7.0.0"
-    tslib: "npm:^2.3.0"
-    yargs: "npm:^18.0.0"
-  peerDependencies:
-    "@angular/compiler": 21.2.16
-    typescript: ">=5.9 <6.1"
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  bin:
-    ng-xi18n: bundles/src/bin/ng_xi18n.js
-    ngc: bundles/src/bin/ngc.js
-  checksum: 10c0/f7413677fbd60e251b8b8ca6f6866c4ecba30eacaa7bae7c0f7eb84ee8ce45737c5a34311bdeb2daecba17927d04ccfc9bec2e9f96ccc9cae2b4a9c5593be6e6
   languageName: node
   linkType: hard
 
@@ -1390,39 +1095,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/compiler@npm:^21.2.0":
-  version: 21.2.16
-  resolution: "@angular/compiler@npm:21.2.16"
-  dependencies:
-    tslib: "npm:^2.3.0"
-  checksum: 10c0/071f5cd229812eb149e24bb890bccf65db99e59814126e0fe81020bbc3990ce53efed0f6f6ec8f34bf1d89eda8bbf89dd2266eec226c3c95125a81387280d41c
-  languageName: node
-  linkType: hard
-
 "@angular/compiler@npm:^21.2.5":
   version: 21.2.7
   resolution: "@angular/compiler@npm:21.2.7"
   dependencies:
     tslib: "npm:^2.3.0"
   checksum: 10c0/8970060026a70164533327ba9b2bbc91fef98779656ac39f4be6f1f1e64db076936dd1de7f1e07b2352ce87b9b5259a9c621c9130e388dc01eaffccba4b95dab
-  languageName: node
-  linkType: hard
-
-"@angular/core@npm:^21.2.0":
-  version: 21.2.16
-  resolution: "@angular/core@npm:21.2.16"
-  dependencies:
-    tslib: "npm:^2.3.0"
-  peerDependencies:
-    "@angular/compiler": 21.2.16
-    rxjs: ^6.5.3 || ^7.4.0
-    zone.js: ~0.15.0 || ~0.16.0
-  peerDependenciesMeta:
-    "@angular/compiler":
-      optional: true
-    zone.js:
-      optional: true
-  checksum: 10c0/3f594abb767f2e958fa2379de89f539fef3b25ac2cd944f14e98a240cae29cdc368958ec0b0bb0e8652d46ae1ee51745b2a8943279e11a6b2735d8fb3b020baa
   languageName: node
   linkType: hard
 
@@ -1441,21 +1119,6 @@ __metadata:
     zone.js:
       optional: true
   checksum: 10c0/33b2593f4631cab0c3f39e8d7e1a760b466f2253a7c5508e161ad22212c85965e6e898104c4a029f55e10df35439208e119b53cba3c20085c9bc12a28a609d71
-  languageName: node
-  linkType: hard
-
-"@angular/forms@npm:^21.2.0":
-  version: 21.2.16
-  resolution: "@angular/forms@npm:21.2.16"
-  dependencies:
-    "@standard-schema/spec": "npm:^1.0.0"
-    tslib: "npm:^2.3.0"
-  peerDependencies:
-    "@angular/common": 21.2.16
-    "@angular/core": 21.2.16
-    "@angular/platform-browser": 21.2.16
-    rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/cfcd061cf831c2b722fec90dc45255458658ce336edee14ac6bdb9867b3c0b1ce15168b22384d44e596adfdc17f2f53ca9bec21c62635859b19e7e8b3a123311
   languageName: node
   linkType: hard
 
@@ -1504,22 +1167,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/platform-browser@npm:^21.2.0":
-  version: 21.2.16
-  resolution: "@angular/platform-browser@npm:21.2.16"
-  dependencies:
-    tslib: "npm:^2.3.0"
-  peerDependencies:
-    "@angular/animations": 21.2.16
-    "@angular/common": 21.2.16
-    "@angular/core": 21.2.16
-  peerDependenciesMeta:
-    "@angular/animations":
-      optional: true
-  checksum: 10c0/37c13bd1c8c3f210fb24f60ac1e8d44d6a6447748e5c4fb73bf0abf0546f80aaed0b4b6b57d6e5cf130d65b4ecd808a736ef29805744699f2b720fced5cdab69
-  languageName: node
-  linkType: hard
-
 "@angular/platform-browser@npm:^21.2.5":
   version: 21.2.7
   resolution: "@angular/platform-browser@npm:21.2.7"
@@ -1549,20 +1196,6 @@ __metadata:
     "@angular/platform-browser": 21.2.7
     rxjs: ^6.5.3 || ^7.4.0
   checksum: 10c0/94f836bd7f7f8c4987c4be70a0b0d37397e3d761d48f146e332baf79b70e9a209574db864681d09c3cd207f0c73a127b27da165ac8432363fcbe7f9e0b210d20
-  languageName: node
-  linkType: hard
-
-"@angular/router@npm:^21.2.0":
-  version: 21.2.16
-  resolution: "@angular/router@npm:21.2.16"
-  dependencies:
-    tslib: "npm:^2.3.0"
-  peerDependencies:
-    "@angular/common": 21.2.16
-    "@angular/core": 21.2.16
-    "@angular/platform-browser": 21.2.16
-    rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/340aecb000e7ae76385b90f928ef7eb56764cecdf15f772195b7682de9906414fd3c053b81c7d5be5a5c6edc4d66a425f77ad2720f97107e50b77536ea3ef889
   languageName: node
   linkType: hard
 
@@ -10565,17 +10198,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@schematics/angular@npm:21.2.14":
-  version: 21.2.14
-  resolution: "@schematics/angular@npm:21.2.14"
-  dependencies:
-    "@angular-devkit/core": "npm:21.2.14"
-    "@angular-devkit/schematics": "npm:21.2.14"
-    jsonc-parser: "npm:3.3.1"
-  checksum: 10c0/153d4297e6ebe7d6cc499c779f8fa8b9f386d7b9686306178eb43be3e3e076b4eb58c376ecd6be2565cb898f790949ae14c38093f56fb96bf79addb93790d0f8
-  languageName: node
-  linkType: hard
-
 "@schematics/angular@npm:21.2.6":
   version: 21.2.6
   resolution: "@schematics/angular@npm:21.2.6"
@@ -13203,9 +12825,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "a2ui-over-mcp-recipe-client@workspace:samples/mcp/a2ui-over-mcp-recipe/client"
   dependencies:
-    "@a2ui/lit": "file:../../../../renderers/lit"
-    "@a2ui/markdown-it": "file:../../../../renderers/markdown/markdown-it"
-    "@a2ui/web_core": "file:../../../../renderers/web_core"
+    "@a2ui/lit": "workspace:*"
+    "@a2ui/markdown-it": "workspace:*"
+    "@a2ui/web_core": "workspace:*"
     "@lit-labs/signals": "npm:^0.1.3"
     "@lit/context": "npm:^1.1.4"
     "@modelcontextprotocol/sdk": "npm:^1.28.0"
@@ -14110,8 +13732,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "basic-mcp-app-angular-editor@workspace:samples/mcp/a2ui-in-mcpapps/server/apps/editor"
   dependencies:
-    "@a2ui/angular": "file:../../../../../../renderers/angular/dist"
-    "@a2ui/markdown-it": "file:../../../../../../renderers/markdown/markdown-it"
+    "@a2ui/angular": "workspace:*"
+    "@a2ui/markdown-it": "workspace:*"
     "@angular/build": "npm:^21.2.0"
     "@angular/cli": "npm:^21.2.0"
     "@angular/common": "npm:^21.2.0"
@@ -14132,8 +13754,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "basic-mcp-app-angular@workspace:samples/mcp/a2ui-in-mcpapps/server/apps/src"
   dependencies:
-    "@a2ui/angular": "file:../../../../../../renderers/angular/dist"
-    "@a2ui/markdown-it": "file:../../../../../../renderers/markdown/markdown-it"
+    "@a2ui/angular": "workspace:*"
+    "@a2ui/markdown-it": "workspace:*"
     "@angular/build": "npm:^21.2.0"
     "@angular/cli": "npm:^21.2.0"
     "@angular/common": "npm:^21.2.0"
@@ -29335,61 +28957,6 @@ __metadata:
   bin:
     vite: bin/vite.js
   checksum: 10c0/5c7548f5f43a23533e53324304db4ad85f1896b1bfd3ee32ae9b866bac2933782c77b350eb2b52a02c625c8ad1ddd4c000df077419410650c982cd97fde8d014
-  languageName: node
-  linkType: hard
-
-"vite@npm:7.3.2":
-  version: 7.3.2
-  resolution: "vite@npm:7.3.2"
-  dependencies:
-    esbuild: "npm:^0.27.0"
-    fdir: "npm:^6.5.0"
-    fsevents: "npm:~2.3.3"
-    picomatch: "npm:^4.0.3"
-    postcss: "npm:^8.5.6"
-    rollup: "npm:^4.43.0"
-    tinyglobby: "npm:^0.2.15"
-  peerDependencies:
-    "@types/node": ^20.19.0 || >=22.12.0
-    jiti: ">=1.21.0"
-    less: ^4.0.0
-    lightningcss: ^1.21.0
-    sass: ^1.70.0
-    sass-embedded: ^1.70.0
-    stylus: ">=0.54.8"
-    sugarss: ^5.0.0
-    terser: ^5.16.0
-    tsx: ^4.8.1
-    yaml: ^2.4.2
-  dependenciesMeta:
-    fsevents:
-      optional: true
-  peerDependenciesMeta:
-    "@types/node":
-      optional: true
-    jiti:
-      optional: true
-    less:
-      optional: true
-    lightningcss:
-      optional: true
-    sass:
-      optional: true
-    sass-embedded:
-      optional: true
-    stylus:
-      optional: true
-    sugarss:
-      optional: true
-    terser:
-      optional: true
-    tsx:
-      optional: true
-    yaml:
-      optional: true
-  bin:
-    vite: bin/vite.js
-  checksum: 10c0/74be36907e208916f18bfec81c8eba18b869f0a170f1ece0a4dcb14874d0f0e7c022fb6c2ad896e3ee6c973fe88f53ac23b4078879ada340d8b263260868b8d4
   languageName: node
   linkType: hard
 

@@ -63,7 +63,10 @@ def setup_catalog_alias(catalog_file="catalogs/basic/catalog.json"):
     # and have it resolve to this schema content.
     if "$id" in catalog:
         import re
-        catalog["$id"] = re.sub(r"catalogs/basic/catalog\.json$", "catalog.json", catalog["$id"])
+        suffix_pattern = re.escape(catalog_file) + r"$"
+        if not re.search(suffix_pattern, catalog["$id"]):
+            suffix_pattern = re.escape(os.path.basename(catalog_file)) + r"$"
+        catalog["$id"] = re.sub(suffix_pattern, "catalog.json", catalog["$id"])
 
 
     with open(TEMP_CATALOG_FILE, 'w') as f:
