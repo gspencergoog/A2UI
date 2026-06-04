@@ -82,7 +82,7 @@ def validate_ajv(schema_path, data_path, all_schemas):
         result = subprocess.run(cmd, capture_output=True, text=True)
         return result.returncode == 0, result.stdout + result.stderr
     except FileNotFoundError:
-        print("Error: 'ajv' command not found. Please ensure dependencies are installed (e.g., 'pnpm install').")
+        print("Error: 'ajv' command not found. Please ensure dependencies are installed (e.g., 'yarn install').")
         sys.exit(1)
 
 def run_suite(suite_path):
