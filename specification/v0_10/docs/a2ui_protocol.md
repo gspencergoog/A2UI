@@ -378,7 +378,7 @@ Every catalog follows the standard `Catalog` object definition:
 - **instructions** (string, optional): Markdown-formatted design principles, rules, or developer guidelines specific to this catalog. These rules guide LLMs when generating UI layouts under this catalog.
 - **components** (object, optional): A map of supported UI components, where each key is the component type (e.g., `Text`) and its value is its JSON Schema definition.
 - **functions** (array, optional): A list of client-side validation or utility functions supported by the catalog.
-- **theme** (object, optional): A schema defining the catalog's customizable visual properties.
+- **surfaceProperties** (object, optional): A schema defining the catalog's customizable visual properties.
 
 ### UI composition: the adjacency list model
 
