@@ -7,7 +7,7 @@ This document serves as a comprehensive guide to the changes between A2UI versio
 Version 0.10 differs from 0.9 in the following ways:
 
 - **Client-to-Server RPC**: Introduced `actionResponse` enabling synchronous responses to client-initiated actions. Added `actionId` for response correlation.
-- <TBD>
+- **Surface Properties Refactoring**: Renamed `theme` to `surfaceProperties` at both the message and catalog level. Removed the `primaryColor` property entirely to decouple structural UI layout and branding customization from surface definition.
 
 ## 2. Changes
 
@@ -16,6 +16,7 @@ Version 0.10 differs from 0.9 in the following ways:
 - Added `posterUrl` property to the `Video` component in `catalogs/basic/catalog.json`, allowing a preview image to be displayed before the video plays.
 - Added `placeholder` prop to the `TextField` component schema.
 - Added an optional `instructions` field to the `Catalog` schema (`catalogs/basic/catalog.json`) to embed design guidelines and component usage rules directly in the catalog, deprecating and removing the external `rules.txt` file.
+- Renamed the `$defs/theme` schema to `$defs/surfaceProperties` in both the basic and minimal catalogs, and removed the `primaryColor` property from it.
 
 ### 2.2. Server-to-Client Message List Schema
 
@@ -30,6 +31,7 @@ Version 0.10 differs from 0.9 in the following ways:
 ### 2.4. Client Capabilities Schema
 
 - Added an optional `instructions` field to the `Catalog` object definition (`client_capabilities.json`) to support design principles or component rules associated with a catalog.
+- Renamed `theme` capability block to `surfaceProperties` within the Catalog definition in `client_capabilities.json`.
 
 ### 2.5. AgentCard
 
@@ -46,7 +48,7 @@ Version 0.10 differs from 0.9 in the following ways:
 ### 2.8. Server-to-Client Messages
 
 - Added `actionResponse` message structure to support synchronous responses with a `value` or `error`.
-- <TBD>
+- Updated `createSurface` message to rename the `theme` field to `surfaceProperties` (pointing to catalog surface properties definitions).
 
 ### 2.9. Client-to-Server Events
 
