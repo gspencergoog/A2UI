@@ -10,19 +10,21 @@ Before running this gallery, you **must** build the shared A2UI renderers.
 
 Navigate to the project root and run:
 
-```bash
+````bash
 ```bash
 yarn install
 yarn build:all
-```
+````
 
 For more details on building the renderers, see:
+
 - [Web Core README](../../../../renderers/web_core/README.md)
 - [Lit Renderer README](../../../../renderers/lit/README.md)
 
 ## Getting Started
 
 1.  **Navigate to this directory**:
+
     ```bash
     cd samples/client/lit/gallery_v0_9
     ```
@@ -39,6 +41,6 @@ For more details on building the renderers, see:
 ## Architecture
 
 - **Agentless**: Unlike other samples, this does not require a running Python agent. It simulates agent responses locally for interactive components (like the Login Form).
-- **Dynamic Loading**: The app automatically discovers and loads *all* `.json` files present in the v0.8 minimal specification folder at build time. To add a new test case, simply drop a JSON file into that specification folder and restart the dev server.
+- **Dynamic Loading**: The app automatically discovers and loads _all_ `.json` files present in the v0.8 minimal specification folder at build time. To add a new test case, simply drop a JSON file into that specification folder and restart the dev server.
 - **Surface Isolation**: Each example is rendered into its own independent `a2ui-surface` with a unique ID derived from the filename.
 - **Mock Agent Console**: All user interactions (button clicks, form submissions) are intercepted and logged to a sidebar, demonstrating how the renderer resolves actions and contexts.

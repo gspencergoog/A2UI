@@ -32,6 +32,7 @@ renderers/scripts/increment_version.mjs lit 0.9.2-beta.1
 ```
 
 This script will:
+
 - Update the `package.json` of the target package.
 - Scan the entire mono-repo for internal dependents (via `file:` links).
 - Run `npm install` in those dependents to update their lockfiles.
@@ -46,6 +47,7 @@ Once versions are updated and merged into `main`, use the `publish_npm` script t
 ```
 
 This script will:
+
 - Run `npx google-artifactregistry-auth` to authenticate.
 - Sort packages topologically (e.g., publishing `web_core` before `lit`).
 - Verify that if a renderer is being published, `web_core` is also included (use `--force` to skip).
@@ -53,9 +55,10 @@ This script will:
 - For each package: `npm install` -> `npm test` -> `npm run publish:package`.
 
 **Advanced Flags for publish_npm.mjs:**
+
 - `--force`: Skips the `web_core` inclusion warning.
 - `--yes`: Bypasses the manual user confirmation prompt (useful for CI).
-- `--dry-run`: Simulates the process, printing the commands it *would* execute without actually running them.
+- `--dry-run`: Simulates the process, printing the commands it _would_ execute without actually running them.
 - `--skip-tests`: Skips the `npm run test` phase before publishing.
 - `--test-only`: Runs the full build and test suite in topological order, but skips the final `npm run publish:package` step. Useful for verifying that packages build and tests pass before performing a real release.
 
@@ -74,6 +77,7 @@ This generates a `manifest.json` with the current versions of all renderer packa
 You can also do this step manually, if you are authenticated with `gcloud` with a corporate Google account in the correct groups:
 
 1. Create a new manifest.json file with these contents:
+
    ```json
    {
      "publish_all": true
@@ -107,9 +111,9 @@ Add the following temporarily for publishing (do not commit as it may break CI d
 ```yaml
 npmScopes:
   a2ui:
-    npmRegistryServer: "https://us-npm.pkg.dev/oss-exit-gate-prod/a2ui--npm/"
+    npmRegistryServer: 'https://us-npm.pkg.dev/oss-exit-gate-prod/a2ui--npm/'
     npmAlwaysAuth: true
-    npmAuthToken: "${NPM_TOKEN:-}"
+    npmAuthToken: '${NPM_TOKEN:-}'
 ```
 
 1. Ensure your local `.npmrc` in the package directory is correctly configured if you are debugging, but the automated scripts handle authentication via `google-artifactregistry-auth`.
@@ -126,7 +130,7 @@ Because these are scoped packages (`@a2ui/`), they require the `--access public`
 yarn publish:package
 ```
 
-*Note: This command runs the build, prepares the `dist/` directory, and then executes `yarn npm publish --access public`.*
+_Note: This command runs the build, prepares the `dist/` directory, and then executes `yarn npm publish --access public`._
 
 ---
 

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { AgentCard, Part, SendMessageSuccessResponse } from '@a2a-js/sdk';
-import { A2aService } from '@a2a_chat_canvas/interfaces/a2a-service';
-import { inject, Injectable, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import {AgentCard, Part, SendMessageSuccessResponse} from '@a2a-js/sdk';
+import {A2aService} from '@a2a_chat_canvas/interfaces/a2a-service';
+import {inject, Injectable, PLATFORM_ID} from '@angular/core';
+import {isPlatformBrowser} from '@angular/common';
 
 @Injectable({
   providedIn: 'root',
@@ -28,9 +28,9 @@ export class A2aServiceImpl implements A2aService {
 
   async sendMessage(parts: Part[], signal?: AbortSignal): Promise<SendMessageSuccessResponse> {
     const response = await fetch('/a2a', {
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         parts: parts,
-        contextId: this.contextId
+        contextId: this.contextId,
       }),
       method: 'POST',
       signal,
@@ -44,7 +44,7 @@ export class A2aServiceImpl implements A2aService {
       return data;
     }
 
-    const error = (await response.json()) as { error: string };
+    const error = (await response.json()) as {error: string};
     throw new Error(error.error);
   }
 
@@ -56,7 +56,7 @@ export class A2aServiceImpl implements A2aService {
     if (!response.ok) {
       throw new Error('Failed to fetch agent card');
     }
-    const card = await response.json() as AgentCard;
+    const card = (await response.json()) as AgentCard;
     return card;
   }
 }

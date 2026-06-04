@@ -13,12 +13,14 @@ See the [video](https://github.com/user-attachments/assets/2a406115-3a17-4bea-80
 
 1. **Install and build dependencies:**
    From the repository root, install dependencies and build all packages:
+
    ```bash
    yarn install
    yarn build:all
    ```
 
 2. **Run this sample:**
+
    ```bash
    cd samples/client/lit/shell
    ```

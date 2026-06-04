@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
-import { ChatService } from '@a2a_chat_canvas/services/chat-service';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {signal} from '@angular/core';
+import {ChatService} from '@a2a_chat_canvas/services/chat-service';
 
-import { InputArea } from './input-area';
+import {InputArea} from './input-area';
 
 describe('InputArea', () => {
   let component: InputArea;
@@ -34,9 +34,7 @@ describe('InputArea', () => {
 
     await TestBed.configureTestingModule({
       imports: [InputArea],
-      providers: [
-        { provide: ChatService, useValue: mockChatService }
-      ]
+      providers: [{provide: ChatService, useValue: mockChatService}],
     }).compileComponents();
 
     fixture = TestBed.createComponent(InputArea);

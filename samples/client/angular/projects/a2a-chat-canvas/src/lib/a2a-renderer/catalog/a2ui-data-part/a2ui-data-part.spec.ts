@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
-import { ChatService } from '@a2a_chat_canvas/services/chat-service';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {signal} from '@angular/core';
+import {ChatService} from '@a2a_chat_canvas/services/chat-service';
 
-import { A2uiDataPart } from './a2ui-data-part';
+import {A2uiDataPart} from './a2ui-data-part';
 
 describe('A2uiDataPart', () => {
   let component: A2uiDataPart;
@@ -32,22 +32,20 @@ describe('A2uiDataPart', () => {
 
     await TestBed.configureTestingModule({
       imports: [A2uiDataPart],
-      providers: [
-        { provide: ChatService, useValue: mockChatService }
-      ]
+      providers: [{provide: ChatService, useValue: mockChatService}],
     }).compileComponents();
 
     fixture = TestBed.createComponent(A2uiDataPart);
     component = fixture.componentInstance;
-    
+
     fixture.componentRef.setInput('uiMessageContent', {
       type: 'ui_message_content',
       id: 'test-id',
       data: {
         kind: 'a2a_data',
         data: {
-          beginRendering: { surfaceId: 'test-surface' }
-        }
+          beginRendering: {surfaceId: 'test-surface'},
+        },
       },
       variant: 'default_text_part',
     });

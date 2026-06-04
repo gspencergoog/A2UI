@@ -29,13 +29,13 @@ describe('DefaultTextPart', () => {
 
     fixture = TestBed.createComponent(DefaultTextPart);
     component = fixture.componentInstance;
-    
+
     fixture.componentRef.setInput('uiMessageContent', {
       type: 'ui_message_content',
       id: 'test-id',
       data: {
         kind: 'text',
-        text: 'test text'
+        text: 'test text',
       },
       variant: 'default_text_part',
     });

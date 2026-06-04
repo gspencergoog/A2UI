@@ -17,16 +17,16 @@ name: Composer
 on:
   push:
     paths:
-      - 'tools/composer/**'
-      - 'renderers/react/**'
-      - 'renderers/web_core/**'
-      - '.github/workflows/composer_build_and_test.yml'
+      - "tools/composer/**"
+      - "renderers/react/**"
+      - "renderers/web_core/**"
+      - ".github/workflows/composer_build_and_test.yml"
   pull_request:
     paths:
-      - 'tools/composer/**'
-      - 'renderers/react/**'
-      - 'renderers/web_core/**'
-      - '.github/workflows/composer_build_and_test.yml'
+      - "tools/composer/**"
+      - "renderers/react/**"
+      - "renderers/web_core/**"
+      - ".github/workflows/composer_build_and_test.yml"
 
 jobs:
   build-and-test:
@@ -38,8 +38,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '22'
-          cache: 'yarn'
+          node-version: "22"
+          cache: "yarn"
 
       - name: Install dependencies
         run: yarn install --immutable

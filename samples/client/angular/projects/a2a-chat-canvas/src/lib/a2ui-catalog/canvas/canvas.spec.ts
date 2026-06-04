@@ -29,11 +29,11 @@ describe('A2uiCanvas', () => {
 
     fixture = TestBed.createComponent(Canvas);
     component = fixture.componentInstance;
-    
+
     fixture.componentRef.setInput('surfaceId', 'test-surface-id');
     fixture.componentRef.setInput('component', {
       id: 'test-component',
-      properties: { children: [] }
+      properties: {children: []},
     });
     fixture.componentRef.setInput('weight', 0);
 

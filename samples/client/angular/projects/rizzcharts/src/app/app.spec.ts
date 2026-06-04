@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { provideZonelessChangeDetection, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
-import { ChatService } from '@a2a_chat_canvas/services/chat-service';
-import { A2aService } from '@rizzcharts/services/a2a_service';
+import {provideZonelessChangeDetection, signal} from '@angular/core';
+import {TestBed} from '@angular/core/testing';
+import {ChatService} from '@a2a_chat_canvas/services/chat-service';
+import {A2aService} from '@rizzcharts/services/a2a_service';
 
-import { App } from './app';
+import {App} from './app';
 
 describe('App', () => {
   let mockChatService: any;
@@ -33,15 +33,17 @@ describe('App', () => {
     };
 
     mockA2aService = {
-      getAgentCard: jasmine.createSpy('getAgentCard').and.returnValue(Promise.resolve({ name: 'Mock Agent' })),
+      getAgentCard: jasmine
+        .createSpy('getAgentCard')
+        .and.returnValue(Promise.resolve({name: 'Mock Agent'})),
     };
 
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
         provideZonelessChangeDetection(),
-        { provide: ChatService, useValue: mockChatService },
-        { provide: A2aService, useValue: mockA2aService },
+        {provide: ChatService, useValue: mockChatService},
+        {provide: A2aService, useValue: mockA2aService},
       ],
     }).compileComponents();
   });

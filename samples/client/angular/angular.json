@@ -180,9 +180,7 @@
                 "input": "projects/rizzcharts/public"
               }
             ],
-            "styles": [
-              "projects/rizzcharts/src/styles.scss"
-            ]
+            "styles": ["projects/rizzcharts/src/styles.scss"]
           }
         }
       }

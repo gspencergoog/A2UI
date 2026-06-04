@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
-import { ChatService } from '@a2a_chat_canvas/services/chat-service';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {signal} from '@angular/core';
+import {ChatService} from '@a2a_chat_canvas/services/chat-service';
 
-import { Message } from './message';
+import {Message} from './message';
 
 describe('Message', () => {
   let component: Message;
@@ -32,19 +32,17 @@ describe('Message', () => {
 
     await TestBed.configureTestingModule({
       imports: [Message],
-      providers: [
-        { provide: ChatService, useValue: mockChatService }
-      ]
+      providers: [{provide: ChatService, useValue: mockChatService}],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Message);
     component = fixture.componentInstance;
-    
+
     fixture.componentRef.setInput('message', {
       type: 'ui_message',
       id: 'test-msg-id',
       contextId: 'test-context-id',
-      role: { type: 'ui_user' },
+      role: {type: 'ui_user'},
       contents: [],
       status: 'completed',
       created: new Date().toISOString(),

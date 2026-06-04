@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
-import { ChatService } from '@a2a_chat_canvas/services/chat-service';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {signal} from '@angular/core';
+import {ChatService} from '@a2a_chat_canvas/services/chat-service';
 
-import { ChatHistory } from './chat-history';
+import {ChatHistory} from './chat-history';
 
 describe('ChatHistory', () => {
   let component: ChatHistory;
@@ -32,14 +32,12 @@ describe('ChatHistory', () => {
 
     await TestBed.configureTestingModule({
       imports: [ChatHistory],
-      providers: [
-        { provide: ChatService, useValue: mockChatService }
-      ]
+      providers: [{provide: ChatService, useValue: mockChatService}],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ChatHistory);
     component = fixture.componentInstance;
-    
+
     fixture.componentRef.setInput('history', []);
 
     fixture.detectChanges();
