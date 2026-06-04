@@ -18,12 +18,12 @@
 
 package com.google.a2ui.basic_catalog
 
-import com.google.a2ui.core.schema.A2uiCatalogProvider
-import com.google.a2ui.core.schema.A2uiConstants
-import com.google.a2ui.core.schema.A2uiVersion
-import com.google.a2ui.core.schema.CatalogConfig
-import com.google.a2ui.core.schema.SchemaResourceLoader
-import com.google.a2ui.core.schema.resolveExamplesPath
+import com.google.a2ui.schema.A2uiCatalogProvider
+import com.google.a2ui.schema.A2uiConstants
+import com.google.a2ui.schema.A2uiVersion
+import com.google.a2ui.schema.CatalogConfig
+import com.google.a2ui.schema.SchemaResourceLoader
+import com.google.a2ui.schema.resolveExamplesPath
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
@@ -41,6 +41,8 @@ class BundledCatalogProvider(private val version: A2uiVersion) : A2uiCatalogProv
     val filename =
       if (version == A2uiVersion.VERSION_0_9) {
         relPath.substringAfter("specification/v0_9/")
+      } else if (version == A2uiVersion.VERSION_0_9_1) {
+        relPath.substringAfter("specification/v0_9_1/")
       } else {
         relPath.substringAfterLast('/')
       }
@@ -81,6 +83,10 @@ object BasicCatalog {
         ),
       A2uiVersion.VERSION_0_9 to
         mapOf(A2uiConstants.CATALOG_SCHEMA_KEY to "specification/v0_9/catalogs/basic/catalog.json"),
+      A2uiVersion.VERSION_0_9_1 to
+        mapOf(
+          A2uiConstants.CATALOG_SCHEMA_KEY to "specification/v0_9_1/catalogs/basic/catalog.json"
+        ),
     )
 
   /**

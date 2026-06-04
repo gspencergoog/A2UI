@@ -3,7 +3,7 @@
 This guide shows you how to serve **rich, interactive A2UI interfaces** from an **MCP server** using Tools and Embedded Resources. By the end, you'll have a working MCP server that returns A2UI components to any MCP-compatible client.
 
 <video width="100%" height="auto" controls playsinline style="display: block; aspect-ratio: 16/9; object-fit: cover; border-radius: 8px; margin-bottom: 24px;">
-  <source src="https://raw.githubusercontent.com/google/A2UI/main/docs/assets/guides-a2ui-over-mcp-tour.mp4" type="video/mp4">
+  <source src="https://raw.githubusercontent.com/a2ui-project/a2ui/main/docs/assets/guides-a2ui-over-mcp-tour.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
 
@@ -21,8 +21,8 @@ Before diving into the protocol details, let's get a working example running. Th
 
 ```bash
 # Clone the repo (if you haven't already)
-git clone https://github.com/google/A2UI.git
-cd A2UI/samples/mcp/a2ui-over-mcp-recipe
+git clone https://github.com/a2ui-project/a2ui.git
+cd a2ui/samples/mcp/a2ui-over-mcp-recipe
 
 # Start the MCP server (SSE transport on port 8000)
 uv run .
@@ -75,7 +75,7 @@ You will see a premium, responsive dual-column interface where the left column r
 
 ![Dynamic Recipe Studio demo showing selection form on the left and dynamic recipe card generation on the right](../assets/recipe_sample.gif)
 
-See all samples at [`samples/mcp/`](https://github.com/google/A2UI/tree/main/samples/mcp).
+See all samples at [`samples/mcp/`](https://github.com/a2ui-project/a2ui/tree/main/samples/mcp).
 
 ## How It Works
 
@@ -84,11 +84,11 @@ There are two primary ways an MCP server can deliver A2UI content to a client:
 1. **Via Reading a Resource (`resources/read`)**: The client reads an MCP resource directly (e.g., `a2ui://recipe-form`). The server returns the A2UI JSON payload directly.
 2. **Via Calling a Tool (`tools/call`)**: The client calls an MCP tool (e.g., `get_recipe_a2ui`). The server returns the A2UI JSON payload wrapped as an **Embedded Resource** inside the tool response.
 
-In both cases, the client detects the `application/json+a2ui` MIME type and routes the payload to an A2UI renderer.
+In both cases, the client detects the `application/a2ui+json` MIME type and routes the payload to an A2UI renderer.
 
 > [!IMPORTANT]
 > **MIME Type Uniformity**
-> Regardless of the delivery channel (whether fetched directly as a Resource or returned inside a Tool's `CallToolResult`), the A2UI JSON payload is always identified by the `application/json+a2ui` MIME type. In Tool responses, the payload must be wrapped inside an `EmbeddedResource` carrying this MIME type. This uniform identification allows client-side middleware to seamlessly intercept and route both static resources and dynamic tool responses to A2UI.
+> Regardless of the delivery channel (whether fetched directly as a Resource or returned inside a Tool's `CallToolResult`), the A2UI JSON payload is always identified by the `application/a2ui+json` MIME type. In Tool responses, the payload must be wrapped inside an `EmbeddedResource` carrying this MIME type. This uniform identification allows client-side middleware to seamlessly intercept and route both static resources and dynamic tool responses to A2UI.
 
 ### 1. Resource-based Delivery Flow (`resources/read`)
 
@@ -98,7 +98,7 @@ Client → resources/read → MCP Server
                  Retrieve A2UI JSON
                              ↓
 Client ← ResourceContents ← MCP Server
-          (application/json+a2ui)
+          (application/a2ui+json)
    ↓
 A2UI Renderer displays UI
 ```
@@ -111,7 +111,7 @@ Client → tools/call → MCP Server
               Generate A2UI JSON
                          ↓
          Wrap as EmbeddedResource
-              (application/json+a2ui)
+              (application/a2ui+json)
                          ↓
 Client ← CallToolResult ← MCP Server
    ↓
@@ -139,7 +139,7 @@ async def list_resources() -> list[types.Resource]:
         types.Resource(
             uri="a2ui://recipe-form",
             name="Recipe Form",
-            mimeType="application/json+a2ui",
+            mimeType="application/a2ui+json",
             description="Static form allowing users to pick options.",
         )
     ]
@@ -150,7 +150,7 @@ async def read_resource(uri: str) -> list[ReadResourceContents]:
         return [
             ReadResourceContents(
                 content=json.dumps(recipe_form_json),
-                mime_type="application/json+a2ui",
+                mime_type="application/a2ui+json",
             )
         ]
     raise ValueError(f"Unknown resource: {uri}")
@@ -188,7 +188,7 @@ async def handle_call_tool(name: str, arguments: dict[str, Any]) -> types.CallTo
                 type="resource",
                 resource=types.TextResourceContents(
                     uri="a2ui://recipe-card",
-                    mimeType="application/json+a2ui",
+                    mimeType="application/a2ui+json",
                     text=json.dumps(custom_recipe_json),
                 )
             )
@@ -370,7 +370,7 @@ a2ui_resource = types.EmbeddedResource(
     type="resource",
     resource=types.TextResourceContents(
         uri="a2ui://training-plan-page",
-        mimeType="application/json+a2ui",
+        mimeType="application/a2ui+json",
         text=json.dumps(a2ui_payload)
     ),
     # Show the UI to the user, but hide the raw JSON from the LLM

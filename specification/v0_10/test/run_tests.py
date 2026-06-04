@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -63,10 +63,9 @@ def setup_catalog_alias(catalog_file="catalogs/basic/catalog.json"):
     # and have it resolve to this schema content.
     if "$id" in catalog:
         import re
-        suffix_pattern = re.escape(catalog_file) + r"$"
-        if not re.search(suffix_pattern, catalog["$id"]):
-            suffix_pattern = re.escape(os.path.basename(catalog_file)) + r"$"
-        catalog["$id"] = re.sub(suffix_pattern, "catalog.json", catalog["$id"])
+        match = re.match(r"^(https://a2ui\.org/specification/v[^/]+/)", catalog["$id"])
+        if match:
+            catalog["$id"] = match.group(1) + "catalog.json"
 
 
     with open(TEMP_CATALOG_FILE, 'w') as f:
