@@ -26,10 +26,8 @@
     "openUrl": {
       "type": "object",
       "description": "Opens the specified URL in a browser or handler. This function has no return value.",
+      "returnType": "void",
       "properties": {
-        "callableFrom": {
-          "const": "clientOrRemote"
-        },
         "call": {
           "const": "openUrl"
         },
@@ -44,9 +42,6 @@
           },
           "required": ["url"],
           "additionalProperties": false
-        },
-        "returnType": {
-          "const": "void"
         }
       },
       "required": ["call", "args"],
@@ -55,15 +50,10 @@
     "pingServer": {
       "type": "object",
       "description": "Pings the server from the client side.",
+      "returnType": "void",
       "properties": {
-        "callableFrom": {
-          "const": "remoteOnly"
-        },
         "call": {
           "const": "pingServer"
-        },
-        "returnType": {
-          "const": "void"
         }
       },
       "required": ["call"],
