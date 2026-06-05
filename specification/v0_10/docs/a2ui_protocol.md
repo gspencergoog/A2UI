@@ -442,7 +442,7 @@ The set of available UI components and functions is defined in a **Catalog**. Th
 Every catalog follows the standard `Catalog` object definition:
 
 - **catalogId** (string, required): A unique identifier URI for this catalog.
-- **instructions** (string, optional): Markdown-formatted design principles, rules, or developer guidelines specific to this catalog. These rules guide LLMs when generating UI layouts under this catalog.
+- **instructions** (string, optional): A relative file URI pointing to a Markdown file containing design principles, rules, or developer guidelines specific to this catalog (typically `catalog_rules.md`). These rules guide LLMs when generating UI layouts under this catalog.
 - **components** (object, optional): A map of supported UI components, where each key is the component type (e.g., `Text`) and its value is its JSON Schema definition.
 - **functions** (array, optional): A list of client-side validation or utility functions supported by the catalog.
 - **surfaceProperties** (object, optional): A schema defining the catalog's customizable visual properties.

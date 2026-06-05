@@ -116,7 +116,8 @@
         },
         "instructions": {
           "type": "string",
-          "description": "Markdown formatted instructions or guidelines specific to this catalog. For example, design principles, or general component usage rules that don't belong as part of a component description."
+          "format": "uri-reference",
+          "description": "A relative file URI pointing to a Markdown file containing guidelines or instructions specific to this catalog (typically 'catalog_rules.md')."
         },
         "components": {
           "type": "object",

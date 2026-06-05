@@ -353,7 +353,17 @@ async function main() {
   }
 
   const schemas = loadSchemas();
-  const catalogRules = schemas['catalogs/basic/catalog.json']?.instructions;
+  let catalogRules: string | undefined;
+  const catalogInstructions = schemas['catalogs/basic/catalog.json']?.instructions;
+  if (catalogInstructions) {
+    const catalogPath = path.join(__dirname, '../../catalogs/basic/catalog.json');
+    const catalogRulesPath = path.resolve(path.dirname(catalogPath), catalogInstructions);
+    if (fs.existsSync(catalogRulesPath)) {
+      catalogRules = fs.readFileSync(catalogRulesPath, 'utf-8');
+    } else {
+      logger.warn(`Catalog rules file not found at ${catalogRulesPath}.`);
+    }
+  }
 
   // Phase 1: Generation
   const generator = new Generator(schemas, resultsBaseDir, catalogRules);
