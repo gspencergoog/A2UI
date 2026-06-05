@@ -9,9 +9,10 @@
     "start": "next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "test": "vitest run",
+    "test": "wireit",
     "test:watch": "vitest",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "clean": "wireit",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
@@ -86,6 +87,19 @@
       "output": [
         ".next/"
       ]
+    },
+    "test": {
+      "command": "vitest run",
+      "dependencies": [
+        "build"
+      ],
+      "files": [
+        "src/**/*",
+        "tsconfig.json"
+      ]
+    },
+    "clean": {
+      "command": "rm -rf .next out dist build .tsbuildinfo .wireit"
     }
   }
 }

@@ -25,10 +25,11 @@
     "prepublishOnly": "node -e \"if(!process.cwd().endsWith('dist')) { console.error('Error: This package must be published from the dist/ directory. Run `yarn build` then `cd dist && yarn npm publish`'); process.exit(1); }\"",
     "publish:package": "yarn build && cd dist && yarn npm publish --access public",
     "demo": "yarn generate-examples && ng serve a2ui_explorer",
-    "test": "yarn generate-examples && ng test lib --watch=false --browsers=ChromeHeadless",
+    "test": "wireit",
     "test:watch": "yarn generate-examples && ng test lib --browsers=ChromeHeadless",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "clean": "wireit"
   },
   "dependencies": {
     "@a2ui/web_core": "workspace:*",
@@ -109,6 +110,19 @@
       "output": [
         "dist/"
       ]
+    },
+    "test": {
+      "command": "yarn generate-examples && ng test lib --watch=false --browsers=ChromeHeadless",
+      "dependencies": [
+        "build"
+      ],
+      "files": [
+        "src/**/*",
+        "tsconfig.json"
+      ]
+    },
+    "clean": {
+      "command": "rm -rf dist projects/mcp_calculator/dist projects/orchestrator/dist .tsbuildinfo .wireit"
     }
   },
   "resolutions": {

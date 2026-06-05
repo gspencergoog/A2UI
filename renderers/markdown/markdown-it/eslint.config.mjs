@@ -21,24 +21,19 @@ export default [
   {
     rules: {
       'prettier/prettier': 'off',
-      'eqeqeq': 'off',
+      eqeqeq: 'off',
       'no-undef': 'off',
-    }
+    },
   },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.mts', '**/*.cts'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'off',
-      '@typescript-eslint/no-unused-vars': 'warn'
-    }
+      '@typescript-eslint/no-unused-vars': 'warn',
+    },
   },
   {
-    ignores: [
-      'dist/**',
-      'node_modules/**',
-      '.wireit/**',
-      '**/*.d.ts'
-    ]
-  }
+    ignores: ['dist/**', 'node_modules/**', '.wireit/**', '**/*.d.ts'],
+  },
 ];

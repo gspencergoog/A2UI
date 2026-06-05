@@ -13,7 +13,8 @@
     "test:debug": "yarn generate-examples && karma start karma.conf.cjs --single-run=false --auto-watch=true --browsers Chrome",
     "test:ci": "wireit",
     "lint": "gts lint",
-    "lint:fix": "gts fix"
+    "lint:fix": "gts fix",
+    "clean": "wireit"
   },
   "wireit": {
     "build": {
@@ -39,6 +40,9 @@
         "../../markdown/markdown-it:build",
         "../:build"
       ]
+    },
+    "clean": {
+      "command": "rm -rf dist .tsbuildinfo .wireit"
     }
   },
   "dependencies": {

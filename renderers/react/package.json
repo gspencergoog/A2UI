@@ -78,14 +78,14 @@
     "publish:package": "yarn build && node ../scripts/prepare-publish.mjs && cd dist && yarn npm publish --access public",
     "build": "wireit",
     "dev": "tsup --watch",
-    "test": "vitest run",
+    "test": "wireit",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
-    "clean": "rm -rf dist",
+    "clean": "wireit",
     "demo": "cd a2ui_explorer && vite",
     "build:demo": "cd a2ui_explorer && tsc -b && vite build",
     "test:demo": "cd a2ui_explorer && vitest run src"
@@ -149,6 +149,19 @@
       "output": [
         "dist/"
       ]
+    },
+    "test": {
+      "command": "vitest run",
+      "dependencies": [
+        "build"
+      ],
+      "files": [
+        "src/**/*",
+        "tsconfig.json"
+      ]
+    },
+    "clean": {
+      "command": "rm -rf dist dist-demo .tsbuildinfo .wireit"
     }
   }
 }

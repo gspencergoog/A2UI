@@ -68,7 +68,8 @@
     "compile": "tsc",
     "lint": "gts lint",
     "lint:fix": "gts fix",
-    "fix": "gts fix"
+    "fix": "gts fix",
+    "clean": "wireit"
   },
   "wireit": {
     "copy-spec": {
@@ -115,6 +116,9 @@
       "dependencies": [
         "build"
       ]
+    },
+    "clean": {
+      "command": "rm -rf dist .tsbuildinfo .wireit"
     }
   },
   "author": "Google",

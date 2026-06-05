@@ -13414,6 +13414,7 @@ __metadata:
     uuid: "npm:^13.0.0"
     vite: "npm:7.2.7"
     vitest: "npm:^4.0.15"
+    wireit: "npm:^0.15.0-pre.2"
     zod: "npm:^3.25.76"
     zone.js: "npm:~0.15.0"
   languageName: unknown

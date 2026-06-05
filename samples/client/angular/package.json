@@ -5,12 +5,13 @@
     "ng": "ng",
     "start": "ng serve",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test --watch=false --browsers=ChromeHeadless",
+    "test": "wireit",
     "serve:ssr:angular": "node dist/angular/server/server.mjs",
     "serve:ssr:restaurant": "node dist/restaurant/server/server.mjs",
     "serve:ssr:rizzcharts": "node dist/rizzcharts/server/server.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "clean": "wireit",
     "build:renderer": "yarn workspace @a2ui/web_core build && yarn workspace @a2ui/markdown-it build && yarn workspace @a2ui/angular build",
     "serve:agent:restaurant": "cd ../../agent/adk/restaurant_finder && uv run .",
     "demo:restaurant": "yarn build:renderer && concurrently -k -n \"AGENT,WEB\" -c \"magenta,blue\" \"yarn serve:agent:restaurant\" \"yarn start -- restaurant\"",
@@ -73,6 +74,23 @@
     "tslib": "^2.8.1",
     "typescript": "5.9.3",
     "vite": "7.2.7",
-    "vitest": "^4.0.15"
+    "vitest": "^4.0.15",
+    "wireit": "^0.15.0-pre.2"
+  },
+  "wireit": {
+    "test": {
+      "command": "ng test --watch=false --browsers=ChromeHeadless",
+      "dependencies": [
+        "../../../renderers/angular:build"
+      ],
+      "files": [
+        "src/**/*",
+        "projects/**/*",
+        "tsconfig.json"
+      ]
+    },
+    "clean": {
+      "command": "rm -rf dist .tsbuildinfo .wireit"
+    }
   }
 }

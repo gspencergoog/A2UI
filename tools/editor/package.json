@@ -13,7 +13,8 @@
     "dev": "yarn serve --watch",
     "serve": "wireit",
     "lint": "gts lint",
-    "lint:fix": "gts fix"
+    "lint:fix": "gts fix",
+    "clean": "wireit"
   },
   "wireit": {
     "serve": {
@@ -45,6 +46,9 @@
         "!dist/**/*.min.js{,.map}"
       ],
       "clean": "if-file-deleted"
+    },
+    "clean": {
+      "command": "rm -rf dist .tsbuildinfo .wireit"
     }
   },
   "repository": {

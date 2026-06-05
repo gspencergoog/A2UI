@@ -57,7 +57,8 @@
     "test:integration": "wireit",
     "demo": "yarn workspace @a2ui/lit-explorer dev",
     "lint": "gts lint",
-    "lint:fix": "gts fix"
+    "lint:fix": "gts fix",
+    "clean": "wireit"
   },
   "wireit": {
     "test": {
@@ -98,6 +99,9 @@
         "!dist/**/*.min.js{,.map}"
       ],
       "clean": "if-file-deleted"
+    },
+    "clean": {
+      "command": "rm -rf dist .tsbuildinfo .wireit"
     }
   },
   "files": [
