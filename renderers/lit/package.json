@@ -55,7 +55,7 @@
     "test": "wireit",
     "test:unit": "wireit",
     "test:integration": "wireit",
-    "demo": "npm run dev --prefix a2ui_explorer"
+    "demo": "yarn workspace @a2ui/lit-explorer dev"
   },
   "wireit": {
     "test": {
@@ -71,7 +71,7 @@
       ]
     },
     "test:integration": {
-      "command": "npm run test:ci --prefix a2ui_explorer"
+      "command": "yarn workspace @a2ui/lit-explorer test:ci"
     },
     "build": {
       "dependencies": [

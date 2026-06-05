@@ -161,6 +161,28 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@a2ui/lit-explorer@workspace:renderers/lit/a2ui_explorer":
+  version: 0.0.0-use.local
+  resolution: "@a2ui/lit-explorer@workspace:renderers/lit/a2ui_explorer"
+  dependencies:
+    "@a2ui/lit": "workspace:*"
+    "@a2ui/markdown-it": "workspace:*"
+    "@a2ui/web_core": "workspace:*"
+    "@lit-labs/signals": "npm:^0.1.3"
+    "@lit/context": "npm:^1.1.4"
+    "@types/jasmine": "npm:^5.1.5"
+    esbuild: "npm:^0.25.0"
+    jasmine-core: "npm:^5.6.0"
+    karma: "npm:^6.4.4"
+    karma-chrome-launcher: "npm:^3.2.0"
+    karma-esbuild: "npm:^2.3.0"
+    karma-jasmine: "npm:^5.1.0"
+    lit: "npm:^3.3.1"
+    typescript: "npm:^5.8.3"
+    vite: "npm:^7.1.11"
+  languageName: unknown
+  linkType: soft
+
 "@a2ui/lit-samples@workspace:samples/client/lit":
   version: 0.0.0-use.local
   resolution: "@a2ui/lit-samples@workspace:samples/client/lit"
@@ -11858,7 +11880,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jasmine@npm:~5.1.0":
+"@types/jasmine@npm:^5.1.5, @types/jasmine@npm:~5.1.0":
   version: 5.1.15
   resolution: "@types/jasmine@npm:5.1.15"
   checksum: 10c0/824119f85fd01f88a251fb654f58b135ba38d1085137b4bf57ecaa74b129ba617da58183b9f5f9cf271c86c72cf1f33b6277afb720a1734574cd953b4da2bf22
@@ -20238,6 +20260,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jasmine-core@npm:^5.6.0":
+  version: 5.13.0
+  resolution: "jasmine-core@npm:5.13.0"
+  checksum: 10c0/3bbf1dbbde8017f41872a27f22bafd164fe4fcf834347af23d7d5a63e7e35c72c79e1596e6b384dd2906e885518419e13a6c7535ffabf8256b624110d664599d
+  languageName: node
+  linkType: hard
+
 "jasmine-core@npm:~5.9.0":
   version: 5.9.0
   resolution: "jasmine-core@npm:5.9.0"
@@ -20694,6 +20723,18 @@ __metadata:
     istanbul-reports: "npm:^3.0.5"
     minimatch: "npm:^3.0.4"
   checksum: 10c0/6496bb56b19b60e3f24a64e4da712a640a4f047fa271a40e321fca3e399e808246a38d434a1b77db4cc54d8f71164ebcb6cf310ae75c99ef957b7010b5d90f49
+  languageName: node
+  linkType: hard
+
+"karma-esbuild@npm:^2.3.0":
+  version: 2.3.0
+  resolution: "karma-esbuild@npm:2.3.0"
+  dependencies:
+    chokidar: "npm:^3.5.1"
+    source-map: "npm:0.6.1"
+  peerDependencies:
+    esbuild: ">=0.17.0"
+  checksum: 10c0/e4660eb625973cd95a3e084f360eb03f9742d295e12e56f954ef4eb8495a755d60162c233c806bca2a3727d482957e4fe7a3c4b799fff06488c9cbff1174d555
   languageName: node
   linkType: hard
 
@@ -26964,17 +27005,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"source-map@npm:0.6.1, source-map@npm:^0.6.0, source-map@npm:^0.6.1, source-map@npm:~0.6.0, source-map@npm:~0.6.1":
+  version: 0.6.1
+  resolution: "source-map@npm:0.6.1"
+  checksum: 10c0/ab55398007c5e5532957cb0beee2368529618ac0ab372d789806f5718123cc4367d57de3904b4e6a4170eb5a0b0f41373066d02ca0735a0c4d75c7d328d3e011
+  languageName: node
+  linkType: hard
+
 "source-map@npm:0.7.6, source-map@npm:^0.7.6":
   version: 0.7.6
   resolution: "source-map@npm:0.7.6"
   checksum: 10c0/59f6f05538539b274ba771d2e9e32f6c65451982510564438e048bc1352f019c6efcdc6dd07909b1968144941c14015c2c7d4369fb7c4d7d53ae769716dcc16c
-  languageName: node
-  linkType: hard
-
-"source-map@npm:^0.6.0, source-map@npm:^0.6.1, source-map@npm:~0.6.0, source-map@npm:~0.6.1":
-  version: 0.6.1
-  resolution: "source-map@npm:0.6.1"
-  checksum: 10c0/ab55398007c5e5532957cb0beee2368529618ac0ab372d789806f5718123cc4367d57de3904b4e6a4170eb5a0b0f41373066d02ca0735a0c4d75c7d328d3e011
   languageName: node
   linkType: hard
 
