@@ -1,6 +1,6 @@
 # Specification v1.0
 
-This directory contains the specification for version 1.0 of A2UI.  This was previously known as version 0.10 when it was in draft.
+This directory contains the specification for version 1.0 of A2UI. This was previously known as version 0.10 when it was in draft.
 
 **This specification is currently a candidate for becoming stable.**
 

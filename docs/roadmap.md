@@ -6,11 +6,12 @@ This roadmap outlines the current state and future plans for the A2UI project. T
 
 ### Protocol
 
-| Version   | Status     | Notes                                   |
-| --------- | ---------- | --------------------------------------- |
-| **v0.8**  | 🆗 Prior   | Initial public release, minimal support |
-| **v0.9**  | 🆗 Prior   | Feature complete, legacy support        |
-| **v1.0**  | ✅ Current | Stable and complete release            |
+| Version    | Status       | Notes                                   |
+| ---------- | ------------ | --------------------------------------- |
+| **v0.8**   | 🆗 Prior     | Initial public release, minimal support |
+| **v0.9**   | 🆗 Prior     | Feature complete, legacy support        |
+| **v0.9.1** | 🆗 Current   | stable release                          |
+| **v1.0**   | 📋 Candidate | release candidate                       |
 
 ### Renderers
 
