@@ -11,7 +11,9 @@
     "test": "wireit",
     "test:watch": "yarn generate-examples && karma start karma.conf.cjs --single-run=false --auto-watch=true",
     "test:debug": "yarn generate-examples && karma start karma.conf.cjs --single-run=false --auto-watch=true --browsers Chrome",
-    "test:ci": "wireit"
+    "test:ci": "wireit",
+    "lint": "gts lint",
+    "lint:fix": "gts fix"
   },
   "wireit": {
     "build": {
@@ -50,6 +52,8 @@
   "devDependencies": {
     "@types/jasmine": "^5.1.5",
     "esbuild": "^0.25.0",
+    "eslint": "^9.37.0",
+    "gts": "^7.0.0",
     "jasmine-core": "^5.6.0",
     "karma": "^6.4.4",
     "karma-chrome-launcher": "^3.2.0",

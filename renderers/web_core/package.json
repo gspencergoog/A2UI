@@ -67,6 +67,7 @@
     "test:coverage": "c8 node --test \"dist/**/*.test.js\"",
     "compile": "tsc",
     "lint": "gts lint",
+    "lint:fix": "gts fix",
     "fix": "gts fix"
   },
   "wireit": {

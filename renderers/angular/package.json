@@ -26,7 +26,9 @@
     "publish:package": "yarn build && cd dist && yarn npm publish --access public",
     "demo": "yarn generate-examples && ng serve a2ui_explorer",
     "test": "yarn generate-examples && ng test lib --watch=false --browsers=ChromeHeadless",
-    "test:watch": "yarn generate-examples && ng test lib --browsers=ChromeHeadless"
+    "test:watch": "yarn generate-examples && ng test lib --browsers=ChromeHeadless",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@a2ui/web_core": "workspace:*",
@@ -60,7 +62,9 @@
     "@types/uuid": "^10.0.0",
     "@vitest/browser": "^4.0.15",
     "cypress": "^15.6.0",
+    "eslint": "^9.37.0",
     "google-artifactregistry-auth": "^3.5.0",
+    "gts": "^7.0.0",
     "jasmine-core": "~5.9.0",
     "jsdom": "^27.2.0",
     "karma": "^6.4.4",

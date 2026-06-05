@@ -55,7 +55,9 @@
     "test": "wireit",
     "test:unit": "wireit",
     "test:integration": "wireit",
-    "demo": "yarn workspace @a2ui/lit-explorer dev"
+    "demo": "yarn workspace @a2ui/lit-explorer dev",
+    "lint": "gts lint",
+    "lint:fix": "gts fix"
   },
   "wireit": {
     "test": {
@@ -104,7 +106,9 @@
   "devDependencies": {
     "@types/jsdom": "^28.0.1",
     "@types/node": "^24.10.1",
+    "eslint": "^9.37.0",
     "google-artifactregistry-auth": "^3.5.0",
+    "gts": "^7.0.0",
     "jsdom": "^25.0.0",
     "typescript": "5.9.3",
     "wireit": "^0.15.0-pre.2"

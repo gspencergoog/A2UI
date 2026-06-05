@@ -23,7 +23,9 @@
   ],
   "scripts": {
     "build:all": "yarn workspaces foreach -A -p --topological-dev run build",
-    "test:all": "yarn workspaces foreach -A -p --topological-dev run test"
+    "test:all": "yarn workspaces foreach -A -p --topological-dev run test",
+    "lint:all": "yarn workspaces foreach -A -p --topological-dev run lint",
+    "lint:fix:all": "yarn workspaces foreach -A -p --topological-dev run lint:fix"
   },
   "devDependencies": {
     "google-artifactregistry-auth": "^3.5.0",
