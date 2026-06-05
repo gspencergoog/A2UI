@@ -117,7 +117,7 @@
         "instructions": {
           "type": "string",
           "format": "uri-reference",
-          "description": "A relative file URI pointing to a Markdown file containing guidelines or instructions specific to this catalog (typically 'catalog_rules.md')."
+          "description": "A relative file URI pointing to a Markdown file containing guidelines or instructions specific to this catalog (typically 'instructions.md')."
         },
         "components": {
           "type": "object",

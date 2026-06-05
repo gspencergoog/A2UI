@@ -15,7 +15,7 @@ Version 0.10 differs from 0.9 in the following ways:
 
 - Added `posterUrl` property to the `Video` component in `catalogs/basic/catalog.json`, allowing a preview image to be displayed before the video plays.
 - Added `placeholder` prop to the `TextField` component schema.
-- Added an optional `instructions` field to the `Catalog` schema (`catalogs/basic/catalog.json`) to refer to an external guidelines/rules file (`catalog_rules.md`) via relative file URI, renaming and updating the previous `rules.txt` file.
+- Added an optional `instructions` field to the `Catalog` schema (`catalogs/basic/catalog.json`) to refer to an external guidelines/rules file (`instructions.md`) via relative file URI, renaming and updating the previous `rules.txt` file.
 - Renamed the `$defs/theme` schema to `$defs/surfaceProperties` in both the basic and minimal catalogs, and removed the `primaryColor` property from it.
 
 ### 2.2. Server-to-Client Message List Schema
