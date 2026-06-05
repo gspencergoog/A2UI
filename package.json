@@ -19,7 +19,8 @@
     "samples/mcp/a2ui-in-mcpapps/server/apps/*",
     "specification/*/eval",
     "specification/*/test",
-    "tools/*"
+    "tools/*",
+    "!**/dist"
   ],
   "scripts": {
     "build:all": "yarn workspaces foreach -A -p --topological-dev run build",

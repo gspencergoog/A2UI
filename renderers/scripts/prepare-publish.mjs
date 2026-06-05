@@ -112,13 +112,16 @@ delete pkg.devDependencies;
 
 writeFileSync(join(resolvedDistDir, 'package.json'), JSON.stringify(pkg, null, 2));
 
-// 5. Copy README and LICENSE
+// 5. Copy README, LICENSE and .npmrc
 if (existsSync(join(packageDir, 'README.md'))) {
   copyFileSync(join(packageDir, 'README.md'), join(resolvedDistDir, 'README.md'));
 }
 const rootLicense = join(rootDir, 'LICENSE');
 if (existsSync(rootLicense)) {
   copyFileSync(rootLicense, join(resolvedDistDir, 'LICENSE'));
+}
+if (existsSync(join(packageDir, '.npmrc'))) {
+  copyFileSync(join(packageDir, '.npmrc'), join(resolvedDistDir, '.npmrc'));
 }
 
 console.log(`[prepare-publish] Prepared ${pkg.name} for publishing in ${distDir}/.`);
