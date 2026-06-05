@@ -153,6 +153,7 @@
     "capitalize": {
       "type": "object",
       "description": "Converts an input string to a capitalized version.",
+      "returnType": "string",
       "properties": {
         "call": {"const": "capitalize"},
         "args": {
@@ -164,8 +165,7 @@
           },
           "required": ["value"],
           "unevaluatedProperties": false
-        },
-        "returnType": {"const": "string"}
+        }
       },
       "required": ["call", "args"],
       "unevaluatedProperties": false

@@ -30,10 +30,11 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        task: [unit, integration]
     steps:
       - uses: actions/checkout@v6
-
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
@@ -43,14 +44,10 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Build web_core
-        working-directory: ./renderers/web_core
-        run: yarn build
+      - name: Run Unit Tests
+        if: matrix.task == 'unit'
+        run: yarn workspace @a2ui/lit test:unit
 
-      - name: Build Lit renderer
-        working-directory: ./renderers/lit
-        run: yarn build
-
-      - name: Run Lit renderer tests
-        working-directory: ./renderers/lit
-        run: yarn test
+      - name: Run Integration Tests
+        if: matrix.task == 'integration'
+        run: yarn workspace @a2ui/lit test:integration
