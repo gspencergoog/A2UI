@@ -419,15 +419,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@a2ui/specification-v0_10-test@workspace:specification/v0_10/test":
-  version: 0.0.0-use.local
-  resolution: "@a2ui/specification-v0_10-test@workspace:specification/v0_10/test"
-  dependencies:
-    ajv-cli: "npm:^5.0.0"
-    ajv-formats: "npm:^3.0.1"
-  languageName: unknown
-  linkType: soft
-
 "@a2ui/specification-v0_9-test@workspace:specification/v0_9/test":
   version: 0.0.0-use.local
   resolution: "@a2ui/specification-v0_9-test@workspace:specification/v0_9/test"
@@ -440,6 +431,15 @@ __metadata:
 "@a2ui/specification-v0_9_1-test@workspace:specification/v0_9_1/test":
   version: 0.0.0-use.local
   resolution: "@a2ui/specification-v0_9_1-test@workspace:specification/v0_9_1/test"
+  dependencies:
+    ajv-cli: "npm:^5.0.0"
+    ajv-formats: "npm:^3.0.1"
+  languageName: unknown
+  linkType: soft
+
+"@a2ui/specification-v1_0-test@workspace:specification/v1_0/test":
+  version: 0.0.0-use.local
+  resolution: "@a2ui/specification-v1_0-test@workspace:specification/v1_0/test"
   dependencies:
     ajv-cli: "npm:^5.0.0"
     ajv-formats: "npm:^3.0.1"
@@ -13013,36 +13013,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"a2ui_0_10_eval_llm@workspace:specification/v0_10/eval":
-  version: 0.0.0-use.local
-  resolution: "a2ui_0_10_eval_llm@workspace:specification/v0_10/eval"
-  dependencies:
-    "@genkit-ai/ai": "npm:^1.29.0"
-    "@genkit-ai/compat-oai": "npm:^1.29.0"
-    "@genkit-ai/core": "npm:^1.29.0"
-    "@genkit-ai/dotprompt": "npm:^0.9.12"
-    "@genkit-ai/firebase": "npm:^1.29.0"
-    "@genkit-ai/google-cloud": "npm:^1.29.0"
-    "@genkit-ai/google-genai": "npm:^1.29.0"
-    "@types/js-yaml": "npm:^4.0.9"
-    "@types/node": "npm:^20.19.33"
-    "@types/yargs": "npm:^17.0.35"
-    ajv: "npm:^8.18.0"
-    ajv-formats: "npm:^3.0.1"
-    dotenv-cli: "npm:^10.0.0"
-    genkit: "npm:^1.29.0"
-    genkitx-anthropic: "npm:^0.25.0"
-    js-yaml: "npm:^4.1.1"
-    prettier: "npm:^3.8.1"
-    tsx: "npm:^4.21.0"
-    typescript: "npm:5.9.3"
-    winston: "npm:^3.19.0"
-    wireit: "npm:^0.15.0-pre.2"
-    yargs: "npm:^18.0.0"
-    zod: "npm:^3.25.76"
-  languageName: unknown
-  linkType: soft
-
 "a2ui_0_9_1_eval_llm@workspace:specification/v0_9_1/eval":
   version: 0.0.0-use.local
   resolution: "a2ui_0_9_1_eval_llm@workspace:specification/v0_9_1/eval"
@@ -13075,6 +13045,36 @@ __metadata:
 "a2ui_0_9_eval_llm@workspace:specification/v0_9/eval":
   version: 0.0.0-use.local
   resolution: "a2ui_0_9_eval_llm@workspace:specification/v0_9/eval"
+  dependencies:
+    "@genkit-ai/ai": "npm:^1.29.0"
+    "@genkit-ai/compat-oai": "npm:^1.29.0"
+    "@genkit-ai/core": "npm:^1.29.0"
+    "@genkit-ai/dotprompt": "npm:^0.9.12"
+    "@genkit-ai/firebase": "npm:^1.29.0"
+    "@genkit-ai/google-cloud": "npm:^1.29.0"
+    "@genkit-ai/google-genai": "npm:^1.29.0"
+    "@types/js-yaml": "npm:^4.0.9"
+    "@types/node": "npm:^20.19.33"
+    "@types/yargs": "npm:^17.0.35"
+    ajv: "npm:^8.18.0"
+    ajv-formats: "npm:^3.0.1"
+    dotenv-cli: "npm:^10.0.0"
+    genkit: "npm:^1.29.0"
+    genkitx-anthropic: "npm:^0.25.0"
+    js-yaml: "npm:^4.1.1"
+    prettier: "npm:^3.8.1"
+    tsx: "npm:^4.21.0"
+    typescript: "npm:5.9.3"
+    winston: "npm:^3.19.0"
+    wireit: "npm:^0.15.0-pre.2"
+    yargs: "npm:^18.0.0"
+    zod: "npm:^3.25.76"
+  languageName: unknown
+  linkType: soft
+
+"a2ui_1_0_eval_llm@workspace:specification/v1_0/eval":
+  version: 0.0.0-use.local
+  resolution: "a2ui_1_0_eval_llm@workspace:specification/v1_0/eval"
   dependencies:
     "@genkit-ai/ai": "npm:^1.29.0"
     "@genkit-ai/compat-oai": "npm:^1.29.0"
