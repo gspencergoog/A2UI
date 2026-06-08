@@ -112,9 +112,12 @@ delete pkg.devDependencies;
 
 writeFileSync(join(resolvedDistDir, 'package.json'), JSON.stringify(pkg, null, 2));
 
-// 5. Copy README and LICENSE
+// 5. Copy README, CHANGELOG and LICENSE
 if (existsSync(join(packageDir, 'README.md'))) {
   copyFileSync(join(packageDir, 'README.md'), join(resolvedDistDir, 'README.md'));
+}
+if (existsSync(join(packageDir, 'CHANGELOG.md'))) {
+  copyFileSync(join(packageDir, 'CHANGELOG.md'), join(resolvedDistDir, 'CHANGELOG.md'));
 }
 const rootLicense = join(rootDir, 'LICENSE');
 if (existsSync(rootLicense)) {
