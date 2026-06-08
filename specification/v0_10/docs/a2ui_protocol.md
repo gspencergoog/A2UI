@@ -820,8 +820,11 @@ The [`catalogs/basic/catalog.json`] provides the baseline set of components and 
 
 ### Functions
 
+> **System Namespace Rule (`@` Prefix)**: Function names beginning with `@` (e.g., `@index`) represent universal system context evaluations available across all catalogs. Custom catalogs MUST NOT define functions prefixed with `@`.
+
 | Function           | Description                                                              |
 | :----------------- | :----------------------------------------------------------------------- |
+| **@index**         | Returns the 0-based index of the current item during template rendering. |
 | **required**       | Checks that the value is not null, undefined, or empty.                  |
 | **regex**          | Checks that the value matches a regular expression string.               |
 | **length**         | Checks string length constraints.                                        |
@@ -905,6 +908,35 @@ When a non-string value is interpolated, the client converts it to a string:
 - **Numbers/Booleans**: Standard string representation.
 - **Null/Undefined**: An empty string `""`.
 - **Objects/Arrays**: Stringified as JSON to ensure consistency across different client implementations.
+
+### The `@index` function
+
+The `@index` function returns the 0-based index of the current item when rendering a dynamic list from a template. It is a universal system function available across all catalogs.
+
+#### `@index` scope restriction
+
+The `@index` function MUST ONLY be available when evaluating template items within a list rendering context (Collection Scope). When an expression evaluator encounters `@index()`, it inspects the active Evaluation Context chain. If a Collection Scope is present, it returns the tracked iteration index. If called outside of template iteration (e.g., directly in the Root Scope), the client MUST treat it as an error or evaluate it as invalid.
+
+#### `@index` arguments
+
+- `offset` (Optional, `number`): An offset added to the 0-based index. For example, `@index(offset: 1)` produces 1-based indexing (`1, 2, 3...`). Defaults to `0`.
+
+#### Example usage
+
+Displaying item positions inside a list row template:
+
+```json
+{
+  "id": "todo-index",
+  "component": "Text",
+  "text": {
+    "call": "formatString",
+    "args": {
+      "value": "#${@index(offset: 1)}"
+    }
+  }
+}
+```
 
 ## Usage pattern: the prompt-generate-validate loop
 
