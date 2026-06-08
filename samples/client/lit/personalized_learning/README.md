@@ -10,7 +10,7 @@ _This video demonstrates two use cases: personalized learning, which is the focu
 
 ---
 
-## tl;dr
+## Summary
 
 This sample shows how agents within a chat can use A2UI to go beyond text responses and generate dynamic UI elements. When a student asks for flashcards on photosynthesis, the agent matches the topic to OpenStax textbook content, generates personalized study materials, and returns A2UI JSON that the frontend renders as interactive, flippable cards.
 

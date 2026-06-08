@@ -80,64 +80,40 @@ Ensure you have your environment variables set up (create a `.env` file if neces
 
 The Lit clients are located in `samples/client/lit/`.
 
-1.  **Build the Renderer**:
-    First, ensure the shared renderers are built:
-
+1.  **Install Dependencies**:
+    From the repository root, run:
     ```bash
-    cd renderers/markdown/markdown-it
-    npm install
-    npm run build
-
-    cd ../../web_core
-    npm install
-    npm run build
-
-    cd ../lit
-    npm install
-    npm run build
+    yarn install
     ```
 
 2.  **Run the Client**:
     Navigate to the specific client sample (e.g., `contact` or `shell`) and start the dev server:
     ```bash
     cd samples/client/lit/contact
-    npm install
-    npm run dev
+    yarn dev
     ```
+    *(Note: Wireit automatically handles building required upstream renderers like `@a2ui/web_core` and `@a2ui/lit`.)*
 
 ### Running a Demo Client (Angular)
 
 The Angular clients are located in `samples/client/angular/`.
 
-First, ensure the shared renderers are built (if not already done):
-
+Ensure workspace dependencies are installed from the repository root:
 ```bash
-cd renderers/markdown/markdown-it
-npm install
-npm run build
-
-cd ../../web_core
-npm install
-npm run build
-
-cd ../lit
-npm install
-npm run build
+yarn install
 ```
 
 Then run the Angular client:
-
 ```bash
 cd samples/client/angular
-npm install
-npm start -- contact  # Replace 'contact' with the desired project name (e.g., restaurant, gallery, rizzcharts)
+yarn start -- contact  # Replace 'contact' with the desired project name (e.g., restaurant, gallery, rizzcharts)
 ```
 
 ### Running Tools
 
-- **Editor**: Located in `tools/editor`. Run with `npm install && npm run dev`.
+- **Editor**: Located in `tools/editor`. Run with `yarn dev` (after root `yarn install`).
   - Requires a Gemini API key in `.env` (`GEMINI_API_KEY=<key>`).
-- **Inspector**: Located in `tools/inspector`. Run with `npm install && npm run dev`.
+- **Inspector**: Located in `tools/inspector`. Run with `yarn dev` (after root `yarn install`).
 
 ## Renderers
 

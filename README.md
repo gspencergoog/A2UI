@@ -109,7 +109,7 @@ Pick the path that matches where you want to start:
 | 🎨 **[A2UI Composer](https://a2ui-composer.ag-ui.com/)** · **[Widget Builder](https://go.copilotkit.ai/A2UI-widget-builder)** | Generate A2UI JSON from a visual editor and paste it into any agent prompt — no install required.                                       | ~1 min |
 | 🎬 **[A2UI Theater](https://a2ui-composer.ag-ui.com/theater)**                                                                | Step through pre-built A2UI streaming scenarios across Lit, React, and Angular renderers — no install required.                         | ~1 min |
 
-### Restaurant Finder demo — TL;DR
+### Restaurant Finder demo — Summary
 
 Prerequisites: Node.js 18+, [uv](https://docs.astral.sh/uv/), and a [Gemini API key](https://aistudio.google.com/apikey).
 
@@ -124,7 +124,7 @@ yarn demo:restaurant
 
 These commands install dependencies across workspaces, build the renderers, start the Python agent, and open the client at `http://localhost:5173`. For step-by-step instructions, alternative demos, and troubleshooting see the **[full Quickstart](docs/quickstart.md)**.
 
-### A2UI + AG-UI — TL;DR
+### A2UI + AG-UI — Summary
 
 ```bash
 npx copilotkit@latest init
