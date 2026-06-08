@@ -14,7 +14,7 @@ This angular app connects to an Orchastrator Agent which takes user messages and
 
 1. Update the `src/environments/environment.ts` file with your Google Maps API key.
 2. Build the shared dependencies by running `yarn build` in the `renderers/web_core` directory
-3. Install the dependencies: `npm i`
+3. Install local dependencies: `yarn install`
 4. Run the A2A server for all of the agents. ([Link to instructions](../../../../agent/adk/orchestrator/README.md))
 5. Run the app:
 

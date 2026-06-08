@@ -35,7 +35,7 @@ The shared `web_core` library provides:
 ## Web Components (Lit)
 
 ```bash
-npm install @a2ui/lit @a2ui/web_core
+yarn add @a2ui/lit @a2ui/web_core
 ```
 
 Once installed, you can use the renderer in your app. The Lit renderer uses:
@@ -49,7 +49,7 @@ Once installed, you can use the renderer in your app. The Lit renderer uses:
 ## Angular
 
 ```bash
-npm install @a2ui/angular @a2ui/web_core
+yarn add @a2ui/angular @a2ui/web_core
 ```
 
 Once installed, you can use the renderer in your app. The Angular renderer provides:
@@ -90,13 +90,13 @@ By default, the Angular client uses the non-streaming API. To enable streaming, 
 
 ```bash
 export ENABLE_STREAMING=true
-npm start -- restaurant
+yarn start -- restaurant
 ```
 
 ## React
 
 ```bash
-npm install @a2ui/react @a2ui/web_core
+yarn add @a2ui/react @a2ui/web_core
 ```
 
 The React renderer provides:

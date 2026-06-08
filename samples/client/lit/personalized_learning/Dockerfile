@@ -33,11 +33,11 @@ RUN sed -i 's|"name": "@a2ui/lit"|"name": "@a2ui/web-lib"|g' a2ui-web-lib/packag
 # (we copy pre-built dist/; the wireit build references ../../specification/ which doesn't exist)
 RUN sed -i '/"prepack":/d' a2ui-web-lib/package.json
 
-# Install dependencies using public npm registry
-RUN npm install --registry https://registry.npmjs.org/
+# Install dependencies using Yarn
+RUN yarn install
 
 # Build the Vite frontend
-RUN npm run build
+RUN yarn build
 
 # Set production environment
 ENV PORT=8080
