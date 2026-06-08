@@ -78,6 +78,11 @@
   "wireit": {
     "build": {
       "command": "node scripts/sync-gallery.mjs && next build --webpack",
+      "dependencies": [
+        "../../renderers/web_core:build",
+        "../../renderers/lit:build",
+        "../../renderers/react:build"
+      ],
       "files": [
         "src/**/*",
         "public/**/*",
