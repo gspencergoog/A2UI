@@ -210,19 +210,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@a2ui/lit@npm:^0.8.1":
-  version: 0.8.3
-  resolution: "@a2ui/lit@npm:0.8.3"
-  dependencies:
-    "@a2ui/web_core": "npm:^0.8.0"
-    "@lit-labs/signals": "npm:^0.1.3"
-    "@lit/context": "npm:^1.1.4"
-    lit: "npm:^3.3.1"
-    signal-utils: "npm:^0.21.1"
-  checksum: 10c0/734cd99674f46cb728b726578a0fa283399650973d5553e42265f7ae002641704b098e7440833aec10341bb6554da863b4aacd46afecd4bf8f84a7aff8cd52dd
-  languageName: node
-  linkType: hard
-
 "@a2ui/lit@workspace:*, @a2ui/lit@workspace:renderers/lit":
   version: 0.0.0-use.local
   resolution: "@a2ui/lit@workspace:renderers/lit"
@@ -484,16 +471,6 @@ __metadata:
     vite: "npm:^7.3.1"
   languageName: unknown
   linkType: soft
-
-"@a2ui/web_core@npm:^0.8.0":
-  version: 0.8.0
-  resolution: "@a2ui/web_core@npm:0.8.0"
-  dependencies:
-    zod: "npm:^3.25.76"
-    zod-to-json-schema: "npm:^3.25.1"
-  checksum: 10c0/046ce3715fa3f80dbb09c31991b084f28177bde546d168bed6bf499434c73b8eaf3d14ee6870a6916af0552066876accd53113f124172b8f030f97817fddf093
-  languageName: node
-  linkType: hard
 
 "@a2ui/web_core@workspace:*, @a2ui/web_core@workspace:renderers/web_core":
   version: 0.0.0-use.local

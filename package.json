@@ -35,6 +35,10 @@
     "wireit": "^0.15.0-pre.2"
   },
   "resolutions": {
+    "@a2ui/web_core": "workspace:*",
+    "@a2ui/lit": "workspace:*",
+    "@a2ui/angular": "workspace:*",
+    "@a2ui/markdown-it": "workspace:*",
     "@angular/core": "^21.2.5",
     "@angular/common": "^21.2.5",
     "@angular/compiler": "^21.2.5",
