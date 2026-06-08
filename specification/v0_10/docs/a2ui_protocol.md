@@ -437,6 +437,16 @@ This structure is designed to be both flexible and strictly validated.
 
 The set of available UI components and functions is defined in a **Catalog**. The basic catalog is defined in [`catalogs/basic/catalog.json`]. While the Basic Catalog is useful for starting out, most production applications will define their own catalog to reflect their specific design system. The server must generate messages that conform to the catalog understood by the client.
 
+#### Catalog structure
+
+Every catalog follows the standard `Catalog` object definition:
+
+- **catalogId** (string, required): A unique identifier URI for this catalog.
+- **instructions** (string, optional): A relative file URI pointing to a Markdown file containing design principles, rules, or developer guidelines specific to this catalog (typically `instructions.md`). These rules guide LLMs when generating UI layouts under this catalog.
+- **components** (object, optional): A map of supported UI components, where each key is the component type (e.g., `Text`) and its value is its JSON Schema definition.
+- **functions** (array, optional): A list of client-side validation or utility functions supported by the catalog.
+- **surfaceProperties** (object, optional): A schema defining the catalog's customizable visual properties.
+
 ### UI composition: the adjacency list model
 
 The A2UI protocol defines the UI as a flat list of components. The tree structure is built implicitly using ID references. This is known as an adjacency list model.
