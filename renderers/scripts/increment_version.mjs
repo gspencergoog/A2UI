@@ -62,8 +62,8 @@ if (dependents.length > 0 && !skipSync) {
       continue;
     }
     console.log(`- Syncing ${dep.name} in ${dep.dir}`);
-    // Update lockfiles normally, but ignore scripts to prevent postinstall esbuild errors
-    runCommand('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund'], {cwd: dep.dir});
+    // Update lockfiles normally using yarn
+    runCommand('yarn', ['install'], {cwd: dep.dir});
   }
 }
 

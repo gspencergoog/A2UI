@@ -8,20 +8,19 @@ The following scripts in `renderers/scripts/` automate the versioning, building,
 
 ### Pre-requirement: Artifact registry configuration
 
-_(Note: Only Googlers will be able to do this. This is a one-time setup.)_
+_(Note: Only Googlers will be able to publish to the internal registry. Authentication is handled automatically when running release scripts.)_
 
-Add the following line to your `~/.npmrc` file:
+Ensure you are logged into `gcloud` with your corporate credentials:
 
+```sh
+gcloud auth login
 ```
-//us-npm.pkg.dev/oss-exit-gate-prod/a2ui--npm/:_authToken=<auth_token>
-```
 
-The `<auth_token>` field gets populated by the `google-artifactregistry-auth`
-command on "Step 2" later.
+The automated release scripts (`publish_npm.mjs`) will automatically acquire an access token via `gcloud auth print-access-token` and pass it to Yarn Modern during publishing.
 
 ### 1. Increment Versions (Local)
 
-To increment a package version and automatically sync all internal dependents (updating their `package-lock.json` files). This should be done in a PR:
+To increment a package version and automatically sync all internal dependents (updating their `yarn.lock` files). This should be done in a PR:
 
 ```sh
 # Automatically increment patch version (e.g. 0.9.5 -> 0.9.6)
@@ -35,7 +34,7 @@ This script will:
 
 - Update the `package.json` of the target package.
 - Scan the entire mono-repo for internal dependents (via `file:` links).
-- Run `npm install` in those dependents to update their lockfiles.
+- Run `yarn install` in those dependents to update their lockfiles.
 
 ### 2. Publish to Staging (Artifact Registry)
 
@@ -43,16 +42,16 @@ Once versions are updated and merged into `main`, use the `publish_npm` script t
 
 ```sh
 # Publish multiple packages (they will be sorted automatically by dependency)
-./renderers/scripts/publish_npm.mjs --packages=lit,web_core
+./renderers/scripts/publish_npm.mjs --package=lit --package=web_core
 ```
 
 This script will:
 
-- Run `npx google-artifactregistry-auth` to authenticate.
+- Automatically obtain a Google Artifact Registry token via `gcloud auth print-access-token`.
 - Sort packages topologically (e.g., publishing `web_core` before `lit`).
 - Verify that if a renderer is being published, `web_core` is also included (use `--force` to skip).
 - Run pre-flight checks against existing `npmjs` versions and prompt for confirmation.
-- For each package: `npm install` -> `npm test` -> `npm run publish:package`.
+- For each package: `yarn install` -> `yarn test` -> `yarn run publish:package`.
 
 **Advanced Flags for publish_npm.mjs:**
 
@@ -104,23 +103,13 @@ export NPM_TOKEN="npm_YourSecretTokenHere"
 
 ### 🏢 Internal Artifact Registry Setup (Exit Gate) - For Yarn Modern
 
-If you need to publish to the internal Google Artifact Registry (e.g., for Exit Gate validation), you can configure the registry and authentication for the `@a2ui` scope together in your `.yarnrc.yml` file.
+The monorepo is fully configured in `.yarnrc.yml` to route `@a2ui` scoped packages to the internal Google Artifact Registry. Authentication is automatically injected via `gcloud` when running `./renderers/scripts/publish_npm.mjs`.
 
-Add the following temporarily for publishing (do not commit as it may break CI due to missing auth in automated runs):
+If you need to manually publish or run commands locally requiring registry access, export a token in your terminal:
 
-```yaml
-npmScopes:
-  a2ui:
-    npmRegistryServer: 'https://us-npm.pkg.dev/oss-exit-gate-prod/a2ui--npm/'
-    npmAlwaysAuth: true
-    npmAuthToken: '${NPM_TOKEN:-}'
+```sh
+export NPM_TOKEN=$(gcloud auth print-access-token)
 ```
-
-1. Ensure your local `.npmrc` in the package directory is correctly configured if you are debugging, but the automated scripts handle authentication via `google-artifactregistry-auth`.
-2. If you need to manually overwrite or create an `.npmrc` for local testing:
-   ```sh
-   echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
-   ```
 
 ## About the `publish:package` command
 

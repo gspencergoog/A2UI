@@ -61,11 +61,13 @@ describe('publish_npm script integration test', () => {
 
   it('should default to dry-run mode (skip auth and publish)', async () => {
     const executedCommands = [];
+    let gcloudCalled = false;
     const mocks = {
       runCommand: (cmd, args) => {
         executedCommands.push(`${cmd} ${args.join(' ')}`);
       },
       execSync: cmd => {
+        if (cmd.includes('gcloud auth')) gcloudCalled = true;
         if (cmd.includes('npm view')) return '0.0.1\n';
         return '';
       },
@@ -73,33 +75,33 @@ describe('publish_npm script integration test', () => {
 
     await main(['--package=web_core'], mocks);
 
-    const hasAuth = executedCommands.some(cmd => cmd.includes('google-artifactregistry-auth'));
     const hasPublish = executedCommands.some(cmd => cmd.includes('publish:package'));
-    const hasInstall = executedCommands.some(cmd => cmd.includes('npm install'));
+    const hasInstall = executedCommands.some(cmd => cmd.includes('yarn install'));
 
-    assert.strictEqual(hasAuth, false, 'Should NOT authenticate in dry-run');
+    assert.strictEqual(gcloudCalled, false, 'Should NOT authenticate in dry-run');
     assert.strictEqual(hasPublish, false, 'Should NOT publish in dry-run');
-    assert.ok(hasInstall, 'Should still run npm install in dry-run by default');
+    assert.ok(hasInstall, 'Should still run yarn install in dry-run by default');
   });
 
   it('should authenticate and publish when --no-dry-run is passed', async () => {
     const executedCommands = [];
+    let gcloudCalled = false;
     const mocks = {
       runCommand: (cmd, args) => {
         executedCommands.push(`${cmd} ${args.join(' ')}`);
       },
       execSync: cmd => {
+        if (cmd.includes('gcloud auth')) gcloudCalled = true;
         if (cmd.includes('npm view')) return '0.0.1\n';
-        return '';
+        return 'dummy_token\n';
       },
     };
 
     await main(['--package=web_core', '--no-dry-run'], mocks);
 
-    const hasAuth = executedCommands.some(cmd => cmd.includes('google-artifactregistry-auth'));
     const hasPublish = executedCommands.some(cmd => cmd.includes('publish:package'));
 
-    assert.ok(hasAuth, 'Should authenticate when --no-dry-run is passed');
+    assert.ok(gcloudCalled, 'Should authenticate via gcloud when --no-dry-run is passed');
     assert.ok(hasPublish, 'Should publish when --no-dry-run is passed');
   });
 
@@ -117,7 +119,7 @@ describe('publish_npm script integration test', () => {
 
     await main(['--package=web_core', '--skip-tests'], mocks);
 
-    const hasTest = executedCommands.some(cmd => cmd.includes('npm run test'));
+    const hasTest = executedCommands.some(cmd => cmd.includes('run test'));
     assert.strictEqual(hasTest, false, 'Should NOT run tests when --skip-tests is passed');
   });
 
@@ -150,7 +152,7 @@ describe('publish_npm script integration test', () => {
 
     await main(['--package=lit', '--no-check-core-dependencies'], mocks);
 
-    const hasInstall = executedCommands.some(cmd => cmd.includes('npm install'));
-    assert.ok(hasInstall, 'Should proceed to install');
+    const hasInstall = executedCommands.some(cmd => cmd.includes('yarn install'));
+    assert.ok(hasInstall, 'Should proceed to install with yarn');
   });
 });

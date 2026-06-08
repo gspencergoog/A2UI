@@ -54,7 +54,7 @@ const updateInternalDeps = deps => {
   if (!deps) return;
   for (const name in deps) {
     const version = deps[name];
-    if (version.startsWith('file:') && graph[name]) {
+    if ((version.startsWith('file:') || version.startsWith('workspace:')) && graph[name]) {
       deps[name] = '^' + graph[name].version;
     }
   }
