@@ -86,7 +86,7 @@ A2UI uses an **adjacency list model** for component hierarchies. Instead of nest
 
     ```json
     {
-      "version": "v0.9",
+      "version": "v0.9.1",
       "updateComponents": {
         "surfaceId": "main",
         "components": [
@@ -258,7 +258,7 @@ Components compose into **surfaces** (widgets):
 
 === "v0.9 and later"
 
-    1. LLM creates a surface via `createSurface` (specifying catalog)
+    1. LLM creates a surface via `createSurface` (specifying catalog; in v1.0, can also include initial data model and components)
     2. LLM generates component definitions via `updateComponents`
     3. LLM populates data via `updateDataModel`
     4. Client renders all components as native widgets

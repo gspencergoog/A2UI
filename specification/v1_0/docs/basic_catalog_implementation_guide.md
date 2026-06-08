@@ -208,6 +208,7 @@ However, complex functions like `formatString` must manually interact with the C
 
 **Architecture & Logic:**
 Universal system function available across all catalogs. MUST ONLY be evaluated within template instantiation loops (Collection Scope).
+
 - `offset` (Optional, number): Added to the 0-based index (e.g., `offset: 1` produces 1-based indexing). Defaults to `0`.
 
 ### `formatString`

@@ -236,29 +236,29 @@ Interactive components update the data model bidirectionally:
 
 - **Use granular updates**: Update only changed paths.
 
-    === "v0.8"
+=== "v0.8"
 
-            ```json
-            {
-              "dataModelUpdate": {
-                "path": "/user",
-                "contents": [{"key": "name", "valueString": "Alice"}]
-              }
-            }
-            ```
+    ```json
+    {
+      "dataModelUpdate": {
+        "path": "/user",
+        "contents": [{"key": "name", "valueString": "Alice"}]
+      }
+    }
+    ```
 
-    === "v0.9 and later"
+=== "v0.9 and later"
 
-            ```json
-            {
-              "version": "v0.9.1",
-              "updateDataModel": {
-                "surfaceId": "user_profile",
-                "path": "/user/name",
-                "value": "Alice"
-              }
-            }
-            ```
+    ```json
+    {
+      "version": "v0.9.1",
+      "updateDataModel": {
+        "surfaceId": "user_profile",
+        "path": "/user/name",
+        "value": "Alice"
+      }
+    }
+    ```
 
 - **Organize by domain**: Group related data.
 
