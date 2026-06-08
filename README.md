@@ -117,11 +117,12 @@ Prerequisites: Node.js 18+, [uv](https://docs.astral.sh/uv/), and a [Gemini API 
 git clone https://github.com/a2ui-project/a2ui.git
 cd a2ui
 export GEMINI_API_KEY="your_gemini_api_key"
+yarn install
 cd samples/client/lit
-npm run demo:restaurant
+yarn demo:restaurant
 ```
 
-This one command installs dependencies, builds the renderers, starts the Python agent, and opens the client at `http://localhost:5173`. For step-by-step instructions, alternative demos, and troubleshooting see the **[full Quickstart](docs/quickstart.md)**.
+These commands install dependencies across workspaces, build the renderers, start the Python agent, and open the client at `http://localhost:5173`. For step-by-step instructions, alternative demos, and troubleshooting see the **[full Quickstart](docs/quickstart.md)**.
 
 ### A2UI + AG-UI — TL;DR
 
