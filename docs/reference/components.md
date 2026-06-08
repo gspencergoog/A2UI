@@ -631,7 +631,7 @@ To see all components in action:
 
 ```bash
 cd samples/client/angular
-npm start -- gallery
+yarn start gallery
 ```
 
 ## Further Reading
