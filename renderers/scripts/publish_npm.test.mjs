@@ -29,7 +29,7 @@ describe('publish_npm script integration test', () => {
         );
       },
       execSync: cmd => {
-        if (cmd.includes('npm view') || cmd.includes('npm info')) return '0.0.1\n';
+        if (cmd.includes('npm info')) return '0.0.1\n';
         return '';
       },
     };
@@ -68,7 +68,7 @@ describe('publish_npm script integration test', () => {
       },
       execSync: cmd => {
         if (cmd.includes('gcloud auth')) gcloudCalled = true;
-        if (cmd.includes('npm view') || cmd.includes('npm info')) return '0.0.1\n';
+        if (cmd.includes('npm info')) return '0.0.1\n';
         return '';
       },
     };
@@ -92,7 +92,7 @@ describe('publish_npm script integration test', () => {
       },
       execSync: cmd => {
         if (cmd.includes('gcloud auth')) gcloudCalled = true;
-        if (cmd.includes('npm view') || cmd.includes('npm info')) return '0.0.1\n';
+        if (cmd.includes('npm info')) return '0.0.1\n';
         return 'dummy_token\n';
       },
     };
@@ -112,7 +112,7 @@ describe('publish_npm script integration test', () => {
         executedCommands.push(`${cmd} ${args.join(' ')}`);
       },
       execSync: cmd => {
-        if (cmd.includes('npm view') || cmd.includes('npm info')) return '0.0.1\n';
+        if (cmd.includes('npm info')) return '0.0.1\n';
         return '';
       },
     };
@@ -145,7 +145,7 @@ describe('publish_npm script integration test', () => {
         executedCommands.push(`${cmd} ${args.join(' ')}`);
       },
       execSync: cmd => {
-        if (cmd.includes('npm view') || cmd.includes('npm info')) return '0.0.1\n';
+        if (cmd.includes('npm info')) return '0.0.1\n';
         return '';
       },
     };
