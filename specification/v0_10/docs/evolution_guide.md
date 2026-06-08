@@ -28,6 +28,7 @@ Version 1.0 differs from 0.9 in the following ways:
 - Added `posterUrl` property to the `Video` component in `catalogs/basic/catalog.json`, allowing a preview image to be displayed before the video plays.
 - Added `placeholder` prop to the `TextField` component schema.
 - Added a `steps` property to the `Slider` component schema to snap values to discrete intervals.
+- Added an optional `instructions` field to the `Catalog` schema (`catalogs/basic/catalog.json`) to refer to an external guidelines/rules file (`instructions.md`) via relative file URI, renaming and updating the previous `rules.txt` file.
 - Renamed `svgPath` to `path` in the custom SVG icon definition object schema.
 - Renamed `$defs/theme` to `$defs/surfaceProperties` in both the basic and minimal catalogs.
 
@@ -39,12 +40,13 @@ Version 1.0 differs from 0.9 in the following ways:
 
 ### 2.4. Client-to-server events
 
-- Added `actionId` to the `action` message properties, which the client generates when `wantResponse` is true.
-- Added `functionResponse` message type to return execution results of server-initiated function calls.
-- Added optional `functionCallId` to client-side `error` messages.
-- Enforced mutual exclusivity of `surfaceId` and `functionCallId` in `error` payloads.
-- Updated `Action` type in `common_types.json` to include `wantResponse` and `responsePath`.
-- Removed the `returnType` property from the wire-level `FunctionCall` definition in `common_types.json`.
+- Added `actionId` to the `action` message properties, which the client generates if a response is expected (`wantResponse: true`).
+- <TBD>
+
+### 2.4. Client Capabilities Schema
+
+- Added an optional `instructions` field to the `Catalog` object definition (`client_capabilities.json`) as a relative file URI reference (with format hint of `uri-reference`) to support external rules files associated with a catalog.
+- Renamed `theme` capability block to `surfaceProperties` within the Catalog definition in `client_capabilities.json`.
 
 ### 2.5. Data encoding
 
