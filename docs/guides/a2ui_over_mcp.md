@@ -63,11 +63,11 @@ For a fully rendered interactive experience that visually demonstrates A2UI over
     ```
 2. Install Node.js dependencies:
     ```bash
-    npm install
+    yarn install
     ```
 3. Start the Vite development server:
     ```bash
-    npm run dev
+    yarn dev
     ```
 4. Open your browser to the URL displayed in your terminal (usually `http://localhost:5173`).
 

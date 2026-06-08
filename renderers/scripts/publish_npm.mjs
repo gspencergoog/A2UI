@@ -178,7 +178,7 @@ function checkNpmVersions(packages, exec) {
     let remoteVersion;
 
     try {
-      remoteVersion = exec(`npm view ${pkg.name} version`, {
+      remoteVersion = exec(`yarn npm info ${pkg.name} --fields version`, {
         encoding: 'utf8',
         stdio: ['pipe', 'pipe', 'ignore'],
       }).trim();

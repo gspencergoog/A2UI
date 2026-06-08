@@ -58,8 +58,8 @@ This script will:
 - `--force`: Skips the `web_core` inclusion warning.
 - `--yes`: Bypasses the manual user confirmation prompt (useful for CI).
 - `--dry-run`: Simulates the process, printing the commands it _would_ execute without actually running them.
-- `--skip-tests`: Skips the `npm run test` phase before publishing.
-- `--test-only`: Runs the full build and test suite in topological order, but skips the final `npm run publish:package` step. Useful for verifying that packages build and tests pass before performing a real release.
+- `--skip-tests`: Skips the `yarn test` phase before publishing.
+- `--test-only`: Runs the full build and test suite in topological order, but skips the final `yarn run publish:package` step. Useful for verifying that packages build and tests pass before performing a real release.
 
 ### 3. Upload Manifest
 
