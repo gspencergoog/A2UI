@@ -82,6 +82,7 @@ The Lit clients are located in `samples/client/lit/`.
 
 1.  **Install Dependencies**:
     From the repository root, run:
+
     ```bash
     yarn install
     ```
@@ -92,18 +93,20 @@ The Lit clients are located in `samples/client/lit/`.
     cd samples/client/lit/contact
     yarn dev
     ```
-    *(Note: Wireit automatically handles building required upstream renderers like `@a2ui/web_core` and `@a2ui/lit`.)*
+    _(Note: Wireit automatically handles building required upstream renderers like `@a2ui/web_core` and `@a2ui/lit`.)_
 
 ### Running a Demo Client (Angular)
 
 The Angular clients are located in `samples/client/angular/`.
 
 Ensure workspace dependencies are installed from the repository root:
+
 ```bash
 yarn install
 ```
 
 Then run the Angular client:
+
 ```bash
 cd samples/client/angular
 yarn start -- contact  # Replace 'contact' with the desired project name (e.g., restaurant, gallery, rizzcharts)
