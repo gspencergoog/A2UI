@@ -52,7 +52,7 @@ Run the one-command demo launcher:
 
 ```bash
 yarn install
-yarn demo:all
+yarn demo:restaurant
 ```
 
 This command will:
@@ -80,7 +80,7 @@ uv run .
 
 ```bash
 cd samples/client/lit/shell
-npm run dev
+yarn dev
 ```
 
 NOTE: Demo Running
