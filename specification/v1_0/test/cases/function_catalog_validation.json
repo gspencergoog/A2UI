@@ -1225,7 +1225,7 @@
       "description": "@index: Valid call",
       "valid": true,
       "data": {
-        "version": "v0.10",
+        "version": "v1.0",
         "updateComponents": {
           "surfaceId": "test",
           "components": [
@@ -1256,7 +1256,7 @@
       "description": "@index: Invalid args (string offset)",
       "valid": false,
       "data": {
-        "version": "v0.10",
+        "version": "v1.0",
         "updateComponents": {
           "surfaceId": "test",
           "components": [
@@ -1279,7 +1279,7 @@
       "description": "@index: Invalid returnType",
       "valid": false,
       "data": {
-        "version": "v0.10",
+        "version": "v1.0",
         "updateComponents": {
           "surfaceId": "test",
           "components": [
