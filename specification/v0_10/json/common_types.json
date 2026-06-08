@@ -170,7 +170,8 @@
           "properties": {
             "offset": {
               "$ref": "#/$defs/DynamicNumber",
-              "description": "Optional. An offset to add to the 0-based index (e.g., 1 for 1-based indexing). Defaults to 0."
+              "description": "Optional. An offset to add to the 0-based index (e.g., 1 for 1-based indexing). Defaults to 0.",
+              "default": 0
             }
           },
           "unevaluatedProperties": false
