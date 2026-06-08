@@ -46,7 +46,8 @@
                   "path": "/date"
                 },
                 "format": "EEEE"
-              }
+              },
+              "returnType": "string"
             },
             "variant": "caption"
           },
@@ -60,7 +61,8 @@
                   "path": "/date"
                 },
                 "format": "d"
-              }
+              },
+              "returnType": "string"
             },
             "variant": "h1"
           },

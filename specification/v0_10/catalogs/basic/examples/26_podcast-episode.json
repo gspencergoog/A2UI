@@ -78,7 +78,8 @@
                   "path": "/date"
                 },
                 "format": "MMM d, yyyy"
-              }
+              },
+              "returnType": "string"
             },
             "variant": "caption"
           },

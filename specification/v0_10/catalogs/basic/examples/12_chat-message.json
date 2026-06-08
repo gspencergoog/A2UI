@@ -101,7 +101,8 @@
                   "path": "timestamp"
                 },
                 "format": "h:mm a"
-              }
+              },
+              "returnType": "string"
             },
             "variant": "caption"
           },

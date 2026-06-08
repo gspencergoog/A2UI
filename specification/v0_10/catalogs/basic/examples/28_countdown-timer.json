@@ -110,7 +110,8 @@
                   "path": "/targetDate"
                 },
                 "format": "MMMM d, yyyy"
-              }
+              },
+              "returnType": "string"
             },
             "variant": "body"
           }

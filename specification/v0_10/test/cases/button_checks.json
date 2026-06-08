@@ -13,11 +13,7 @@
               "id": "btn1",
               "component": "Button",
               "child": "txt1",
-              "action": {
-                "event": {
-                  "name": "submit"
-                }
-              },
+              "action": {"event": {"name": "submit"}},
               "checks": [
                 {
                   "condition": {
@@ -26,11 +22,8 @@
                       "values": [
                         {
                           "call": "required",
-                          "args": {
-                            "value": {
-                              "path": "/formData/terms"
-                            }
-                          }
+                          "args": {"value": {"path": "/formData/terms"}},
+                          "returnType": "boolean"
                         },
                         {
                           "call": "or",
@@ -38,35 +31,27 @@
                             "values": [
                               {
                                 "call": "required",
-                                "args": {
-                                  "value": {
-                                    "path": "/formData/email"
-                                  }
-                                }
+                                "args": {"value": {"path": "/formData/email"}},
+                                "returnType": "boolean"
                               },
                               {
                                 "call": "required",
-                                "args": {
-                                  "value": {
-                                    "path": "/formData/phone"
-                                  }
-                                }
+                                "args": {"value": {"path": "/formData/phone"}},
+                                "returnType": "boolean"
                               }
                             ]
-                          }
+                          },
+                          "returnType": "boolean"
                         }
                       ]
-                    }
+                    },
+                    "returnType": "boolean"
                   },
                   "message": "Must accept terms and provide contact info"
                 }
               ]
             },
-            {
-              "id": "txt1",
-              "component": "Text",
-              "text": "Submit"
-            }
+            {"id": "txt1", "component": "Text", "text": "Submit"}
           ]
         }
       }
@@ -83,20 +68,10 @@
               "id": "btn2",
               "component": "Button",
               "child": "txt2",
-              "action": {
-                "event": {
-                  "name": "submit"
-                }
-              },
-              "enabled": {
-                "path": "/some/path"
-              }
+              "action": {"event": {"name": "submit"}},
+              "enabled": {"path": "/some/path"}
             },
-            {
-              "id": "txt2",
-              "component": "Text",
-              "text": "Submit"
-            }
+            {"id": "txt2", "component": "Text", "text": "Submit"}
           ]
         }
       }
@@ -113,29 +88,19 @@
               "id": "btn3",
               "component": "Button",
               "child": "txt3",
-              "action": {
-                "event": {
-                  "name": "submit"
-                }
-              },
+              "action": {"event": {"name": "submit"}},
               "checks": [
                 {
                   "condition": {
                     "call": "required",
-                    "args": {
-                      "value": "foo"
-                    },
+                    "args": {"value": "foo"},
                     "returnType": "not_a_valid_type"
                   },
                   "message": "Msg"
                 }
               ]
             },
-            {
-              "id": "txt3",
-              "component": "Text",
-              "text": "Submit"
-            }
+            {"id": "txt3", "component": "Text", "text": "Submit"}
           ]
         }
       }
@@ -152,29 +117,20 @@
               "id": "btn4",
               "component": "Button",
               "child": "txt4",
-              "action": {
-                "event": {
-                  "name": "submit"
-                }
-              },
+              "action": {"event": {"name": "submit"}},
               "checks": [
                 {
                   "condition": {
                     "call": "and",
-                    "args": {
-                      "values": []
-                    }
+                    "args": {"values": []},
+                    "returnType": "boolean"
                   },
                   "message": "foo",
                   "extraProp": "not allowed"
                 }
               ]
             },
-            {
-              "id": "txt4",
-              "component": "Text",
-              "text": "Submit"
-            }
+            {"id": "txt4", "component": "Text", "text": "Submit"}
           ]
         }
       }
@@ -191,18 +147,10 @@
               "id": "btn_primary",
               "component": "Button",
               "child": "txt_primary",
-              "action": {
-                "event": {
-                  "name": "submit"
-                }
-              },
+              "action": {"event": {"name": "submit"}},
               "variant": "primary"
             },
-            {
-              "id": "txt_primary",
-              "component": "Text",
-              "text": "Submit"
-            }
+            {"id": "txt_primary", "component": "Text", "text": "Submit"}
           ]
         }
       }
@@ -219,18 +167,10 @@
               "id": "btn_borderless",
               "component": "Button",
               "child": "txt_borderless",
-              "action": {
-                "event": {
-                  "name": "cancel"
-                }
-              },
+              "action": {"event": {"name": "cancel"}},
               "variant": "borderless"
             },
-            {
-              "id": "txt_borderless",
-              "component": "Text",
-              "text": "Cancel"
-            }
+            {"id": "txt_borderless", "component": "Text", "text": "Cancel"}
           ]
         }
       }
@@ -247,18 +187,10 @@
               "id": "btn_dep",
               "component": "Button",
               "child": "txt_dep",
-              "action": {
-                "event": {
-                  "name": "submit"
-                }
-              },
+              "action": {"event": {"name": "submit"}},
               "primary": true
             },
-            {
-              "id": "txt_dep",
-              "component": "Text",
-              "text": "Submit"
-            }
+            {"id": "txt_dep", "component": "Text", "text": "Submit"}
           ]
         }
       }

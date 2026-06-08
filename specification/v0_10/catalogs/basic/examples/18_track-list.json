@@ -71,7 +71,8 @@
                 "value": {
                   "path": "number"
                 }
-              }
+              },
+              "returnType": "string"
             },
             "variant": "caption"
           },

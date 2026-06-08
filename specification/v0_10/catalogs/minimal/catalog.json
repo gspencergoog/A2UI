@@ -153,7 +153,6 @@
     "capitalize": {
       "type": "object",
       "description": "Converts an input string to a capitalized version.",
-      "returnType": "string",
       "properties": {
         "call": {"const": "capitalize"},
         "args": {
@@ -165,7 +164,8 @@
           },
           "required": ["value"],
           "unevaluatedProperties": false
-        }
+        },
+        "returnType": {"const": "string"}
       },
       "required": ["call", "args"],
       "unevaluatedProperties": false
@@ -178,9 +178,11 @@
         "weight": {"type": "number"}
       }
     },
-    "surfaceProperties": {
+    "theme": {
       "type": "object",
-      "properties": {},
+      "properties": {
+        "primaryColor": {"type": "string", "pattern": "^#[0-9a-fA-F]{6}$"}
+      },
       "additionalProperties": true
     },
     "anyComponent": {

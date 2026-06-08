@@ -62,7 +62,8 @@
                   "path": "/date"
                 },
                 "format": "E, MMM d"
-              }
+              },
+              "returnType": "string"
             },
             "variant": "caption"
           },
@@ -126,7 +127,8 @@
                   "path": "/departureTime"
                 },
                 "format": "h:mm a"
-              }
+              },
+              "returnType": "string"
             },
             "variant": "h3"
           },
@@ -172,7 +174,8 @@
                   "path": "/arrivalTime"
                 },
                 "format": "h:mm a"
-              }
+              },
+              "returnType": "string"
             },
             "variant": "h3"
           }

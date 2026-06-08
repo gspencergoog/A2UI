@@ -262,7 +262,6 @@ export class Validator {
     let hasUpdateComponents = false;
     let hasRootComponent = false;
     const createdSurfaces = new Set<string>();
-    const activeSurfaces = new Set<string>();
 
     for (const message of messages) {
       if (message.updateComponents) {
@@ -273,77 +272,26 @@ export class Validator {
             `updateComponents message received for surface '${surfaceId}' before createSurface message.`,
           );
         }
-        if (surfaceId && createdSurfaces.has(surfaceId) && !activeSurfaces.has(surfaceId)) {
-          errors.push(
-            `updateComponents message received for inactive or deleted surface '${surfaceId}'.`,
-          );
-        }
 
         this.validateUpdateComponents(message.updateComponents, errors);
 
         // Check for root component in this message
-        if (Array.isArray(message.updateComponents.components)) {
+        if (message.updateComponents.components) {
           for (const comp of message.updateComponents.components) {
-            if (comp && typeof comp === 'object' && comp.id === 'root') {
+            if (comp.id === 'root') {
               hasRootComponent = true;
             }
           }
         }
       } else if (message.createSurface) {
         this.validateCreateSurface(message.createSurface, errors);
-        const surfaceId = message.createSurface.surfaceId;
-        if (surfaceId) {
-          if (activeSurfaces.has(surfaceId)) {
-            errors.push(
-              `Duplicate createSurface message received for surface '${surfaceId}' without prior deleteSurface.`,
-            );
-          }
-          createdSurfaces.add(surfaceId);
-          activeSurfaces.add(surfaceId);
-        }
-
-        const createSurface = message.createSurface;
-        if (createSurface.components) {
-          hasUpdateComponents = true;
-
-          if (Array.isArray(createSurface.components)) {
-            this.validateComponentsList(createSurface.components, errors);
-
-            // Check for root component in nested components
-            for (const comp of createSurface.components) {
-              if (comp && typeof comp === 'object' && comp.id === 'root') {
-                hasRootComponent = true;
-              }
-            }
-          } else {
-            errors.push('createSurface.components must be an array of components.');
-          }
+        if (message.createSurface.surfaceId) {
+          createdSurfaces.add(message.createSurface.surfaceId);
         }
       } else if (message.updateDataModel) {
         this.validateUpdateDataModel(message.updateDataModel, errors);
-        const surfaceId = message.updateDataModel.surfaceId;
-        if (surfaceId) {
-          if (!createdSurfaces.has(surfaceId)) {
-            errors.push(
-              `updateDataModel message received for surface '${surfaceId}' before createSurface message.`,
-            );
-          } else if (!activeSurfaces.has(surfaceId)) {
-            errors.push(
-              `updateDataModel message received for inactive or deleted surface '${surfaceId}'.`,
-            );
-          }
-        }
       } else if (message.deleteSurface) {
         this.validateDeleteSurface(message.deleteSurface, errors);
-        const surfaceId = message.deleteSurface.surfaceId;
-        if (surfaceId) {
-          if (!activeSurfaces.has(surfaceId)) {
-            errors.push(
-              `deleteSurface message received for inactive or non-existent surface '${surfaceId}'.`,
-            );
-          }
-          activeSurfaces.delete(surfaceId);
-        }
       } else {
         errors.push(`Unknown message type in output: ${JSON.stringify(message)}`);
       }
@@ -399,14 +347,7 @@ export class Validator {
     if (data.catalogId === undefined) {
       errors.push("createSurface must have a 'catalogId' property.");
     }
-    const allowed = [
-      'surfaceId',
-      'catalogId',
-      'surfaceProperties',
-      'sendDataModel',
-      'components',
-      'dataModel',
-    ];
+    const allowed = ['surfaceId', 'catalogId'];
     for (const key in data) {
       if (!allowed.includes(key)) {
         errors.push(`createSurface has unexpected property: ${key}`);
@@ -435,13 +376,8 @@ export class Validator {
       return;
     }
 
-    this.validateComponentsList(data.components, errors);
-  }
-
-  private validateComponentsList(components: any[], errors: string[]) {
     const componentIds = new Set<string>();
-    for (const c of components) {
-      if (!c || typeof c !== 'object') continue;
+    for (const c of data.components) {
       const id = c.id;
       if (id) {
         if (componentIds.has(id)) {
@@ -469,21 +405,12 @@ export class Validator {
       }
     }
 
-    for (const component of components) {
-      if (component && typeof component === 'object') {
-        this.validateComponent(component, componentIds, errors);
-      }
+    for (const component of data.components) {
+      this.validateComponent(component, componentIds, errors);
     }
   }
 
   private validateUpdateDataModel(data: any, errors: string[]) {
-    if (data.surfaceId === undefined) {
-      errors.push("UpdateDataModel must have a 'surfaceId' property.");
-    }
-    this.validateDataModelUpdate(data, errors);
-  }
-
-  private validateDataModelUpdate(data: any, errors: string[]) {
     // Schema validation handles types and basic structure.
     // 'op' is removed in v0.10, so we don't need to validate it or its relationship with 'value'.
     // We strictly rely on the schema for this message type now.

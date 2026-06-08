@@ -97,9 +97,7 @@
           "functionCallId": "unique-call-id-131",
           "call": "someFunction",
           "value": {
-            "result": {
-              "nested": "object"
-            }
+            "result": {"nested": "object"}
           }
         }
       }

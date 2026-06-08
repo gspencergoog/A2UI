@@ -18,11 +18,8 @@
                 {
                   "condition": {
                     "call": "required",
-                    "args": {
-                      "value": {
-                        "path": "/val"
-                      }
-                    }
+                    "args": {"value": {"path": "/val"}},
+                    "returnType": "boolean"
                   },
                   "message": "Required"
                 }
@@ -45,15 +42,7 @@
               "component": "TextField",
               "label": "L",
               "value": "",
-              "checks": [
-                {
-                  "condition": {
-                    "call": "required",
-                    "args": {}
-                  },
-                  "message": "Msg"
-                }
-              ]
+              "checks": [{"condition": {"call": "required", "args": {}}, "message": "Msg"}]
             }
           ]
         }
@@ -76,11 +65,7 @@
                 {
                   "condition": {
                     "call": "required",
-                    "args": {
-                      "value": {
-                        "path": "/val"
-                      }
-                    },
+                    "args": {"value": {"path": "/val"}},
                     "returnType": "string"
                   },
                   "message": "Msg"
@@ -108,12 +93,7 @@
                 {
                   "condition": {
                     "call": "regex",
-                    "args": {
-                      "value": {
-                        "path": "/val"
-                      },
-                      "pattern": "^abc$"
-                    }
+                    "args": {"value": {"path": "/val"}, "pattern": "^abc$"}
                   },
                   "message": "Match"
                 }
@@ -138,14 +118,7 @@
               "value": "",
               "checks": [
                 {
-                  "condition": {
-                    "call": "regex",
-                    "args": {
-                      "value": {
-                        "path": "/val"
-                      }
-                    }
-                  },
+                  "condition": {"call": "regex", "args": {"value": {"path": "/val"}}},
                   "message": "Msg"
                 }
               ]
@@ -171,12 +144,7 @@
                 {
                   "condition": {
                     "call": "length",
-                    "args": {
-                      "value": {
-                        "path": "/val"
-                      },
-                      "min": 5
-                    }
+                    "args": {"value": {"path": "/val"}, "min": 5}
                   },
                   "message": "Msg"
                 }
@@ -203,12 +171,7 @@
                 {
                   "condition": {
                     "call": "length",
-                    "args": {
-                      "value": {
-                        "path": "/val"
-                      },
-                      "max": 10
-                    }
+                    "args": {"value": {"path": "/val"}, "max": 10}
                   },
                   "message": "Msg"
                 }
@@ -233,14 +196,7 @@
               "value": "",
               "checks": [
                 {
-                  "condition": {
-                    "call": "length",
-                    "args": {
-                      "value": {
-                        "path": "/val"
-                      }
-                    }
-                  },
+                  "condition": {"call": "length", "args": {"value": {"path": "/val"}}},
                   "message": "Msg"
                 }
               ]
@@ -266,13 +222,7 @@
                 {
                   "condition": {
                     "call": "numeric",
-                    "args": {
-                      "value": {
-                        "path": "/val"
-                      },
-                      "min": 0,
-                      "max": 100
-                    }
+                    "args": {"value": {"path": "/val"}, "min": 0, "max": 100}
                   },
                   "message": "Msg"
                 }
@@ -297,14 +247,7 @@
               "value": "",
               "checks": [
                 {
-                  "condition": {
-                    "call": "email",
-                    "args": {
-                      "value": {
-                        "path": "/val"
-                      }
-                    }
-                  },
+                  "condition": {"call": "email", "args": {"value": {"path": "/val"}}},
                   "message": "Msg"
                 }
               ]
@@ -326,9 +269,8 @@
               "component": "Text",
               "text": {
                 "call": "formatString",
-                "args": {
-                  "value": "Hello ${/name}"
-                }
+                "args": {"value": "Hello ${/name}"},
+                "returnType": "string"
               }
             }
           ]
@@ -348,9 +290,7 @@
               "component": "Text",
               "text": {
                 "call": "formatString",
-                "args": {
-                  "value": "Hi"
-                },
+                "args": {"value": "Hi"},
                 "returnType": "boolean"
               }
             }
@@ -371,11 +311,8 @@
               "component": "Text",
               "text": {
                 "call": "formatNumber",
-                "args": {
-                  "value": 1234.567,
-                  "decimals": 2,
-                  "grouping": true
-                }
+                "args": {"value": 1234.567, "decimals": 2, "grouping": true},
+                "returnType": "string"
               }
             }
           ]
@@ -395,10 +332,8 @@
               "component": "Text",
               "text": {
                 "call": "formatNumber",
-                "args": {
-                  "value": 1234.567,
-                  "decimals": "2"
-                }
+                "args": {"value": 1234.567, "decimals": "2"},
+                "returnType": "string"
               }
             }
           ]
@@ -418,10 +353,8 @@
               "component": "Text",
               "text": {
                 "call": "formatCurrency",
-                "args": {
-                  "value": 99.99,
-                  "currency": "USD"
-                }
+                "args": {"value": 99.99, "currency": "USD"},
+                "returnType": "string"
               }
             }
           ]
@@ -441,9 +374,8 @@
               "component": "Text",
               "text": {
                 "call": "formatCurrency",
-                "args": {
-                  "value": 99.99
-                }
+                "args": {"value": 99.99},
+                "returnType": "string"
               }
             }
           ]
@@ -463,10 +395,8 @@
               "component": "Text",
               "text": {
                 "call": "formatDate",
-                "args": {
-                  "value": "2023-01-01",
-                  "format": "MMM d"
-                }
+                "args": {"value": "2023-01-01", "format": "MMM d"},
+                "returnType": "string"
               }
             }
           ]
@@ -486,11 +416,8 @@
               "component": "Text",
               "text": {
                 "call": "pluralize",
-                "args": {
-                  "value": 5,
-                  "one": "item",
-                  "other": "items"
-                }
+                "args": {"value": 5, "one": "item", "other": "items"},
+                "returnType": "string"
               }
             }
           ]
@@ -510,10 +437,8 @@
               "component": "Text",
               "text": {
                 "call": "pluralize",
-                "args": {
-                  "value": 5,
-                  "one": "item"
-                }
+                "args": {"value": 5, "one": "item"},
+                "returnType": "string"
               }
             }
           ]
@@ -535,17 +460,12 @@
               "action": {
                 "functionCall": {
                   "call": "openUrl",
-                  "args": {
-                    "url": "https://example.com"
-                  }
+                  "args": {"url": "https://example.com"},
+                  "returnType": "void"
                 }
               }
             },
-            {
-              "id": "txt1",
-              "component": "Text",
-              "text": "Go"
-            }
+            {"id": "txt1", "component": "Text", "text": "Go"}
           ]
         }
       }
@@ -565,15 +485,12 @@
               "action": {
                 "functionCall": {
                   "call": "openUrl",
-                  "args": "https://example.com"
+                  "args": "https://example.com",
+                  "returnType": "void"
                 }
               }
             },
-            {
-              "id": "txt1",
-              "component": "Text",
-              "text": "Go"
-            }
+            {"id": "txt1", "component": "Text", "text": "Go"}
           ]
         }
       }
@@ -593,18 +510,12 @@
               "action": {
                 "functionCall": {
                   "call": "openUrl",
-                  "args": {
-                    "url": "https://example.com"
-                  },
+                  "args": {"url": "https://example.com"},
                   "returnType": "boolean"
                 }
               }
             },
-            {
-              "id": "txt1",
-              "component": "Text",
-              "text": "Go"
-            }
+            {"id": "txt1", "component": "Text", "text": "Go"}
           ]
         }
       }
@@ -626,12 +537,7 @@
                 {
                   "condition": {
                     "call": "length",
-                    "args": {
-                      "value": {
-                        "path": "/val"
-                      },
-                      "min": "5"
-                    }
+                    "args": {"value": {"path": "/val"}, "min": "5"}
                   },
                   "message": "Msg"
                 }
@@ -658,12 +564,7 @@
                 {
                   "condition": {
                     "call": "length",
-                    "args": {
-                      "value": {
-                        "path": "/val"
-                      },
-                      "max": -2
-                    }
+                    "args": {"value": {"path": "/val"}, "max": -2}
                   },
                   "message": "Msg"
                 }
@@ -690,12 +591,7 @@
                 {
                   "condition": {
                     "call": "numeric",
-                    "args": {
-                      "value": {
-                        "path": "/val"
-                      },
-                      "min": "10"
-                    }
+                    "args": {"value": {"path": "/val"}, "min": "10"}
                   },
                   "message": "Msg"
                 }
@@ -722,12 +618,7 @@
                 {
                   "condition": {
                     "call": "numeric",
-                    "args": {
-                      "value": {
-                        "path": "/val"
-                      },
-                      "max": "20"
-                    }
+                    "args": {"value": {"path": "/val"}, "max": "20"}
                   },
                   "message": "Msg"
                 }
@@ -754,12 +645,7 @@
                 {
                   "condition": {
                     "call": "regex",
-                    "args": {
-                      "value": {
-                        "path": "/val"
-                      },
-                      "pattern": 123
-                    }
+                    "args": {"value": {"path": "/val"}, "pattern": 123}
                   },
                   "message": "Msg"
                 }
@@ -786,12 +672,7 @@
                 {
                   "condition": {
                     "call": "email",
-                    "args": {
-                      "value": {
-                        "path": "/val"
-                      },
-                      "extra": "foo"
-                    }
+                    "args": {"value": {"path": "/val"}, "extra": "foo"}
                   },
                   "message": "Msg"
                 }
@@ -814,9 +695,8 @@
               "component": "Text",
               "text": {
                 "call": "formatString",
-                "args": {
-                  "value": 123
-                }
+                "args": {"value": 123},
+                "returnType": "string"
               }
             }
           ]
@@ -836,10 +716,8 @@
               "component": "Text",
               "text": {
                 "call": "formatNumber",
-                "args": {
-                  "value": 123.456,
-                  "decimals": true
-                }
+                "args": {"value": 123.456, "decimals": true},
+                "returnType": "string"
               }
             }
           ]
@@ -859,10 +737,8 @@
               "component": "Text",
               "text": {
                 "call": "formatCurrency",
-                "args": {
-                  "value": 123.45,
-                  "currency": 840
-                }
+                "args": {"value": 123.45, "currency": 840},
+                "returnType": "string"
               }
             }
           ]
@@ -882,10 +758,8 @@
               "component": "Text",
               "text": {
                 "call": "formatDate",
-                "args": {
-                  "value": "2023-01-01",
-                  "format": null
-                }
+                "args": {"value": "2023-01-01", "format": null},
+                "returnType": "string"
               }
             }
           ]
@@ -907,17 +781,12 @@
               "action": {
                 "functionCall": {
                   "call": "openUrl",
-                  "args": {
-                    "url": "not a uri"
-                  }
+                  "args": {"url": "not a uri"},
+                  "returnType": "void"
                 }
               }
             },
-            {
-              "id": "txt1",
-              "component": "Text",
-              "text": "Go"
-            }
+            {"id": "txt1", "component": "Text", "text": "Go"}
           ]
         }
       }
@@ -941,7 +810,8 @@
                     "call": "and",
                     "args": {
                       "values": [true, false]
-                    }
+                    },
+                    "returnType": "boolean"
                   },
                   "message": "Msg"
                 }
@@ -968,9 +838,7 @@
                 {
                   "condition": {
                     "call": "and",
-                    "args": {
-                      "values": [true]
-                    }
+                    "args": {"values": [true]}
                   },
                   "message": "Msg"
                 }
@@ -999,7 +867,8 @@
                     "call": "or",
                     "args": {
                       "values": [true, false]
-                    }
+                    },
+                    "returnType": "boolean"
                   },
                   "message": "Msg"
                 }
@@ -1026,9 +895,7 @@
                 {
                   "condition": {
                     "call": "or",
-                    "args": {
-                      "values": [true]
-                    }
+                    "args": {"values": [true]}
                   },
                   "message": "Msg"
                 }
@@ -1057,7 +924,8 @@
                     "call": "not",
                     "args": {
                       "value": true
-                    }
+                    },
+                    "returnType": "boolean"
                   },
                   "message": "Msg"
                 }
@@ -1084,9 +952,8 @@
                 {
                   "condition": {
                     "call": "not",
-                    "args": {
-                      "value": "true"
-                    }
+                    "args": {"value": "true"},
+                    "returnType": "boolean"
                   },
                   "message": "Msg"
                 }
@@ -1113,9 +980,7 @@
                 {
                   "condition": {
                     "call": "not",
-                    "args": {
-                      "value": true
-                    },
+                    "args": {"value": true},
                     "returnType": "string"
                   },
                   "message": "Msg"
@@ -1143,12 +1008,8 @@
                 {
                   "condition": {
                     "call": "required",
-                    "args": {
-                      "value": {
-                        "path": "/val"
-                      },
-                      "extra": 1
-                    }
+                    "args": {"value": {"path": "/val"}, "extra": 1},
+                    "returnType": "boolean"
                   },
                   "message": "Required"
                 }
@@ -1175,12 +1036,7 @@
                 {
                   "condition": {
                     "call": "regex",
-                    "args": {
-                      "value": {
-                        "path": "/val"
-                      },
-                      "pattern": "^abc$"
-                    },
+                    "args": {"value": {"path": "/val"}, "pattern": "^abc$"},
                     "returnType": "string"
                   },
                   "message": "Match"
@@ -1208,9 +1064,7 @@
                 {
                   "condition": {
                     "call": "and",
-                    "args": {
-                      "values": [true, false]
-                    },
+                    "args": {"values": [true, false]},
                     "returnType": "string"
                   },
                   "message": "Msg"

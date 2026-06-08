@@ -24,7 +24,7 @@ cp .env.example .env
 You also need to install dependencies before running:
 
 ```bash
-yarn install
+pnpm install
 ```
 
 ## Running all evals (warning: can use _lots_ of model quota)
@@ -32,7 +32,7 @@ yarn install
 To run the flow, use the following command:
 
 ```bash
-yarn evalAll
+pnpm run evalAll
 ```
 
 ## Running a Single Test
@@ -42,7 +42,7 @@ You can run the script for a single model and data point by using the `--model` 
 ### Syntax
 
 ```bash
-yarn eval --model=<model_name> --prompt=<prompt_name>
+pnpm run eval --model=<model_name> --prompt=<prompt_name>
 ```
 
 ### Example
@@ -50,7 +50,7 @@ yarn eval --model=<model_name> --prompt=<prompt_name>
 To run the test with the `gemini-2.5-flash-lite` model and the `loginForm` prompt, use the following command:
 
 ```bash
-yarn eval --model=gemini-2.5-flash-lite --prompt=loginForm
+pnpm run eval --model=gemini-2.5-flash-lite --prompt=loginForm
 ```
 
 ## Controlling Output
@@ -72,13 +72,13 @@ By default, the script prints a progress bar and the final summary table to the 
 Run with debug output in console:
 
 ```bash
-yarn eval -- --log-level=debug
+pnpm run eval -- --log-level=debug
 ```
 
 Run 5 times per prompt and clean previous results:
 
 ```bash
-yarn eval -- --runs-per-prompt=5 --clean-results
+pnpm run eval -- --runs-per-prompt=5 --clean-results
 ```
 
 ## Rate Limiting

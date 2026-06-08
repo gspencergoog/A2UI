@@ -48,9 +48,7 @@
           {
             "id": "item-name",
             "component": "Text",
-            "text": {
-              "path": "name"
-            }
+            "text": {"path": "name"}
           },
           {
             "id": "qty-label",
@@ -60,9 +58,7 @@
           {
             "id": "item-qty",
             "component": "Text",
-            "text": {
-              "path": "quantity"
-            }
+            "text": {"path": "quantity"}
           }
         ]
       }
@@ -73,18 +69,9 @@
         "surfaceId": "gallery-child-list-template",
         "value": {
           "items": [
-            {
-              "name": "Apple",
-              "quantity": 10
-            },
-            {
-              "name": "Banana",
-              "quantity": 5
-            },
-            {
-              "name": "Cherry",
-              "quantity": 20
-            }
+            {"name": "Apple", "quantity": 10},
+            {"name": "Banana", "quantity": 5},
+            {"name": "Cherry", "quantity": 20}
           ]
         }
       }

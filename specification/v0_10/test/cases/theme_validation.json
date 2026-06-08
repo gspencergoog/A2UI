@@ -2,58 +2,58 @@
   "schema": "server_to_client.json",
   "tests": [
     {
-      "description": "Valid surfaceProperties in createSurface",
+      "description": "Valid theme in createSurface",
       "valid": true,
       "data": {
         "version": "v0.10",
         "createSurface": {
           "surfaceId": "test_surface",
           "catalogId": "https://a2ui.org/specification/v0_10/catalogs/basic/catalog.json",
-          "surfaceProperties": {
-            "agentDisplayName": "Test Agent",
-            "iconUrl": "https://example.com/icon.png"
+          "theme": {
+            "primaryColor": "#00BFFF",
+            "agentDisplayName": "Test Agent"
           }
         }
       }
     },
     {
-      "description": "Invalid surfaceProperties property (wrong type for agentDisplayName)",
+      "description": "Invalid theme property (wrong type)",
       "valid": false,
       "data": {
         "version": "v0.10",
         "createSurface": {
           "surfaceId": "test_surface",
           "catalogId": "https://a2ui.org/specification/v0_10/catalogs/basic/catalog.json",
-          "surfaceProperties": {
-            "agentDisplayName": 123
+          "theme": {
+            "primaryColor": 123
           }
         }
       }
     },
     {
-      "description": "Invalid surfaceProperties property (invalid uri for iconUrl)",
+      "description": "Invalid theme property (invalid hex color)",
       "valid": false,
       "data": {
         "version": "v0.10",
         "createSurface": {
           "surfaceId": "test_surface",
           "catalogId": "https://a2ui.org/specification/v0_10/catalogs/basic/catalog.json",
-          "surfaceProperties": {
-            "iconUrl": "not-a-uri"
+          "theme": {
+            "primaryColor": "invalid-color"
           }
         }
       }
     },
     {
-      "description": "Additional surfaceProperties properties are allowed",
+      "description": "Additional theme properties are allowed",
       "valid": true,
       "data": {
         "version": "v0.10",
         "createSurface": {
           "surfaceId": "test_surface",
           "catalogId": "https://a2ui.org/specification/v0_10/catalogs/basic/catalog.json",
-          "surfaceProperties": {
-            "agentDisplayName": "Test Agent",
+          "theme": {
+            "primaryColor": "#00BFFF",
             "customProperty": "customValue"
           }
         }

@@ -113,7 +113,7 @@ export NPM_TOKEN=$(gcloud auth print-access-token)
 
 ## About the `publish:package` command
 
-Because these are scoped packages (`@a2ui/`), they require the `--access public` flag to be published to the public registry. The `publish:package` script handles this automatically, as well as replacing the path dependencies with package dependencies.
+Because these are scoped packages (`@a2ui/`), they require the `--access public` flag to be published to the public registry. The `publish:package` script handles this automatically, as well as replacing internal `workspace:` and `file:` protocol dependencies with semver version dependencies.
 
 ```sh
 yarn publish:package

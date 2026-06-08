@@ -5,7 +5,7 @@ This directory contains test cases and a runner for validating the A2UI JSON sch
 ## Prerequisites
 
 - **Python 3**
-- **Yarn**: The tests use `yarn` to run `ajv-cli`.
+- **pnpm**: The tests use `pnpm` to run `ajv-cli`.
 
 ## Installation (Optional)
 
@@ -13,7 +13,7 @@ To speed up test execution, install the dependencies locally:
 
 ```bash
 cd specification/v0_10/test
-yarn install
+pnpm install
 ```
 
 ## Running Tests

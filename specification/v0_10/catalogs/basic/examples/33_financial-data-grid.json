@@ -94,17 +94,13 @@
           {
             "id": "asset-name",
             "component": "Text",
-            "text": {
-              "path": "name"
-            },
+            "text": {"path": "name"},
             "variant": "body"
           },
           {
             "id": "asset-symbol",
             "component": "Text",
-            "text": {
-              "path": "symbol"
-            },
+            "text": {"path": "symbol"},
             "variant": "caption"
           },
           {
@@ -112,12 +108,8 @@
             "component": "Text",
             "text": {
               "call": "formatCurrency",
-              "args": {
-                "value": {
-                  "path": "price"
-                },
-                "currency": "USD"
-              }
+              "args": {"value": {"path": "price"}, "currency": "USD"},
+              "returnType": "string"
             },
             "weight": 1
           },
@@ -126,9 +118,8 @@
             "component": "Text",
             "text": {
               "call": "formatString",
-              "args": {
-                "value": "${change}%"
-              }
+              "args": {"value": "${change}%"},
+              "returnType": "string"
             },
             "weight": 1
           },
@@ -137,12 +128,8 @@
             "component": "Text",
             "text": {
               "call": "formatCurrency",
-              "args": {
-                "value": {
-                  "path": "marketCap"
-                },
-                "currency": "USD"
-              }
+              "args": {"value": {"path": "marketCap"}, "currency": "USD"},
+              "returnType": "string"
             },
             "weight": 1.5
           }

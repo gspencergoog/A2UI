@@ -86,7 +86,8 @@
                 "value": {
                   "path": "/followers"
                 }
-              }
+              },
+              "returnType": "string"
             },
             "variant": "h3"
           },
@@ -111,7 +112,8 @@
                 "value": {
                   "path": "/following"
                 }
-              }
+              },
+              "returnType": "string"
             },
             "variant": "h3"
           },
@@ -136,7 +138,8 @@
                 "value": {
                   "path": "/posts"
                 }
-              }
+              },
+              "returnType": "string"
             },
             "variant": "h3"
           },
