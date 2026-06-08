@@ -33,6 +33,9 @@ RUN sed -i 's|"name": "@a2ui/lit"|"name": "@a2ui/web-lib"|g' a2ui-web-lib/packag
 # (we copy pre-built dist/; the wireit build references ../../specification/ which doesn't exist)
 RUN sed -i '/"prepack":/d' a2ui-web-lib/package.json
 
+# Enable Corepack for modern Yarn (v4) support
+RUN corepack enable
+
 # Install dependencies using Yarn
 RUN yarn install
 
