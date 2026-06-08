@@ -294,20 +294,13 @@ def validate_catalogs_identifiers():
                 errors.append(f"Invalid component name: '{comp_name}'")
             check_schema_properties(comp_def)
 
-        functions = catalog.get("functions", [])
-        for func in functions:
-            if isinstance(func, str):
-                func_name = func
-            elif isinstance(func, dict):
-                func_name = func.get("call")
-                check_schema_properties(func)
-            else:
-                func_name = None
-
-            if func_name:
+        functions = catalog.get("functions", {})
+        if isinstance(functions, dict):
+            for func_name, func_def in functions.items():
                 check_name = func_name[1:] if func_name.startswith("@") else func_name
                 if not check_name.isidentifier():
                     errors.append(f"Invalid function name: '{func_name}'")
+                check_schema_properties(func_def)
 
         if errors:
             failed += 1
