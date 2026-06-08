@@ -8,7 +8,7 @@ When building your framework-specific adapters (Layer 3) over the generic A2UI b
 
 ## Mandatory Identifier Rules for Catalogs
 
-All entities defined in an A2UI v0.10 catalog—including **component types**, **function names**, and **argument/property names**—MUST strictly comply with [Unicode Standard Annex #31 (UAX #31)](https://www.unicode.org/reports/tr31/) rules for variable names:
+All entities defined in an A2UI v1.0 catalog—including **component types**, **function names**, and **argument/property names**—MUST strictly comply with [Unicode Standard Annex #31 (UAX #31)](https://www.unicode.org/reports/tr31/) rules for variable names:
 
 - Must begin with `XID_Start` or underscore (`_`). Cannot begin with a digit (`Nd`).
 - Must continue with `XID_Continue`.
@@ -201,6 +201,14 @@ Core libraries for each language (such as `@a2ui/web_core` for TypeScript) typic
 When a function is called, the system resolves its arguments. If an argument is a static value, it is passed directly. If it is a dynamic binding, the Context layer handles the subscription. For most standard functions, the `execute` implementation simply receives a dictionary of static `args` and returns a static value. The Context layer wraps this execution in a reactive stream (e.g., a `computed` signal) so that the function re-runs whenever any of its dynamic arguments change.
 
 However, complex functions like `formatString` must manually interact with the Context to parse and subscribe to nested dynamic dependencies.
+
+### `@index`
+
+**Description:** Returns the 0-based iteration index during dynamic list template rendering.
+
+**Architecture & Logic:**
+Universal system function available across all catalogs. MUST ONLY be evaluated within template instantiation loops (Collection Scope).
+- `offset` (Optional, number): Added to the 0-based index (e.g., `offset: 1` produces 1-based indexing). Defaults to `0`.
 
 ### `formatString`
 

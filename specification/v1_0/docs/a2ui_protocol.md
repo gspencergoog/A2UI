@@ -10,10 +10,10 @@
 
 A Specification for a JSON-Based, Streaming UI Protocol.
 
-**Version:** 0.10
-**Status:** Draft
+**Version:** 1.0
+**Status:** Candidate
 **Created:** Nov 20, 2025
-**Last Updated:** Dec 3, 2025
+**Last Updated:** Jun 8, 2026
 
 A Specification for a JSON-Based, Streaming UI Protocol
 
@@ -32,9 +32,13 @@ End of agent turn is signaled by [transport layer](https://github.com/a2ui-proje
 
 ## Changes from previous versions
 
-Version 0.10 differs from 0.9 in the following ways:
+The major differences between version 1.0 and 0.9 (including 0.9.1) are:
 
-- <TBD>
+- **Bidirectional RPC Messaging**: Supports synchronous server responses to client actions (`actionResponse`) and remote server-initiated function execution (`callFunction` / `functionResponse`) verified against runtime catalog definitions.
+- **Single-Message UI Instantiation**: Allows initial component trees and data models to be embedded directly within `createSurface`, enabling complete UI composition in a single payload.
+- **Decoupled Branding**: Replaces rigid theme properties with extensible `surfaceProperties` (removing hardcoded brand colors) to defer visual styling entirely to the target framework's native theme.
+- **Enhanced Catalog Schemas**: Refactors function definitions into object maps for direct O(1) lookups and supports standard JSON Schema metadata fields (`$schema`, `$id`) on inline catalogs.
+- **Strict Identifier & Context Standards**: Enforces Unicode (UAX #31) naming rules across all catalog entities and reserves the `@` namespace for universal system context evaluations (such as `@index`).
 
 See [the evolution guide](evolution_guide.md) for a detailed explanation of the differences between v0.9 and v1.0.
 
