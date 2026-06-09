@@ -24,7 +24,7 @@ import {prompts, TestPrompt} from './prompts';
 import {Generator} from './generator';
 import {Validator} from './validator';
 import {Evaluator} from './evaluator';
-import {EvaluatedResult} from './types';
+import {EvaluatedResult, ProtocolSchemas} from './types';
 import {analysisFlow} from './analysis_flow';
 
 const schemaFiles = [
@@ -33,8 +33,8 @@ const schemaFiles = [
   '../../json/server_to_client.json',
 ];
 
-function loadSchemas(): Record<string, any> {
-  const schemas: Record<string, any> = {};
+function loadSchemas(): ProtocolSchemas {
+  const schemas: ProtocolSchemas = {};
   for (const file of schemaFiles) {
     const schemaString = fs.readFileSync(path.join(__dirname, file), 'utf-8');
     const schema = JSON.parse(schemaString);
