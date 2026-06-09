@@ -166,7 +166,7 @@ MCP Apps are typically delivered as a single HTML resource from the MCP Server. 
 > 1. **Install the plugin**:
 >
 >     ```bash
->     yarn add -D vite-plugin-singlefile
+>     npm install -D vite-plugin-singlefile
 >     ```
 >
 > 2. **Configure Vite**: Add the plugin to your `vite.config.ts` (or `.js`):
