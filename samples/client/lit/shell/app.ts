@@ -873,7 +873,7 @@ export class A2UILayoutEditor extends SignalWatcher(LitElement) {
     for (const surfaceId of Array.from(this.#processor.model.surfacesMap.keys())) {
       this.#processor.model.deleteSurface(surfaceId);
     }
-    this.showToast(`Local mockup cleared.`, 'info');
+    this.showToast('Local mockup cleared.', 'info');
   }
 
   async #loadBuiltinSample(filename: string) {

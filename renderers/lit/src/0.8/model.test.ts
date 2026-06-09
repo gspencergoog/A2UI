@@ -398,7 +398,7 @@ describe('A2uiMessageProcessor', () => {
             },
           },
         ]);
-      }, new A2uiStateError(`Circular dependency for component "a".`));
+      }, new A2uiStateError('Circular dependency for component "a".'));
 
       const tree = processor.getSurfaces().get('@default')?.componentTree;
       assert.strictEqual(tree, null, 'Tree should be null due to circular dependency');
@@ -1319,5 +1319,5 @@ describe('A2uiMessageProcessor', () => {
 });
 
 function assertIsDataMap(obj: Types.DataValue): asserts obj is Types.DataMap {
-  assert.ok(obj instanceof Map, `Data should be a DataMap`);
+  assert.ok(obj instanceof Map, 'Data should be a DataMap');
 }

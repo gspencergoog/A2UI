@@ -65,7 +65,7 @@ export class LocalGallery extends LitElement {
         this.selectItem(0);
       }
     } catch (err) {
-      console.error(`Failed to initiate gallery:`, err);
+      console.error('Failed to initiate gallery:', err);
     }
   }
 
