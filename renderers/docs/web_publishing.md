@@ -200,6 +200,8 @@ Before publishing, the script runs the necessary `build` command which processes
 
 The script then `cd`s to the `dist/` directory and runs `yarn npm publish` to upload only the contents of the `dist/` directory to the npm registry.
 
+Googlers can visit [go/a2ui-oss-exit-gate-artifacts](https://go/a2ui-oss-exit-gate-artifacts) to see the published artifacts on Exit Gate (staging registry).
+
 ---
 
 ## 🔖 Post-Publish

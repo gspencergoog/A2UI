@@ -166,6 +166,10 @@ describe('publish_npm script integration test', () => {
     };
 
     await main(['--help'], mocks);
-    assert.strictEqual(executedCommands.length, 0, 'Should not run any commands when help is passed');
+    assert.strictEqual(
+      executedCommands.length,
+      0,
+      'Should not run any commands when help is passed',
+    );
   });
 });
