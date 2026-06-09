@@ -18,7 +18,6 @@ import js from '@eslint/js';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import turboPlugin from 'eslint-plugin-turbo';
 import tseslint from 'typescript-eslint';
-import onlyWarn from 'eslint-plugin-only-warn';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
 import pluginReact from 'eslint-plugin-react';
 import globals from 'globals';
@@ -39,11 +38,6 @@ export default [
     },
     rules: {
       'turbo/no-undeclared-env-vars': 'warn',
-    },
-  },
-  {
-    plugins: {
-      onlyWarn,
     },
   },
   // Next.js specific config
@@ -74,6 +68,15 @@ export default [
       ...pluginReactHooks.configs.recommended.rules,
       // React scope no longer necessary with new JSX transform.
       'react/react-in-jsx-scope': 'off',
+    },
+  },
+  {
+    rules: {
+      // Legacy monorepo rules downgraded to warn to allow local/CI builds to pass
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-expressions': 'warn',
+      '@typescript-eslint/no-unused-vars': ['warn', {argsIgnorePattern: '^_'}],
+      'react/no-unescaped-entities': 'warn',
     },
   },
   {
