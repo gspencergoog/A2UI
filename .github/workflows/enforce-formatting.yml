@@ -53,5 +53,5 @@ jobs:
           python -m pip install --upgrade pip
           pip install uv
 
-      - name: Run enforce-formatting script
-        run: ./scripts/fix_format.sh --check
+      - name: Run enforce-formatting check
+        run: yarn format:check:all
