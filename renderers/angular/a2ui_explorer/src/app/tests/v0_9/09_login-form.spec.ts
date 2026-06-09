@@ -28,7 +28,7 @@ describe('Example: Login Form with Validation', () => {
     expect(textContent).toContain('Welcome back');
     expect(textContent).toContain('Sign in to your account');
     expect(textContent).toContain('Sign in');
-    expect(textContent).toContain('Don\'t have an account?');
+    expect(textContent).toContain("Don't have an account?");
     expect(textContent).toContain('Sign up');
   });
 });

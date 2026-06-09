@@ -28,7 +28,7 @@ describe('Example: Step Counter', () => {
   });
 
   it('should render text content', async () => {
-    expect(textContent).toContain('Today\'s Steps');
+    expect(textContent).toContain("Today's Steps");
     expect(textContent).toContain('Distance');
     expect(textContent).toContain('Calories');
   });

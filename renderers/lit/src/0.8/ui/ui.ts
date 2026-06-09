@@ -95,7 +95,6 @@ interface A2UITagNameMap {
 }
 
 declare global {
-
   interface HTMLElementTagNameMap extends A2UITagNameMap {}
 }
 
