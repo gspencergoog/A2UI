@@ -111,16 +111,29 @@ Pick the path that matches where you want to start:
 
 ### Restaurant Finder demo — Summary
 
-Prerequisites: Node.js 18+, [uv](https://docs.astral.sh/uv/), and a [Gemini API key](https://aistudio.google.com/apikey).
+Prerequisites: Node.js 18+ (with [Corepack](https://nodejs.org/api/corepack.html) enabled), [uv](https://docs.astral.sh/uv/), and a [Gemini API key](https://aistudio.google.com/apikey).
 
 ```bash
 git clone https://github.com/a2ui-project/a2ui.git
 cd a2ui
 export GEMINI_API_KEY="your_gemini_api_key"
+
+# Enable Corepack (macOS Homebrew users: see tip below)
+corepack enable
+
 yarn install
 cd samples/client/lit
 yarn demo:restaurant
 ```
+
+> [!TIP]
+> **macOS Homebrew Users:** If you previously installed standalone package managers, unlink conflicts before installing Corepack so Corepack can manage versions per-project:
+>
+> ```bash
+> brew unlink yarn pnpm
+> brew install corepack
+> corepack enable
+> ```
 
 These commands install dependencies across workspaces, build the renderers, start the Python agent, and open the client at `http://localhost:5173`. For step-by-step instructions, alternative demos, and troubleshooting see the **[full Quickstart](docs/quickstart.md)**.
 
