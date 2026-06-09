@@ -29,9 +29,7 @@ samples/client/angular/projects/mcp_calculator/public/mcp_apps_inner_iframe/
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
-!.yarn/releases
 !.yarn/sdks
-!.yarn/versions
 .yarn/cache
 
 ## Generated files for a2ui-in-mcpapps
