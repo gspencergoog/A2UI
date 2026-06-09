@@ -35,6 +35,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
@@ -60,6 +63,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
