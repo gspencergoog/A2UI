@@ -155,4 +155,17 @@ describe('publish_npm script integration test', () => {
     const hasInstall = executedCommands.some(cmd => cmd.includes('yarn install'));
     assert.ok(hasInstall, 'Should proceed to install with yarn');
   });
+
+  it('should output help message and return early when --help is passed', async () => {
+    const executedCommands = [];
+    const mocks = {
+      runCommand: (cmd, args) => {
+        executedCommands.push(`${cmd} ${args.join(' ')}`);
+      },
+      execSync: () => '',
+    };
+
+    await main(['--help'], mocks);
+    assert.strictEqual(executedCommands.length, 0, 'Should not run any commands when help is passed');
+  });
 });

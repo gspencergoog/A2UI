@@ -267,9 +267,38 @@ export async function main(args, mocks = {}) {
       type: 'boolean',
       default: false,
     },
+    help: {
+      type: 'boolean',
+      short: 'h',
+      default: false,
+    },
   };
 
   const {values} = parseArgs({args, options, allowNegative: true});
+
+  if (values.help) {
+    console.log(`Usage: publish_npm [options]
+
+Publishes A2UI workspace packages to NPM / Artifact Registry in topological dependency order.
+
+Options:
+  -p, --package <name>                 Package(s) to publish. Can be specified multiple times.
+                                       Accepts short names (e.g., 'web_core') or scoped names (e.g., '@a2ui/web_core').
+  --check-core-dependencies            Verify that core dependencies are also being published.
+  --no-check-core-dependencies         Skip core dependencies verification.
+  --dry-run                            Perform a dry run without actually publishing or obtaining auth tokens (default).
+  --no-dry-run                         Actually publish the packages and obtain fresh auth tokens.
+  --skip-tests                         Skip building and testing packages before publishing.
+  -h, --help                           Show this complete help message.
+
+Examples:
+  # Dry run publishing a single package
+  ./publish_npm.mjs --package=web_core
+
+  # Actually publish multiple packages, skipping tests
+  ./publish_npm.mjs -p web_core -p react --no-dry-run --skip-tests`);
+    return;
+  }
   const packagesToPublish = values.package;
   const checkCoreDeps = values['check-core-dependencies'];
 

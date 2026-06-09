@@ -113,13 +113,15 @@ export NPM_TOKEN=$(gcloud auth print-access-token)
 
 ## About the `publish:package` command
 
-Because these are scoped packages (`@a2ui/`), they require the `--access public` flag to be published to the public registry. The `publish:package` script handles this automatically, as well as replacing internal `workspace:` and `file:` protocol dependencies with semver version dependencies.
+Because these are scoped packages (`@a2ui/`), they require the `--access public` flag to be published to the public registry. The `publish:package` script handles this automatically through a three-step isolation and release process:
+
+1. **Build and Strip Workspace Metadata**: It executes `yarn build` and invokes `prepare-publish.mjs` (or equivalent post-processing). This copies the build artifacts into `dist/`, converts internal `workspace:` and `file:` dependency protocols into absolute semver ranges (e.g., `^0.10.1`), and removes `devDependencies`.
+2. **Establish Standalone Package Boundary**: Because the monorepo root configuration explicitly excludes `dist` directories from workspace traversal (`!**/dist`), running Yarn commands directly inside `dist/` would ordinarily fail or traverse upward. To establish `dist/` as an authentic standalone package, the script initializes an empty lockfile (`touch yarn.lock`) inside `dist/` and executes `yarn install`.
+3. **Publish Archive**: Finally, it executes `yarn npm publish --access public` from within the isolated `dist/` directory to upload the clean tarball to the registry.
 
 ```sh
 yarn publish:package
 ```
-
-_Note: This command runs the build, prepares the `dist/` directory, and then executes `yarn npm publish --access public`._
 
 ---
 
