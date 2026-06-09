@@ -24,11 +24,11 @@ fi
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
-echo "Running Prettier..."
+echo "Running Yarn format for Node projects..."
 if [ "$CHECK_ONLY" = true ]; then
-  npx -y prettier --config .prettierrc --check .
+  yarn format:check:all
 else
-  npx -y prettier --config .prettierrc --write .
+  yarn format:all
 fi
 
 echo "Running Pyink for Python Agent SDK..."

@@ -27,8 +27,8 @@
     "test:all": "yarn workspaces foreach -A -p --topological-dev run test",
     "lint:all": "yarn workspaces foreach -A -p --topological-dev run lint",
     "lint:fix:all": "yarn workspaces foreach -A -p --topological-dev run lint:fix",
-    "format:all": "./scripts/fix_format.sh",
-    "format:check:all": "./scripts/fix_format.sh --check",
+    "format:all": "npx -y prettier --config .prettierrc --write .",
+    "format:check:all": "npx -y prettier --config .prettierrc --check .",
     "clean:all": "yarn workspaces foreach -A -p run clean"
   },
   "devDependencies": {
