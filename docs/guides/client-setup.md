@@ -35,7 +35,7 @@ The shared `web_core` library provides:
 ## Web Components (Lit)
 
 ```bash
-yarn add @a2ui/lit @a2ui/web_core
+npm install @a2ui/lit @a2ui/web_core
 ```
 
 Once installed, you can use the renderer in your app. The Lit renderer uses:
@@ -49,7 +49,7 @@ Once installed, you can use the renderer in your app. The Lit renderer uses:
 ## Angular
 
 ```bash
-yarn add @a2ui/angular @a2ui/web_core
+npm install @a2ui/angular @a2ui/web_core
 ```
 
 Once installed, you can use the renderer in your app. The Angular renderer provides:
@@ -93,10 +93,14 @@ export ENABLE_STREAMING=true
 yarn start -- restaurant
 ```
 
+> [!NOTE]
+> **Package Manager Usage:** The `yarn start` command above is specific to running the sample application within the A2UI monorepo repository. For your own regular usage and standalone projects outside this repository, use the package manager of your choice (e.g. npm, pnpm).
+
+
 ## React
 
 ```bash
-yarn add @a2ui/react @a2ui/web_core
+npm install @a2ui/react @a2ui/web_core
 ```
 
 The React renderer provides:

@@ -77,6 +77,10 @@ This command will:
 
 The source code for the Restaurant Finder agent is located in [`samples/agent/adk/restaurant_finder`](../samples/agent/adk/restaurant_finder).
 
+> [!NOTE]
+> **Package Manager Usage:** Running the quickstart demo application within the A2UI repository requires Yarn as configured by Corepack workspaces. For your own regular usage and standalone projects outside this repository, use the package manager of your choice (e.g. npm, pnpm).
+
+
 ### Running Manually (Alternative)
 
 If you prefer to run the agent and client in separate terminals, or need to troubleshoot:

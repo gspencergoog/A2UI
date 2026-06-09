@@ -57,6 +57,10 @@ In the Inspector:
 
 For a fully rendered interactive experience that visually demonstrates A2UI over MCP, run the included web application:
 
+> [!NOTE]
+> **Package Manager Usage:** Running the built-in sample applications within the A2UI repository requires Yarn (`yarn install` / `yarn dev`) as configured by Corepack workspaces. For your own regular usage and standalone projects outside this repository, use the package manager of your choice (e.g. npm, pnpm).
+
+
 1. In a new terminal window, navigate to the client directory:
     ```bash
     cd client
