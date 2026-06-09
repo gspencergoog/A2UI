@@ -15,12 +15,7 @@
  */
 
 import {evaluationFlow} from './evaluation_flow';
-import {
-  ValidatedResult,
-  EvaluatedResult,
-  ProtocolSchemas,
-  IssueSeverity,
-} from './types';
+import {ValidatedResult, EvaluatedResult, ProtocolSchemas, IssueSeverity} from './types';
 import {logger} from './logger';
 import {rateLimiter} from './rateLimiter';
 import * as fs from 'fs';

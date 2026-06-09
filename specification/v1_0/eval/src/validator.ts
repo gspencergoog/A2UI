@@ -20,12 +20,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
 
-import {
-  GeneratedResult,
-  ValidatedResult,
-  IssueSeverity,
-  ProtocolSchemas,
-} from './types';
+import {GeneratedResult, ValidatedResult, IssueSeverity, ProtocolSchemas} from './types';
 import {logger} from './logger';
 
 export class Validator {
