@@ -205,7 +205,7 @@ describe('v0.8 Angular Renderer Integration', () => {
     };
 
     // Mock data resolution for the name
-    processor.getData.and.callFake((node: any, path: string) => {
+    processor.getData.and.callFake((node: any, path: string, _surfaceId?: string) => {
       if (path === '/name') return 'The Italian Kitchen';
       return `resolved:${path}`;
     });
