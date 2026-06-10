@@ -12,10 +12,12 @@ import sys
 import unittest
 from typing import Any
 
-# Support direct execution from worktree root
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
+try:
+    # pylint: disable=import-error
+    from google import genai
+except ImportError:
+    genai = None
 
-# pylint: disable=import-error, wrong-import-position
 from specification.v1_0.express.optimizer.gauntlet import EvaluationGauntlet
 from specification.v1_0.express.optimizer.manifest import Gene
 from specification.v1_0.express.optimizer.mutator import ExpressMutator
@@ -24,7 +26,7 @@ from specification.v1_0.express.optimizer.mutator import ExpressMutator
 SPEC_EXPRESS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 
-def run_worker_gauntlet(parent_id: str) -> dict[str, Any]:
+def run_worker_gauntlet(parent_id: str, model_name: str = "gemini-3.5-flash") -> dict[str, Any]:
     """Executes mutation and evaluation gauntlet, returning completion payload."""
     leaderboard_path = os.path.join(SPEC_EXPRESS_DIR, "leaderboard.json")
     with open(leaderboard_path, "r", encoding="utf-8") as f:
@@ -35,9 +37,9 @@ def run_worker_gauntlet(parent_id: str) -> dict[str, Any]:
     champion.gene_id = leaderboard.get("reigning_champion", "gene_v1_0")
 
     prompt_path = os.path.join(SPEC_EXPRESS_DIR, "optimizer", "mutate_prompt.md")
-    mutator = ExpressMutator(prompt_path)
+    mutator = ExpressMutator(prompt_path, model_name=model_name)
 
-    print(f"Generating mutation from parent {champion.gene_id}...")
+    print(f"Generating mutation from parent {champion.gene_id} using {model_name}...")
     target_candidates_dir = os.path.abspath(os.path.join(SPEC_EXPRESS_DIR, "..", "..", "scratch", "candidates"))
     offspring = mutator.generate_mutation(champion, target_disk_dir=target_candidates_dir)
 
@@ -56,7 +58,6 @@ def run_worker_gauntlet(parent_id: str) -> dict[str, Any]:
             "gate": metrics.get("gate_reached", "Evaluation Gauntlet"),
             "fitness_score": 0.0,
         }
-
     offspring.save_to_disk(target_candidates_dir)
 
     return {
@@ -71,11 +72,16 @@ def run_worker_gauntlet(parent_id: str) -> dict[str, Any]:
 
 def main():
     """Parses arguments and runs the worker evaluation gauntlet."""
+    if genai is None:
+        print("Error: 'google-genai' SDK not available in active Python environment. Short-circuiting worker.")
+        sys.exit(1)
+
     parser = argparse.ArgumentParser(description="A2UI Express Subagent Worker Entrypoint")
     parser.add_argument("--parent_id", default="gene_v1_0", help="Parent champion ID")
+    parser.add_argument("--model_name", default="gemini-3.5-flash", help="Target Gemini model identifier")
     args = parser.parse_args()
 
-    payload = run_worker_gauntlet(args.parent_id)
+    payload = run_worker_gauntlet(args.parent_id, model_name=args.model_name)
     print("\n=== SUBAGENT COMPLETION PAYLOAD ===")
     print(json.dumps(payload, indent=2))
 
