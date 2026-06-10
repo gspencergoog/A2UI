@@ -1,7 +1,7 @@
-"""Real-time monitoring HTTP server and REST API backend for A2UI Express dashboard.
+"""Real-time SSE streaming HTTP server and REST API backend for A2UI Express dashboard.
 
-Serves single-page HTML assets and exposes JSON REST endpoints inspecting
-leaderboard.json, scanning active Jetski transcripts in brain, and checking MLX.
+Serves single-page HTML assets and exposes Server-Sent Events (/api/stream)
+yielding persistent updates from leaderboard.json, brain transcripts, and MLX.
 """
 
 import argparse
@@ -12,6 +12,7 @@ import os
 import socket
 import socketserver
 import sys
+import time
 from typing import Any, Optional
 
 DASHBOARD_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -21,7 +22,7 @@ JETSKI_BRAIN_DIR = os.path.expanduser("~/.gemini/jetski/brain")
 
 
 class DashboardAPIHandler(http.server.SimpleHTTPRequestHandler):
-    """Handles static asset serving and asynchronous REST API queries."""
+    """Handles static asset serving, asynchronous REST APIs, and SSE streams."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DASHBOARD_DIR, **kwargs)
@@ -109,7 +110,7 @@ class DashboardAPIHandler(http.server.SimpleHTTPRequestHandler):
                         "conversation_id": conv_id[:12],
                         "status": last_status,
                         "current_gate": current_gate,
-                        "thinking": last_thinking[:400] + ("..." if len(last_thinking) > 400 else ""),
+                        "thinking": last_thinking,
                     })
 
         except (IOError, OSError) as e:
@@ -128,9 +129,38 @@ class DashboardAPIHandler(http.server.SimpleHTTPRequestHandler):
 
         return {"mlx_online": mlx_online}
 
+    def _handle_sse_stream(self) -> None:
+        """Establishes persistent connection transmitting SSE packets on state change."""
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        self.send_header("Connection", "keep-alive")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+
+        print("SSE Event stream client connected.")
+        while True:
+            try:
+                # Bundle complete unified state
+                payload = {
+                    "leaderboard": self._get_leaderboard_data(),
+                    "agents_data": self._get_active_agents_data(),
+                    "system_state": self._get_system_state(),
+                    "timestamp": time.time(),
+                }
+                packet = f"data: {json.dumps(payload)}\n\n".encode("utf-8")
+                self.wfile.write(packet)
+                self.wfile.flush()
+                time.sleep(1.0)
+            except (BrokenPipeError, ConnectionResetError, OSError):
+                print("SSE Event stream client disconnected.")
+                break
+
     def do_GET(self) -> None:
-        """Routes HTTP GET requests to REST APIs or static asset handler."""
-        if self.path == "/api/leaderboard":
+        """Routes HTTP GET requests to SSE stream, REST APIs, or static assets."""
+        if self.path == "/api/stream":
+            self._handle_sse_stream()
+        elif self.path == "/api/leaderboard":
             self._send_json_response(self._get_leaderboard_data())
         elif self.path == "/api/agents":
             self._send_json_response(self._get_active_agents_data())
@@ -152,8 +182,9 @@ def main():
 
     try:
         with socketserver.TCPServer(("", args.port), DashboardAPIHandler) as httpd:
-            print(f"=== A2UI Express Dashboard Backend active on http://localhost:{args.port} ===")
+            print(f"=== A2UI Express Dashboard Backend (SSE Mode) active on http://localhost:{args.port} ===")
             print(f"Serving UI static assets from: {DASHBOARD_DIR}")
+            print(f"Streaming SSE updates on: /api/stream")
             print(f"Monitoring central registry at: {LEADERBOARD_PATH}")
             print(f"Scanning active agent logs in: {JETSKI_BRAIN_DIR}")
             httpd.serve_forever()
