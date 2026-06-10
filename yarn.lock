@@ -190,6 +190,7 @@ __metadata:
     lit: "npm:^3.3.1"
     typescript: "npm:^5.8.3"
     vite: "npm:^7.1.11"
+    wireit: "npm:^0.15.0-pre.2"
   languageName: unknown
   linkType: soft
 

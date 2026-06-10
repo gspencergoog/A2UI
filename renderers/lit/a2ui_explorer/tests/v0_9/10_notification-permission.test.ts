@@ -53,7 +53,7 @@ describe('Example: Notification Permission', () => {
   it('should render icon', async () => {
     const iconEl = querySelectorAllDeep(surface, 'a2ui-icon')[0] as HTMLElement;
     expect(iconEl).toBeTruthy();
-    expect(iconEl.textContent).toContain('check');
+    expect(getDeepTextContent(iconEl)).toContain('check');
   });
 
   it('should handle Yes button click', async () => {
