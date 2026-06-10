@@ -1,6 +1,6 @@
 # A2UI Express developer guide
 
-A2UI Express is a compact, token-efficient declarative syntax designed for dynamic generative user interfaces. It acts as an intermediate, highly compressed notation that local on-device models generate. A host-side compiler parses this syntax and compiles it into standard A2UI v0.10 wire protocol payloads.
+A2UI Express is a compact, token-efficient declarative syntax designed for dynamic generative user interfaces. It acts as an intermediate, highly compressed notation that local on-device models generate. A host-side compiler parses this syntax and compiles it into standard A2UI v1.0 wire protocol payloads.
 
 This guide explains how to install the native Apple Silicon MLX local model runner, boot a local Gemma 4 completions server, and run compilation validation.
 
@@ -40,7 +40,7 @@ To test local generation and compiler correctness in a single command, run the i
 
 ```bash
 # Navigate to the express directory
-cd main/specification/v0_10/express
+cd main/specification/v1_0/express
 
 # Run inference against your local Gemma 4 server
 uv run ./run_inference.py \
@@ -53,7 +53,7 @@ The script will:
 1. Extract the target component structure from the JSON example.
 2. Compile the active catalog schema definitions into plain-text positional signatures.
 3. Query your local Gemma 4 server at `http://localhost:8080/v1/chat/completions`.
-4. Compile the returned A2UI Express DSL back into pretty-printed, standard A2UI v0.10 JSON.
+4. Compile the returned A2UI Express DSL back into pretty-printed, standard A2UI v1.0 JSON.
 5. Validate the final component tree structure, checking parent-child references and data pointer paths.
 
 ---
@@ -73,7 +73,7 @@ Generate the model prompt contract, containing positional component signatures a
 
 ### Plain DSL compiler
 
-Compile an offline A2UI Express DSL file directly into standard pretty-printed v0.10 JSON:
+Compile an offline A2UI Express DSL file directly into standard pretty-printed v1.0 JSON:
 
 ```bash
 ./run_compiler.py \
@@ -83,7 +83,7 @@ Compile an offline A2UI Express DSL file directly into standard pretty-printed v
 
 ### JSON-to-Express decompiler
 
-Convert standard A2UI v0.10 JSON envelopes back into compact A2UI Express code:
+Convert standard A2UI v1.0 JSON envelopes back into compact A2UI Express code:
 
 ```bash
 ./run_decompiler.py ../catalogs/basic/examples/01_flight-status.json

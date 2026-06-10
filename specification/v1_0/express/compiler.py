@@ -1,7 +1,7 @@
 """Compilation engine for A2UI Express.
 
 Tokenizes, lexes, and parses A2UI Express plain-text statements into a clean
-AST, compiling it directly into standard A2UI v0.10 JSON messages.
+AST, compiling it directly into standard A2UI v1.0 JSON messages.
 """
 
 import re
@@ -247,7 +247,7 @@ class ExpressCompiler:
     """Compilation pipeline for A2UI Express.
 
     Resolves positional parameters dynamically, flattens variable references into
-    an adjacency list widget tree, and constructs valid A2UI v0.10 JSON payloads.
+    an adjacency list widget tree, and constructs valid A2UI v1.0 JSON payloads.
 
     Attributes:
         helper: A CatalogSchemaHelper loaded with the target catalog definition.
@@ -265,7 +265,7 @@ class ExpressCompiler:
                 dsl_text: str,
                 surface_id: str = "default_surface",
                 catalog_id: str = "") -> dict:
-        """Compiles plain A2UI Express DSL into standard A2UI v0.10 wire JSON.
+        """Compiles plain A2UI Express DSL into standard A2UI v1.0 wire JSON.
 
         Args:
             dsl_text: The source A2UI Express DSL text block.
@@ -273,7 +273,7 @@ class ExpressCompiler:
             catalog_id: The URI/identifier of the schema catalog to reference.
 
         Returns:
-            The standard A2UI v0.10 JSON envelope.
+            The standard A2UI v1.0 JSON envelope.
 
         Raises:
             ValueError: If the root component variable is missing.
@@ -364,7 +364,7 @@ class ExpressCompiler:
                 "catalogId", "https://a2ui.org/catalog.json")
 
         envelope = {
-            "version": "v0.10",
+            "version": "v1.0",
             "createSurface": {
                 "surfaceId": surface_id,
                 "catalogId": catalog_id,
@@ -550,9 +550,10 @@ class ExpressCompiler:
                     res_expr = {"call": fn_name, "args": compiled_args}
                     # Read returnType from catalog definition if present
                     fn_def = self.helper.functions.get(fn_name, {})
-                    return_type_const = fn_def.get("properties",
-                                                   {}).get("returnType",
-                                                           {}).get("const")
+                    return_type_const = (
+                        fn_def.get("returnType")
+                        or fn_def.get("properties", {}).get("returnType", {}).get("const")
+                    )
                     if return_type_const:
                         res_expr["returnType"] = return_type_const
                     return res_expr

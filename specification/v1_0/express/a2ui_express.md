@@ -1,6 +1,6 @@
 # A2UI Express technical specification
 
-A2UI Express is a compact, model-optimized declarative syntax designed for dynamic generative user interfaces. It acts as an intermediate, highly compressed representation that on-device large language models generate to describe user interfaces. A host-side compiler parses this syntax and compiles it into standard A2UI v0.10 wire protocol payloads.
+A2UI Express is a compact, model-optimized declarative syntax designed for dynamic generative user interfaces. It acts as an intermediate, highly compressed representation that on-device large language models generate to describe user interfaces. A host-side compiler parses this syntax and compiles it into standard A2UI v1.0 wire protocol payloads.
 
 ## Core design goals
 
@@ -9,7 +9,7 @@ The design of A2UI Express focuses on four main requirements:
 * Token footprint reduction. Generative models spend excessive output tokens when producing verbose JSON structures. A2UI Express removes structural keys, brackets, and repeated quotes, reducing output tokens by 55% to 70% compared to native A2UI wire payloads.
 * On-device model optimization. Small local models, such as Gemma 4 E2B and E4B, operate with limited context windows and reasoning budgets. The syntax uses clean positional signatures that fit into prompt contracts without consuming excessive context.
 * Streaming compatibility. The line-oriented grammar allows the client host to parse and build the component hierarchy line-by-line, enabling progressive rendering of the interface before the model finishes its output.
-* Protocol alignment. A2UI Express preserves full semantic compatibility with standard A2UI v0.10, supporting data bindings, client validation rules, and local event handling.
+* Protocol alignment. A2UI Express preserves full semantic compatibility with standard A2UI v1.0, supporting data bindings, client validation rules, and local event handling.
 
 ## Syntax and grammar
 
@@ -86,7 +86,7 @@ Validation checks are defined using the `?` prefix. If a component expects valid
 
 ## Compilation pipeline
 
-The compilation pipeline runs on the host application. It takes the plain text stream of A2UI Express, processes it, and emits a standard A2UI v0.10 JSON payload.
+The compilation pipeline runs on the host application. It takes the plain text stream of A2UI Express, processes it, and emits a standard A2UI v1.0 JSON payload.
 
 ```mermaid
 flowchart TD
@@ -94,7 +94,7 @@ flowchart TD
     B --> C("Abstract syntax tree")
     C --> D("Schema mapper")
     D --> E("AST flattener")
-    E --> F("Standard A2UI v0.10 JSON")
+    E --> F("Standard A2UI v1.0 JSON")
 ```
 
 ### Line parsing and tokenization
@@ -118,7 +118,7 @@ Because A2UI Express omits property keys, the compiler relies entirely on the JS
 
 ### Adjacency list flattening
 
-Standard A2UI v0.10 requires a flat array of components where nesting is represented by referencing IDs in an adjacency list.
+Standard A2UI v1.0 requires a flat array of components where nesting is represented by referencing IDs in an adjacency list.
 1. The compiler traverses the variable references starting at the `root` variable.
 2. It generates a unique, stable string ID for each sub-component variable, replacing variable names with these IDs.
 3. It packages child arrays into standard `ChildList` structures.
@@ -130,7 +130,7 @@ The compiled component list and any extracted default data models are wrapped in
 
 ```json
 {
-  "version": "v0.10",
+  "version": "v1.0",
   "createSurface": {
     "surfaceId": "surface_id",
     "catalogId": "catalog_identifier",
@@ -143,7 +143,7 @@ The compiled component list and any extracted default data models are wrapped in
 
 ## Compilation example
 
-This section shows an input text stream in A2UI Express and the compiled A2UI v0.10 JSON payload.
+This section shows an input text stream in A2UI Express and the compiled A2UI v1.0 JSON payload.
 
 ### Input text stream
 
@@ -170,10 +170,10 @@ The compiler parses the text stream, resolves the parent-child references, maps 
 
 ```json
 {
-  "version": "v0.10",
+  "version": "v1.0",
   "createSurface": {
     "surfaceId": "gallery-notification-permission",
-    "catalogId": "https://a2ui.org/specification/v0_10/catalogs/basic/catalog.json",
+    "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
     "components": [
       {
         "id": "root",

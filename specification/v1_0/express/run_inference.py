@@ -30,8 +30,8 @@ sys.path.insert(
     os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
 
 # pylint: disable=import-error, wrong-import-position
-from specification.v0_10.express.compiler import ExpressCompiler
-from specification.v0_10.express.prompt_generator import ExpressPromptGenerator
+from specification.v1_0.express.compiler import ExpressCompiler
+from specification.v1_0.express.prompt_generator import ExpressPromptGenerator
 # pylint: enable=import-error, wrong-import-position
 
 
@@ -52,7 +52,7 @@ def run_inference_and_validate(example_path: str,
     Returns:
         A tuple containing:
           - The raw A2UI Express DSL outputted by the model.
-          - The successfully compiled standard A2UI v0.10 JSON dict.
+          - The successfully compiled standard A2UI v1.0 JSON dict.
 
     Raises:
         ImportError: If google-genai package is not installed.

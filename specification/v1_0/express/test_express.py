@@ -1,7 +1,7 @@
 """Unit tests for the A2UI Express pipeline.
 
 Validates prompt generation, DSL compilation, wire JSON decompilation, and runs
-comprehensive semantic round-trip checks on standard v0.10 catalog examples.
+comprehensive semantic round-trip checks on standard v1.0 catalog examples.
 """
 
 import os
@@ -45,7 +45,7 @@ repField = TextField("Representative", $/form/rep, "Enter name")
 valueField = TextField("Deal Value", $/form/value, "0.00", "number", ?required)"""
 
         envelope = compiler.compile(dsl, surface_id="test_surf")
-        self.assertEqual(envelope["version"], "v0.10")
+        self.assertEqual(envelope["version"], "v1.0")
         self.assertEqual(envelope["createSurface"]["surfaceId"], "test_surf")
 
         components = envelope["createSurface"]["components"]
@@ -159,7 +159,7 @@ saveLabel = Text("Save")"""
             components_list = None
             surface_id = "test_surf"
             catalog_id = (
-                "https://a2ui.org/specification/v0_10/catalogs/basic/catalog.json"
+                "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json"
             )
 
             for msg in messages:
@@ -177,7 +177,7 @@ saveLabel = Text("Save")"""
 
             # Wrap into standard createSurface payload
             original_envelope = {
-                "version": "v0.10",
+                "version": "v1.0",
                 "createSurface": {
                     "surfaceId": surface_id,
                     "catalogId": catalog_id,
@@ -230,6 +230,10 @@ saveLabel = Text("Save")"""
                         print(f"Comp: {comp}")
                         self.assertIn(k, comp)
                     comp_v = comp[k]
+                    # Normalize function call returnType omission in legacy examples
+                    if isinstance(orig_v, dict) and "call" in orig_v and "returnType" not in orig_v:
+                        if isinstance(comp_v, dict) and comp_v.get("call") == orig_v["call"]:
+                            comp_v = {k2: v2 for k2, v2 in comp_v.items() if k2 != "returnType"}
                     if orig_v != comp_v:
                         print(
                             f"Value mismatch for property '{k}' in component "
@@ -256,7 +260,7 @@ icon = Icon($/icon)
 title = Text($/title, "h3")"""
 
         envelope = compiler.compile(dsl, surface_id="test_data_surf")
-        self.assertEqual(envelope["version"], "v0.10")
+        self.assertEqual(envelope["version"], "v1.0")
         create_surface = envelope["createSurface"]
         self.assertEqual(create_surface["surfaceId"], "test_data_surf")
 

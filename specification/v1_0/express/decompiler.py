@@ -1,6 +1,6 @@
 """Decompilation engine for A2UI Express.
 
-Reconstructs standard A2UI v0.10 JSON envelopes back into A2UI Express DSL code,
+Reconstructs standard A2UI v1.0 JSON envelopes back into A2UI Express DSL code,
 tailored for prompt tokens compression.
 """
 
@@ -43,7 +43,7 @@ class ExpressDecompiler:
         """Decompiles standard A2UI wire JSON into clean A2UI Express lines.
 
         Args:
-            envelope_json: The standard A2UI v0.10 JSON envelope.
+            envelope_json: The standard A2UI v1.0 JSON envelope.
 
         Returns:
             The decompiled A2UI Express DSL string.

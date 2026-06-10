@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Command-line tool to compile A2UI Express DSL files into standard A2UI v0.10 JSON.
+"""Command-line tool to compile A2UI Express DSL files into standard A2UI v1.0 JSON.
 
 Loads an A2UI Express DSL file, parses it against the specified catalog schema,
 and prints the pretty-printed standard A2UI JSON message on stdout.
@@ -11,7 +11,7 @@ import json
 import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
-from specification.v0_10.express.compiler import ExpressCompiler
+from specification.v1_0.express.compiler import ExpressCompiler
 
 
 def compile_dsl_file(dsl_path: str, catalog_path: str, surface_id: str,
@@ -25,7 +25,7 @@ def compile_dsl_file(dsl_path: str, catalog_path: str, surface_id: str,
         catalog_id: The optional URI/identifier of the catalog.
 
     Returns:
-        The compiled A2UI v0.10 JSON envelope.
+        The compiled A2UI v1.0 JSON envelope.
 
     Raises:
         FileNotFoundError: If the DSL or catalog file does not exist.
@@ -48,7 +48,7 @@ def main():
     """CLI entrypoint for the compiler."""
     parser = argparse.ArgumentParser(
         description=
-        "Compile A2UI Express DSL files into standard A2UI v0.10 wire JSON.")
+        "Compile A2UI Express DSL files into standard A2UI v1.0 wire JSON.")
     parser.add_argument("dsl_file",
                         help="Path to the A2UI Express DSL file to compile.")
     parser.add_argument(
