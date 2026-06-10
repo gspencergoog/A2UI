@@ -4,7 +4,10 @@
   "description": "This directory contains test cases and a runner for validating the A2UI JSON schemas.",
   "main": "index.js",
   "scripts": {
-    "test": "python3 run_tests.py"
+    "test": "python3 run_tests.py",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "echo \"Workspace has no lint configuration.\""
   },
   "keywords": [],
   "author": "",

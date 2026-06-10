@@ -3,7 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "wireit"
+    "build": "wireit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "yarn --cwd ../.. lint",
+    "test": "yarn --cwd ../.. test"
   },
   "dependencies": {
     "@a2ui/angular": "workspace:*",

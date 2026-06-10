@@ -34,7 +34,7 @@
   ],
   "scripts": {
     "build": "wireit",
-    "lint": "gts lint",
+    "lint": "eslint .",
     "lint:fix": "gts fix",
     "format": "prettier --ignore-path ../.gitignore --write .",
     "format:check": "prettier --ignore-path ../.gitignore --check .",
