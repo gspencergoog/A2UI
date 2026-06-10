@@ -71,15 +71,6 @@ export default [
     },
   },
   {
-    rules: {
-      // Legacy monorepo rules downgraded to warn to allow local/CI builds to pass
-      '@typescript-eslint/no-explicit-any': 'warn',
-      '@typescript-eslint/no-unused-expressions': 'warn',
-      '@typescript-eslint/no-unused-vars': ['warn', {argsIgnorePattern: '^_'}],
-      'react/no-unescaped-entities': 'warn',
-    },
-  },
-  {
     ignores: ['dist/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts', '.wireit/**'],
   },
 ];
