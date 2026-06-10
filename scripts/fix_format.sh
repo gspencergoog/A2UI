@@ -24,6 +24,8 @@ fi
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
+echo "Resolving Node workspace dependencies..."
+yarn install || echo "Warning: 'yarn install' failed."
 echo "Running Yarn format for Node projects..."
 if [ "$CHECK_ONLY" = true ]; then
   yarn format:check:all
