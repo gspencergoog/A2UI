@@ -24,16 +24,21 @@ fi
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
-# Ensure Node workspace binary link state exists before invoking script runner
-if [ ! -f ".yarn/install-state.gz" ]; then
-  echo "Resolving Node workspace dependencies..."
-  yarn install >/dev/null 2>&1 || true
-fi
-echo "Running Yarn format for Node projects..."
-if [ "$CHECK_ONLY" = true ]; then
-  yarn format:check:all
+echo "Running Prettier formatting for Node/Web assets..."
+if [ -f ".yarn/install-state.gz" ]; then
+  # Local Node environment already installed; invoke standard script targets
+  if [ "$CHECK_ONLY" = true ]; then
+    yarn format:check:all
+  else
+    yarn format:all
+  fi
 else
-  yarn format:all
+  # Non-Node contributor or CI; run standalone Prettier via dlx without full monorepo install
+  if [ "$CHECK_ONLY" = true ]; then
+    yarn dlx prettier@^3.5.0 --config .prettierrc --check .
+  else
+    yarn dlx prettier@^3.5.0 --config .prettierrc --write .
+  fi
 fi
 
 echo "Running Pyink for Python Agent SDK..."
