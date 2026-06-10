@@ -14,7 +14,7 @@
     "test": "wireit",
     "serve": "wireit",
     "lint": "eslint .",
-    "lint:fix": "gts fix",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

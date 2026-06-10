@@ -15,7 +15,7 @@
     "serve": "wireit",
     "demo:restaurant": "cd ../../../agent/adk/restaurant_finder && uv run .",
     "lint": "eslint .",
-    "lint:fix": "gts fix",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

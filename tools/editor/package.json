@@ -13,7 +13,7 @@
     "dev": "yarn serve --watch",
     "serve": "wireit",
     "lint": "eslint .",
-    "lint:fix": "gts fix",
+    "lint:fix": "eslint . --fix",
     "clean": "wireit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

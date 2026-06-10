@@ -14,7 +14,8 @@
     "genkit:dev": "genkit start -- tsx --watch src/dev.ts",
     "format": "prettier --write src/**/*.ts",
     "format:check": "prettier --check .",
-    "lint": "echo \"Workspace has no lint configuration.\""
+    "lint": "echo \"Workspace has no lint configuration.\"",
+    "lint:fix": "echo \"Workspace has no lint configuration.\""
   },
   "keywords": [],
   "author": "",

@@ -1,6 +1,6 @@
-import preset from "../../eslint.preset.mjs";
+import preset from '../../eslint.preset.mjs';
 
 export default [
   ...preset,
-  { ignores: ["vite.config.ts", "middleware/**"] }
+  { ignores: ['vite.config.ts', 'middleware/**'] }
 ];

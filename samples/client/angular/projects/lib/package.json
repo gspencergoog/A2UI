@@ -15,6 +15,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "yarn --cwd ../.. lint",
-    "test": "yarn --cwd ../.. test"
+    "test": "yarn --cwd ../.. test",
+    "lint:fix": "yarn --cwd ../.. lint:fix"
   }
 }

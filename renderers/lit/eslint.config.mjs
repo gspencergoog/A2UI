@@ -1,6 +1,6 @@
-import preset from "../../eslint.preset.mjs";
+import preset from '../../eslint.preset.mjs';
 
 export default [
   ...preset,
-  { ignores: ["a2ui_explorer/**"] }
+  { ignores: ['a2ui_explorer/**'] }
 ];

@@ -13,7 +13,7 @@
     "test:debug": "yarn generate-examples && karma start karma.conf.cjs --single-run=false --auto-watch=true --browsers Chrome",
     "test:ci": "wireit",
     "lint": "eslint .",
-    "lint:fix": "gts fix",
+    "lint:fix": "eslint . --fix",
     "clean": "wireit",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

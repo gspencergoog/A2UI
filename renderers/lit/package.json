@@ -57,7 +57,7 @@
     "test:integration": "wireit",
     "demo": "yarn workspace @a2ui/lit-explorer dev",
     "lint": "eslint .",
-    "lint:fix": "gts fix",
+    "lint:fix": "eslint . --fix",
     "clean": "wireit",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
