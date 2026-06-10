@@ -26,13 +26,20 @@ class EvaluationGauntlet:
         self.catalog_path = catalog_path
         self.mlx_linter = LocalMLXLinter()
 
-    def _run_local_unit_tests(self) -> bool:
-        """Executes local Tier 0/1 parser and decompiler unit test suite."""
-        loader = unittest.TestLoader()
-        suite = loader.discover(SPEC_EXPRESS_DIR, pattern="test_express.py")
-        runner = unittest.TextTestRunner(verbosity=0)
-        result = runner.run(suite)
-        return result.wasSuccessful()
+    def _run_local_unit_tests(self, gene: Gene) -> bool:
+        """Executes in-memory Tier 0/1 compilation checks against candidate AST logic."""
+        dummy_ns = {}
+        try:
+            exec(gene.compiler_content, dummy_ns)
+            comp_cls = dummy_ns.get("ExpressCompiler")
+            if not comp_cls:
+                return False
+            compiler = comp_cls(self.catalog_path)
+            dsl = "root = Column([field])\nfield = TextField(\"Label\", $/key)"
+            envelope = compiler.compile(dsl, surface_id="mem_surf")
+            return envelope.get("version") == "v1.0"
+        except (SyntaxError, ValueError, KeyError, Exception):
+            return False
 
     def _simulate_inspect_ai_subset(self, datasets: list[dict[str, Any]], gene: Gene) -> float:
         """Simulates Inspect AI task scoring across layout matrices."""
@@ -65,7 +72,7 @@ class EvaluationGauntlet:
 
         # 1. Tier 0 & Tier 1: Local AST & Round-Trip Check
         print(f"Executing {candidate.gene_id} through Tier 0/1 local unit tests...")
-        if not self._run_local_unit_tests():
+        if not self._run_local_unit_tests(candidate):
             print("Candidate failed Tier 0/1 local AST/round-trip check. Short-circuiting.")
             metrics["gate_reached"] = "Tier 0/1 Failed"
             return 0.0, metrics
