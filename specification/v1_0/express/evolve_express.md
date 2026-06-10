@@ -78,10 +78,10 @@ graph TD
     Tier0 -->|Passes| Tier1["Tier 1: Deterministic Round-Trip Check<br/>Target JSON -> Simulated DSL -> Compiled JSON == Target<br/>Cost: 0 Tokens | Time: ~200ms"]
     Tier0 -->|Fails| Reject0[Discard Mutation]
 
-    Tier1 -->|Passes| Tier2["Tier 2: Synthetic Prompt Linting<br/>Micro-prompt targets single updated component<br/>Cost: ~50 Tokens | Time: ~1s"]
+    Tier1 -->|Passes| Tier2["Tier 2: Local MLX model linting<br/>Target Gemma 2B via local mlx_vlm server<br/>Cost: 0 Tokens | Time: ~200ms"]
     Tier1 -->|Fails| Reject1[Discard Mutation]
 
-    Tier2 -->|Passes| Tier3["Tier 3: Inspect AI Adaptive Gating<br/>Phase A: Smoke Test -> Phase B: Subset -> Phase C: Full Suite<br/>Cost: Progressive | Time: ~30s - 5m"]
+    Tier2 -->|Passes| Tier3["Tier 3: Inspect AI foundation gating<br/>Escalate to Gemini Flash: Smoke -> Subset -> Full Suite<br/>Cost: Progressive | Time: ~30s - 2m"]
     Tier2 -->|Fails| Reject2[Discard Mutation]
 
     Tier3 -->|Passes| Champion[Leaderboard Submission]
@@ -104,16 +104,18 @@ graph TD
 *   **Method:** A deterministic "Reverse Compiler" takes standard A2UI JSON files and translates them into the mutated DSL rules. The mutated compiler then translates them back into standard JSON.
 *   **Failure condition:** Deep comparison reveals structural property differences. For instance, if an action event context or data binding like `$/path/to/key` is lost or mismatched, the pipeline aborts.
 
-### Tier 2: Synthetic Prompt Linting
+### Tier 2: Local MLX small-model linting
 
-*   **Method:** Fire a micro-request (hard-capped at 30 max tokens) querying the LLM to output a single UI element (e.g., a Submit button with a custom action) using the mutated system prompt instructions.
-*   **Failure condition:** The generated line fails to conform to the mutated grammar pattern, or positional arguments map incorrectly to the validation schemas.
+*   **Method:** Execute a micro-inference call against a local Apple Silicon background server (`mlx_lm.server` or `mlx_vlm.server`) hosting a lightweight target model (such as Gemma 2B). The request is hard-capped at 30 tokens and asks the model to generate a single UI component using the mutated instructions.
+*   **Failure condition:** The generated line fails to parse under the mutated compiler grammar, proving the syntax exceeds the reasoning capacity of small local models.
 
-### Tier 3: Adaptive Inspect AI Gating
+### Tier 3: Adaptive foundation model gating (Inspect AI)
 
-*   **Phase A (Smoke Test):** Run exactly 2 Inspect AI test cases (one lightweight card, one deeply-nested form) targeting lightweight local models (e.g., Gemma E2B/E4B). If performance drops below the reigning champion, stop immediately.
-*   **Phase B (Representative Run):** Run 10 benchmark test cases covering diverse data-bindings, validation matrices, and layouts.
-*   **Phase C (Full Validation):** Run the full Inspect AI suite to compute the official candidate score for leaderboard submission.
+Once local MLX comprehension is proven at zero API cost, the candidate escalates to larger foundation models (such as Gemini 3 Flash) via Inspect AI.
+
+*   **Phase A (Smoke Test):** Run exactly two Inspect AI test cases targeting Gemini Flash. If performance drops below the reigning champion, stop immediately.
+*   **Phase B (Representative Run):** Run ten benchmark test cases covering diverse data bindings, validation matrices, and layouts.
+*   **Phase C (Full Validation):** Run the complete Inspect AI suite to compute the official candidate score for leaderboard submission.
 
 ## 4. Evaluative Scoring & Fitness Function
 
@@ -150,14 +152,45 @@ $$F = (E \cdot A) \cdot \left[ w_s \cdot S + w_{\text{out}} \cdot T_{\text{out}}
 *   $w_{\text{prompt}} = 0.15$ **(Prompt Compactness):** Prevents the agent from creating massive, over-specified prompts. Smaller prompts preserve the model's active memory context and optimize time-to-first-token latency.
 *   $w_r = 0.15$ **(Micro-Refinement Penalty):** Subtracts value from solutions that frequently trigger error correction, as client-side refinement round-trips introduce severe latency spikes.
 
-## 5. Implementation Roadmap
+### 5. Optimizer directory & module layout
+
+To maintain clear separation between the static A2UI Express compiler utilities and the dynamic evolutionary search loop, all optimization infrastructure is encapsulated within `specification/v1_0/express/optimizer/`.
+
+```
+specification/v1_0/express/optimizer/
+├── __init__.py
+├── manifest.py           # Defines the Gene dataclass and candidate disk packaging
+├── mutator.py            # Executes LLM mutation calls using mutate_prompt.md
+├── mutate_prompt.md      # System instructions for the LLM mutator agent
+├── gauntlet.py           # Orchestrates Tier 0, Tier 1, Tier 2, and Tier 3 evaluation gates
+├── tier2_mlx.py          # Micro-inference client targeting http://localhost:8080 (Gemma 2B)
+├── inspect_suite/        # Tier 3 Inspect AI task definitions and custom scorers
+│   ├── __init__.py
+│   ├── layout_tasks.py   # Benchmark datasets covering complex nested form structures
+│   └── custom_metric.py  # Implements the fitness formula scoring function
+├── coordinator.py        # Central leader script managing blackboard file locks and subagents
+└── tests/
+    ├── __init__.py
+    ├── test_manifest.py  # Unit tests verifying gene serialization and hashing
+    ├── test_gauntlet.py  # Mocks MLX/Inspect endpoints to verify gating short-circuits
+    └── test_locks.py     # Verifies atomic write-locking on leaderboard.json
+```
+
+### Module responsibilities
+
+*   **`manifest.py`:** Manages candidate gene bundles. Serializes and deserializes the four core genetic artifacts ([a2ui_express.md](file:///Users/gspencer/code/a2ui/a2ui_express/specification/v1_0/express/a2ui_express.md), [basic_prompt.md](file:///Users/gspencer/code/a2ui/a2ui_express/specification/v1_0/express/basic_prompt.md), [compiler.py](file:///Users/gspencer/code/a2ui/a2ui_express/specification/v1_0/express/compiler.py), and [decompiler.py](file:///Users/gspencer/code/a2ui/a2ui_express/specification/v1_0/express/decompiler.py)) to and from isolated disk directories within `<appDataDir>/scratch/candidates/`.
+*   **`mutator.py`:** Formats input contexts for Gemini 3.0 Pro/Flash. Injects the reigning champion's prose and grammar rules into `mutate_prompt.md`, requests specific syntactic compressions, and writes resulting offspring to disk. Implements an automated syntax self-correction loop: if language model outputs invalid Python parsing logic that fails `ast.parse`, the mutator automatically queries the model to repair the syntax before evaluation escalation.
+*   **`gauntlet.py`:** Implements the token-saving short-circuit logic. Executes Tier 0 (`unittest`) and Tier 1 ([decompiler.py](file:///Users/gspencer/code/a2ui/a2ui_express/specification/v1_0/express/decompiler.py)) locally. If successful, invokes `tier2_mlx.py`. If local small-model comprehension passes, triggers the Inspect AI test runner.
+*   **`coordinator.py`:** Serves as the central control daemon. Reads `specification/v1_0/express/leaderboard.json`, invokes concurrent worker subagents via Antigravity/Jetski with `Workspace: 'branch'`, reactively processes completion messages, and enforces atomic file locking during leaderboard updates.
+
+## 6. Detailed implementation plan
 
 ```mermaid
 graph TD
-    P1[PHASE 1: Foundations & Local Harnesses<br/>- Write Tier 0/1 testing utilities<br/>- Implement Reverse Compiler & JSON diffing engine]
-    P2[PHASE 2: Mutation Engine & Structured Gene Mapping<br/>- Define prompt/parser coupling manifests<br/>- Draft Gemini instruction block for safe, targeted mutations]
-    P3[PHASE 3: Orchestration & Parallelism<br/>- Set up Blackboard registry and concurrency locks<br/>- Write main Jetski worker execution loop]
-    P4[PHASE 4: Inspect AI Gating & Optimization Run<br/>- Construct Phase A, B, C Inspect AI filters<br/>- Execute 10-worker evolutionary cycles]
+    P1[Phase 1: Baseline setup<br/>- Bootstrap manifest.py gene models<br/>- Initialize leaderboard.json from test_express.py]
+    P2[Phase 2: Mutation mechanics<br/>- Build mutator.py AST self-repair<br/>- Draft XML-structured mutate_prompt.md]
+    P3[Phase 3: Subagent orchestration<br/>- Register ExpressMutatorWorker subagent<br/>- Execute coordinator.py reactive wakeup loop]
+    P4[Phase 4: Multi-tier gating<br/>- Integrate tier2_mlx.py small-model check<br/>- Build inspect_suite/ adaptive benchmark tasks]
 
     P1 --> P2
     P2 --> P3
@@ -169,7 +202,32 @@ graph TD
     style P4 fill:#dae8fc,stroke:#6c8ebf
 ```
 
-## 6. Risks & Mitigation Protocols
+### Phase 1: Baseline setup
+
+1. Author `optimizer/manifest.py` defining the `Gene` data class. Add methods to compute SHA-256 hashes of the combined files to uniquely identify genetic lineages and prevent duplicate gauntlet runs.
+2. Execute `python3 -m unittest specification/v1_0/express/test_express.py` to compute exact baseline AST node counts and wire JSON properties.
+3. Boot-strap `specification/v1_0/express/leaderboard.json` recording `gene_v1_0` as the reigning champion, capturing its initial compression score ($T_{\text{out}}$) and prompt token count ($T_{\text{prompt}}$).
+
+### Phase 2: Mutation mechanics
+
+1. Author `optimizer/mutate_prompt.md` structured with explicit XML delimiters (`<REIGNING_CHAMPION>`, `<OPTIMIZATION_TARGETS>`, `<OUTPUT_CONTRACT>`). Instruct the model to apply exact syntactic shortenings, such as replacing verbose string keys with positional indices or stripping quotation marks.
+2. Implement `optimizer/mutator.py`. Add a strict AST syntax check wrapper around any generated Python code targeting [compiler.py](file:///Users/gspencer/code/a2ui/a2ui_express/specification/v1_0/express/compiler.py). If parsing raises `SyntaxError`, automatically bounce the error back to Gemini for self-correction up to three retries before discarding the mutation.
+3. Configure the mutator to serialize candidate bundles directly to isolated disk paths like `<appDataDir>/scratch/candidates/gene_{hash}/`.
+
+### Phase 3: Subagent orchestration
+
+1. Register the worker subagent type by calling `define_subagent` with the identifier `ExpressMutatorWorker`, enabling write tools (`enable_write_tools: true`).
+2. Author `optimizer/coordinator.py`. Configure the coordinator loop to launch ten parallel execution branches using `invoke_subagent` with the argument `Workspace: 'branch'`.
+3. Inside each worker branch, execute `python3 -m specification.v1_0.express.optimizer.worker_entrypoint --candidate_id {hash}`. The worker modifies its local, isolated copy of [compiler.py](file:///Users/gspencer/code/a2ui/a2ui_express/specification/v1_0/express/compiler.py) and runs local evaluations.
+4. Upon gauntlet completion, the worker transmits a JSON-formatted message payload (`{"candidate_id": "...", "fitness_score": 0.94, "lineage": "..."}`) back to the coordinator conversation ID via `send_message`. The coordinator resumes reactively, acquires an exclusive file lock (`fcntl.flock`) on `leaderboard.json`, and records new champions atomically.
+
+### Phase 4: Multi-tier gating
+
+1. Author `optimizer/tier2_mlx.py` wrapping [run_inference.py](file:///Users/gspencer/code/a2ui/a2ui_express/specification/v1_0/express/run_inference.py) with `--mlx` targeting `http://localhost:8080/v1/chat/completions`. Enforce a strict 2-second socket timeout and a 30-token completion limit to verify Gemma 2B comprehension instantly.
+2. Construct the Tier 3 Inspect AI benchmark suite inside `optimizer/inspect_suite/`. Define three progressive execution subsets: `layout_tasks.smoke` (2 basic cards), `layout_tasks.representative` (10 complex forms), and `layout_tasks.complete` (full verification suite).
+3. Implement high-density champion flare mitigation inside `gauntlet.py`. Any candidate that exceeds the reigning champion's score is automatically re-evaluated three consecutive times at temperature $0.1$ across the full test suite; only the lowest resulting score is recorded to the leaderboard to confirm genetic robustness.
+
+## 7. Risks & mitigation protocols
 
 ### Risk 1: Overfitting to the Test Suite
 
