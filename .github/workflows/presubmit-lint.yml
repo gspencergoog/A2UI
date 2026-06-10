@@ -41,5 +41,8 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Build all workspaces
+        run: yarn build:all
+
       - name: Run yarn lint:all
         run: yarn lint:all
