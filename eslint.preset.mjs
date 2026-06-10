@@ -26,7 +26,7 @@ export default [
       // Decouple formatting from linting (rely strictly on Prettier for formatting)
       'prettier/prettier': 'off',
       // Common monorepo rule relaxations
-      eqeqeq: 'off',
+      eqeqeq: 'error',
       'no-undef': 'off',
     },
   },

@@ -59,7 +59,7 @@ class MarkdownDirective extends Directive {
 
     const dynamicRendererPromise = (async () => {
       try {
-        /* eslint-disable @typescript-eslint/ban-ts-comment */
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore - optional peer dependency
         const {renderMarkdown} = await import('@a2ui/markdown-it');
         const rendered = await renderMarkdown(value, markdownOptions);

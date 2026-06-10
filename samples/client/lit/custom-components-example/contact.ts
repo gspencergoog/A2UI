@@ -29,7 +29,7 @@ import * as UI from '@a2ui/lit/ui';
 // Demo elements.
 import './ui/ui.js';
 import {registerContactComponents} from './ui/custom-components/register-components.js';
-/* eslint-disable @typescript-eslint/ban-ts-comment */
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - optional peer dependency
 import {renderMarkdown} from '@a2ui/markdown-it';
 
