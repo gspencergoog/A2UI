@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A2UI Express — Optimizer Dashboard</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+    <header>
+        <h1>
+            <span>A2UI Express</span>
+            <span style="font-weight: 300; color: var(--text-muted);">// Evolutionary Optimizer</span>
+        </h1>
+        <div style="display: flex; gap: 16px; align-items: center;">
+            <div class="server-status">
+                <div class="status-dot online" id="statusDot"></div>
+                <span id="statusText">MLX Server: Online (8080)</span>
+            </div>
+            <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">
+                Auto-Refresh: <span style="color: var(--accent-cyan);">2000ms</span>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <button class="tab-btn active" data-target="overviewContent">
+            Overview & Leaderboard
+            <span class="tab-badge" id="reigningBadge">gene_v1_0</span>
+        </button>
+        <button class="tab-btn" data-target="agentsContent">
+            Active Antigravity Workers
+            <span class="tab-badge" id="activeAgentsCount">5</span>
+        </button>
+        <button class="tab-btn" data-target="lineageContent">
+            Mutation Lineage Tree
+        </button>
+        <button class="tab-btn" data-target="logsContent">
+            Live Trajectory Logs
+        </button>
+    </nav>
+
+    <main>
+        <!-- 1. Overview & Leaderboard View -->
+        <section class="tab-content active" id="overviewContent">
+            <div class="dashboard-grid" style="margin-bottom: 32px;">
+                <div class="glass-panel metric-card">
+                    <div class="metric-header">
+                        <span class="metric-title">Reigning Champion</span>
+                        <span style="color: var(--accent-amber);">baseline</span>
+                    </div>
+                    <div class="metric-value" id="champId">gene_v1_0</div>
+                    <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted);">
+                        Lineage Hash: <span style="color: var(--text-main);" id="champHash">9ba12f7b201c</span>
+                    </div>
+                </div>
+
+                <div class="glass-panel metric-card">
+                    <div class="metric-header">
+                        <span class="metric-title">Output Compression (T_out)</span>
+                        <span style="color: var(--accent-cyan);" id="compPctText">65.0%</span>
+                    </div>
+                    <div class="metric-value" id="compScore">0.6500</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="compProgressBar" style="width: 65%;"></div>
+                    </div>
+                </div>
+
+                <div class="glass-panel metric-card">
+                    <div class="metric-header">
+                        <span class="metric-title">Prompt Compactness (T_prompt)</span>
+                        <span style="color: var(--accent-emerald);" id="promptPctText">61.5%</span>
+                    </div>
+                    <div class="metric-value" id="promptScore">385 <span style="font-size: 1rem; font-weight: 400; color: var(--text-muted);">/ 1000 max</span></div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="promptProgressBar" style="width: 61.5%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel" style="padding: 32px;">
+                <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 16px; color: var(--accent-cyan);">Fitness Formula Breakdown</h2>
+                <div style="font-family: var(--font-mono); font-size: 0.95rem; line-height: 1.6; background: hsl(0, 0%, 0% / 0.4); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color);">
+                    <div style="color: var(--accent-emerald); font-weight: 700; margin-bottom: 12px;">F = (E * A) * [ w_s*S + w_out*T_out + w_prompt*T_prompt - w_r*R ]</div>
+                    <div>• <span style="color: var(--text-muted);">Expressive Coverage (E):</span> 1.0 (100% catalog feature mapping verified)</div>
+                    <div>• <span style="color: var(--text-muted);">Semantic Accuracy (A):</span> 1.0 (AST layout nodes match golden target perfectly)</div>
+                    <div>• <span style="color: var(--text-muted);">Small-Model Success (S):</span> 1.0 (Gemma 2B comprehension verified via MLX server)</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Active Antigravity Workers View -->
+        <section class="tab-content" id="agentsContent">
+            <div class="agent-grid" id="agentsGrid">
+                <div class="glass-panel agent-card">
+                    <div style="color: var(--text-muted);">Scanning Jetski background worker trajectory logs...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Mutation Lineage Tree View -->
+        <section class="tab-content" id="lineageContent">
+            <div class="glass-panel lineage-container" id="lineageTree">
+                <div style="color: var(--text-muted);">Loading historical lineage graph...</div>
+            </div>
+        </section>
+
+        <!-- 4. Live Trajectory Logs View -->
+        <section class="tab-content" id="logsContent">
+            <div class="terminal-view" id="terminalLogs">
+                <div class="log-line">
+                    <span class="log-time">[System]</span>
+                    <span class="log-source">Daemon</span>
+                    <span class="log-msg" style="color: var(--accent-emerald);">Tailing live worker transcript files...</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
