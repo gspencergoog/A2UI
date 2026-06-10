@@ -13,16 +13,19 @@ from typing import Optional
 try:
     # pylint: disable=import-error
     from google import genai
+    from google.genai import types
 except ImportError:
     genai = None
+    types = None
 
+from .gauntlet import EvaluationGauntlet
 from .manifest import Gene
 
 
 class ExpressMutator:
     """Orchestrates LLM mutations with automated syntax self-repair."""
 
-    def __init__(self, prompt_template_path: str, model_name: str = "gemini-2.5-pro"):
+    def __init__(self, prompt_template_path: str, model_name: str = "gemini-2.0-flash-001"):
         """Initializes the mutator with prompt template and target model.
 
         Args:
@@ -65,9 +68,12 @@ class ExpressMutator:
             DECOMPILER_CONTENT=champion.decompiler_content,
         )
 
-        messages = [{"role": "user", "content": prompt}]
+        messages = [
+            types.Content(role="user", parts=[types.Part.from_text(text=prompt)])
+        ]
 
         for attempt in range(1, max_retries + 1):
+            output_text = None
             try:
                 response = self.client.models.generate_content(
                     model=self.model_name,
@@ -98,6 +104,14 @@ class ExpressMutator:
                 )
                 offspring.gene_id = f"gene_{offspring.compute_hash()}"
 
+                # Tier 0/1 Compilation Gauntlet Gate (Self-Repair Trigger)
+                gauntlet = EvaluationGauntlet()
+                if not gauntlet._run_local_unit_tests(offspring):
+                    raise SyntaxError(
+                        "Your generated compiler parser failed in-memory Tier 0/1 compilation unit tests "
+                        "against reference golden targets. Inspect syntax rules and logic."
+                    )
+
                 if target_disk_dir:
                     offspring.save_to_disk(target_disk_dir)
 
@@ -116,7 +130,12 @@ class ExpressMutator:
                     f"Inspect the Python syntax and XML structure, fix the errors, and "
                     f"resubmit precisely the four corrected XML blocks."
                 )
-                messages.append({"role": "model", "content": output_text})
-                messages.append({"role": "user", "content": repair_prompt})
+                if output_text:
+                    messages.append(
+                        types.Content(role="model", parts=[types.Part.from_text(text=output_text)])
+                    )
+                messages.append(
+                    types.Content(role="user", parts=[types.Part.from_text(text=repair_prompt)])
+                )
 
         return None

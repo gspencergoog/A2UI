@@ -3,6 +3,7 @@
 import os
 import unittest
 from unittest.mock import MagicMock, patch
+from ..gauntlet import EvaluationGauntlet
 from ..manifest import Gene
 from ..mutator import ExpressMutator
 
@@ -57,7 +58,8 @@ class TestExpressMutator(unittest.TestCase):
         mutator = ExpressMutator(self.prompt_path)
         mutator.client = mock_client
 
-        offspring = mutator.generate_mutation(self.champion, max_retries=2)
+        with patch.object(EvaluationGauntlet, "_run_local_unit_tests", return_value=True):
+            offspring = mutator.generate_mutation(self.champion, max_retries=2)
         self.assertIsNotNone(offspring)
         self.assertEqual(offspring.parent_id, "gene_v1_0")
         self.assertEqual(offspring.compiler_content, "def closed_paren(): pass")
