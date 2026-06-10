@@ -24,9 +24,11 @@ fi
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
-# Note: package.json formatting scripts use 'yarn dlx prettier' on-demand
-# to format assets seamlessly without forcing non-Node contributors (e.g. Dart)
-# to execute a heavy monorepo package install.
+# Ensure Node workspace binary link state exists before invoking script runner
+if [ ! -f ".yarn/install-state.gz" ]; then
+  echo "Resolving Node workspace dependencies..."
+  yarn install >/dev/null 2>&1 || true
+fi
 echo "Running Yarn format for Node projects..."
 if [ "$CHECK_ONLY" = true ]; then
   yarn format:check:all
