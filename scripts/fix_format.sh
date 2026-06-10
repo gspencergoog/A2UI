@@ -24,8 +24,9 @@ fi
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
-echo "Resolving Node workspace dependencies..."
-yarn install || echo "Warning: 'yarn install' failed."
+# Note: package.json formatting scripts use 'yarn dlx prettier' on-demand
+# to format assets seamlessly without forcing non-Node contributors (e.g. Dart)
+# to execute a heavy monorepo package install.
 echo "Running Yarn format for Node projects..."
 if [ "$CHECK_ONLY" = true ]; then
   yarn format:check:all
