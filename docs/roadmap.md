@@ -6,12 +6,12 @@ This roadmap outlines the current state and future plans for the A2UI project. T
 
 ### Protocol
 
-| Version   | Status     | Notes                                   |
-| --------- | ---------- | --------------------------------------- |
-| **v0.8**  | 🆗 Prior   | Initial public release, minimal support |
-| **v0.9**  | ✅ Current | Feature complete, supported             |
-| **v0.10** | 🚧 Draft   | Minimal changes to spec, new features   |
-| **v1.0**  | 🚧 Draft   | Targeting stable and complete release   |
+| Version    | Status       | Notes                                   |
+| ---------- | ------------ | --------------------------------------- |
+| **v0.8**   | 🆗 Prior     | Initial public release, minimal support |
+| **v0.9**   | 🆗 Prior     | Feature complete, legacy support        |
+| **v0.9.1** | 🆗 Current   | stable release                          |
+| **v1.0**   | 📋 Candidate | release candidate                       |
 
 ### Renderers
 
@@ -81,7 +81,7 @@ Many research projects across multiple Google teams, including integration into 
 
 ## Upcoming Milestones
 
-### Q3 2026 v0.9 & v0.10
+### Q3 2026 v0.9 & v1.0
 
 **Jetpack Compose Renderer (Android):**
 
@@ -180,7 +180,7 @@ A2UI follows [Semantic Versioning](https://semver.org/):
 
 ## Stay Updated
 
-- Watch the [GitHub repository](https://github.com/google/A2UI) for updates
+- Watch the [GitHub repository](https://github.com/a2ui-project/a2ui) for updates
 - Star the repo to show your support
 - Follow releases to get notified of new versions
 
@@ -188,4 +188,4 @@ A2UI follows [Semantic Versioning](https://semver.org/):
 
 **Last Updated:** March 2026
 
-Have questions about the roadmap? [Start a discussion on GitHub](https://github.com/google/A2UI/discussions).
+Have questions about the roadmap? [Start a discussion on GitHub](https://github.com/a2ui-project/a2ui/discussions).

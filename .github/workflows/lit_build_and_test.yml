@@ -27,37 +27,29 @@ on:
       - "renderers/web_core/**"
       - ".github/workflows/lit_build_and_test.yml"
 
-permissions:
-  contents: read
-
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        task: [unit, integration]
     steps:
       - uses: actions/checkout@v6
-
+      - name: Enable Corepack
+        run: corepack enable
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: "22"
+          cache: "yarn"
 
-      - name: Install web_core dependencies
-        working-directory: ./renderers/web_core
-        run: npm i
+      - name: Install dependencies
+        run: yarn install --immutable
 
-      - name: Build web_core
-        working-directory: ./renderers/web_core
-        run: npm run build
+      - name: Run Unit Tests
+        if: matrix.task == 'unit'
+        run: yarn workspace @a2ui/lit test:unit
 
-      - name: Install Lit renderer dependencies
-        working-directory: ./renderers/lit
-        run: npm i
-
-      - name: Build Lit renderer
-        working-directory: ./renderers/lit
-        run: npm run build
-
-      - name: Run Lit renderer tests
-        working-directory: ./renderers/lit
-        run: npm test
+      - name: Run Integration Tests
+        if: matrix.task == 'integration'
+        run: yarn workspace @a2ui/lit test:integration
