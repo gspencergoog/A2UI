@@ -109,7 +109,7 @@ app.get('/a2a/agent-card', async (req, res) => {
     const card = await response.json();
     res.json(card);
   } catch (_error) {
-    console.error('Error fetching agent card:', error);
+    console.error('Error fetching agent card:', _error);
     res.status(500).json({error: 'Internal server error'});
   }
 });

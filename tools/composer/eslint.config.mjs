@@ -71,6 +71,14 @@ export default [
     },
   },
   {
-    ignores: ['dist/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts', '.wireit/**'],
+    ignores: [
+      'dist/**',
+      '.next/**',
+      'out/**',
+      'build/**',
+      'next-env.d.ts',
+      '.wireit/**',
+      '**/generated.ts',
+    ],
   },
 ];

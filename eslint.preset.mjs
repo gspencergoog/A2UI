@@ -48,6 +48,14 @@ export default [
     },
   },
   {
-    ignores: ['dist/**', 'node_modules/**', '.wireit/**', '**/*.d.ts', '**/generated/**'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/.angular/**',
+      '.wireit/**',
+      '**/*.d.ts',
+      '**/generated/**',
+      '**/generated.ts',
+    ],
   },
 ];
