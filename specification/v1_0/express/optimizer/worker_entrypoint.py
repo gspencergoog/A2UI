@@ -26,7 +26,9 @@ from specification.v1_0.express.optimizer.mutator import ExpressMutator
 SPEC_EXPRESS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 
-def run_worker_gauntlet(parent_id: str, model_name: str = "gemini-3.5-flash") -> dict[str, Any]:
+def run_worker_gauntlet(
+    parent_id: str, model_name: str = "gemini-3.5-flash", thinking_budget: int = 4096
+) -> dict[str, Any]:
     """Executes mutation and evaluation gauntlet, returning completion payload."""
     leaderboard_path = os.path.join(SPEC_EXPRESS_DIR, "leaderboard.json")
     with open(leaderboard_path, "r", encoding="utf-8") as f:
@@ -37,9 +39,9 @@ def run_worker_gauntlet(parent_id: str, model_name: str = "gemini-3.5-flash") ->
     champion.gene_id = leaderboard.get("reigning_champion", "gene_v1_0")
 
     prompt_path = os.path.join(SPEC_EXPRESS_DIR, "optimizer", "mutate_prompt.md")
-    mutator = ExpressMutator(prompt_path, model_name=model_name)
+    mutator = ExpressMutator(prompt_path, model_name=model_name, thinking_budget=thinking_budget)
 
-    print(f"Generating mutation from parent {champion.gene_id} using {model_name}...")
+    print(f"Generating mutation from parent {champion.gene_id} using {model_name} (budget: {thinking_budget})...")
     target_candidates_dir = os.path.abspath(os.path.join(SPEC_EXPRESS_DIR, "..", "..", "scratch", "candidates"))
     offspring = mutator.generate_mutation(champion, target_disk_dir=target_candidates_dir)
 
@@ -79,9 +81,10 @@ def main():
     parser = argparse.ArgumentParser(description="A2UI Express Subagent Worker Entrypoint")
     parser.add_argument("--parent_id", default="gene_v1_0", help="Parent champion ID")
     parser.add_argument("--model_name", default="gemini-3.5-flash", help="Target Gemini model identifier")
+    parser.add_argument("--thinking_budget", type=int, default=4096, help="Scratchpad reasoning token allocation")
     args = parser.parse_args()
 
-    payload = run_worker_gauntlet(args.parent_id, model_name=args.model_name)
+    payload = run_worker_gauntlet(args.parent_id, model_name=args.model_name, thinking_budget=args.thinking_budget)
     print("\n=== SUBAGENT COMPLETION PAYLOAD ===")
     print(json.dumps(payload, indent=2))
 

@@ -25,15 +25,17 @@ from .manifest import Gene
 class ExpressMutator:
     """Orchestrates LLM mutations with automated syntax self-repair."""
 
-    def __init__(self, prompt_template_path: str, model_name: str = "gemini-2.0-flash-001"):
-        """Initializes the mutator with prompt template and target model.
+    def __init__(self, prompt_template_path: str, model_name: str = "gemini-3.5-flash", thinking_budget: int = 4096):
+        """Initializes the mutator with prompt template, target model, and thinking budget.
 
         Args:
             prompt_template_path: Disk path to mutate_prompt.md.
             model_name: Target Gemini model identifier.
+            thinking_budget: Token allocation for internal chain-of-thought scratchpad.
         """
         self.prompt_template_path = prompt_template_path
         self.model_name = model_name
+        self.thinking_budget = thinking_budget
         with open(prompt_template_path, "r", encoding="utf-8") as f:
             self.prompt_template = f.read()
 
@@ -75,9 +77,17 @@ class ExpressMutator:
         for attempt in range(1, max_retries + 1):
             output_text = None
             try:
+                config = (
+                    types.GenerateContentConfig(
+                        thinking_config=types.ThinkingConfig(thinking_budget=self.thinking_budget),
+                        temperature=0.7,
+                    )
+                    if types else None
+                )
                 response = self.client.models.generate_content(
                     model=self.model_name,
                     contents=messages,
+                    config=config,
                 )
                 output_text = response.text
 
