@@ -36,7 +36,7 @@ Every component definition is assigned to a unique, alphanumeric variable. The c
 ### Core primitive types
 
 The syntax supports four literal primitive types:
-* Strings are enclosed in straight double quotes, for example `"Enter your name"`.
+* Strings are enclosed in straight double quotes (for example `"Enter your name"`), or optionally unquoted if they are simple lowercase identifiers matching `^[a-z_][a-z0-9_-]*$` (for example `primary` or `number`).
 * Numbers are written as plain integers or decimals, for example `42` or `3.14`.
 * Booleans are represented by `true` or `false`.
 * Empty states are represented by `null`.
@@ -47,24 +47,24 @@ Arrays are represented using square brackets, for example `[component1, componen
 
 ### Data binding and reactive paths
 
-To connect component properties to the application data model, properties accept bound paths prefixed with the `$` symbol:
-* Absolute paths start with a forward slash after the prefix, for example `$/user/email`. These paths resolve from the root of the shared data model.
-* Relative paths omit the slash, for example `$lastName`. These resolve within list iteration contexts.
+To connect component properties to the application data model, properties accept bound paths prefixed with the `@` symbol:
+* Absolute paths start with a forward slash after the prefix, for example `@/user/email`. These paths resolve from the root of the shared data model.
+* Relative paths omit the slash, for example `@lastName`. These resolve within list iteration contexts.
 
 ### Data model population
 
 To populate or initialize values within the shared data model directly from the generated output, A2UI Express supports data model assignments. A statement with a left-hand side that represents an absolute data path will populate that path in the surface's `dataModel`:
 
 ```
-$/path/to/key = value_expression
+@/path/to/key = value_expression
 ```
 
 Where `value_expression` is any valid literal primitive, array, or map. For example:
 
 ```
-$/icon = "check"
-$/title = "Enable notification"
-$/user = {firstName: "Alice", age: 30}
+@/icon = "check"
+@/title = "Enable notification"
+@/user = {firstName: "Alice", age: 30}
 ```
 
 The compiler resolves these statements and generates the structured `dataModel` JSON object at the root of the `createSurface` payload.
@@ -75,7 +75,7 @@ To support catalog flexibility and avoid hardcoding specific formatting or actio
 * Client functions are written as `<FunctionName>(<args>)`, matching the exact function names registered in the loaded catalog.
 * If the client catalog contains a text formatting helper (such as `formatString`), it is called explicitly: `welcomeText = Text(formatString("Welcome, ${/user/firstName}!"))`. This prevents failures if a client catalog uses a different naming convention for interpolation.
 * Local actions use this same signature to trigger behaviors, for example `openUrl("https://example.com")`. The compiler maps these to standard client function actions.
-* Server events use a reserved `Event` signature to declare backend actions, for example `Event("save_deal", {rep: $/form/rep})`.
+* Server events use a reserved `Event` signature to declare backend actions, for example `Event("save_deal", {rep: @/form/rep})`.
 
 ### Validation and logic expressions
 
@@ -153,9 +153,9 @@ The input file defines a notification permission card, using positional argument
 <a2ui>
 root = Card(main-column)
 main-column = Column([icon, title, description, actions], null, "center")
-icon = Icon($/icon)
-title = Text($/title, "h3")
-description = Text($/description, "body")
+icon = Icon(@/icon)
+title = Text(@/title, "h3")
+description = Text(@/description, "body")
 actions = Row([yes-btn, no-btn], "center")
 yes-btn-text = Text("Yes")
 yes-btn = Button(yes-btn-text, null, Event("accept"))

@@ -4,6 +4,7 @@ Reconstructs standard A2UI v1.0 JSON envelopes back into A2UI Express DSL code,
 tailored for prompt tokens compression.
 """
 
+import re
 from typing import Any
 try:
     # pylint: disable=relative-beyond-top-level
@@ -64,7 +65,7 @@ class ExpressDecompiler:
         if data_model:
             for path, val in sorted(_flatten_data_model(data_model)):
                 val_str = self._decompile_value(val, comp_ids)
-                dsl_lines.append(f"${path} = {val_str}")
+                dsl_lines.append(f"@{path} = {val_str}")
 
 
         for c in components:
@@ -159,11 +160,11 @@ class ExpressDecompiler:
                                                       comp_ids)
                     comp_id_repr = val["componentId"]
                     return f"Template({path_repr}, {comp_id_repr})"
-                # Decompile path: prefixed by $
+                # Decompile path: prefixed by @
                 path_str = val["path"]
                 if path_str.startswith("/"):
-                    return f"$/{path_str[1:]}"
-                return f"${path_str}"
+                    return f"@/{path_str[1:]}"
+                return f"@{path_str}"
 
             if "event" in val:
                 # Decompile server event: Event("name", context)
@@ -232,6 +233,9 @@ class ExpressDecompiler:
             # If it matches a component ID reference, keep it as a variable identifier
             # (if it is a structural variable name)
             if val in comp_ids:
+                return val
+            # Omit quotes for simple lowercase identifiers/enums (e.g. primary, center, number)
+            if re.match(r'^[a-z_][a-z0-9_-]*$', val):
                 return val
             # Otherwise quote as string literal
             escaped = val.replace('"', '\\"')

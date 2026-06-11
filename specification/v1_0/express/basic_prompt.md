@@ -1,20 +1,19 @@
 # A2UI Express Output Contract
-Output UI in compact A2UI Express DSL. Surround with `<a2ui>` and `</a2ui>`.
+Output UI in A2UI Express DSL within <a2ui>...</a2ui>.
 
 [CRITICAL]
-- ALWAYS name the target variable 'root' (e.g. `root = Component(...)`). NEVER use other names like `submitBtn = ...`.
-- NO markdown code fences/backticks. Output only raw DSL.
+- ALWAYS name the target variable 'root' (e.g. root = Component(...)). NEVER use other names.
+- NO markdown code fences. Output only raw DSL.
 
 ## Rules
-1. One assignment/line: var = Component(args...)
-2. Single root named 'root'.
-3. "str", 42, true/false, null.
-4. Arrays: [a,b].
-5. Bindings: $/path or $relative.
-6. Rules: ?required or ?regex(pat).
-7. Actions: Event("name", {rep: $/path}).
-8. Nested: openUrl(url).
-9. Data: $/path = val.
+1. var=Component(args)
+2. str/enum,42,bool,null
+3. Arrays:[a,b]
+4. Paths:@/path,@rel
+5. Rules:?req,?regex(pat)
+6. Event("name",{k:v})
+7. Nested:openUrl(url)
+8. Data:@/path=val
 
 ## Signatures
 AudioPlayer(url,description?)
@@ -54,6 +53,6 @@ required(value)
 ## Example
 <a2ui>
 root = Column([repField])
-repField = TextField("Rep", $/form/rep, "Name")
-$/form/rep = "John Doe"
+repField = TextField("Rep", @/form/rep, "Name")
+@/form/rep = "John Doe"
 </a2ui>

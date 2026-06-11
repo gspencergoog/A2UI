@@ -41,8 +41,8 @@ class TestExpressPipeline(unittest.TestCase):
         decompiler = ExpressDecompiler(self.catalog_path)
 
         dsl = """root = Column([repField, valueField])
-repField = TextField("Representative", $/form/rep, "Enter name")
-valueField = TextField("Deal Value", $/form/value, "0.00", "number", ?required)"""
+repField = TextField("Representative", @/form/rep, "Enter name")
+valueField = TextField("Deal Value", @/form/value, "0.00", number, ?required)"""
 
         envelope = compiler.compile(dsl, surface_id="test_surf")
         self.assertEqual(envelope["version"], "v1.0")
@@ -86,10 +86,10 @@ valueField = TextField("Deal Value", $/form/value, "0.00", "number", ?required)"
         decompiled_dsl = decompiler.decompile(envelope)
         self.assertIn("root = Column([repField, valueField])", decompiled_dsl)
         self.assertIn(
-            'repField = TextField("Representative", $/form/rep, "Enter name")',
+            'repField = TextField("Representative", @/form/rep, "Enter name")',
             decompiled_dsl)
         self.assertIn(
-            'valueField = TextField("Deal Value", $/form/value, "0.00", "number", ?required)',
+            'valueField = TextField("Deal Value", @/form/value, "0.00", number, ?required)',
             decompiled_dsl)
 
     def test_format_string_and_actions(self):
@@ -99,7 +99,7 @@ valueField = TextField("Deal Value", $/form/value, "0.00", "number", ?required)"
 
         dsl = """root = Column([welcome, saveButton])
 welcome = Text(formatString("Welcome, ${/user/name}!"))
-saveButton = Button(saveLabel, "primary", Event("submitDeal", {rep: $/form/rep}))
+saveButton = Button(saveLabel, primary, Event("submitDeal", {rep: @/form/rep}))
 saveLabel = Text("Save")"""
 
         envelope = compiler.compile(dsl)
@@ -134,7 +134,7 @@ saveLabel = Text("Save")"""
             'welcome = Text(formatString("Welcome, ${/user/name}!"))',
             decompiled_dsl)
         self.assertIn(
-            'saveButton = Button(saveLabel, "primary", Event("submitDeal", {rep: $/form/rep}))',
+            'saveButton = Button(saveLabel, primary, Event("submitDeal", {rep: @/form/rep}))',
             decompiled_dsl)
 
     def test_round_trip_examples(self):
@@ -250,14 +250,14 @@ saveLabel = Text("Save")"""
         compiler = ExpressCompiler(self.catalog_path)
         decompiler = ExpressDecompiler(self.catalog_path)
 
-        dsl = """$/icon = "check"
-$/title = "Enable notification"
-$/user/firstName = "Alice"
-$/user/age = 30
+        dsl = """@/icon = check
+@/title = "Enable notification"
+@/user/firstName = "Alice"
+@/user/age = 30
 root = Card(main-column)
-main-column = Column([icon, title], null, "center")
-icon = Icon($/icon)
-title = Text($/title, "h3")"""
+main-column = Column([icon, title], null, center)
+icon = Icon(@/icon)
+title = Text(@/title, h3)"""
 
         envelope = compiler.compile(dsl, surface_id="test_data_surf")
         self.assertEqual(envelope["version"], "v1.0")
@@ -273,10 +273,10 @@ title = Text($/title, "h3")"""
 
         # Verify decompiled dataModel DSL output
         decompiled_dsl = decompiler.decompile(envelope)
-        self.assertIn('$/icon = "check"', decompiled_dsl)
-        self.assertIn('$/title = "Enable notification"', decompiled_dsl)
-        self.assertIn('$/user/age = 30', decompiled_dsl)
-        self.assertIn('$/user/firstName = "Alice"', decompiled_dsl)
+        self.assertIn('@/icon = check', decompiled_dsl)
+        self.assertIn('@/title = "Enable notification"', decompiled_dsl)
+        self.assertIn('@/user/age = 30', decompiled_dsl)
+        self.assertIn('@/user/firstName = "Alice"', decompiled_dsl)
         self.assertIn('root = Card(main-column)', decompiled_dsl)
 
         # Round-trip check

@@ -6,9 +6,9 @@ try:
 except (ImportError, ValueError):
     from schema_helper import CatalogSchemaHelper
 def _set_nested_path(d: dict, path_str: str, val: Any) -> None:
-    if path_str.startswith("$/"):
+    if path_str.startswith("@/"):
         clean_path = path_str[2:]
-    elif path_str.startswith("$"):
+    elif path_str.startswith("@"):
         clean_path = path_str[1:]
     else:
         clean_path = path_str
@@ -23,7 +23,7 @@ def _set_nested_path(d: dict, path_str: str, val: Any) -> None:
     current[keys[-1]] = val
 TOKEN_SPEC = [
     ('STRING', r'"(?:[^"\\]|\\.)*"'),
-    ('PATH', r'\$[a-zA-Z0-9_/]+'),
+    ('PATH', r'@[a-zA-Z0-9_/]+'),
     ('CHECK', r'\?[a-zA-Z_][a-zA-Z0-9_]*'),
     ('NUMBER', r'-?\d+(?:\.\d+)?'),
     ('BOOLEAN', r'\b(?:true|false)\b'),
@@ -180,7 +180,7 @@ class ExpressCompiler:
         statements = []
         current_statement = []
         assignment_start_regex = re.compile(
-            r'^(?:[a-zA-Z_][a-zA-Z0-9_-]*|\$[a-zA-Z0-9_/]+)\s*='
+            r'^(?:[a-zA-Z_][a-zA-Z0-9_-]*|@[a-zA-Z0-9_/]+)\s*='
         )
         for line in lines:
             if assignment_start_regex.match(line):
@@ -204,12 +204,12 @@ class ExpressCompiler:
                 tokens = tokenize(expr_text)
                 parser = TokenParser(tokens)
                 parsed_val = parser.parse_expression()
-                if var_name.startswith("$"):
+                if var_name.startswith("@"):
                     data_path_assignments[var_name] = parsed_val
                 else:
                     raw_symbols[var_name] = parsed_val
             except Exception:
-                if var_name.startswith("$"):
+                if var_name.startswith("@"):
                     data_path_assignments[var_name] = None
                 else:
                     raw_symbols[var_name] = {
@@ -222,7 +222,7 @@ class ExpressCompiler:
             _set_nested_path(data_model, path_name, compiled_val)
         compiled_components = []
         if "root" not in raw_symbols:
-            first_key = next((k for k in raw_symbols.keys() if not k.startswith("$") and not k.startswith("@")), None)
+            first_key = next((k for k in raw_symbols.keys() if not k.startswith("@")), None)
             if first_key:
                 raw_symbols["root"] = raw_symbols[first_key]
         if "root" not in raw_symbols:
