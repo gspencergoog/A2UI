@@ -187,19 +187,16 @@ specification/v1_0/express/optimizer/
 
 ```mermaid
 graph TD
-    P1[Phase 1: Baseline setup<br/>- Bootstrap manifest.py gene models<br/>- Initialize leaderboard.json from test_express.py]
-    P2[Phase 2: Mutation mechanics<br/>- Build mutator.py AST self-repair<br/>- Draft XML-structured mutate_prompt.md]
-    P3[Phase 3: Subagent orchestration<br/>- Register ExpressMutatorWorker subagent<br/>- Execute coordinator.py reactive wakeup loop]
-    P4[Phase 4: Multi-tier gating<br/>- Integrate tier2_mlx.py small-model check<br/>- Build inspect_suite/ adaptive benchmark tasks]
-
-    P1 --> P2
-    P2 --> P3
-    P3 --> P4
+    P1["Phase 1: Baseline setup"] --> P2["Phase 2: Mutation mechanics"]
+    P2 --> P3["Phase 3: Subagent orchestration"]
+    P3 --> P4["Phase 4: Multi-tier gating"]
+    P4 --> P5["Phase 5: Continuous Harness Improvement"]
 
     style P1 fill:#dae8fc,stroke:#6c8ebf
     style P2 fill:#dae8fc,stroke:#6c8ebf
     style P3 fill:#dae8fc,stroke:#6c8ebf
     style P4 fill:#dae8fc,stroke:#6c8ebf
+    style P5 fill:#d5e8d4,stroke:#82b366
 ```
 
 ### Phase 1: Baseline setup
@@ -226,6 +223,13 @@ graph TD
 1. Author `optimizer/tier2_mlx.py` wrapping [run_inference.py](file:///Users/gspencer/code/a2ui/a2ui_express/specification/v1_0/express/run_inference.py) with `--mlx` targeting `http://localhost:8080/v1/chat/completions`. Enforce a strict 2-second socket timeout and a 30-token completion limit to verify Gemma 2B comprehension instantly.
 2. Construct the Tier 3 Inspect AI benchmark suite inside `optimizer/inspect_suite/`. Define three progressive execution subsets: `layout_tasks.smoke` (2 basic cards), `layout_tasks.representative` (10 complex forms), and `layout_tasks.complete` (full verification suite).
 3. Implement high-density champion flare mitigation inside `gauntlet.py`. Any candidate that exceeds the reigning champion's score is automatically re-evaluated three consecutive times at temperature $0.1$ across the full test suite; only the lowest resulting score is recorded to the leaderboard to confirm genetic robustness.
+
+### Phase 5: Continuous Harness Improvement (Meta-Evolution)
+
+1. **Semantic Completeness Gating:** Enforce that all fundamental catalog component signatures (`Button`, `Card`, `Column`, `Icon`, `Row`, `Text`, `TextField`) must remain defined within the prompt contract to defend against degenerate "prompt deletion" exploits.
+2. **Dynamic Layout Fuzzing:** Dynamically construct randomized layout expressions within `_run_local_unit_tests` to prevent candidate parsers from overfitting static golden layout verification strings.
+3. **High-Concurrency Socket Resilience:** Wrap local VLM micro-inference network queries inside `tier2_mlx.py` with exponential backoff retries to prevent socket exhaustion during parallel multi-agent search batches.
+4. **Automated Regression Snapshotting:** Configure `coordinator.py` to automatically snapshot and promote winning candidate regression test suites (`test_express.py`) into the specification baseline upon champion promotion.
 
 ## 7. Risks & mitigation protocols
 

@@ -34,6 +34,13 @@ class EvaluationGauntlet:
         import subprocess
         import json
 
+        # Gate 0: Semantic Completeness Gate (Prevent prompt deletion exploits)
+        prompt_content = gene.basic_prompt_content
+        required_signatures = ["Button", "Card", "Column", "Icon", "Row", "Text", "TextField"]
+        for sig in required_signatures:
+            if sig not in prompt_content:
+                return False
+
         # Create isolated temporary directory
         with tempfile.TemporaryDirectory() as temp_dir:
             # Write candidate code blocks to temp folder
@@ -152,6 +159,27 @@ class EvaluationGauntlet:
                     return False
                 decompiled_dsl = res.stdout.strip()
                 if "root = Column(" not in decompiled_dsl or "TextField(" not in decompiled_dsl:
+                    return False
+            except Exception:
+                return False
+
+            # Check 5: Dynamic Layout Fuzzing (Prevent static overfitting)
+            import random
+            rand_id = f"comp_{random.randint(1000, 9999)}"
+            rand_lbl = f"Label_{random.randint(100, 999)}"
+            prefix = "@" if "@" in gene.a2ui_express_content else "$"
+            dsl_fuzz = f"root = Column([{rand_id}])\n{rand_id} = TextField(\"{rand_lbl}\", {prefix}/fuzz/key)"
+            cmd_fuzz = (
+                f"import sys, json; sys.path.insert(0, '{temp_dir}'); "
+                f"from compiler import ExpressCompiler; "
+                f"print(json.dumps(ExpressCompiler('{self.catalog_path}').compile({repr(dsl_fuzz)})))"
+            )
+            try:
+                res_fuzz = subprocess.run([sys.executable, "-c", cmd_fuzz], capture_output=True, text=True, timeout=2.0)
+                if res_fuzz.returncode != 0:
+                    return False
+                env_fuzz = json.loads(res_fuzz.stdout)
+                if env_fuzz.get("version") != "v1.0":
                     return False
             except Exception:
                 return False

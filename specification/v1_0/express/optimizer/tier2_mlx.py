@@ -85,12 +85,22 @@ class LocalMLXLinter:
             headers={"Content-Type": "application/json"},
         )
 
-        try:
-            with urllib.request.urlopen(req, timeout=self.timeout_seconds) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                output_line = data["choices"][0]["message"]["content"].strip()
-        except (urllib.error.URLError, TimeoutError, KeyError, IndexError) as e:
-            return False, f"MLX server unreachable or timed out ({self.timeout_seconds}s limit): {e}"
+        import time
+        import random
+
+        output_line = ""
+        backoff_sec = random.uniform(0.5, 1.5)
+        for attempt in range(3):
+            try:
+                with urllib.request.urlopen(req, timeout=self.timeout_seconds) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    output_line = data["choices"][0]["message"]["content"].strip()
+                    break
+            except Exception as e:
+                if attempt == 2:
+                    return False, f"MLX server unreachable or timed out after 3 retries: {e}"
+                time.sleep(backoff_sec)
+                backoff_sec *= 2.0
 
         # Feed generated line into candidate compiler
         comp_cls = compiler_module if compiler_module else ExpressCompiler

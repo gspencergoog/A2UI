@@ -89,6 +89,14 @@ class EvolutionCoordinator:
                 f.truncate()
                 json.dump(board, f, indent=2)
                 fcntl.flock(f, fcntl.LOCK_UN)
+
+                # Snapshot candidate regression test suite to specification baseline
+                cand_test_path = os.path.join(artifacts_dir, "test_express.py")
+                base_test_path = os.path.join(SPEC_EXPRESS_DIR, "test_express.py")
+                if os.path.exists(cand_test_path):
+                    shutil.copy2(cand_test_path, base_test_path)
+                    print(f"Automated Regression Snapshot: Promoted {candidate_id} test suite to specification baseline.")
+
                 return True
 
             fcntl.flock(f, fcntl.LOCK_UN)
