@@ -93,7 +93,7 @@ class EvolutionCoordinator:
             prompt = (
                 f"Invoke the ExpressMutatorWorker subagent with Workspace mode 'inherit'. "
                 f"Instruct it to run precisely: {sys.executable} -m specification.v1_0.express.optimizer.worker_entrypoint "
-                f"--parent_id {champion_id} --model_name gemini-3.5-flash --thinking_budget 8192. Report completion payload back to coordinator via send_message."
+                f"--parent_id {champion_id} --model_name gemini-pro-latest --thinking_budget 8192. Report completion payload back to coordinator via send_message."
             )
             cmd = ["agentapi", "new-conversation", "--model=pro", prompt]
             print(f"Launching worker {i}/{num_workers}: {' '.join(cmd)}")

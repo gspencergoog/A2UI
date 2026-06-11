@@ -8,7 +8,9 @@ evaluation gauntlets, and computes the fitness score.
 import argparse
 import json
 import os
+import random
 import sys
+import time
 import unittest
 from typing import Any
 
@@ -27,9 +29,14 @@ SPEC_EXPRESS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 
 def run_worker_gauntlet(
-    parent_id: str, model_name: str = "gemini-3.5-flash", thinking_budget: int = 4096
+    parent_id: str, model_name: str = "gemini-pro-latest", thinking_budget: int = 8192
 ) -> dict[str, Any]:
     """Executes mutation and evaluation gauntlet, returning completion payload."""
+    # Apply randomized startup jitter (1 to 15 seconds) to prevent API socket thundering herd
+    jitter = random.uniform(1.0, 15.0)
+    print(f"Applying startup jitter ({jitter:.1f}s) to stagger heavy Pro API concurrency...")
+    time.sleep(jitter)
+
     leaderboard_path = os.path.join(SPEC_EXPRESS_DIR, "leaderboard.json")
     with open(leaderboard_path, "r", encoding="utf-8") as f:
         leaderboard = json.load(f)
@@ -80,8 +87,8 @@ def main():
 
     parser = argparse.ArgumentParser(description="A2UI Express Subagent Worker Entrypoint")
     parser.add_argument("--parent_id", default="gene_v1_0", help="Parent champion ID")
-    parser.add_argument("--model_name", default="gemini-3.5-flash", help="Target Gemini model identifier")
-    parser.add_argument("--thinking_budget", type=int, default=4096, help="Scratchpad reasoning token allocation")
+    parser.add_argument("--model_name", default="gemini-pro-latest", help="Target Gemini model identifier")
+    parser.add_argument("--thinking_budget", type=int, default=8192, help="Scratchpad reasoning token allocation")
     args = parser.parse_args()
 
     payload = run_worker_gauntlet(args.parent_id, model_name=args.model_name, thinking_budget=args.thinking_budget)

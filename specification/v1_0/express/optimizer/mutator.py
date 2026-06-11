@@ -7,6 +7,7 @@ requests to Gemini, extracts XML blocks, and verifies Python syntax integrity.
 import ast
 import re
 import sys
+import time
 import traceback
 from typing import Optional
 
@@ -25,7 +26,7 @@ from .manifest import Gene
 class ExpressMutator:
     """Orchestrates LLM mutations with automated syntax self-repair."""
 
-    def __init__(self, prompt_template_path: str, model_name: str = "gemini-3.5-flash", thinking_budget: int = 4096):
+    def __init__(self, prompt_template_path: str, model_name: str = "gemini-pro-latest", thinking_budget: int = 8192):
         """Initializes the mutator with prompt template, target model, and thinking budget.
 
         Args:
@@ -84,11 +85,28 @@ class ExpressMutator:
                     )
                     if types else None
                 )
-                response = self.client.models.generate_content(
-                    model=self.model_name,
-                    contents=messages,
-                    config=config,
-                )
+
+                # API Rate Limit Protection with Exponential Backoff
+                backoff_sec = 4.0
+                for backoff_attempt in range(5):
+                    try:
+                        response = self.client.models.generate_content(
+                            model=self.model_name,
+                            contents=messages,
+                            config=config,
+                        )
+                        break
+                    except Exception as api_err:
+                        err_str = str(api_err).lower()
+                        if "429" in err_str or "503" in err_str or "quota" in err_str or "exhausted" in err_str:
+                            print(f"API Rate limit hit on attempt {attempt} ({api_err}). Backing off for {backoff_sec}s...")
+                            time.sleep(backoff_sec)
+                            backoff_sec *= 2.0
+                        else:
+                            raise api_err
+                else:
+                    raise RuntimeError("Exhausted 5 API exponential backoff retries due to persistent rate limiting.")
+
                 output_text = response.text
 
                 a2ui_spec = self._extract_xml_block(output_text, "a2ui_express.md")
