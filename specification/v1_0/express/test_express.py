@@ -32,6 +32,8 @@ class TestExpressPipeline(unittest.TestCase):
         prompt = generator.generate_prompt()
         self.assertIn("A component that allows selecting one or more options", prompt)
         self.assertIn("The ID of the child component", prompt)
+        self.assertIn("Formats a number as a currency string", prompt)
+        self.assertIn("ISO 4217 currency code", prompt)
 
     def test_compilation_and_decompilation_basic(self):
         """Validates parsing and mapping basic components and validations."""

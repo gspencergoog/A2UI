@@ -298,7 +298,13 @@ class EvaluationGauntlet:
 
         # Gate 1.5: Mandatory Catalog Description Preservation Check
         prompt_content = candidate.basic_prompt_content
-        if "A component that allows selecting one or more options" not in prompt_content or "The ID of the child component" not in prompt_content:
+        required_snippets = [
+            "A component that allows selecting one or more options",
+            "The ID of the child component",
+            "Formats a number as a currency string",
+            "ISO 4217 currency code",
+        ]
+        if not all(s in prompt_content for s in required_snippets):
             print(f"Candidate {candidate.gene_id} failed Description Preservation check: Catalog descriptions stripped.")
             metrics["gate_reached"] = "Tier 1.5 Failed (Descriptions Stripped)"
             return 0.0, metrics
