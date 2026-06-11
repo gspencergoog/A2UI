@@ -14,7 +14,7 @@
     "@modelcontextprotocol/ext-apps": "^1.7.4"
   },
   "devDependencies": {
-    "typescript": "^6.0.3",
+    "typescript": "5.9.3",
     "vite": "^8.0.16",
     "vite-plugin-singlefile": "^2.3.3"
   }

@@ -16,7 +16,7 @@
     "@angular/build": "^21.2.5",
     "@angular/cli": "^21.2.5",
     "@angular/compiler-cli": "^21.2.5",
-    "typescript": "~6.0.3"
+    "typescript": "5.9.3"
   },
   "scripts": {
     "build": "ng build --output-path=../dist/raw --configuration production",

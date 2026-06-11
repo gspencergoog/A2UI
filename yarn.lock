@@ -188,7 +188,7 @@ __metadata:
     karma-esbuild: "npm:^2.3.0"
     karma-jasmine: "npm:^5.1.0"
     lit: "npm:^3.3.3"
-    typescript: "npm:^6.0.3"
+    typescript: "npm:5.9.3"
     vite: "npm:^8.0.16"
     wireit: "npm:^0.14.12"
   languageName: unknown
@@ -13685,7 +13685,7 @@ __metadata:
     "@lit/context": "npm:^1.1.6"
     "@modelcontextprotocol/sdk": "npm:^1.29.0"
     lit: "npm:^3.3.3"
-    typescript: "npm:^6.0.3"
+    typescript: "npm:5.9.3"
     vite: "npm:^8.0.16"
   languageName: unknown
   linkType: soft
@@ -13723,7 +13723,7 @@ __metadata:
     js-yaml: "npm:^4.2.0"
     prettier: "npm:^3.8.4"
     tsx: "npm:^4.22.4"
-    typescript: "npm:^6.0.3"
+    typescript: "npm:5.9.3"
     winston: "npm:^3.19.0"
     yargs: "npm:^18.0.0"
     zod: "npm:^3.25.76"
@@ -14531,7 +14531,7 @@ __metadata:
     "@editorjs/paragraph": "npm:^2.11.7"
     rxjs: "npm:~7.8.2"
     tslib: "npm:^2.8.1"
-    typescript: "npm:~6.0.3"
+    typescript: "npm:5.9.3"
     zone.js: "npm:~0.16.2"
   languageName: unknown
   linkType: soft
@@ -14551,7 +14551,7 @@ __metadata:
     "@angular/platform-browser": "npm:^21.2.5"
     rxjs: "npm:~7.8.2"
     tslib: "npm:^2.8.1"
-    typescript: "npm:~6.0.3"
+    typescript: "npm:5.9.3"
     zone.js: "npm:~0.16.2"
   languageName: unknown
   linkType: soft
@@ -22294,7 +22294,7 @@ __metadata:
   resolution: "mcp-calculator-app@workspace:samples/mcp/mcp-apps-calculator/apps/src"
   dependencies:
     "@modelcontextprotocol/ext-apps": "npm:^1.7.4"
-    typescript: "npm:^6.0.3"
+    typescript: "npm:5.9.3"
     vite: "npm:^8.0.16"
     vite-plugin-singlefile: "npm:^2.3.3"
   languageName: unknown
