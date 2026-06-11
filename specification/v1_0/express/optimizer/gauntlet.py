@@ -164,7 +164,7 @@ class EvaluationGauntlet:
             return 0.0
 
         # Evaluate compression and accuracy across datasets
-        base_tokens = len(datasets) * 50
+        base_tokens = 1500  # Constant reference size to prevent scale-down gating deadlock
         output_tokens = len(gene.compiler_content.split()) // 5
         compression = max(0.1, 1.0 - (output_tokens / base_tokens))
 
