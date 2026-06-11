@@ -146,7 +146,7 @@ You MUST surround the entire A2UI Express DSL block with the sentinel tags `<a2u
    Prefix relative list scopes with '@', e.g., @firstName.
 
 6. Logic and validation: prefix client check rules with '?', e.g., ?required or
-   ?regex("^[0-9]{5}$").
+   ?regex("^[0-9]{{5}}$").
 
 7. Action events: represent server-side actions using the '!' prefix:
    !save_deal({{rep: @/form/rep}}) or !accept
