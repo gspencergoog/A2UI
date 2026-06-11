@@ -5,7 +5,9 @@ requests to Gemini, extracts XML blocks, and verifies Python syntax integrity.
 """
 
 import ast
+import os
 import re
+import subprocess
 import sys
 import time
 import traceback
@@ -211,7 +213,7 @@ class ExpressMutator:
 
                 return offspring
 
-            except (SyntaxError, ValueError) as e:
+            except Exception as e:
                 print(f"Mutation attempt {attempt} failed syntax/extraction validation: {e}")
                 if attempt == max_retries:
                     print("Max syntax self-repair retries exhausted. Discarding candidate.")

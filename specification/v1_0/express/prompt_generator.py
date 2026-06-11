@@ -135,10 +135,10 @@ You MUST surround the entire A2UI Express DSL block with the sentinel tags `<a2u
 2. The interface tree must have a single entry point assigned to the reserved variable 'root'.
 
 3. Primitives:
-   - Strings: enclose in double quotes, e.g., "label"
+   - Strings: enclose in double quotes, e.g., "label" (simple lowercase enums can be unquoted, e.g., center)
    - Numbers: write as integers or decimals, e.g., 42
    - Booleans: write true or false
-   - Null values: write null
+   - Null values: write ~
 
 4. Lists: represent as arrays, e.g., [child1, child2]
 
@@ -148,8 +148,8 @@ You MUST surround the entire A2UI Express DSL block with the sentinel tags `<a2u
 6. Logic and validation: prefix client check rules with '?', e.g., ?required or
    ?regex("^[0-9]{5}$").
 
-7. Action events: represent server-side actions using the Event helper:
-   Event("save_deal", {{rep: @/form/rep}})
+7. Action events: represent server-side actions using the '!' prefix:
+   !save_deal({{rep: @/form/rep}}) or !accept
 
 8. Nested functions: call client functions directly using catalog signatures,
    for example openUrl("https://example.com").
@@ -172,7 +172,7 @@ Use these exact positional signatures to instantiate check rules or logic functi
 <a2ui>
 root = Column([repField, valueField])
 repField = TextField("Representative", @/form/rep, "Enter name")
-valueField = TextField("Deal Value", @/form/value, "0.00", "number", [?required])
+valueField = TextField("Deal Value", @/form/value, "0.00", "number", ?required)
 @/form/rep = "John Doe"
 @/form/value = 1500.00
 </a2ui>
