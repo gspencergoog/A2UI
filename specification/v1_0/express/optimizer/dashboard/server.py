@@ -27,12 +27,19 @@ class DashboardAPIHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DASHBOARD_DIR, **kwargs)
 
-    def handle_one_request(self):
-        """Suppresses broken pipe and connection reset errors on client disconnect."""
+    def handle(self) -> None:
+        """Suppresses broken pipe and connection reset errors across request lifecycle."""
+        try:
+            super().handle()
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, OSError):
+            pass
+
+    def handle_one_request(self) -> None:
+        """Suppresses connection errors on client disconnect and closes connection."""
         try:
             super().handle_one_request()
-        except (BrokenPipeError, ConnectionResetError):
-            pass
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, OSError):
+            self.close_connection = True
 
     def _send_json_response(self, data: dict[str, Any], status_code: int = 200) -> None:
         """Serializes dictionary payload and sends HTTP JSON headers."""
@@ -160,8 +167,9 @@ class DashboardAPIHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(packet)
                 self.wfile.flush()
                 time.sleep(1.0)
-            except (BrokenPipeError, ConnectionResetError, OSError):
+            except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, OSError):
                 print("SSE Event stream client disconnected.")
+                self.close_connection = True
                 break
 
     def do_GET(self) -> None:
