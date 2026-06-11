@@ -137,18 +137,13 @@ class ExpressMutator:
                 ast.parse(compiler_code)
                 ast.parse(decompiler_code)
 
-                # Dynamically execute mutated prompt generator
+                # Dynamically execute mutated prompt generator in-memory
                 spec_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-                temp_gen_path = os.path.join(spec_dir, "prompt_generator.py")
-                with open(temp_gen_path, "w", encoding="utf-8") as f:
-                    f.write(prompt_gen_code)
-
-                run_gen_path = os.path.join(spec_dir, "run_prompt_generator.py")
-                out_prompt_path = os.path.join(spec_dir, "basic_prompt.md")
-                subprocess.run(["python3", run_gen_path, "--output", out_prompt_path], check=True)
-
-                with open(out_prompt_path, "r", encoding="utf-8") as f:
-                    basic_prompt = f.read()
+                catalog_path = os.path.join(spec_dir, "catalogs", "basic", "catalog.json")
+                namespace = {"__package__": "specification.v1_0.express"}
+                exec(prompt_gen_code, namespace)
+                generator = namespace["ExpressPromptGenerator"](catalog_path)
+                basic_prompt = generator.generate_prompt()
 
                 # Syntax is clean. Construct offspring bundle.
                 offspring = Gene(
