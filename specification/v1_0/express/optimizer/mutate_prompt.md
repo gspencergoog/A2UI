@@ -4,21 +4,19 @@ You are an expert compiler optimization agent. Your goal is to mutate the reigni
 
 ## Optimization objectives
 
-1. **Syntactic Brevity:** Propose specific grammar simplifications. For example:
-   - Remove redundant quotation marks around common string properties or enum values.
-   - Replace verbose keyword parameters with strict positional ordering.
-   - Introduce shorthand symbol overloads (e.g., prefixing `!` for primary buttons, `?` for optional fields).
-2. **Lockstep Synchrony:** You must modify all four core files simultaneously so that the mutated compiler correctly lexes and parses the mutated grammar, and the decompiler correctly translates standard JSON back into the new syntax.
-3. **AST Robustness:** The updated Python parser (`compiler.py`), decompiler (`decompiler.py`), and prompt generator (`prompt_generator.py`) must be syntactically valid Python code and parse cleanly into a clean Abstract Syntax Tree.
-4. **Targeted AST Tweaking:** When mutating `compiler.py`, DO NOT rewrite the entire class from scratch. Maintain the existing recursive-descent parser structure (`parse_column`, `parse_textfield`) exactly as written; ONLY tweak the specific character-matching strings (e.g. changing `$/` to `@` or removing quotes) to match your proposed DSL grammar.
-5. **Compile-Time Adherence:** Your mutated Python compiler MUST successfully tokenize and parse the following reference DSL syntax without raising exceptions:
+1. **Radical DSL Redesign:** You are fully empowered to redesign the DSL format entirely (e.g., Lisp s-expressions `(Column (TextField ...))`, YAML/Indentation-based structural hierarchies, Assembler-style opcode stacks, or custom shorthand overloads) to minimize token footprint.
+2. **Dynamic Feature Masking:** When updating `prompt_generator.py`, introduce dynamic pruning to filter catalog signatures based on active scenario requirements and eliminate static boilerplate.
+3. **Autonomous Structural Elision:** Modify `compiler.py` and `decompiler.py` autonomously to support advanced shorthands (such as optional trailing nulls, omitted brackets, and property packing).
+4. **Lockstep Synchrony:** You must modify all four core files simultaneously so that the mutated compiler correctly tokenizes and parses the mutated grammar, and the decompiler translates standard JSON back into the new syntax.
+5. **AST Robustness:** The updated Python parser (`compiler.py`), decompiler (`decompiler.py`), and prompt generator (`prompt_generator.py`) must be syntactically valid Python code and parse cleanly into an Abstract Syntax Tree.
+6. **Compile-Time Adherence:** Update both the compiler and decompiler to support your proposed DSL paradigm, ensuring it successfully parses your translated golden reference sample:
 
 <TIER0_GOLDEN_TARGET>
 root = Column([repField, valueField])
 repField = TextField("Representative", @/form/rep, "Enter name")
 valueField = TextField("Deal Value", @/form/value, "0.00", "number", ?required)
 </TIER0_GOLDEN_TARGET>
-6. **Mandatory Documentation Preservation:** When updating `prompt_generator.py`, you MUST ensure that all generated system prompts preserve ALL descriptions for components, component properties, functions, and function arguments exactly as written. DO NOT delete, shorten, or summarize any descriptive text or parameter usage explanations.
+7. **Mandatory Documentation Preservation:** When updating `prompt_generator.py`, you MUST ensure that all generated system prompts preserve ALL descriptions for components, component properties, functions, and function arguments exactly as written. DO NOT delete, shorten, or summarize any descriptive text or parameter usage explanations.
 
 ## Current reigning champion baseline
 
