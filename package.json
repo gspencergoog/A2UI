@@ -34,7 +34,7 @@
   "devDependencies": {
     "google-artifactregistry-auth": "^3.5.0",
     "prettier": "^3.8.4",
-    "typescript": "6.0.3",
+    "typescript": "5.9.3",
     "wireit": "^0.14.12"
   },
   "resolutions": {

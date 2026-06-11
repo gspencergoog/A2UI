@@ -27,7 +27,7 @@
     "dotenv-cli": "^11.0.0",
     "prettier": "^3.8.4",
     "tsx": "^4.22.4",
-    "typescript": "6.0.3",
+    "typescript": "5.9.3",
     "wireit": "^0.14.12",
     "yargs": "^18.0.0"
   },
@@ -46,7 +46,7 @@
     "genkitx-anthropic": "^0.30.0",
     "js-yaml": "^4.2.0",
     "winston": "^3.19.0",
-    "zod": "^4.4.3"
+    "zod": "^3.25.76"
   },
   "wireit": {
     "build": {

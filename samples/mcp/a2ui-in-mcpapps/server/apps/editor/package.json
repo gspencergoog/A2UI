@@ -4,10 +4,10 @@
   "dependencies": {
     "@a2ui/angular": "workspace:*",
     "@a2ui/markdown-it": "workspace:*",
-    "@angular/common": "^22.0.1",
-    "@angular/compiler": "^22.0.1",
-    "@angular/core": "^22.0.1",
-    "@angular/platform-browser": "^22.0.1",
+    "@angular/common": "^21.2.5",
+    "@angular/compiler": "^21.2.5",
+    "@angular/core": "^21.2.5",
+    "@angular/platform-browser": "^21.2.5",
     "@editorjs/editorjs": "^2.31.6",
     "@editorjs/paragraph": "^2.11.7",
     "rxjs": "~7.8.2",
@@ -15,9 +15,9 @@
     "zone.js": "~0.16.2"
   },
   "devDependencies": {
-    "@angular/build": "^22.0.1",
-    "@angular/cli": "^22.0.1",
-    "@angular/compiler-cli": "^22.0.1",
+    "@angular/build": "^21.2.5",
+    "@angular/cli": "^21.2.5",
+    "@angular/compiler-cli": "^21.2.5",
     "typescript": "~6.0.3"
   },
   "scripts": {
