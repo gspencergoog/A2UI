@@ -44,11 +44,20 @@ def main():
                              "basic", "catalog.json"),
         help="Path to the catalog JSON schema (default: basic catalog).")
 
+    parser.add_argument(
+        "--output",
+        help="Optional file path to serialize generated prompt (e.g. basic_prompt.md).")
+
     args = parser.parse_args()
 
     try:
         prompt_content = generate_prompt_text(args.catalog)
-        print(prompt_content)
+        if args.output:
+            with open(args.output, "w", encoding="utf-8") as f:
+                f.write(prompt_content)
+            print(f"Successfully generated prompt contract to {args.output}")
+        else:
+            print(prompt_content)
         sys.exit(0)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
