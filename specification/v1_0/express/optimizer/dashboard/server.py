@@ -117,11 +117,8 @@ class DashboardAPIHandler(http.server.SimpleHTTPRequestHandler):
                                 last_status = "Waiting"
                             elif tool_calls:
                                 last_status = "Tool"
-                        elif entry.get("type") == "PLANNER_RESPONSE":
-                            if entry.get("status") == "RUNNING":
-                                last_status = "Thinking"
-                            elif not entry.get("tool_calls"):
-                                last_status = "Done"
+                        elif entry.get("type") == "PLANNER_RESPONSE" and entry.get("status") == "RUNNING":
+                            last_status = "Thinking"
                         if "gate" in entry or "Tier" in entry.get("content", ""):
                             current_gate = entry.get("gate", "Tier 2 MLX Linting")
 
