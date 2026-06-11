@@ -6,6 +6,14 @@
       "content_hash": "9ba12f7b201c",
       "fitness_score": 0.8198,
       "metrics": {
+        "gate_reached": "Tier 3 Complete",
+        "ast_graph_stats": {
+          "total_nodes": 3120,
+          "max_depth": 16,
+          "call_density": 0.058,
+          "valid": true
+        },
+        "msifr_stage": "PassedAll",
         "output_compression": 0.65,
         "prompt_footprint_tokens": 385,
         "compilation_success": true,
