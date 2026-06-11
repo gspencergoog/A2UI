@@ -6,6 +6,7 @@ small-model check -> Tier 3 Inspect AI progressive subsets -> 3x repeated valida
 
 import json
 import os
+import shutil
 import sys
 import unittest
 from unittest.mock import patch
@@ -28,86 +29,134 @@ class EvaluationGauntlet:
         self.mlx_linter = LocalMLXLinter()
 
     def _run_local_unit_tests(self, gene: Gene) -> bool:
-        """Executes in-memory Tier 0/1 compilation checks against candidate AST logic."""
-        dummy_ns = {"__name__": "express_candidate_eval"}
-        try:
-            with patch("sys.exit", side_effect=RuntimeError), \
-                 patch("builtins.exit", side_effect=RuntimeError), \
-                 patch("builtins.quit", side_effect=RuntimeError):
-                exec(gene.compiler_content, dummy_ns)
-                exec(gene.decompiler_content, dummy_ns)
+        """Executes candidate AST logic inside an isolated subprocess sandbox to block monkeypatching."""
+        import tempfile
+        import subprocess
+        import json
 
-                comp_cls = dummy_ns.get("ExpressCompiler")
-                dec_cls = dummy_ns.get("ExpressDecompiler")
-                if not comp_cls or not dec_cls:
+        # Create isolated temporary directory
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Write candidate code blocks to temp folder
+            with open(os.path.join(temp_dir, "compiler.py"), "w", encoding="utf-8") as f:
+                f.write(gene.compiler_content)
+            with open(os.path.join(temp_dir, "decompiler.py"), "w", encoding="utf-8") as f:
+                f.write(gene.decompiler_content)
+
+            # Copy schema helper files
+            shutil.copy2(os.path.join(SPEC_EXPRESS_DIR, "schema_helper.py"), os.path.join(temp_dir, "schema_helper.py"))
+
+            # Check 1: Basic component layout and structural integrity
+            dsl1 = "root = Column([field])\nfield = TextField(\"Label\", @/key)"
+            if "@" not in gene.a2ui_express_content:
+                dsl1 = "root = Column([field])\nfield = TextField(\"Label\", $/key)"
+
+            cmd_compile1 = (
+                f"import sys, json; sys.path.insert(0, '{temp_dir}'); "
+                f"from compiler import ExpressCompiler; "
+                f"print(json.dumps(ExpressCompiler('{self.catalog_path}').compile({repr(dsl1)}, surface_id='mem_surf')))"
+            )
+            try:
+                res = subprocess.run([sys.executable, "-c", cmd_compile1], capture_output=True, text=True, timeout=2.0)
+                if res.returncode != 0:
                     return False
+                envelope = json.loads(res.stdout)
+            except Exception:
+                return False
 
-                compiler = comp_cls(self.catalog_path)
-                decompiler = dec_cls(self.catalog_path)
+            if envelope.get("version") != "v1.0":
+                return False
 
-                # Check 1: Basic component layout and structural integrity
-                dsl1 = "root = Column([field])\nfield = TextField(\"Label\", @/key)"
-                if "@" not in gene.a2ui_express_content and "$/" in gene.compiler_content:
-                    dsl1 = "root = Column([field])\nfield = TextField(\"Label\", $/key)"
+            create_surface = envelope.get("createSurface", {})
+            if create_surface.get("component") != "Column":
+                return False
 
-                envelope = compiler.compile(dsl1, surface_id="mem_surf")
-                if envelope.get("version") != "v1.0":
+            children = create_surface.get("children", [])
+            if len(children) != 1 or children[0].get("component") != "TextField":
+                return False
+
+            val = children[0].get("value")
+            if isinstance(val, dict):
+                if val.get("path") != "/key":
                     return False
+            elif val not in ("@/key", "@key", "$/key", "$key"):
+                return False
 
-                create_surface = envelope["createSurface"]
-                if create_surface.get("component") != "Column":
+            # Check 2: Action event data structures
+            dsl2 = 'root = Button("Submit Deal", "primary", Event("save_deal", {rep: @form/rep}))'
+            if "@" not in gene.a2ui_express_content:
+                dsl2 = 'root = Button("Submit Deal", "primary", Event("save_deal", {rep: $/form/rep}))'
+
+            cmd_compile2 = (
+                f"import sys, json; sys.path.insert(0, '{temp_dir}'); "
+                f"from compiler import ExpressCompiler; "
+                f"print(json.dumps(ExpressCompiler('{self.catalog_path}').compile({repr(dsl2)})))"
+            )
+            try:
+                res = subprocess.run([sys.executable, "-c", cmd_compile2], capture_output=True, text=True, timeout=2.0)
+                if res.returncode != 0:
                     return False
+                envelope2 = json.loads(res.stdout)
+            except Exception:
+                return False
 
-                children = create_surface.get("children", [])
-                if len(children) != 1 or children[0].get("component") != "TextField":
+            create_surf2 = envelope2.get("createSurface", {})
+            components = create_surf2.get("components", [create_surf2])
+            button_comp = next((c for c in components if c.get("component") == "Button"), None)
+            if not button_comp:
+                return False
+
+            if button_comp.get("variant") != "primary":
+                return False
+
+            action = button_comp.get("action", {})
+            event = action.get("event", {})
+            if event.get("name") != "save_deal":
+                return False
+
+            context = event.get("context", {})
+            rep = context.get("rep", {})
+            if rep.get("path") != "/form/rep":
+                return False
+
+            # Check 3: dataModel mapping
+            dsl3 = '@/user/age = 30\nroot = Column([])'
+            if "@" not in gene.a2ui_express_content:
+                dsl3 = '$/user/age = 30\nroot = Column([])'
+
+            cmd_compile3 = (
+                f"import sys, json; sys.path.insert(0, '{temp_dir}'); "
+                f"from compiler import ExpressCompiler; "
+                f"print(json.dumps(ExpressCompiler('{self.catalog_path}').compile({repr(dsl3)})))"
+            )
+            try:
+                res = subprocess.run([sys.executable, "-c", cmd_compile3], capture_output=True, text=True, timeout=2.0)
+                if res.returncode != 0:
                     return False
+                envelope3 = json.loads(res.stdout)
+            except Exception:
+                return False
 
-                # Verify that path bindings map strictly to path properties
-                val = children[0].get("value")
-                if isinstance(val, dict):
-                    if val.get("path") != "/key":
-                        return False
-                elif val not in ("@/key", "@key", "$/key", "$key"):
+            dm = envelope3.get("createSurface", {}).get("dataModel", {})
+            if dm.get("user", {}).get("age") != 30:
+                return False
+
+            # Check 4: Decompiler round-trip checks
+            cmd_decompile = (
+                f"import sys, json; sys.path.insert(0, '{temp_dir}'); "
+                f"from decompiler import ExpressDecompiler; "
+                f"print(ExpressDecompiler('{self.catalog_path}').decompile({repr(envelope)}))"
+            )
+            try:
+                res = subprocess.run([sys.executable, "-c", cmd_decompile], capture_output=True, text=True, timeout=2.0)
+                if res.returncode != 0:
                     return False
-
-                # Check 2: Action event data structures
-                dsl2 = 'root = Button("Submit Deal", "primary", Event("save_deal", {rep: @form/rep}))'
-                if "@" not in gene.a2ui_express_content and "$/" in gene.compiler_content:
-                    dsl2 = 'root = Button("Submit Deal", "primary", Event("save_deal", {rep: $/form/rep}))'
-
-                envelope2 = compiler.compile(dsl2)
-                create_surf2 = envelope2.get("createSurface", {})
-
-                components = create_surf2.get("components", [create_surf2])
-                button_comp = next((c for c in components if c.get("component") == "Button"), None)
-                if not button_comp:
+                decompiled_dsl = res.stdout.strip()
+                if "root = Column(" not in decompiled_dsl or "TextField(" not in decompiled_dsl:
                     return False
+            except Exception:
+                return False
 
-                if button_comp.get("variant") != "primary":
-                    return False
-
-                action = button_comp.get("action", {})
-                event = action.get("event", {})
-                if event.get("name") != "save_deal":
-                    return False
-
-                context = event.get("context", {})
-                rep = context.get("rep", {})
-                if rep.get("path") != "/form/rep":
-                    return False
-
-                # Check 3: dataModel mapping
-                dsl3 = '@/user/age = 30\nroot = Column([])'
-                if "@" not in gene.a2ui_express_content and "$/" in gene.compiler_content:
-                    dsl3 = '$/user/age = 30\nroot = Column([])'
-                envelope3 = compiler.compile(dsl3)
-                dm = envelope3.get("createSurface", {}).get("dataModel", {})
-                if dm.get("user", {}).get("age") != 30:
-                    return False
-
-                return True
-        except Exception:
-            return False
+            return True
 
     def _simulate_inspect_ai_subset(self, datasets: list[dict[str, Any]], gene: Gene) -> float:
         """Simulates Inspect AI task scoring across layout matrices."""
@@ -123,7 +172,7 @@ class EvaluationGauntlet:
         prompt_compactness = max(0.1, 1.0 - (prompt_tokens / 1000.0))
 
         # Formula: F = (E * A) * [w_s*S + w_out*T_out + w_prompt*T_prompt]
-        score = 0.35 * 1.0 + 0.35 * compression + 0.15 * prompt_compactness
+        score = 0.50 * 1.0 + 0.35 * compression + 0.15 * prompt_compactness
         return round(score, 4)
 
     def evaluate_candidate(self, candidate: Gene, reigning_champion_score: float) -> tuple[float, dict[str, Any]]:
