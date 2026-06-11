@@ -283,6 +283,16 @@ title = Text(@/title, h3)"""
         compiled_envelope_2 = compiler.compile(decompiled_dsl, surface_id="test_data_surf")
         self.assertEqual(compiled_envelope_2["createSurface"]["dataModel"], data_model)
 
+    def test_feature_mask_modular_prompt(self):
+        """Verifies modular prompt generation filtering using feature masks."""
+        generator_full = ExpressPromptGenerator(self.catalog_path, feature_mask={"accessibility", "weight"})
+        prompt_full = generator_full.generate_prompt()
+        self.assertIn("accessibility?", prompt_full)
+
+        generator_min = ExpressPromptGenerator(self.catalog_path, feature_mask=set())
+        prompt_min = generator_min.generate_prompt()
+        self.assertNotIn("accessibility?", prompt_min)
+
 
 if __name__ == "__main__":
     unittest.main()

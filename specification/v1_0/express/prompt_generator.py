@@ -4,6 +4,7 @@ Compiles standard JSON catalog schemas into compact plain-text signatures and
 instruction blocks for on-device models (e.g., Gemma 4).
 """
 
+from typing import Optional
 from .schema_helper import CatalogSchemaHelper
 
 
@@ -17,13 +18,15 @@ class ExpressPromptGenerator:
         helper: A CatalogSchemaHelper instance loaded with the target catalog.
     """
 
-    def __init__(self, catalog_path: str):
+    def __init__(self, catalog_path: str, feature_mask: Optional[set[str]] = None):
         """Initializes the generator with the specified catalog path.
 
         Args:
             catalog_path: The absolute filesystem path to the catalog JSON file.
+            feature_mask: Optional set of feature modules to include.
         """
-        self.helper = CatalogSchemaHelper(catalog_path)
+        self.helper = CatalogSchemaHelper(catalog_path, feature_mask=feature_mask)
+        self.feature_mask = feature_mask
 
     def generate_component_signatures(self) -> str:
         """Compiles component definitions into clean function-like signatures.

@@ -5,6 +5,8 @@ signatures, and requirements directly from standard catalog JSON schemas.
 """
 
 import json
+import os
+from typing import Optional
 
 
 class CatalogSchemaHelper:
@@ -20,17 +22,30 @@ class CatalogSchemaHelper:
         functions: A dictionary mapping function names to their catalog schemas.
     """
 
-    def __init__(self, catalog_path: str):
+    def __init__(self, catalog_path: str, feature_mask: Optional[set[str]] = None):
         """Initializes the helper by loading and parsing the catalog file.
 
         Args:
             catalog_path: The absolute filesystem path to the catalog JSON file.
+            feature_mask: Optional feature module inclusion mask.
         """
         self.catalog_path = catalog_path
+        self.feature_mask = feature_mask
         with open(catalog_path, "r", encoding="utf-8") as f:
             self.catalog = json.load(f)
         self.components = self.catalog.get("components", {})
         self.functions = self.catalog.get("functions", {})
+        self.defs = self.catalog.get("$defs", {})
+        
+        self.common_defs = {}
+        common_path = os.path.join(
+            os.path.dirname(catalog_path), "..", "..", "json", "common_types.json"
+        )
+        if os.path.exists(common_path):
+            with open(common_path, "r", encoding="utf-8") as f:
+                common_data = json.load(f)
+                self.common_defs = common_data.get("$defs", {})
+
         self._load_mappings()
 
     def _load_mappings(self):
@@ -54,6 +69,21 @@ class CatalogSchemaHelper:
                     ref = sub["$ref"]
                     if "Checkable" in ref:
                         is_checkable = True
+                    
+                    ref_name = ref.split("/")[-1]
+                    if ref.startswith("#"):
+                        resolved = self.defs.get(ref_name, {})
+                        if "properties" in resolved:
+                            props.update(resolved["properties"])
+                        if "required" in resolved:
+                            reqs.extend(resolved["required"])
+                    elif "common_types.json" in ref and self.common_defs:
+                        resolved = self.common_defs.get(ref_name, {})
+                        if "properties" in resolved:
+                            props.update(resolved["properties"])
+                        if "required" in resolved:
+                            reqs.extend(resolved["required"])
+
                 if "properties" in sub:
                     props.update(sub["properties"])
                 if "required" in sub:
@@ -62,8 +92,13 @@ class CatalogSchemaHelper:
             # Filter out structural properties component and id
             ordered_keys = []
             for k in props:
-                if k not in ["component", "id"]:
-                    ordered_keys.append(k)
+                if k in ["component", "id", "checks"]:
+                    continue
+                if k == "accessibility" and (not self.feature_mask or "accessibility" not in self.feature_mask):
+                    continue
+                if k == "weight" and (not self.feature_mask or "weight" not in self.feature_mask):
+                    continue
+                ordered_keys.append(k)
 
             # If it's checkable, add checks at the end
             if is_checkable:
