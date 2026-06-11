@@ -38,14 +38,43 @@ class ExpressPromptGenerator:
         for name in sorted(self.helper.component_properties.keys()):
             props = self.helper.get_component_properties(name)
             reqs = self.helper.get_component_required(name)
+            comp_schema = self.helper.components.get(name, {})
             ordered_args = []
+            param_docs = []
+            
+            sub_schemas = [comp_schema]
+            if "allOf" in comp_schema:
+                sub_schemas.extend(comp_schema["allOf"])
+            
             for p in props:
                 is_req = p in reqs
                 opt_suffix = "" if is_req else "?"
                 ordered_args.append(f"{p}{opt_suffix}")
-            sig = f"• {name}({', '.join(ordered_args)})"
-            signatures.append(sig)
-        return "\n".join(signatures)
+                
+                prop_def = {}
+                for sub in sub_schemas:
+                    if "properties" in sub and p in sub["properties"]:
+                        prop_def = sub["properties"][p]
+                        break
+                        
+                p_desc = prop_def.get("description", "").strip()
+                if p_desc:
+                    first_sentence = p_desc.split("\n")[0]
+                    param_docs.append(f"  - {p}: {first_sentence}")
+                    
+            sig = [f"• {name}({', '.join(ordered_args)})"]
+            desc = ""
+            for sub in sub_schemas:
+                if "description" in sub:
+                    desc = sub["description"].strip()
+                    break
+            if desc:
+                sig.append(f"  {desc.split(chr(10))[0]}")
+            if param_docs:
+                sig.extend(param_docs)
+                
+            signatures.append("\n".join(sig))
+        return "\n\n".join(signatures)
 
     def generate_function_signatures(self) -> str:
         """Compiles function definitions into clean signatures.
@@ -57,14 +86,31 @@ class ExpressPromptGenerator:
         for name in sorted(self.helper.function_properties.keys()):
             props = self.helper.get_function_properties(name)
             reqs = self.helper.get_function_required(name)
+            func_schema = self.helper.functions.get(name, {})
             ordered_args = []
+            param_docs = []
+            
+            args_obj = func_schema.get("properties", {}).get("args", {}).get("properties", {})
             for p in props:
                 is_req = p in reqs
                 opt_suffix = "" if is_req else "?"
                 ordered_args.append(f"{p}{opt_suffix}")
-            sig = f"• {name}({', '.join(ordered_args)})"
-            signatures.append(sig)
-        return "\n".join(signatures)
+                
+                prop_def = args_obj.get(p, {})
+                p_desc = prop_def.get("description", "").strip()
+                if p_desc:
+                    first_sentence = p_desc.split("\n")[0]
+                    param_docs.append(f"  - {p}: {first_sentence}")
+                    
+            sig = [f"• {name}({', '.join(ordered_args)})"]
+            desc = func_schema.get("description", "").strip()
+            if desc:
+                sig.append(f"  {desc.split(chr(10))[0]}")
+            if param_docs:
+                sig.extend(param_docs)
+                
+            signatures.append("\n".join(sig))
+        return "\n\n".join(signatures)
 
     def generate_prompt(self) -> str:
         """Assembles the complete system instruction block for the LLM.
