@@ -8,6 +8,7 @@ import json
 import os
 import sys
 import unittest
+from unittest.mock import patch
 from typing import Any
 
 SPEC_EXPRESS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -28,17 +29,84 @@ class EvaluationGauntlet:
 
     def _run_local_unit_tests(self, gene: Gene) -> bool:
         """Executes in-memory Tier 0/1 compilation checks against candidate AST logic."""
-        dummy_ns = {}
+        dummy_ns = {"__name__": "express_candidate_eval"}
         try:
-            exec(gene.compiler_content, dummy_ns)
-            comp_cls = dummy_ns.get("ExpressCompiler")
-            if not comp_cls:
-                return False
-            compiler = comp_cls(self.catalog_path)
-            dsl = "root = Column([field])\nfield = TextField(\"Label\", $/key)"
-            envelope = compiler.compile(dsl, surface_id="mem_surf")
-            return envelope.get("version") == "v1.0"
-        except (SyntaxError, ValueError, KeyError, Exception):
+            with patch("sys.exit", side_effect=RuntimeError), \
+                 patch("builtins.exit", side_effect=RuntimeError), \
+                 patch("builtins.quit", side_effect=RuntimeError):
+                exec(gene.compiler_content, dummy_ns)
+                exec(gene.decompiler_content, dummy_ns)
+
+                comp_cls = dummy_ns.get("ExpressCompiler")
+                dec_cls = dummy_ns.get("ExpressDecompiler")
+                if not comp_cls or not dec_cls:
+                    return False
+
+                compiler = comp_cls(self.catalog_path)
+                decompiler = dec_cls(self.catalog_path)
+
+                # Check 1: Basic component layout and structural integrity
+                dsl1 = "root = Column([field])\nfield = TextField(\"Label\", @/key)"
+                if "@" not in gene.a2ui_express_content and "$/" in gene.compiler_content:
+                    dsl1 = "root = Column([field])\nfield = TextField(\"Label\", $/key)"
+
+                envelope = compiler.compile(dsl1, surface_id="mem_surf")
+                if envelope.get("version") != "v1.0":
+                    return False
+
+                create_surface = envelope["createSurface"]
+                if create_surface.get("component") != "Column":
+                    return False
+
+                children = create_surface.get("children", [])
+                if len(children) != 1 or children[0].get("component") != "TextField":
+                    return False
+
+                # Verify that path bindings map strictly to path properties
+                val = children[0].get("value")
+                if isinstance(val, dict):
+                    if val.get("path") != "/key":
+                        return False
+                elif val not in ("@/key", "@key", "$/key", "$key"):
+                    return False
+
+                # Check 2: Action event data structures
+                dsl2 = 'root = Button("Submit Deal", "primary", Event("save_deal", {rep: @form/rep}))'
+                if "@" not in gene.a2ui_express_content and "$/" in gene.compiler_content:
+                    dsl2 = 'root = Button("Submit Deal", "primary", Event("save_deal", {rep: $/form/rep}))'
+
+                envelope2 = compiler.compile(dsl2)
+                create_surf2 = envelope2.get("createSurface", {})
+
+                components = create_surf2.get("components", [create_surf2])
+                button_comp = next((c for c in components if c.get("component") == "Button"), None)
+                if not button_comp:
+                    return False
+
+                if button_comp.get("variant") != "primary":
+                    return False
+
+                action = button_comp.get("action", {})
+                event = action.get("event", {})
+                if event.get("name") != "save_deal":
+                    return False
+
+                context = event.get("context", {})
+                rep = context.get("rep", {})
+                if rep.get("path") != "/form/rep":
+                    return False
+
+                # Check 3: dataModel mapping
+                dsl3 = '@/user/age = 30\nroot = Column([])'
+                if "@" not in gene.a2ui_express_content and "$/" in gene.compiler_content:
+                    dsl3 = '$/user/age = 30\nroot = Column([])'
+                envelope3 = compiler.compile(dsl3)
+                dm = envelope3.get("createSurface", {}).get("dataModel", {})
+                if dm.get("user", {}).get("age") != 30:
+                    return False
+
+                return True
+        except Exception:
             return False
 
     def _simulate_inspect_ai_subset(self, datasets: list[dict[str, Any]], gene: Gene) -> float:
