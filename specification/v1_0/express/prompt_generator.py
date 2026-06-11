@@ -142,19 +142,19 @@ You MUST surround the entire A2UI Express DSL block with the sentinel tags `<a2u
 
 4. Lists: represent as arrays, e.g., [child1, child2]
 
-5. Data bindings: prefix absolute paths in the data model with '$', e.g., $/user/firstName.
-   Prefix relative list scopes with '$', e.g., $firstName.
+5. Data bindings: prefix absolute paths in the data model with '@', e.g., @/user/firstName.
+   Prefix relative list scopes with '@', e.g., @firstName.
 
 6. Logic and validation: prefix client check rules with '?', e.g., ?required or
    ?regex("^[0-9]{5}$").
 
 7. Action events: represent server-side actions using the Event helper:
-   Event("save_deal", {{rep: $/form/rep}})
+   Event("save_deal", {{rep: @/form/rep}})
 
 8. Nested functions: call client functions directly using catalog signatures,
    for example openUrl("https://example.com").
 
-9. Data model population: Assign a value directly to an absolute data path (e.g. $/path/to/key = "value") to populate or initialize values inside the shared dataModel. The value can be a primitive, array, or map.
+9. Data model population: Assign a value directly to an absolute data path (e.g. @/path/to/key = "value") to populate or initialize values inside the shared dataModel. The value can be a primitive, array, or map.
 
 ## Positional Component Signatures
 
@@ -171,10 +171,10 @@ Use these exact positional signatures to instantiate check rules or logic functi
 ```
 <a2ui>
 root = Column([repField, valueField])
-repField = TextField("Representative", $/form/rep, "Enter name")
-valueField = TextField("Deal Value", $/form/value, "0.00", "number", [?required])
-$/form/rep = "John Doe"
-$/form/value = 1500.00
+repField = TextField("Representative", @/form/rep, "Enter name")
+valueField = TextField("Deal Value", @/form/value, "0.00", "number", [?required])
+@/form/rep = "John Doe"
+@/form/value = 1500.00
 </a2ui>
 ```
 """
