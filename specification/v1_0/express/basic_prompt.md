@@ -11,8 +11,8 @@ You MUST surround the entire A2UI Express DSL block with the sentinel tags `<a2u
 2. The interface tree must have a single entry point assigned to the reserved variable 'root'.
 
 3. Primitives:
-   - Strings: enclose in double quotes, e.g., "label"
-   - Numbers: write as integers or decimals, e.g., 42
+   - Strings: enclose in double quotes (e.g. "label") or write unquoted for lowercase keywords (e.g. primary)
+   - Numbers: write as integers or decimals (e.g. 42)
    - Booleans: write true or false
    - Null values: write null
 
@@ -21,38 +21,36 @@ You MUST surround the entire A2UI Express DSL block with the sentinel tags `<a2u
 5. Data bindings: prefix absolute paths in the data model with '@', e.g., @/user/firstName.
    Prefix relative list scopes with '@', e.g., @firstName.
 
-6. Logic and validation: prefix client check rules with '?', e.g., ?required or
-   ?regex("^[0-9]{5}$").
+6. Logic and validation: prefix client check rules with '?', e.g., ?required or ?regex("^[0-9]{5}$").
 
 7. Action events: represent server-side actions using the Event helper:
    Event("save_deal", {rep: @/form/rep})
 
-8. Nested functions: call client functions directly using catalog signatures,
-   for example openUrl("https://example.com").
+8. Nested functions: call client functions directly using catalog signatures, for example openUrl("https://example.com").
 
-9. Data model population: Assign a value directly to an absolute data path (e.g. @/path/to/key = "value") to populate or initialize values inside the shared dataModel. The value can be a primitive, array, or map.
+9. Data model population: Assign a value directly to an absolute data path (e.g. @/path/to/key = "value") to populate values inside dataModel.
 
-## Positional Component Signatures
+## Positional Component Signatures (with Catalog Parameter Descriptions)
 
 Use these exact positional signatures to instantiate components. Do not output property keys:
-• AudioPlayer(url, description?)
-• Button(child, variant?, action, checks?)
-• Card(child)
-• CheckBox(label, value, checks?)
-• ChoicePicker(label?, variant?, options, value, displayStyle?, filterable?, checks?)
-• Column(children, justify?, align?)
-• DateTimeInput(value, enableDate?, enableTime?, min?, max?, label?, checks?)
-• Divider(axis?)
-• Icon(name)
-• Image(url, description?, fit?, variant?)
-• List(children, direction?, align?)
-• Modal(trigger, content)
-• Row(children, justify?, align?)
-• Slider(label?, min?, max, value, checks?)
-• Tabs(tabs)
-• Text(text, variant?)
-• TextField(label, value?, placeholder?, variant?, checks?)
-• Video(url, posterUrl?)
+• AudioPlayer(url: string [URL audio source], description?: string)
+• Button(child: ComponentId [Label text or child], variant?: "primary"|"secondary"|"text", action: Action [Event trigger], checks?: list)
+• Card(child: ComponentId [Content container])
+• CheckBox(label: DynamicString [Check label], value: DynamicBoolean [Bound state], checks?: list)
+• ChoicePicker(label?: DynamicString, variant?: string, options: DynamicStringList [Choices array], value: DynamicString [Selected value], displayStyle?: string, filterable?: boolean, checks?: list)
+• Column(children: ChildList [Vertical child array], justify?: string, align?: string)
+• DateTimeInput(value: DynamicValue, enableDate?: boolean, enableTime?: boolean, min?: DynamicValue, max?: DynamicValue, label?: DynamicString, checks?: list)
+• Divider(axis?: "horizontal"|"vertical")
+• Icon(name: DynamicString [Icon identifier])
+• Image(url: string [Image source], description?: string, fit?: string, variant?: string)
+• List(children: ChildList, direction?: string, align?: string)
+• Modal(trigger: ComponentId [Trigger button], content: ComponentId [Modal dialog content])
+• Row(children: ChildList [Horizontal child array], justify?: string, align?: string)
+• Slider(label?: DynamicString, min?: number, max: number, value: DynamicNumber, checks?: list)
+• Tabs(tabs: ChildList [Tab items])
+• Text(text: DynamicString [Display string], variant?: "h1"|"h2"|"h3"|"body"|"caption")
+• TextField(label: DynamicString [Input label], value?: DynamicString [Bound data path], placeholder?: string, variant?: string, checks?: list)
+• Video(url: string, posterUrl?: string)
 
 ## Positional Function Signatures
 
