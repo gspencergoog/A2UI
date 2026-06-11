@@ -293,6 +293,16 @@ title = Text(@/title, h3)"""
         prompt_min = generator_min.generate_prompt()
         self.assertNotIn("accessibility?", prompt_min)
 
+    def test_trailing_default_elision(self):
+        """Verifies compilation of statements with omitted trailing optional arguments."""
+        compiler = ExpressCompiler(self.catalog_path)
+        dsl = 'root = Column([item])\nitem = Text("Short")'
+        envelope = compiler.compile(dsl)
+        components = envelope["createSurface"]["components"]
+        col = next(c for c in components if c["id"] == "root")
+        self.assertIsNone(col.get("justify"))
+        self.assertIsNone(col.get("align"))
+
 
 if __name__ == "__main__":
     unittest.main()

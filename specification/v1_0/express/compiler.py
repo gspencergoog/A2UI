@@ -274,6 +274,9 @@ class ExpressCompiler:
             return None
         properties = self.helper.get_component_properties(comp_name)
         comp_dict = {"id": var_name, "component": comp_name}
+        for p in properties:
+            if p != "checks":
+                comp_dict[p] = None
         sibling_value_path = None
         for idx, arg in enumerate(args):
             if idx >= len(properties):
