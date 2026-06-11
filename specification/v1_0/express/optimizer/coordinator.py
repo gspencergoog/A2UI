@@ -17,6 +17,10 @@ SPEC_EXPRESS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 LEADERBOARD_PATH = os.path.join(SPEC_EXPRESS_DIR, "leaderboard.json")
 
 
+from .manifest import Gene
+from .gauntlet import EvaluationGauntlet
+
+
 class EvolutionCoordinator:
     """Manages blackboard file locks and bootstraps disposable worktree sandboxes."""
 
@@ -45,9 +49,10 @@ class EvolutionCoordinator:
             True if candidate achieved a new high score and was recorded, False otherwise.
         """
         candidate_id = candidate_payload.get("candidate_id")
-        new_score = candidate_payload.get("fitness_score", 0.0)
+        reported_score = candidate_payload.get("fitness_score", 0.0)
+        artifacts_dir = candidate_payload.get("artifacts_dir")
 
-        if not candidate_id or new_score == 0.0:
+        if not candidate_id or reported_score == 0.0 or not artifacts_dir:
             return False
 
         with open(self.leaderboard_path, "r+", encoding="utf-8") as f:
@@ -57,15 +62,26 @@ class EvolutionCoordinator:
             reigning_id = board.get("reigning_champion", "gene_v1_0")
             reigning_score = board.get("history", {}).get(reigning_id, {}).get("fitness_score", 0.85)
 
-            if new_score > reigning_score:
+            # Load candidate and execute strict verification pass using host's pristine tests
+            try:
+                candidate_gene = Gene.load_from_disk(artifacts_dir)
+            except Exception as e:
+                print(f"Coordinator verification failed: Unable to load candidate gene: {e}")
+                fcntl.flock(f, fcntl.LOCK_UN)
+                return False
+
+            gauntlet = EvaluationGauntlet()
+            verified_score, verified_metrics = gauntlet.evaluate_candidate(candidate_gene, reigning_score)
+
+            if verified_score > reigning_score:
                 print(f"*** NEW CHAMPION DISCOVERED: {candidate_id} ***")
                 board["reigning_champion"] = candidate_id
                 if "history" not in board:
                     board["history"] = {}
                 board["history"][candidate_id] = {
                     "parent": candidate_payload.get("parent_id"),
-                    "fitness_score": new_score,
-                    "metrics": candidate_payload.get("metrics", {}),
+                    "fitness_score": verified_score,
+                    "metrics": verified_metrics,
                     "artifacts_dir": candidate_payload.get("artifacts_dir"),
                 }
 

@@ -5,6 +5,7 @@ import os
 import shutil
 import tempfile
 import unittest
+from unittest.mock import patch
 from ..coordinator import EvolutionCoordinator
 
 
@@ -40,13 +41,17 @@ class TestEvolutionCoordinator(unittest.TestCase):
         data = self.coord.read_leaderboard_locked()
         self.assertEqual(data["reigning_champion"], "gene_base")
 
-    def test_record_champion_locked_rejection(self):
+    @patch("specification.v1_0.express.optimizer.coordinator.Gene.load_from_disk")
+    @patch("specification.v1_0.express.optimizer.coordinator.EvaluationGauntlet.evaluate_candidate")
+    def test_record_champion_locked_rejection(self, mock_eval, mock_load):
         """Verifies lower fitness scores or failed runs are discarded."""
+        mock_eval.return_value = (0.80, {"gate_reached": "Tier 3 Complete"})
         inferior_payload = {
             "candidate_id": "gene_inferior",
             "parent_id": "gene_base",
             "status": "success",
             "fitness_score": 0.80,
+            "artifacts_dir": "/path/to/artifacts",
         }
         recorded = self.coord.record_champion_locked(inferior_payload)
         self.assertFalse(recorded)
@@ -55,8 +60,11 @@ class TestEvolutionCoordinator(unittest.TestCase):
         self.assertEqual(board["reigning_champion"], "gene_base")
         self.assertNotIn("gene_inferior", board["history"])
 
-    def test_record_champion_locked_success(self):
+    @patch("specification.v1_0.express.optimizer.coordinator.Gene.load_from_disk")
+    @patch("specification.v1_0.express.optimizer.coordinator.EvaluationGauntlet.evaluate_candidate")
+    def test_record_champion_locked_success(self, mock_eval, mock_load):
         """Verifies candidate achieving higher fitness score atomically unseats champion."""
+        mock_eval.return_value = (0.95, {"compression": 0.7})
         superior_payload = {
             "candidate_id": "gene_superior",
             "parent_id": "gene_base",
