@@ -9,7 +9,7 @@ import os
 import sys
 import urllib.error
 import urllib.request
-from typing import Optional
+from typing import Any, Optional
 
 # Support direct execution from worktree root
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
@@ -25,7 +25,7 @@ class LocalMLXLinter:
     def __init__(
         self,
         endpoint_url: str = "http://localhost:8080/v1/chat/completions",
-        model_name: str = "gemma-2b-it",
+        model_name: str = "mlx-community/gemma-4-e2b-it-4bit",
         timeout_seconds: float = 2.0,
         max_tokens: int = 30,
     ):
