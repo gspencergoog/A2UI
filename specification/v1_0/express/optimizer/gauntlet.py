@@ -82,7 +82,7 @@ class EvaluationGauntlet:
                 return False
 
             # Check 2: Action event data structures
-            dsl2 = 'root = Button("Submit Deal", "primary", Event("save_deal", {rep: @form/rep}))'
+            dsl2 = 'root = Button("Submit Deal", "primary", Event("save_deal", {rep: @/form/rep}))'
             if "@" not in gene.a2ui_express_content:
                 dsl2 = 'root = Button("Submit Deal", "primary", Event("save_deal", {rep: $/form/rep}))'
 
