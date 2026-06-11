@@ -16,7 +16,7 @@ SPEC_EXPRESS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 CATALOG_PATH = os.path.join(SPEC_EXPRESS_DIR, "..", "catalogs", "basic", "catalog.json")
 
 import ast
-from .inspect_suite.layout_tasks import COMPLETE_DATASETS, REPRESENTATIVE_DATASETS, SMOKE_DATASETS
+from .inspect_suite.layout_tasks import COMPLETE_DATASETS, REPRESENTATIVE_DATASETS, SMOKE_DATASETS, VALIDATION_DATASETS
 from .manifest import Gene
 from .tier2_mlx import LocalMLXLinter
 
@@ -332,6 +332,11 @@ class EvaluationGauntlet:
             # Record strictly the lowest score among the 3 verification runs
             official_score = min(verification_runs)
             print(f"Official robust score recorded after 3x validation: {official_score}")
+            
+            # Evaluate generalization on held-back validation partition
+            val_score = self._simulate_inspect_ai_subset(VALIDATION_DATASETS, candidate)
+            print(f"  Holdout validation partition generalization score: {val_score}")
+            metrics["holdout_validation_score"] = val_score
         else:
             official_score = rep_score
 
