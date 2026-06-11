@@ -45,7 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("compProgressBar").style.width = `${Math.min(100, Math.max(0, compPct))}%`;
 
             const promptTokens = metrics.prompt_footprint_tokens || 385;
-            document.getElementById("promptScore").innerHTML = `${promptTokens} <span style="font-size: 1rem; font-weight: 400; color: var(--text-muted);">/ 1000 max</span>`;
+            document.getElementById('promptScore').innerHTML =
+              `${promptTokens} <span style="font-size: 1rem; font-weight: 400; color: var(--text-muted);"></span>`;
             const promptPct = Math.max(0, 100 - (promptTokens / 10)).toFixed(1);
             document.getElementById("promptPctText").textContent = `${promptPct}%`;
             document.getElementById("promptProgressBar").style.width = `${Math.min(100, Math.max(0, promptPct))}%`;
