@@ -34,24 +34,45 @@ valueField = TextField("Deal Value", @/form/value, "0.00", "number", ?required)
 {DECOMPILER_CONTENT}
 </REIGNING_CHAMPION>
 
-## Output contract
+## Output contract (Surgical Diff Patches)
 
-You must respond with precisely four XML blocks containing the fully updated, drop-in replacement file contents. Do not include introductory filler, markdown backticks outside the XML blocks, or high-level summaries.
+Instead of regurgitating entire source files, you must output surgical search-and-replace patch blocks for the code files (`prompt_generator_patch`, `compiler_patch`, `decompiler_patch`).
+
+### Patch Formatting Rules:
+- Each patch block can contain one or more `<target>` / `<replacement>` pairs.
+- `<target>` MUST exactly match a unique contiguous block of existing lines, including all leading indentation spaces.
+- Never use placeholders, truncated lines, or ellipses (`...`) inside `<target>` or `<replacement>`, unless they are literally part of the code.
+- Include two unchanged anchor lines above and two unchanged anchor lines below the edit to guarantee uniqueness, in both the target and replacement. If the lines are at the beginning or end of a file, include as many as are available.
 
 <OUTPUT_CONTRACT>
 <a2ui_express.md>
 ...fully updated markdown specification...
 </a2ui_express.md>
 
-<prompt_generator.py>
-...fully updated Python prompt generator class...
-</prompt_generator.py>
+<prompt_generator_patch>
+<target>
+exact existing lines to replace in prompt_generator.py
+</target>
+<replacement>
+new replacement code
+</replacement>
+</prompt_generator_patch>
 
-<compiler.py>
-...fully updated Python compiler logic...
-</compiler.py>
+<compiler_patch>
+<target>
+exact existing lines to replace in compiler.py
+</target>
+<replacement>
+new replacement code
+</replacement>
+</compiler_patch>
 
-<decompiler.py>
-...fully updated Python decompiler logic...
-</decompiler.py>
+<decompiler_patch>
+<target>
+exact existing lines to replace in decompiler.py
+</target>
+<replacement>
+new replacement code
+</replacement>
+</decompiler_patch>
 </OUTPUT_CONTRACT>
