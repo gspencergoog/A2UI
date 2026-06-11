@@ -1110,17 +1110,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/cdk@npm:^20.2.11":
-  version: 20.2.14
-  resolution: "@angular/cdk@npm:20.2.14"
+"@angular/cdk@npm:^21.2.5":
+  version: 21.2.14
+  resolution: "@angular/cdk@npm:21.2.14"
   dependencies:
     parse5: "npm:^8.0.0"
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/common": ^20.0.0 || ^21.0.0
-    "@angular/core": ^20.0.0 || ^21.0.0
+    "@angular/common": ^21.0.0 || ^22.0.0
+    "@angular/core": ^21.0.0 || ^22.0.0
+    "@angular/platform-browser": ^21.0.0 || ^22.0.0
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/8f6463252d942cc2a62b861fcb206abeca097e89018191c7d8f390187a7ff6917ee42918e53b4da40e2f9d407fb42bb94b515d82e1daa17fa0c7be4d4fce6de8
+  checksum: 10c0/9c52a7942d8758ae0659583762ab6a56cde4fb97e3f6b47fca80e2bb0d99c4e9925a45136eefbb1442b98fd781f211fbe788adc0da2c091a5e58687d3818042f
   languageName: node
   linkType: hard
 
@@ -1231,33 +1232,33 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@angular/google-maps@npm:^20.2.11":
-  version: 20.2.14
-  resolution: "@angular/google-maps@npm:20.2.14"
+"@angular/google-maps@npm:^21.2.5":
+  version: 21.2.14
+  resolution: "@angular/google-maps@npm:21.2.14"
   dependencies:
     "@types/google.maps": "npm:^3.54.10"
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/common": ^20.0.0 || ^21.0.0
-    "@angular/core": ^20.0.0 || ^21.0.0
+    "@angular/common": ^21.0.0 || ^22.0.0
+    "@angular/core": ^21.0.0 || ^22.0.0
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/4e5a1ecbdb1805428d496bbc59341fd59d1313087bad7464dad335230fed6860fc3cac870450d23c4749d7371b7de99dff72130a76c288a7645c226464e78209
+  checksum: 10c0/125c4748224b445c4782774948cbe464a9a514a93b6216f47f49dd50d6ad7fbfdd22e9d75fbf0c2f9a9efee6f8ba52e0824343c48d63aca020ff788f905b17e2
   languageName: node
   linkType: hard
 
-"@angular/material@npm:^20.2.11":
-  version: 20.2.14
-  resolution: "@angular/material@npm:20.2.14"
+"@angular/material@npm:^21.2.5":
+  version: 21.2.14
+  resolution: "@angular/material@npm:21.2.14"
   dependencies:
     tslib: "npm:^2.3.0"
   peerDependencies:
-    "@angular/cdk": 20.2.14
-    "@angular/common": ^20.0.0 || ^21.0.0
-    "@angular/core": ^20.0.0 || ^21.0.0
-    "@angular/forms": ^20.0.0 || ^21.0.0
-    "@angular/platform-browser": ^20.0.0 || ^21.0.0
+    "@angular/cdk": 21.2.14
+    "@angular/common": ^21.0.0 || ^22.0.0
+    "@angular/core": ^21.0.0 || ^22.0.0
+    "@angular/forms": ^21.0.0 || ^22.0.0
+    "@angular/platform-browser": ^21.0.0 || ^22.0.0
     rxjs: ^6.5.3 || ^7.4.0
-  checksum: 10c0/6acfc033f7817f0237968fcc5e24500d949afecf88e3d6e20fcbcdeeac4747942a97e210475511d96db1157519df4e5089d8a36e2f1ad53fad5169bb452c0b40
+  checksum: 10c0/5d2e45790817f944c840ae52bcb70195bcfe56f2c3e2530719a6bb08ee865eedcd40f8466f7c9baa96b72057539a44cd7728efd680eb50ed5af55a573825b5f6
   languageName: node
   linkType: hard
 
@@ -13889,15 +13890,15 @@ __metadata:
     "@a2ui/markdown-it": "workspace:*"
     "@a2ui/web_core": "workspace:*"
     "@angular/build": "npm:^21.2.5"
-    "@angular/cdk": "npm:^22.0.1"
+    "@angular/cdk": "npm:^21.2.5"
     "@angular/cli": "npm:^21.2.5"
     "@angular/common": "npm:^21.2.5"
     "@angular/compiler": "npm:^21.2.5"
     "@angular/compiler-cli": "npm:^21.2.5"
     "@angular/core": "npm:^21.2.5"
     "@angular/forms": "npm:^21.2.5"
-    "@angular/google-maps": "npm:^22.0.1"
-    "@angular/material": "npm:^22.0.1"
+    "@angular/google-maps": "npm:^21.2.5"
+    "@angular/material": "npm:^21.2.5"
     "@angular/platform-browser": "npm:^21.2.5"
     "@angular/platform-server": "npm:^21.2.5"
     "@angular/router": "npm:^21.2.5"
@@ -15126,7 +15127,7 @@ __metadata:
     prettier: "npm:^3.8.4"
     rxjs: "npm:~7.8.2"
     tslib: "npm:^2.8.1"
-    typescript: "npm:~6.0.3"
+    typescript: "npm:5.9.3"
     vitest: "npm:^4.1.8"
   languageName: unknown
   linkType: soft
