@@ -64,9 +64,13 @@ class ExpressMutator:
             print("Warning: google-genai SDK not available. Skipping mutation API call.")
             return None
 
+        prompt_gen_path = os.path.join(os.path.dirname(__file__), "..", "prompt_generator.py")
+        with open(prompt_gen_path, "r", encoding="utf-8") as f:
+            prompt_gen_content = f.read()
+
         prompt = self.prompt_template.format(
             A2UI_EXPRESS_CONTENT=champion.a2ui_express_content,
-            BASIC_PROMPT_CONTENT=champion.basic_prompt_content,
+            PROMPT_GENERATOR_CONTENT=prompt_gen_content,
             COMPILER_CONTENT=champion.compiler_content,
             DECOMPILER_CONTENT=champion.decompiler_content,
         )
@@ -119,16 +123,30 @@ class ExpressMutator:
                 output_text = response.text
 
                 a2ui_spec = self._extract_xml_block(output_text, "a2ui_express.md")
-                basic_prompt = self._extract_xml_block(output_text, "basic_prompt.md")
+                prompt_gen_code = self._extract_xml_block(output_text, "prompt_generator.py")
                 compiler_code = self._extract_xml_block(output_text, "compiler.py")
                 decompiler_code = self._extract_xml_block(output_text, "decompiler.py")
 
-                if not all([a2ui_spec, basic_prompt, compiler_code, decompiler_code]):
+                if not all([a2ui_spec, prompt_gen_code, compiler_code, decompiler_code]):
                     raise ValueError("Failed to extract all four mandatory XML blocks.")
 
                 # AST Robustness Gate (Self-Repair Trigger)
+                ast.parse(prompt_gen_code)
                 ast.parse(compiler_code)
                 ast.parse(decompiler_code)
+
+                # Dynamically execute mutated prompt generator
+                spec_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+                temp_gen_path = os.path.join(spec_dir, "prompt_generator.py")
+                with open(temp_gen_path, "w", encoding="utf-8") as f:
+                    f.write(prompt_gen_code)
+
+                run_gen_path = os.path.join(spec_dir, "run_prompt_generator.py")
+                out_prompt_path = os.path.join(spec_dir, "basic_prompt.md")
+                subprocess.run(["python3", run_gen_path, "--output", out_prompt_path], check=True)
+
+                with open(out_prompt_path, "r", encoding="utf-8") as f:
+                    basic_prompt = f.read()
 
                 # Syntax is clean. Construct offspring bundle.
                 offspring = Gene(
