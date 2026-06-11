@@ -33,11 +33,16 @@
   },
   "devDependencies": {
     "google-artifactregistry-auth": "^3.5.0",
-    "prettier": "^3.5.0",
-    "typescript": "5.9.3",
-    "wireit": "^0.15.0-pre.2"
+    "prettier": "^3.8.4",
+    "typescript": "6.0.3",
+    "wireit": "^0.14.12"
   },
   "resolutions": {
+    "@playwright/test": "1.58.1",
+    "typescript": "5.9.3",
+    "zod": "^3.25.76",
+    "hono": "^4.11.10",
+    "react-resizable-panels": "^3.0.6",
     "@a2ui/web_core": "workspace:*",
     "@a2ui/lit": "workspace:*",
     "@a2ui/angular": "workspace:*",
@@ -52,6 +57,9 @@
     "@angular/ssr": "^21.2.5",
     "@angular/build": "^21.2.5",
     "@angular/cli": "^21.2.5",
-    "@angular/forms": "^21.2.5"
+    "@angular/forms": "^21.2.5",
+    "@angular/cdk": "^20.2.11",
+    "@angular/google-maps": "^20.2.11",
+    "@angular/material": "^20.2.11"
   }
 }

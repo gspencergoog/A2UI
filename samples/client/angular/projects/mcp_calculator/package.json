@@ -15,7 +15,7 @@
     "@a2ui/web_core": "workspace:*"
   },
   "devDependencies": {
-    "wireit": "^0.15.0-pre.2"
+    "wireit": "^0.14.12"
   },
   "wireit": {
     "build": {

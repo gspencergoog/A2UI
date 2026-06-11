@@ -9,7 +9,7 @@
     "@angular/platform-browser": "^21.2.5"
   },
   "dependencies": {
-    "tslib": "^2.3.0"
+    "tslib": "^2.8.1"
   },
   "scripts": {
     "build": "wireit",
@@ -20,7 +20,7 @@
     "lint:fix": "yarn --cwd ../.. lint:fix"
   },
   "devDependencies": {
-    "wireit": "^0.15.0-pre.2"
+    "wireit": "^0.14.12"
   },
   "sideEffects": false,
   "wireit": {

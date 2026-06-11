@@ -4,21 +4,21 @@
   "dependencies": {
     "@a2ui/angular": "workspace:*",
     "@a2ui/markdown-it": "workspace:*",
-    "@angular/common": "^21.2.0",
-    "@angular/compiler": "^21.2.0",
-    "@angular/core": "^21.2.0",
-    "@angular/platform-browser": "^21.2.0",
-    "@editorjs/editorjs": "^2.30.0",
-    "@editorjs/paragraph": "^2.11.6",
-    "rxjs": "~7.8.0",
-    "tslib": "^2.3.0",
-    "zone.js": "~0.15.0"
+    "@angular/common": "^22.0.1",
+    "@angular/compiler": "^22.0.1",
+    "@angular/core": "^22.0.1",
+    "@angular/platform-browser": "^22.0.1",
+    "@editorjs/editorjs": "^2.31.6",
+    "@editorjs/paragraph": "^2.11.7",
+    "rxjs": "~7.8.2",
+    "tslib": "^2.8.1",
+    "zone.js": "~0.16.2"
   },
   "devDependencies": {
-    "@angular/build": "^21.2.0",
-    "@angular/cli": "^21.2.0",
-    "@angular/compiler-cli": "^21.2.0",
-    "typescript": "~5.9.2"
+    "@angular/build": "^22.0.1",
+    "@angular/cli": "^22.0.1",
+    "@angular/compiler-cli": "^22.0.1",
+    "typescript": "~6.0.3"
   },
   "scripts": {
     "build": "ng build --output-path=../dist/raw --configuration production",
