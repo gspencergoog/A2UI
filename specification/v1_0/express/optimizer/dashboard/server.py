@@ -27,6 +27,13 @@ class DashboardAPIHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DASHBOARD_DIR, **kwargs)
 
+    def handle_one_request(self):
+        """Suppresses broken pipe and connection reset errors on client disconnect."""
+        try:
+            super().handle_one_request()
+        except (BrokenPipeError, ConnectionResetError):
+            pass
+
     def _send_json_response(self, data: dict[str, Any], status_code: int = 200) -> None:
         """Serializes dictionary payload and sends HTTP JSON headers."""
         payload = json.dumps(data, indent=2).encode("utf-8")
