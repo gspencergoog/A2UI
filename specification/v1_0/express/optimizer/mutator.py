@@ -107,7 +107,7 @@ class ExpressMutator:
                         break
                     except Exception as api_err:
                         err_str = str(api_err).lower()
-                        if "429" in err_str or "503" in err_str or "quota" in err_str or "exhausted" in err_str:
+                        if any(k in err_str for k in ("429", "503", "504", "quota", "exhausted", "reset", "connection", "timeout", "readerror")):
                             print(f"API Rate limit hit on attempt {attempt} ({api_err}). Backing off for {backoff_sec}s...")
                             time.sleep(backoff_sec)
                             backoff_sec *= 2.0
