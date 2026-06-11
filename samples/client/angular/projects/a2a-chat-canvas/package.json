@@ -20,7 +20,7 @@
     "lint:fix": "yarn --cwd ../.. lint:fix"
   },
   "devDependencies": {
-    "wireit": "^0.14.12"
+    "wireit": "^0.15.0-pre.2"
   },
   "sideEffects": false,
   "wireit": {

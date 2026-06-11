@@ -26,6 +26,7 @@
     "build:all": "yarn workspaces foreach -A -p --topological-dev run build",
     "test:all": "yarn workspaces foreach -A -p --topological-dev run test",
     "lint:all": "yarn workspaces foreach -A -p --topological-dev run lint",
+    "lint:deps": "syncpack list-mismatches",
     "lint:fix:all": "yarn workspaces foreach -A -p --topological-dev run lint:fix",
     "format:all": "prettier --config .prettierrc --write .",
     "format:check:all": "prettier --config .prettierrc --check .",
@@ -34,8 +35,9 @@
   "devDependencies": {
     "google-artifactregistry-auth": "^3.5.0",
     "prettier": "^3.8.4",
+    "syncpack": "^13.0.0",
     "typescript": "5.9.3",
-    "wireit": "^0.14.12"
+    "wireit": "^0.15.0-pre.2"
   },
   "resolutions": {
     "@playwright/test": "1.58.1",
