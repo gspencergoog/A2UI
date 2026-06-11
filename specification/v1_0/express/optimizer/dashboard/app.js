@@ -127,12 +127,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const statusText = ag.status || "Thinking";
             if (badge.textContent !== statusText) {
                 badge.textContent = statusText;
-                let bClass = "running";
-                if (statusText === "Done" || statusText === "DONE") bClass = "success";
-                else if (statusText === "Waiting") bClass = "waiting";
-                else if (statusText === "Error") bClass = "error";
-                badge.className = `agent-status-badge ${bClass}`;
             }
+            let bClass = "running";
+            if (statusText === "Done" || statusText === "DONE") bClass = "success";
+            else if (statusText === "Waiting") bClass = "waiting";
+            else if (statusText === "Error") bClass = "error";
+            else if (statusText === "Tool") bClass = "tool";
+            badge.className = `agent-status-badge ${bClass}`;
 
             const gateSpan = card.querySelector(".current-gate");
             const gateText = ag.current_gate || "Tier 0/1 Unit Tests";
