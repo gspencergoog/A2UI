@@ -80,9 +80,10 @@ class DashboardAPIHandler(http.server.SimpleHTTPRequestHandler):
                 last_status = "RUNNING"
                 current_gate = "Tier 0/1 Unit Tests"
 
-                # Read last 50 lines of transcript
+                # Read transcript
                 with open(log_path, "r", encoding="utf-8", errors="ignore") as f:
-                    lines = f.readlines()[-50:]
+                    raw_content = f.read()
+                    lines = raw_content.splitlines()[-100:]
 
                 for line in lines:
                     try:
@@ -105,7 +106,7 @@ class DashboardAPIHandler(http.server.SimpleHTTPRequestHandler):
                     except (json.JSONDecodeError, KeyError):
                         continue
 
-                if last_thinking or "ExpressMutatorWorker" in "".join(lines):
+                if last_thinking or "ExpressMutatorWorker" in raw_content:
                     agents.append({
                         "conversation_id": conv_id[:12],
                         "status": last_status,
