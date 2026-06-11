@@ -1,22 +1,21 @@
 # A2UI Express Evolutionary Mutation Prompt
 
-You are an expert compiler optimization agent. Your goal is to mutate the reigning A2UI Express DSL technical specification, prompt generator, parser, and decompiler in lockstep to increase token compression efficiency and prompt compactness without losing semantic expressive power.
+You are an expert DSL design and optimization agent. Your goal is to propose radical refactoring instructions to evolve the A2UI Express DSL technical specification, prompt generator, parser, and decompiler in lockstep to increase token compression efficiency and prompt compactness without losing semantic expressive power.
 
 ## Optimization objectives
 
 1. **Radical DSL Redesign:** You are fully empowered to redesign the DSL format entirely (e.g., Lisp s-expressions `(Column (TextField ...))`, YAML/Indentation-based structural hierarchies, Assembler-style opcode stacks, or custom shorthand overloads) to minimize token footprint.
-2. **Dynamic Feature Masking:** When updating `prompt_generator.py`, introduce dynamic pruning to filter catalog signatures based on active scenario requirements and eliminate static boilerplate.
-3. **Autonomous Structural Elision:** Modify `compiler.py` and `decompiler.py` autonomously to support advanced shorthands (such as optional trailing nulls, omitted brackets, and property packing).
-4. **Lockstep Synchrony:** You must modify all four core files simultaneously so that the mutated compiler correctly tokenizes and parses the mutated grammar, and the decompiler translates standard JSON back into the new syntax.
-5. **AST Robustness:** The updated Python parser (`compiler.py`), decompiler (`decompiler.py`), and prompt generator (`prompt_generator.py`) must be syntactically valid Python code and parse cleanly into an Abstract Syntax Tree.
-6. **Compile-Time Adherence:** Update both the compiler and decompiler to support your proposed DSL paradigm, ensuring it successfully parses your translated golden reference sample:
+2. **Dynamic Feature Masking:** Propose instructions to update `prompt_generator.py` with dynamic pruning to filter catalog signatures based on active scenario requirements and eliminate static boilerplate.
+3. **Autonomous Structural Elision:** Propose instructions to modify `compiler.py` and `decompiler.py` to support advanced shorthands (such as optional trailing nulls, omitted brackets, and property packing).
+4. **Lockstep Synchrony:** Your proposed modifications must update all four core files simultaneously so that the compiler correctly tokenizes and parses the mutated grammar, and the decompiler translates standard JSON back into the new syntax.
+5. **Compile-Time Adherence:** Provide your translated golden reference sample showing how the mutated compiler should parse the new notation:
 
 <TIER0_GOLDEN_TARGET>
 root = Column([repField, valueField])
 repField = TextField("Representative", @/form/rep, "Enter name")
 valueField = TextField("Deal Value", @/form/value, "0.00", "number", ?required)
 </TIER0_GOLDEN_TARGET>
-7. **Mandatory Documentation Preservation:** When updating `prompt_generator.py`, you MUST ensure that all generated system prompts preserve ALL descriptions for components, component properties, functions, and function arguments exactly as written. DO NOT delete, shorten, or summarize any descriptive text or parameter usage explanations.
+6. **Mandatory Documentation Preservation:** When updating `prompt_generator.py`, you MUST ensure that all generated system prompts preserve ALL descriptions for components, component properties, functions, and function arguments exactly as written. DO NOT delete, shorten, or summarize any descriptive text or parameter usage explanations.
 
 ## Current reigning champion baseline
 
@@ -34,45 +33,35 @@ valueField = TextField("Deal Value", @/form/value, "0.00", "number", ?required)
 {DECOMPILER_CONTENT}
 </REIGNING_CHAMPION>
 
-## Output contract (Surgical Diff Patches)
+## Output contract (Surgical Refactoring Instructions)
 
-Instead of regurgitating entire source files, you must output surgical search-and-replace patch blocks for the code files (`prompt_generator_patch`, `compiler_patch`, `decompiler_patch`).
+Instead of outputting brittle XML patch blocks or full source files, you must output clear, actionable refactoring instructions for a peer coding agent (`prompt_generator_instructions`, `compiler_instructions`, `decompiler_instructions`).
 
-### Patch Formatting Rules:
-- Each patch block can contain one or more `<target>` / `<replacement>` pairs.
-- `<target>` MUST exactly match a unique contiguous block of existing lines, including all leading indentation spaces.
-- Never use placeholders, truncated lines, or ellipses (`...`) inside `<target>` or `<replacement>`, unless they are literally part of the code.
-- Include two unchanged anchor lines above and two unchanged anchor lines below the edit to guarantee uniqueness, in both the target and replacement. If the lines are at the beginning or end of a file, include as many as are available.
+### Instructions Formatting Guidance:
+- Clearly explain what methods or lines to replace, modify, or add.
+- Provide precise drop-in code snippets for the coding agent to apply using its code editing tools.
+- State exactly how loops, delimiters, or AST parsing nodes should be modified.
 
 <OUTPUT_CONTRACT>
 <a2ui_express.md>
 ...fully updated markdown specification...
 </a2ui_express.md>
 
-<prompt_generator_patch>
-<target>
-exact existing lines to replace in prompt_generator.py
-</target>
-<replacement>
-new replacement code
-</replacement>
-</prompt_generator_patch>
+<prompt_generator_instructions>
+1. Replace method X() with the following snippet:
+```python
+def X():
+    pass
+```
+2. Modify line Y to do Z...
+</prompt_generator_instructions>
 
-<compiler_patch>
-<target>
-exact existing lines to replace in compiler.py
-</target>
-<replacement>
-new replacement code
-</replacement>
-</compiler_patch>
+<compiler_instructions>
+1. In parse_column(), change delimiter handling...
+2. Insert new helper method...
+</compiler_instructions>
 
-<decompiler_patch>
-<target>
-exact existing lines to replace in decompiler.py
-</target>
-<replacement>
-new replacement code
-</replacement>
-</decompiler_patch>
+<decompiler_instructions>
+1. Update decompilation mapping...
+</decompiler_instructions>
 </OUTPUT_CONTRACT>
