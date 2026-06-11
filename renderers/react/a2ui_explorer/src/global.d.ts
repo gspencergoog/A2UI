@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-import {render, screen} from '@testing-library/react';
-import {describe, it, expect} from 'vitest';
-import App from './App';
-
-describe('App Smoke Test', () => {
-  it('renders without crashing and shows MESSAGES header', () => {
-    render(<App />);
-    expect(screen.getByText('MESSAGES')).toBeDefined();
-  });
-});
+/**
+ * Declares typings for CSS Modules (*.module.css) files.
+ * This allows the TypeScript compiler to resolve CSS class imports as a
+ * read-only dictionary of string mappings.
+ *
+ * This is needed because we typecheck @a2ui/react from source (via path
+ * mappings) rather than consuming its compiled build output, which requires
+ * the TypeScript compiler to resolve CSS Module imports inside the parent library.
+ */
+declare module '*.module.css' {
+  const classes: {readonly [key: string]: string};
+  export default classes;
+}

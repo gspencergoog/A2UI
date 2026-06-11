@@ -14,19 +14,10 @@
  * limitations under the License.
  */
 
-import parentConfig from '../eslint.config.js';
+declare global {
+  var IS_REACT_ACT_ENVIRONMENT: boolean | undefined;
+}
 
-export default [
-  ...parentConfig,
-  {
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.app.json', './tsconfig.spec.json', './tsconfig.node.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-  },
-  {
-    ignores: ['src/generated/**', 'dist/**', 'node_modules/**'],
-  },
-];
+// Configures the React 18 testing environment to expect and support act() blocks.
+// Without this flag, React warns in the console during state transitions and mounting.
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;

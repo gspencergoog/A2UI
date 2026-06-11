@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-import parentConfig from '../eslint.config.js';
-
-export default [
-  ...parentConfig,
-  {
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.app.json', './tsconfig.spec.json', './tsconfig.node.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-  },
-  {
-    ignores: ['src/generated/**', 'dist/**', 'node_modules/**'],
-  },
-];
+/**
+ * Declares typings for CSS Modules (*.module.css) files.
+ * This allows the TypeScript compiler (tsc) to resolve CSS class imports as a
+ * read-only dictionary of string mappings.
+ */
+declare module '*.module.css' {
+  const classes: {readonly [key: string]: string};
+  export default classes;
+}

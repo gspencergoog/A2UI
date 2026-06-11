@@ -77,18 +77,17 @@
     "prepublishOnly": "node -e \"if(!process.cwd().endsWith('dist')) { console.error('Error: This package must be published from the dist/ directory. Run `yarn build` then `cd dist && yarn npm publish`'); process.exit(1); }\"",
     "publish:package": "yarn build && node ../scripts/prepare-publish.mjs && cd dist && touch yarn.lock && yarn install && yarn npm publish --access public",
     "build": "wireit",
-    "dev": "tsup --watch",
+    "demo": "yarn workspace @a2ui/react-explorer dev",
     "test": "wireit",
+    "test:unit": "wireit",
+    "test:integration": "wireit",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx}\"",
-    "clean": "wireit",
-    "demo": "cd a2ui_explorer && vite",
-    "build:demo": "cd a2ui_explorer && tsc -b && vite build",
-    "test:demo": "cd a2ui_explorer && vitest run src"
+    "clean": "wireit"
   },
   "dependencies": {
     "@a2ui/markdown-it": "workspace:*",
@@ -151,6 +150,12 @@
       ]
     },
     "test": {
+      "dependencies": [
+        "test:unit",
+        "test:integration"
+      ]
+    },
+    "test:unit": {
       "command": "vitest run",
       "dependencies": [
         "build"
@@ -160,8 +165,11 @@
         "tsconfig.json"
       ]
     },
+    "test:integration": {
+      "command": "yarn workspace @a2ui/react-explorer test:ci"
+    },
     "clean": {
-      "command": "rm -rf dist dist-demo .tsbuildinfo .wireit"
+      "command": "rm -rf dist .tsbuildinfo .wireit"
     }
   }
 }
