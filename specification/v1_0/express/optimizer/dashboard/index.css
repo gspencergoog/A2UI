@@ -24,7 +24,7 @@
 
 body {
     background-color: var(--bg-main);
-    background-image: 
+    background-image:
         radial-gradient(circle at 15% 20%, hsl(180, 100%, 48% / 0.05) 0%, transparent 40%),
         radial-gradient(circle at 85% 80%, hsl(150, 100%, 42% / 0.05) 0%, transparent 40%);
     background-attachment: fixed;
@@ -249,9 +249,9 @@ main {
     border: 1px solid var(--accent-amber);
 }
 .agent-status-badge.success {
-    background: hsl(150, 100%, 42% / 0.15);
-    color: var(--accent-emerald);
-    border: 1px solid var(--accent-emerald);
+    background: hsl(120, 100%, 45% / 0.15);
+    color: hsl(120, 100%, 45%);
+    border: 1px solid hsl(120, 100%, 45%);
 }
 .agent-status-badge.waiting {
     background: hsl(180, 100%, 48% / 0.15);
@@ -262,6 +262,11 @@ main {
     background: hsl(350, 100%, 62% / 0.15);
     color: var(--accent-rose);
     border: 1px solid var(--accent-rose);
+}
+.agent-status-badge.tool {
+    background: hsl(280, 100%, 75% / 0.15);
+    color: hsl(280, 100%, 75%);
+    border: 1px solid hsl(280, 100%, 75%);
 }
 .agent-thoughts {
     background: hsl(0, 0%, 0% / 0.4);
