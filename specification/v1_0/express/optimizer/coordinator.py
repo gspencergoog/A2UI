@@ -73,31 +73,67 @@ class EvolutionCoordinator:
             gauntlet = EvaluationGauntlet()
             verified_score, verified_metrics = gauntlet.evaluate_candidate(candidate_gene, reigning_score)
 
-            if verified_score > reigning_score:
-                print(f"*** NEW CHAMPION DISCOVERED: {candidate_id} ***")
-                board["reigning_champion"] = candidate_id
-                if "history" not in board:
-                    board["history"] = {}
-                board["history"][candidate_id] = {
-                    "parent": candidate_payload.get("parent_id"),
-                    "fitness_score": verified_score,
-                    "metrics": verified_metrics,
-                    "artifacts_dir": candidate_payload.get("artifacts_dir"),
-                }
+            if "pareto_frontier" not in board:
+                board["pareto_frontier"] = [reigning_id]
 
-                f.seek(0)
-                f.truncate()
-                json.dump(board, f, indent=2)
-                fcntl.flock(f, fcntl.LOCK_UN)
+            if verified_score > 0.0:
+                cand_comp = verified_metrics.get("output_compression", 0.0)
+                cand_prompt = verified_metrics.get("prompt_footprint_tokens", 1000)
 
-                # Snapshot candidate regression test suite to specification baseline
-                cand_test_path = os.path.join(artifacts_dir, "test_express.py")
-                base_test_path = os.path.join(SPEC_EXPRESS_DIR, "test_express.py")
-                if os.path.exists(cand_test_path):
-                    shutil.copy2(cand_test_path, base_test_path)
-                    print(f"Automated Regression Snapshot: Promoted {candidate_id} test suite to specification baseline.")
+                # Check if candidate is dominated by any existing frontier entry
+                is_dominated = False
+                for fid in board["pareto_frontier"]:
+                    fentry = board.get("history", {}).get(fid, {})
+                    fscore = fentry.get("fitness_score", 0.0)
+                    fcomp = fentry.get("metrics", {}).get("output_compression", 0.0)
+                    fprompt = fentry.get("metrics", {}).get("prompt_footprint_tokens", 1000)
 
-                return True
+                    if fscore >= verified_score and fcomp >= cand_comp and fprompt <= cand_prompt:
+                        if fscore > verified_score or fcomp > cand_comp or fprompt < cand_prompt:
+                            is_dominated = True
+                            break
+
+                if not is_dominated and candidate_id not in board["pareto_frontier"]:
+                    # Prune entries dominated by candidate
+                    new_front = []
+                    for fid in board["pareto_frontier"]:
+                        fentry = board.get("history", {}).get(fid, {})
+                        fscore = fentry.get("fitness_score", 0.0)
+                        fcomp = fentry.get("metrics", {}).get("output_compression", 0.0)
+                        fprompt = fentry.get("metrics", {}).get("prompt_footprint_tokens", 1000)
+
+                        if verified_score >= fscore and cand_comp >= fcomp and cand_prompt <= fprompt:
+                            if verified_score > fscore or cand_comp > fcomp or cand_prompt < fprompt:
+                                continue  # Dominated by candidate
+                        new_front.append(fid)
+
+                    new_front.append(candidate_id)
+                    board["pareto_frontier"] = new_front
+                    if "history" not in board:
+                        board["history"] = {}
+                    board["history"][candidate_id] = {
+                        "parent": candidate_payload.get("parent_id"),
+                        "fitness_score": verified_score,
+                        "metrics": verified_metrics,
+                        "artifacts_dir": candidate_payload.get("artifacts_dir"),
+                    }
+                    if verified_score > reigning_score:
+                        print(f"*** NEW CHAMPION DISCOVERED: {candidate_id} ***")
+                        board["reigning_champion"] = candidate_id
+
+                    f.seek(0)
+                    f.truncate()
+                    json.dump(board, f, indent=2)
+                    fcntl.flock(f, fcntl.LOCK_UN)
+
+                    # Snapshot candidate regression test suite to specification baseline
+                    cand_test_path = os.path.join(artifacts_dir, "test_express.py")
+                    base_test_path = os.path.join(SPEC_EXPRESS_DIR, "test_express.py")
+                    if os.path.exists(cand_test_path):
+                        shutil.copy2(cand_test_path, base_test_path)
+                        print(f"Automated Regression Snapshot: Promoted {candidate_id} test suite to specification baseline.")
+
+                    return True
 
             fcntl.flock(f, fcntl.LOCK_UN)
             print("Candidate score did not beat reigning champion. Discarding.")

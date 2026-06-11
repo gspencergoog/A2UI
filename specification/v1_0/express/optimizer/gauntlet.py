@@ -15,9 +15,42 @@ from typing import Any
 SPEC_EXPRESS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 CATALOG_PATH = os.path.join(SPEC_EXPRESS_DIR, "..", "catalogs", "basic", "catalog.json")
 
+import ast
 from .inspect_suite.layout_tasks import COMPLETE_DATASETS, REPRESENTATIVE_DATASETS, SMOKE_DATASETS
 from .manifest import Gene
 from .tier2_mlx import LocalMLXLinter
+
+
+class ASTGraphAnalyzer:
+    """Computes AST graph-theoretic metrics from candidate Python source code."""
+
+    @staticmethod
+    def analyze_source(source_code: str) -> dict[str, Any]:
+        """Calculates AST node count, maximum nesting depth, and call density."""
+        try:
+            tree = ast.parse(source_code)
+        except SyntaxError:
+            return {"total_nodes": 0, "max_depth": 0, "call_density": 0.0, "valid": False}
+
+        total_nodes = 0
+        call_nodes = 0
+
+        def get_depth(node: ast.AST) -> int:
+            nonlocal total_nodes, call_nodes
+            total_nodes += 1
+            if isinstance(node, ast.Call):
+                call_nodes += 1
+            child_depths = [get_depth(child) for child in ast.iter_child_nodes(node)]
+            return 1 + (max(child_depths) if child_depths else 0)
+
+        depth = get_depth(tree)
+        density = round(call_nodes / max(1, total_nodes), 4)
+        return {
+            "total_nodes": total_nodes,
+            "max_depth": depth,
+            "call_density": density,
+            "valid": True,
+        }
 
 
 class EvaluationGauntlet:
@@ -28,7 +61,7 @@ class EvaluationGauntlet:
         self.catalog_path = catalog_path
         self.mlx_linter = LocalMLXLinter()
 
-    def _run_local_unit_tests(self, gene: Gene) -> bool:
+    def _run_local_unit_tests(self, gene: Gene) -> tuple[bool, str]:
         """Executes candidate AST logic inside an isolated subprocess sandbox to block monkeypatching."""
         import tempfile
         import subprocess
@@ -39,7 +72,7 @@ class EvaluationGauntlet:
         required_signatures = ["Button", "Card", "Column", "Icon", "Row", "Text", "TextField"]
         for sig in required_signatures:
             if sig not in prompt_content:
-                return False
+                return False, "Gate0_MissingSignatures"
 
         # Create isolated temporary directory
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -65,28 +98,28 @@ class EvaluationGauntlet:
             try:
                 res = subprocess.run([sys.executable, "-c", cmd_compile1], capture_output=True, text=True, timeout=2.0)
                 if res.returncode != 0:
-                    return False
+                    return False, "Check1_LexicalGate"
                 envelope = json.loads(res.stdout)
             except Exception:
-                return False
+                return False, "Check1_LexicalGate"
 
             if envelope.get("version") != "v1.0":
-                return False
+                return False, "Check1_LexicalGate"
 
             create_surface = envelope.get("createSurface", {})
             if create_surface.get("component") != "Column":
-                return False
+                return False, "Check1_LexicalGate"
 
             children = create_surface.get("children", [])
             if len(children) != 1 or children[0].get("component") != "TextField":
-                return False
+                return False, "Check1_LexicalGate"
 
             val = children[0].get("value")
             if isinstance(val, dict):
                 if val.get("path") != "/key":
-                    return False
+                    return False, "Check1_LexicalGate"
             elif val not in ("@/key", "@key", "$/key", "$key"):
-                return False
+                return False, "Check1_LexicalGate"
 
             # Check 2: Action event data structures
             dsl2 = 'root = Button("Submit Deal", "primary", Event("save_deal", {rep: @/form/rep}))'
@@ -101,29 +134,29 @@ class EvaluationGauntlet:
             try:
                 res = subprocess.run([sys.executable, "-c", cmd_compile2], capture_output=True, text=True, timeout=2.0)
                 if res.returncode != 0:
-                    return False
+                    return False, "Check2_ActionSchemaGate"
                 envelope2 = json.loads(res.stdout)
             except Exception:
-                return False
+                return False, "Check2_ActionSchemaGate"
 
             create_surf2 = envelope2.get("createSurface", {})
             components = create_surf2.get("components", [create_surf2])
             button_comp = next((c for c in components if c.get("component") == "Button"), None)
             if not button_comp:
-                return False
+                return False, "Check2_ActionSchemaGate"
 
             if button_comp.get("variant") != "primary":
-                return False
+                return False, "Check2_ActionSchemaGate"
 
             action = button_comp.get("action", {})
             event = action.get("event", {})
             if event.get("name") != "save_deal":
-                return False
+                return False, "Check2_ActionSchemaGate"
 
             context = event.get("context", {})
             rep = context.get("rep", {})
             if rep.get("path") != "/form/rep":
-                return False
+                return False, "Check2_ActionSchemaGate"
 
             # Check 3: dataModel mapping
             dsl3 = '@/user/age = 30\nroot = Column([])'
@@ -138,14 +171,14 @@ class EvaluationGauntlet:
             try:
                 res = subprocess.run([sys.executable, "-c", cmd_compile3], capture_output=True, text=True, timeout=2.0)
                 if res.returncode != 0:
-                    return False
+                    return False, "Check3_DataModelSchemaGate"
                 envelope3 = json.loads(res.stdout)
             except Exception:
-                return False
+                return False, "Check3_DataModelSchemaGate"
 
             dm = envelope3.get("createSurface", {}).get("dataModel", {})
             if dm.get("user", {}).get("age") != 30:
-                return False
+                return False, "Check3_DataModelSchemaGate"
 
             # Check 4: Decompiler round-trip checks
             cmd_decompile = (
@@ -156,12 +189,12 @@ class EvaluationGauntlet:
             try:
                 res = subprocess.run([sys.executable, "-c", cmd_decompile], capture_output=True, text=True, timeout=2.0)
                 if res.returncode != 0:
-                    return False
+                    return False, "Check4_DecompilerRoundTripGate"
                 decompiled_dsl = res.stdout.strip()
                 if "root = Column(" not in decompiled_dsl or "TextField(" not in decompiled_dsl:
-                    return False
+                    return False, "Check4_DecompilerRoundTripGate"
             except Exception:
-                return False
+                return False, "Check4_DecompilerRoundTripGate"
 
             # Check 5: Dynamic Layout Fuzzing (Prevent static overfitting)
             import random
@@ -177,12 +210,12 @@ class EvaluationGauntlet:
             try:
                 res_fuzz = subprocess.run([sys.executable, "-c", cmd_fuzz], capture_output=True, text=True, timeout=2.0)
                 if res_fuzz.returncode != 0:
-                    return False
+                    return False, "Check5_DynamicFuzzingGate"
                 env_fuzz = json.loads(res_fuzz.stdout)
                 if env_fuzz.get("version") != "v1.0":
-                    return False
+                    return False, "Check5_DynamicFuzzingGate"
             except Exception:
-                return False
+                return False, "Check5_DynamicFuzzingGate"
 
             # Check 6: Lexical ReDoS / Malformed Input Fuzzing
             malformed_dsl = f"root = Column([{'a'*100}])\n{'a'*100} = Invalid(\"\\\"\\\"\\\"\\\"\\\"\\\""
@@ -195,7 +228,7 @@ class EvaluationGauntlet:
                 # Should fail or return without hanging (sub-second cutoff)
                 subprocess.run([sys.executable, "-c", cmd_redos], capture_output=True, text=True, timeout=0.5)
             except subprocess.TimeoutExpired:
-                return False
+                return False, "Check6_ReDoSLexicalGate"
 
             # Check 7: Hidden Hold-Out Layout Verification Suite
             holdout_dsl = (
@@ -212,14 +245,14 @@ class EvaluationGauntlet:
             try:
                 res_holdout = subprocess.run([sys.executable, "-c", cmd_holdout], capture_output=True, text=True, timeout=2.0)
                 if res_holdout.returncode != 0:
-                    return False
+                    return False, "Check7_HoldoutCompilationGate"
                 env_holdout = json.loads(res_holdout.stdout)
                 if env_holdout.get("version") != "v1.0":
-                    return False
+                    return False, "Check7_HoldoutCompilationGate"
             except Exception:
-                return False
+                return False, "Check7_HoldoutCompilationGate"
 
-            return True
+            return True, "PassedAll"
 
     def _simulate_inspect_ai_subset(self, datasets: list[dict[str, Any]], gene: Gene) -> float:
         """Simulates Inspect AI task scoring across layout matrices."""
@@ -252,9 +285,14 @@ class EvaluationGauntlet:
 
         # 1. Tier 0 & Tier 1: Local AST & Round-Trip Check
         print(f"Executing {candidate.gene_id} through Tier 0/1 local unit tests...")
-        if not self._run_local_unit_tests(candidate):
-            print("Candidate failed Tier 0/1 local AST/round-trip check. Short-circuiting.")
-            metrics["gate_reached"] = "Tier 0/1 Failed"
+        ast_stats = ASTGraphAnalyzer.analyze_source(candidate.compiler_content)
+        metrics["ast_graph_stats"] = ast_stats
+
+        passed_local, msifr_stage = self._run_local_unit_tests(candidate)
+        metrics["msifr_stage"] = msifr_stage
+        if not passed_local:
+            print(f"Candidate failed Tier 0/1 local AST/round-trip check at {msifr_stage}. Short-circuiting.")
+            metrics["gate_reached"] = f"Tier 0/1 Failed ({msifr_stage})"
             return 0.0, metrics
         metrics["gate_reached"] = "Tier 1 Passed"
 

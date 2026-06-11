@@ -20,14 +20,14 @@ class TestEvaluationGauntlet(unittest.TestCase):
             decompiler_content="y = 2",
         )
 
-    @patch.object(EvaluationGauntlet, "_run_local_unit_tests", return_value=False)
+    @patch.object(EvaluationGauntlet, "_run_local_unit_tests", return_value=(False, "Check1_LexicalGate"))
     def test_evaluate_candidate_tier1_short_circuit(self, mock_unit_tests):
         """Verifies candidate failing local Tier 0/1 unit tests short-circuits immediately."""
         score, metrics = self.gauntlet.evaluate_candidate(self.candidate, reigning_champion_score=0.85)
         self.assertEqual(score, 0.0)
-        self.assertEqual(metrics["gate_reached"], "Tier 0/1 Failed")
+        self.assertEqual(metrics["gate_reached"], "Tier 0/1 Failed (Check1_LexicalGate)")
 
-    @patch.object(EvaluationGauntlet, "_run_local_unit_tests", return_value=True)
+    @patch.object(EvaluationGauntlet, "_run_local_unit_tests", return_value=(True, "PassedAll"))
     def test_evaluate_candidate_tier2_mlx_short_circuit(self, mock_unit_tests):
         """Verifies candidate failing local MLX comprehension short-circuits at zero API cost."""
         self.gauntlet.mlx_linter.verify_small_model_comprehension = MagicMock(
@@ -37,7 +37,7 @@ class TestEvaluationGauntlet(unittest.TestCase):
         self.assertEqual(score, 0.0)
         self.assertIn("Tier 2 Failed", metrics["gate_reached"])
 
-    @patch.object(EvaluationGauntlet, "_run_local_unit_tests", return_value=True)
+    @patch.object(EvaluationGauntlet, "_run_local_unit_tests", return_value=(True, "PassedAll"))
     def test_evaluate_candidate_tier3_flare_mitigation(self, mock_unit_tests):
         """Verifies candidate achieving champion score triggers 3x repeated validation."""
         self.gauntlet.mlx_linter.verify_small_model_comprehension = MagicMock(

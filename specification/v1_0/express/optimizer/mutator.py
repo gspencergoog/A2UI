@@ -143,7 +143,7 @@ class ExpressMutator:
 
                 # Tier 0/1 Compilation Gauntlet Gate (Self-Repair Trigger)
                 gauntlet = EvaluationGauntlet()
-                if not gauntlet._run_local_unit_tests(offspring):
+                if not gauntlet._run_local_unit_tests(offspring)[0]:
                     raise SyntaxError(
                         "Your generated compiler parser failed in-memory Tier 0/1 compilation unit tests "
                         "against reference golden targets. Inspect syntax rules and logic."

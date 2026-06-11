@@ -58,7 +58,7 @@ class TestExpressMutator(unittest.TestCase):
         mutator = ExpressMutator(self.prompt_path)
         mutator.client = mock_client
 
-        with patch.object(EvaluationGauntlet, "_run_local_unit_tests", return_value=True):
+        with patch.object(EvaluationGauntlet, "_run_local_unit_tests", return_value=(True, "PassedAll")):
             offspring = mutator.generate_mutation(self.champion, max_retries=2)
         self.assertIsNotNone(offspring)
         self.assertEqual(offspring.parent_id, "gene_v1_0")
