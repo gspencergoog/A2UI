@@ -179,8 +179,34 @@ class EvolutionCoordinator:
 
     def dispatch_worker_subagents(self, num_workers: int = 5) -> None:
         """Dispatches parallel agentic subagents assigned to isolated git worktrees."""
-        board = self.read_leaderboard_locked()
-        champion_id = board.get("reigning_champion", "gene_v1_0")
+        # 1. Calculate current metrics for the reigning champion FIRST so we compare the right apples
+        try:
+            board = self.read_leaderboard_locked()
+            champion_id = board.get("reigning_champion", "gene_v1_0")
+            print(f"Re-evaluating reigning champion {champion_id} baseline metrics against current specification prompt...")
+            champion_gene = Gene.load_from_disk(SPEC_EXPRESS_DIR)
+            gauntlet = EvaluationGauntlet()
+            cur_score, cur_metrics = gauntlet.evaluate_candidate(champion_gene, 0.5)
+            
+            with open(self.leaderboard_path, "r+", encoding="utf-8") as f:
+                fcntl.flock(f, fcntl.LOCK_EX)
+                cur_board = json.load(f)
+                if "history" not in cur_board:
+                    cur_board["history"] = {}
+                if champion_id not in cur_board["history"]:
+                    cur_board["history"][champion_id] = {}
+                cur_board["history"][champion_id]["fitness_score"] = cur_score
+                cur_board["history"][champion_id]["metrics"] = cur_metrics
+                f.seek(0)
+                f.truncate()
+                json.dump(cur_board, f, indent=2)
+                fcntl.flock(f, fcntl.LOCK_UN)
+                board = cur_board
+                print(f"Reigning champion {champion_id} metrics verified: {cur_score}")
+        except Exception as e:
+            print(f"Notice: Unable to recompute reigning champion baseline: {e}")
+            board = self.read_leaderboard_locked()
+            champion_id = board.get("reigning_champion", "gene_v1_0")
 
         # Bootstrap temporary root git repository
         repo_dir = self.bootstrap_temporary_git_repository()
