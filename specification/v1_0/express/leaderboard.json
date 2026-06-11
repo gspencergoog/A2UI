@@ -1,5 +1,5 @@
 {
-  "reigning_champion": "gene_v1_0",
+  "reigning_champion": "gene_488867633293",
   "history": {
     "gene_v1_0": {
       "parent": null,
@@ -46,6 +46,56 @@
         "expressive_coverage": 1.0
       },
       "artifacts_dir": "/Users/gspencer/code/a2ui/a2ui_express/scratch/worktrees/worker_3"
+    },
+    "gene_c22347027c27": {
+      "parent": "gene_v1_0",
+      "fitness_score": 0.8795,
+      "metrics": {
+        "gate_reached": "Tier 3 Complete",
+        "ast_graph_stats": {
+          "total_nodes": 2861,
+          "max_depth": 16,
+          "call_density": 0.0556,
+          "valid": true
+        },
+        "msifr_stage": "PassedAll",
+        "mlx_reason": "Successfully parsed MLX line: variable_name = Button(\"Submit Deal\", null, Event(\"save_deal\", {rep: $/form/rep}))",
+        "output_compression": 0.5277,
+        "prompt_footprint_tokens": 413,
+        "compilation_success": true,
+        "compilation_rate_gemma": 1.0,
+        "refinement_reliance": 0.0,
+        "semantic_accuracy": 1.0,
+        "expressive_coverage": 1.0
+      },
+      "artifacts_dir": "/Users/gspencer/code/a2ui/a2ui_express/specification/scratch/candidates/gene_c22347027c27"
+    },
+    "gene_488867633293": {
+      "parent": "gene_v1_0",
+      "fitness_score": 0.8804,
+      "metrics": {
+        "gate_reached": "Tier 3 Complete",
+        "ast_graph_stats": {
+          "total_nodes": 2861,
+          "max_depth": 16,
+          "call_density": 0.0556,
+          "valid": true
+        },
+        "msifr_stage": "PassedAll",
+        "mlx_reason": "Successfully parsed MLX line: variable_name = Button(\"Submit Deal\", null, Event(\"save_deal\", {rep: $/form/rep}))",
+        "output_compression": 0.5282,
+        "prompt_footprint_tokens": 407,
+        "compilation_success": true,
+        "compilation_rate_gemma": 1.0,
+        "refinement_reliance": 0.0,
+        "semantic_accuracy": 1.0,
+        "expressive_coverage": 1.0
+      },
+      "artifacts_dir": "/Users/gspencer/code/a2ui/a2ui_express/specification/scratch/candidates/gene_488867633293"
     }
-  }
+  },
+  "pareto_frontier": [
+    "gene_v1_0",
+    "gene_488867633293"
+  ]
 }
