@@ -4,7 +4,7 @@
     "gene_v1_0": {
       "parent": null,
       "content_hash": "9ba12f7b201c",
-      "fitness_score": 0.8685,
+      "fitness_score": 0.806,
       "metrics": {
         "gate_reached": "Tier 3 Complete",
         "ast_graph_stats": {
@@ -14,9 +14,9 @@
           "valid": true
         },
         "msifr_stage": "PassedAll",
-        "holdout_validation_score": 0.8685,
-        "output_compression": 0.5211,
-        "prompt_footprint_tokens": 483,
+        "holdout_validation_score": 0.806,
+        "output_compression": 0.4836,
+        "prompt_footprint_tokens": 1386,
         "compilation_success": true,
         "compilation_rate_gemma": 1.0,
         "refinement_reliance": 0.0,
