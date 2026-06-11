@@ -296,6 +296,13 @@ class EvaluationGauntlet:
             return 0.0, metrics
         metrics["gate_reached"] = "Tier 1 Passed"
 
+        # Gate 1.5: Mandatory Catalog Description Preservation Check
+        prompt_content = candidate.basic_prompt_content
+        if "A component that allows selecting one or more options" not in prompt_content or "The ID of the child component" not in prompt_content:
+            print(f"Candidate {candidate.gene_id} failed Description Preservation check: Catalog descriptions stripped.")
+            metrics["gate_reached"] = "Tier 1.5 Failed (Descriptions Stripped)"
+            return 0.0, metrics
+
         # 2. Tier 2: Local MLX Small-Model Comprehension Check (Zero Cost)
         print(f"Executing {candidate.gene_id} through Tier 2 local MLX small-model check...")
         mlx_passed, mlx_reason = self.mlx_linter.verify_small_model_comprehension(
