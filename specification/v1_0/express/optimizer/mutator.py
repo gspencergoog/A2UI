@@ -26,7 +26,7 @@ from .manifest import Gene
 class ExpressMutator:
     """Orchestrates LLM mutations with automated syntax self-repair."""
 
-    def __init__(self, prompt_template_path: str, model_name: str = "gemini-3-pro-preview", thinking_budget: int = 16384):
+    def __init__(self, prompt_template_path: str, model_name: str = "gemini-3.1-pro-preview", thinking_budget: int = 16384):
         """Initializes the mutator with prompt template, target model, and thinking budget.
 
         Args:
@@ -35,7 +35,7 @@ class ExpressMutator:
             thinking_budget: Token allocation for internal chain-of-thought scratchpad.
         """
         self.prompt_template_path = prompt_template_path
-        self.model_name = model_name
+        self.model_name = "gemini-3.1-pro-preview" if model_name == "gemini-3-pro-preview" else model_name
         self.thinking_budget = thinking_budget
         with open(prompt_template_path, "r", encoding="utf-8") as f:
             self.prompt_template = f.read()
@@ -78,13 +78,22 @@ class ExpressMutator:
         for attempt in range(1, max_retries + 1):
             output_text = None
             try:
-                config = (
-                    types.GenerateContentConfig(
-                        thinking_config=types.ThinkingConfig(thinking_budget=self.thinking_budget),
-                        temperature=0.7,
+                if attempt == 1:
+                    config = (
+                        types.GenerateContentConfig(
+                            thinking_config=types.ThinkingConfig(thinking_budget=self.thinking_budget),
+                            temperature=0.7,
+                        )
+                        if types else None
                     )
-                    if types else None
-                )
+                else:
+                    config = (
+                        types.GenerateContentConfig(
+                            thinking_config=types.ThinkingConfig(thinking_budget=2048),
+                            temperature=0.3,
+                        )
+                        if types else None
+                    )
 
                 # API Rate Limit Protection with Exponential Backoff
                 backoff_sec = 4.0

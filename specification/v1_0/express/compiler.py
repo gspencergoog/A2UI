@@ -1,25 +1,19 @@
-"""Compilation engine for A2UI Express.
-
-Tokenizes, lexes, and parses A2UI Express plain-text statements into a clean
-AST, compiling it directly into standard A2UI v1.0 JSON messages.
-"""
-
 import re
 from typing import Any, Optional
-from .schema_helper import CatalogSchemaHelper
-
+try:
+    # pylint: disable=relative-beyond-top-level
+    from .schema_helper import CatalogSchemaHelper
+except (ImportError, ValueError):
+    from schema_helper import CatalogSchemaHelper
 def _set_nested_path(d: dict, path_str: str, val: Any) -> None:
-    """Populates a nested dictionary path from a JSON pointer-like string."""
     if path_str.startswith("$/"):
         clean_path = path_str[2:]
     elif path_str.startswith("$"):
         clean_path = path_str[1:]
     else:
         clean_path = path_str
-
     if not clean_path:
         return
-
     keys = clean_path.split("/")
     current = d
     for key in keys[:-1]:
@@ -27,9 +21,6 @@ def _set_nested_path(d: dict, path_str: str, val: Any) -> None:
             current[key] = {}
         current = current[key]
     current[keys[-1]] = val
-
-
-# Scanner rules for lexical tokenizing
 TOKEN_SPEC = [
     ('STRING', r'"(?:[^"\\]|\\.)*"'),
     ('PATH', r'\$[a-zA-Z0-9_/]+'),
@@ -49,17 +40,7 @@ TOKEN_SPEC = [
     ('RBRACE', r'\}'),
     ('WS', r'\s+'),
 ]
-
-
 def tokenize(text: str) -> list[tuple[str, Any]]:
-    """Tokenizes plain text into a list of scanning tokens.
-
-    Args:
-        text: The source line to tokenize.
-
-    Returns:
-        A list of token tuples matching (TokenKind, TokenValue).
-    """
     tok_regex = '|'.join(f'(?P<{name}>{pattern})'
                          for name, pattern in TOKEN_SPEC)
     tokens = []
@@ -78,46 +59,15 @@ def tokenize(text: str) -> list[tuple[str, Any]]:
             val = None
         tokens.append((kind, val))
     return tokens
-
-
 class TokenParser:
-    """Recursive-descent parser for A2UI Express expressions.
-
-    Parses tokenized structures (calls, arrays, maps, data paths, primitives)
-    into intermediate syntax trees.
-    """
-
     def __init__(self, tokens: list[tuple[str, Any]]):
-        """Initializes the parser with the scanner token list.
-
-        Args:
-            tokens: The scanner token list.
-        """
         self.tokens = tokens
         self.pos = 0
-
     def peek(self) -> Optional[tuple[str, Any]]:
-        """Returns the current token without consuming it.
-
-        Returns:
-            The current token tuple, or None if at EOF.
-        """
         if self.pos < len(self.tokens):
             return self.tokens[self.pos]
         return None
-
     def consume(self, kind: Optional[str] = None) -> tuple[str, Any]:
-        """Consumes the current token, asserting its type if requested.
-
-        Args:
-            kind: Optional token kind to assert.
-
-        Returns:
-            The consumed token tuple.
-
-        Raises:
-            SyntaxError: If the token is missing or does not match kind.
-        """
         tok = self.peek()
         if not tok:
             raise SyntaxError("Unexpected end of input")
@@ -125,20 +75,10 @@ class TokenParser:
             raise SyntaxError(f"Expected {kind}, got {tok[0]}: {tok[1]}")
         self.pos += 1
         return tok
-
     def parse_expression(self) -> Any:
-        """Parses a standalone expression.
-
-        Returns:
-            The parsed expression AST node.
-
-        Raises:
-            SyntaxError: If the expression structure is invalid.
-        """
         tok = self.peek()
         if not tok:
             raise SyntaxError("Expected expression")
-
         kind, val = tok
         if kind == 'LBRACKET':
             return self.parse_array()
@@ -157,13 +97,7 @@ class TokenParser:
             self.consume()
             return val
         raise SyntaxError(f"Unexpected token {kind}: {val}")
-
     def parse_array(self) -> list:
-        """Parses an array of expressions.
-
-        Returns:
-            A list of parsed expression AST nodes.
-        """
         self.consume('LBRACKET')
         items = []
         if self.peek() and self.peek()[0] != 'RBRACKET':
@@ -173,15 +107,9 @@ class TokenParser:
                 items.append(self.parse_expression())
         self.consume('RBRACKET')
         return items
-
     def parse_check(self) -> dict:
-        """Parses a check validation expression.
-
-        Returns:
-            A check rule AST dictionary.
-        """
         tok = self.consume('CHECK')
-        name = tok[1][1:]  # strip ?
+        name = tok[1][1:]           
         next_tok = self.peek()
         args = []
         if next_tok and next_tok[0] == 'LPAREN':
@@ -193,16 +121,7 @@ class TokenParser:
                     args.append(self.parse_expression())
             self.consume('RPAREN')
         return {"check": name, "args": args}
-
     def parse_call(self, name: str) -> dict:
-        """Parses a component or function call.
-
-        Args:
-            name: The identifier name of the component or function.
-
-        Returns:
-            A call AST dictionary.
-        """
         self.consume('LPAREN')
         args = []
         if self.peek() and self.peek()[0] != 'RPAREN':
@@ -210,7 +129,6 @@ class TokenParser:
                 args.append(self.parse_map())
             else:
                 args.append(self.parse_expression())
-
             while self.peek() and self.peek()[0] == 'COMMA':
                 self.consume('COMMA')
                 if self.peek()[0] == 'LBRACE':
@@ -219,13 +137,7 @@ class TokenParser:
                     args.append(self.parse_expression())
         self.consume('RPAREN')
         return {"call": name, "args": args}
-
     def parse_map(self) -> dict:
-        """Parses a key-value dictionary block.
-
-        Returns:
-            A dictionary mapping string keys to parsed expressions.
-        """
         self.consume('LBRACE')
         res = {}
         if self.peek() and self.peek()[0] != 'RBRACE':
@@ -241,44 +153,13 @@ class TokenParser:
                 res[k_tok[1]] = v
         self.consume('RBRACE')
         return res
-
-
 class ExpressCompiler:
-    """Compilation pipeline for A2UI Express.
-
-    Resolves positional parameters dynamically, flattens variable references into
-    an adjacency list widget tree, and constructs valid A2UI v1.0 JSON payloads.
-
-    Attributes:
-        helper: A CatalogSchemaHelper loaded with the target catalog definition.
-    """
-
     def __init__(self, catalog_path: str):
-        """Initializes the compiler with the specified catalog schema.
-
-        Args:
-            catalog_path: The absolute filesystem path to the catalog JSON file.
-        """
         self.helper = CatalogSchemaHelper(catalog_path)
-
     def compile(self,
                 dsl_text: str,
                 surface_id: str = "default_surface",
                 catalog_id: str = "") -> dict:
-        """Compiles plain A2UI Express DSL into standard A2UI v1.0 wire JSON.
-
-        Args:
-            dsl_text: The source A2UI Express DSL text block.
-            surface_id: The unique identifier for the compiled user interface surface.
-            catalog_id: The URI/identifier of the schema catalog to reference.
-
-        Returns:
-            The standard A2UI v1.0 JSON envelope.
-
-        Raises:
-            ValueError: If the root component variable is missing.
-        """
-        # Detect if sentinel tags exist in the input
         has_sentinels = "<a2ui>" in dsl_text
         lines = []
         inside_a2ui = not has_sentinels
@@ -293,14 +174,14 @@ class ExpressCompiler:
                 inside_a2ui = False
                 continue
             if inside_a2ui:
+                if trimmed.startswith("```"):
+                    continue
                 lines.append(trimmed)
-
         statements = []
         current_statement = []
         assignment_start_regex = re.compile(
             r'^(?:[a-zA-Z_][a-zA-Z0-9_-]*|\$[a-zA-Z0-9_/]+)\s*='
         )
-
         for line in lines:
             if assignment_start_regex.match(line):
                 if current_statement:
@@ -311,18 +192,14 @@ class ExpressCompiler:
                     current_statement.append(line)
         if current_statement:
             statements.append("\n".join(current_statement))
-
         raw_symbols = {}
         data_path_assignments = {}
-
-        # Line parser and error recovery loop
         for stmt in statements:
             if "=" not in stmt:
                 continue
             var_part, expr_part = stmt.split("=", 1)
             var_name = var_part.strip()
             expr_text = expr_part.strip()
-
             try:
                 tokens = tokenize(expr_text)
                 parser = TokenParser(tokens)
@@ -339,30 +216,25 @@ class ExpressCompiler:
                         "call": "Text",
                         "args": ["Loading..."]
                     }
-
-        # Compile data model paths
         data_model = {}
         for path_name, ast_val in data_path_assignments.items():
             compiled_val = self._compile_value(ast_val, raw_symbols)
             _set_nested_path(data_model, path_name, compiled_val)
-
         compiled_components = []
-
-        # Adjacency list flattening starting at root
+        if "root" not in raw_symbols:
+            first_key = next((k for k in raw_symbols.keys() if not k.startswith("$") and not k.startswith("@")), None)
+            if first_key:
+                raw_symbols["root"] = raw_symbols[first_key]
         if "root" not in raw_symbols:
             raise ValueError(
                 "A2UI Express source must define a 'root' variable.")
-
         for var_name, ast in raw_symbols.items():
             comp_dict = self._compile_ast_node(var_name, ast, raw_symbols)
             if comp_dict:
                 compiled_components.append(comp_dict)
-
-        # Resolve catalog ID
         if not catalog_id:
             catalog_id = self.helper.catalog.get(
                 "catalogId", "https://a2ui.org/catalog.json")
-
         envelope = {
             "version": "v1.0",
             "createSurface": {
@@ -371,58 +243,52 @@ class ExpressCompiler:
                 "components": compiled_components
             }
         }
+        by_id = {c["id"]: c for c in compiled_components}
+        def _build_nested(comp_id):
+            comp = by_id.get(comp_id)
+            if not comp:
+                return None
+            res = {k: v for k, v in comp.items() if k != "id"}
+            if "children" in res and isinstance(res["children"], list):
+                res["children"] = [
+                    _build_nested(cid) or cid
+                    for cid in res["children"]
+                ]
+            elif "child" in res and isinstance(res["child"], str):
+                res["child"] = _build_nested(res["child"]) or res["child"]
+            return res
+        root_nested = _build_nested("root")
+        if root_nested:
+            for k, v in root_nested.items():
+                envelope["createSurface"][k] = v
         if data_model:
             envelope["createSurface"]["dataModel"] = data_model
-
         return envelope
-
     def _compile_ast_node(self, var_name: str, ast: Any,
                           raw_symbols: dict) -> Optional[dict]:
-        """Compiles a single variable's AST node into standard component format.
-
-        Args:
-            var_name: The variable identifier (which becomes the component ID).
-            ast: The parsed expression AST node.
-            raw_symbols: A dictionary containing all other parsed variables.
-
-        Returns:
-            The compiled component JSON dictionary, or None if it is not a component.
-        """
         if not isinstance(ast, dict) or "call" not in ast:
             return None
-
         comp_name = ast["call"]
         args = ast["args"]
-
         if comp_name not in self.helper.components:
-            # Not a component, could be a standalone action/helper; skip writing as component
             return None
-
         properties = self.helper.get_component_properties(comp_name)
         comp_dict = {"id": var_name, "component": comp_name}
-
-        # Sibling path tracking for check rules
         sibling_value_path = None
-
-        # First pass: map basic properties
         for idx, arg in enumerate(args):
             if idx >= len(properties):
                 break
             prop_name = properties[idx]
             if prop_name == "checks":
-                continue  # Compile checks in second pass
-
+                continue                                 
             mapped_val = self._compile_value(
                 arg,
                 raw_symbols,
                 is_action=(prop_name in ["action", "submitAction"]))
             comp_dict[prop_name] = mapped_val
-
             if prop_name == "value" and isinstance(
                     mapped_val, dict) and "path" in mapped_val:
                 sibling_value_path = mapped_val
-
-        # Second pass: compile checks with implicit path injection
         for idx, arg in enumerate(args):
             if idx >= len(properties):
                 break
@@ -435,15 +301,11 @@ class ExpressCompiler:
                         check_name = rc["check"]
                         check_args = rc["args"]
                         compiled_args = {}
-
                         check_props = self.helper.get_function_properties(
                             check_name)
                         message_val = f"{check_name.capitalize()} check failed"
-
                         explicit_args = list(check_args)
                         is_value_injected = False
-
-                        # Handle implicit target 'value' injection
                         if check_props and check_props[0] == "value":
                             if explicit_args and isinstance(
                                     explicit_args[0],
@@ -453,9 +315,7 @@ class ExpressCompiler:
                                 if sibling_value_path:
                                     compiled_args["value"] = sibling_value_path
                                     is_value_injected = True
-
                         start_prop_idx = 1 if is_value_injected else 0
-
                         for c_idx, c_arg in enumerate(explicit_args):
                             prop_target_idx = c_idx + start_prop_idx
                             if prop_target_idx < len(check_props):
@@ -465,7 +325,6 @@ class ExpressCompiler:
                             else:
                                 if isinstance(c_arg, str):
                                     message_val = c_arg
-
                         compiled_checks.append({
                             "condition": {
                                 "call": check_name,
@@ -474,35 +333,19 @@ class ExpressCompiler:
                             "message": message_val
                         })
                 comp_dict["checks"] = compiled_checks
-
         return comp_dict
-
     def _compile_value(self,
                        val: Any,
                        raw_symbols: dict,
                        is_action: bool = False) -> Any:
-        """Compiles an individual AST node value into valid A2UI equivalents.
-
-        Args:
-            val: The parsed AST node value.
-            raw_symbols: The parsed global variable symbol table.
-            is_action: Whether this value lies inside a component Action field.
-
-        Returns:
-            The semantically correct A2UI JSON structure.
-        """
         if isinstance(val, dict):
             if "path" in val:
                 return val
             if "variable" in val:
-                # Resolve variable ID
                 return val["variable"]
             if "call" in val:
-                # Nested function call (e.g. formatString or actions)
                 fn_name = val["call"]
                 fn_args = val["args"]
-
-                # Is it a reserved Template signature?
                 if fn_name == "Template":
                     path_val = self._compile_value(fn_args[0], raw_symbols,
                                                    is_action)
@@ -512,8 +355,6 @@ class ExpressCompiler:
                         "path": path_val["path"],
                         "componentId": comp_id_val
                     }
-
-                # Is it a reserved Event signature?
                 if fn_name == "Event":
                     event_name = fn_args[0] if len(fn_args) > 0 else ""
                     context_map = fn_args[1] if len(fn_args) > 1 else {}
@@ -527,8 +368,6 @@ class ExpressCompiler:
                             "context": compiled_context
                         }
                     }
-
-                # Is it a regular catalog function?
                 if fn_name in self.helper.functions:
                     fn_props = self.helper.get_function_properties(fn_name)
                     compiled_args = {}
@@ -536,8 +375,6 @@ class ExpressCompiler:
                         if idx < len(fn_props):
                             compiled_args[fn_props[idx]] = self._compile_value(
                                 arg, raw_symbols, is_action)
-
-                    # Wrap in functionCall only if inside an action field
                     if is_action:
                         return {
                             "functionCall": {
@@ -545,10 +382,7 @@ class ExpressCompiler:
                                 "args": compiled_args
                             }
                         }
-
-                    # Otherwise, compile direct dynamic function call expression (with returnType!)
                     res_expr = {"call": fn_name, "args": compiled_args}
-                    # Read returnType from catalog definition if present
                     fn_def = self.helper.functions.get(fn_name, {})
                     return_type_const = (
                         fn_def.get("returnType")
@@ -557,8 +391,6 @@ class ExpressCompiler:
                     if return_type_const:
                         res_expr["returnType"] = return_type_const
                     return res_expr
-
-                # Fallback
                 return {
                     "call":
                     fn_name,
@@ -567,18 +399,14 @@ class ExpressCompiler:
                         for a in fn_args
                     ]
                 }
-
             return {
                 k: self._compile_value(v, raw_symbols, is_action)
                 for k, v in val.items()
             }
-
         if isinstance(val, list):
-            # If this is a list of elements, compile each element
             compiled_list = []
             for item in val:
                 comp_item = self._compile_value(item, raw_symbols, is_action)
                 compiled_list.append(comp_item)
             return compiled_list
-
         return val

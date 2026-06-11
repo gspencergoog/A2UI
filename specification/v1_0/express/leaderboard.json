@@ -1,18 +1,27 @@
 {
-  "reigning_champion": "gene_v1_0",
+  "reigning_champion": "gene_cand_3",
   "history": {
     "gene_v1_0": {
       "parent": null,
       "content_hash": "9ba12f7b201c",
-      "fitness_score": 0.85,
+      "fitness_score": 0.8198,
       "metrics": {
         "output_compression": 0.65,
         "prompt_footprint_tokens": 385,
-        "compilation_rate_gemma": 1.0,
-        "refinement_reliance": 0.0,
-        "semantic_accuracy": 1.0,
-        "expressive_coverage": 1.0
+        "compilation_success": true
       }
+    },
+    "gene_cand_3": {
+      "parent": "gene_v1_0",
+      "fitness_score": 0.9209,
+      "metrics": {
+        "gate_reached": "Tier 3 Complete",
+        "mlx_reason": "Successfully parsed MLX line: <a2ui>\nroot = Button(\"Submit Deal\", null, Event(\"submit\", {rep: $/actions/submit}))\n</a",
+        "output_compression": 0.5525,
+        "prompt_footprint_tokens": 140,
+        "compilation_success": true
+      },
+      "artifacts_dir": "/Users/gspencer/code/a2ui/a2ui_express/scratch/candidates/gene_cand_3"
     }
   }
 }

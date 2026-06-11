@@ -29,7 +29,7 @@ SPEC_EXPRESS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 
 def run_worker_gauntlet(
-    parent_id: str, model_name: str = "gemini-3-pro-preview", thinking_budget: int = 16384
+    parent_id: str, model_name: str = "gemini-3.1-pro-preview", thinking_budget: int = 16384
 ) -> dict[str, Any]:
     """Executes mutation and evaluation gauntlet, returning completion payload."""
     # Apply randomized startup jitter (1 to 15 seconds) to prevent API socket thundering herd
@@ -43,7 +43,7 @@ def run_worker_gauntlet(
 
     # Load reigning champion content from active workspace
     champion = Gene.load_baseline(SPEC_EXPRESS_DIR)
-    champion.gene_id = leaderboard.get("reigning_champion", "gene_v1_0")
+    champion.gene_id = parent_id
 
     prompt_path = os.path.join(SPEC_EXPRESS_DIR, "optimizer", "mutate_prompt.md")
     mutator = ExpressMutator(prompt_path, model_name=model_name, thinking_budget=thinking_budget)
@@ -87,7 +87,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="A2UI Express Subagent Worker Entrypoint")
     parser.add_argument("--parent_id", default="gene_v1_0", help="Parent champion ID")
-    parser.add_argument("--model_name", default="gemini-3-pro-preview", help="Target Gemini model identifier")
+    parser.add_argument("--model_name", default="gemini-3.1-pro-preview", help="Target Gemini model identifier")
     parser.add_argument("--thinking_budget", type=int, default=16384, help="Scratchpad reasoning token allocation")
     args = parser.parse_args()
 

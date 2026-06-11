@@ -5,7 +5,11 @@ tailored for prompt tokens compression.
 """
 
 from typing import Any
-from .schema_helper import CatalogSchemaHelper
+try:
+    # pylint: disable=relative-beyond-top-level
+    from .schema_helper import CatalogSchemaHelper
+except (ImportError, ValueError):
+    from schema_helper import CatalogSchemaHelper
 
 def _flatten_data_model(data_dict: dict) -> list[tuple[str, Any]]:
     """Flattens a nested dictionary dataModel structure into JSON Pointer path segments."""
