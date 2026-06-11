@@ -49,6 +49,29 @@ class ExpressMutator:
         match = re.search(f"<{tag}>(.*?)</{tag}>", text, re.DOTALL)
         return match.group(1).strip() if match else None
 
+    def _apply_patch_block(self, source: str, patch_xml: Optional[str]) -> str:
+        """Applies a search-and-replace patch block programmatically."""
+        if not patch_xml:
+            return source
+
+        targets = re.findall(r"<target>\s*(.*?)\s*</target>", patch_xml, re.DOTALL)
+        replacements = re.findall(r"<replacement>\s*(.*?)\s*</replacement>", patch_xml, re.DOTALL)
+
+        if len(targets) != len(replacements):
+            raise ValueError("Mismatched count of <target> and <replacement> tags in patch block.")
+
+        cur = source
+        for t, r in zip(targets, replacements):
+            if t not in cur:
+                t_sub = t.strip("\r\n")
+                if t_sub not in cur:
+                    raise ValueError(f"Patch target snippet not found in source:\n{t[:100]}")
+                cur = cur.replace(t_sub, r.strip("\r\n"))
+            else:
+                cur = cur.replace(t, r)
+
+        return cur
+
     def generate_mutation(
         self, champion: Gene, max_retries: int = 3, target_disk_dir: Optional[str] = None
     ) -> Optional[Gene]:
@@ -125,12 +148,16 @@ class ExpressMutator:
                 output_text = response.text
 
                 a2ui_spec = self._extract_xml_block(output_text, "a2ui_express.md")
-                prompt_gen_code = self._extract_xml_block(output_text, "prompt_generator.py")
-                compiler_code = self._extract_xml_block(output_text, "compiler.py")
-                decompiler_code = self._extract_xml_block(output_text, "decompiler.py")
+                prompt_gen_patch = self._extract_xml_block(output_text, "prompt_generator_patch")
+                compiler_patch = self._extract_xml_block(output_text, "compiler_patch")
+                decompiler_patch = self._extract_xml_block(output_text, "decompiler_patch")
 
-                if not all([a2ui_spec, prompt_gen_code, compiler_code, decompiler_code]):
-                    raise ValueError("Failed to extract all four mandatory XML blocks.")
+                if not a2ui_spec:
+                    raise ValueError("Missing mandatory <a2ui_express.md> XML block.")
+
+                prompt_gen_code = self._apply_patch_block(prompt_gen_content, prompt_gen_patch)
+                compiler_code = self._apply_patch_block(champion.compiler_content, compiler_patch)
+                decompiler_code = self._apply_patch_block(champion.decompiler_content, decompiler_patch)
 
                 # AST Robustness Gate (Self-Repair Trigger)
                 ast.parse(prompt_gen_code)
