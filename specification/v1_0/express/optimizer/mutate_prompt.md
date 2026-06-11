@@ -15,8 +15,8 @@ You are an expert compiler optimization agent. Your goal is to mutate the reigni
 
 <TIER0_GOLDEN_TARGET>
 root = Column([repField, valueField])
-repField = TextField("Representative", $/form/rep, "Enter name")
-valueField = TextField("Deal Value", $/form/value, "0.00", "number", ?required)
+repField = TextField("Representative", @/form/rep, "Enter name")
+valueField = TextField("Deal Value", @/form/value, "0.00", "number", ?required)
 </TIER0_GOLDEN_TARGET>
 6. **Mandatory Documentation Preservation:** When updating `basic_prompt.md`, you MUST preserve ALL descriptions for components, component properties, functions, and function arguments exactly as written. DO NOT delete, shorten, or summarize any descriptive text or parameter usage explanations.
 
