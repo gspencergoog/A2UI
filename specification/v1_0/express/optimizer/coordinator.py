@@ -131,7 +131,8 @@ class EvolutionCoordinator:
         for i in range(1, num_workers + 1):
             wt_path = os.path.join(worktrees_dir, f"worker_{i}")
             prompt = (
-                f"Navigate to temporary git repository: {repo_dir}. "
+                f"Invoke the ExpressWorktreeAgent subagent with Workspace mode 'inherit'. "
+                f"Instruct it precisely: Navigate to temporary root git repo {repo_dir}. "
                 f"Create an isolated git worktree branch: git worktree add {wt_path} -b mutate_branch_{i}. "
                 f"Change directory into your assigned worktree ({wt_path}). Use view_file to inspect compiler.py and test_express.py. "
                 f"Apply surgical AST diff edits using replace_file_content to mutate character matching strings as instructed in optimizer/mutate_prompt.md. "
