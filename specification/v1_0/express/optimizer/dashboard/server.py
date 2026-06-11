@@ -75,20 +75,21 @@ class DashboardAPIHandler(http.server.SimpleHTTPRequestHandler):
             return {"agents": agents, "recent_logs": recent_logs, "error": "Brain directory not found"}
 
         try:
-            # Sort conversation folders by modification time (most recent first)
-            subdirs = [
-                os.path.join(JETSKI_BRAIN_DIR, d)
-                for d in os.listdir(JETSKI_BRAIN_DIR)
-                if os.path.isdir(os.path.join(JETSKI_BRAIN_DIR, d))
-            ]
-            subdirs.sort(key=os.path.getmtime, reverse=True)
-
-            # Inspect top 10 most recent conversations for worker activity
-            for conv_dir in subdirs[:10]:
-                log_path = os.path.join(conv_dir, ".system_generated", "logs", "transcript.jsonl")
-                if not os.path.exists(log_path):
+            # Get conversation folders with active transcript files
+            conv_candidates = []
+            for d in os.listdir(JETSKI_BRAIN_DIR):
+                conv_dir = os.path.join(JETSKI_BRAIN_DIR, d)
+                if not os.path.isdir(conv_dir):
                     continue
+                log_path = os.path.join(conv_dir, ".system_generated", "logs", "transcript.jsonl")
+                if os.path.exists(log_path):
+                    conv_candidates.append((conv_dir, log_path))
 
+            # Sort by transcript file modification time (most recent first)
+            conv_candidates.sort(key=lambda x: os.path.getmtime(x[1]), reverse=True)
+
+            # Inspect top 25 most recent conversations for worker activity
+            for conv_dir, log_path in conv_candidates[:25]:
                 conv_id = os.path.basename(conv_dir)
                 last_thinking = ""
                 last_status = "Thinking"
@@ -135,7 +136,7 @@ class DashboardAPIHandler(http.server.SimpleHTTPRequestHandler):
                     except (json.JSONDecodeError, KeyError):
                         continue
 
-                if last_thinking or "ExpressMutatorWorker" in raw_content:
+                if lines:
                     agents.append({
                         "conversation_id": conv_id[:12],
                         "status": last_status,
