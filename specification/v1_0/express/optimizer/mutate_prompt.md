@@ -18,7 +18,7 @@ root = Column([repField, valueField])
 repField = TextField("Representative", $/form/rep, "Enter name")
 valueField = TextField("Deal Value", $/form/value, "0.00", "number", ?required)
 </TIER0_GOLDEN_TARGET>
-6. **Mandatory Documentation Preservation:** You MUST preserve ALL catalog component descriptions, function summaries, and individual parameter documentation in `basic_prompt.md`. DO NOT delete or shorten the descriptive text or parameter usage explanations.
+6. **Mandatory Documentation Preservation:** When updating `basic_prompt.md`, you MUST preserve ALL descriptions for components, component properties, functions, and function arguments exactly as written. DO NOT delete, shorten, or summarize any descriptive text or parameter usage explanations.
 
 ## Current reigning champion baseline
 
