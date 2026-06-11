@@ -124,10 +124,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Selectively update text spans
             const badge = card.querySelector(".agent-status-badge");
-            const statusText = ag.status || "In Progress";
+            const statusText = ag.status || "Thinking";
             if (badge.textContent !== statusText) {
                 badge.textContent = statusText;
-                badge.className = `agent-status-badge ${statusText === "Done" || statusText === "DONE" ? "success" : "running"}`;
+                let bClass = "running";
+                if (statusText === "Done" || statusText === "DONE") bClass = "success";
+                else if (statusText === "Waiting") bClass = "waiting";
+                else if (statusText === "Error") bClass = "error";
+                badge.className = `agent-status-badge ${bClass}`;
             }
 
             const gateSpan = card.querySelector(".current-gate");

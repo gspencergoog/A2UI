@@ -91,7 +91,7 @@ class DashboardAPIHandler(http.server.SimpleHTTPRequestHandler):
 
                 conv_id = os.path.basename(conv_dir)
                 last_thinking = ""
-                last_status = "In Progress"
+                last_status = "Thinking"
                 current_gate = "Tier 0/1 Unit Tests"
 
                 # Read transcript
@@ -107,15 +107,20 @@ class DashboardAPIHandler(http.server.SimpleHTTPRequestHandler):
                         if entry.get("status") == "ERROR":
                             last_status = "Error"
                         elif entry.get("type") == "USER_INPUT":
-                            last_status = "In Progress"
+                            last_status = "Thinking"
                         elif "tool_calls" in entry:
                             tool_calls = entry.get("tool_calls") or []
                             if any(isinstance(tc, dict) and tc.get("name") == "send_message" for tc in tool_calls):
                                 last_status = "Done"
+                            elif any(isinstance(tc, dict) and tc.get("name") == "schedule" for tc in tool_calls):
+                                last_status = "Waiting"
                             elif tool_calls:
-                                last_status = "In Progress"
+                                last_status = "Tool"
                         elif entry.get("type") == "PLANNER_RESPONSE":
-                            last_status = "Done"
+                            if entry.get("status") == "RUNNING":
+                                last_status = "Thinking"
+                            elif not entry.get("tool_calls"):
+                                last_status = "Done"
                         if "gate" in entry or "Tier" in entry.get("content", ""):
                             current_gate = entry.get("gate", "Tier 2 MLX Linting")
 
