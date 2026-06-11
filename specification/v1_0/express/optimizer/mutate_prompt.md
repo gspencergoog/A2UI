@@ -1,6 +1,6 @@
 # A2UI Express Evolutionary Mutation Prompt
 
-You are an expert compiler optimization agent. Your goal is to mutate the reigning A2UI Express DSL technical specification, system prompt, parser, and decompiler in lockstep to increase token compression efficiency and prompt compactness without losing semantic expressive power.
+You are an expert compiler optimization agent. Your goal is to mutate the reigning A2UI Express DSL technical specification, prompt generator, parser, and decompiler in lockstep to increase token compression efficiency and prompt compactness without losing semantic expressive power.
 
 ## Optimization objectives
 
@@ -9,7 +9,7 @@ You are an expert compiler optimization agent. Your goal is to mutate the reigni
    - Replace verbose keyword parameters with strict positional ordering.
    - Introduce shorthand symbol overloads (e.g., prefixing `!` for primary buttons, `?` for optional fields).
 2. **Lockstep Synchrony:** You must modify all four core files simultaneously so that the mutated compiler correctly lexes and parses the mutated grammar, and the decompiler correctly translates standard JSON back into the new syntax.
-3. **AST Robustness:** The updated Python parser (`compiler.py`) and decompiler (`decompiler.py`) must be syntactically valid Python code and parse cleanly into a clean Abstract Syntax Tree.
+3. **AST Robustness:** The updated Python parser (`compiler.py`), decompiler (`decompiler.py`), and prompt generator (`prompt_generator.py`) must be syntactically valid Python code and parse cleanly into a clean Abstract Syntax Tree.
 4. **Targeted AST Tweaking:** When mutating `compiler.py`, DO NOT rewrite the entire class from scratch. Maintain the existing recursive-descent parser structure (`parse_column`, `parse_textfield`) exactly as written; ONLY tweak the specific character-matching strings (e.g. changing `$/` to `@` or removing quotes) to match your proposed DSL grammar.
 5. **Compile-Time Adherence:** Your mutated Python compiler MUST successfully tokenize and parse the following reference DSL syntax without raising exceptions:
 
@@ -18,7 +18,7 @@ root = Column([repField, valueField])
 repField = TextField("Representative", @/form/rep, "Enter name")
 valueField = TextField("Deal Value", @/form/value, "0.00", "number", ?required)
 </TIER0_GOLDEN_TARGET>
-6. **Mandatory Documentation Preservation:** When updating `basic_prompt.md`, you MUST preserve ALL descriptions for components, component properties, functions, and function arguments exactly as written. DO NOT delete, shorten, or summarize any descriptive text or parameter usage explanations.
+6. **Mandatory Documentation Preservation:** When updating `prompt_generator.py`, you MUST ensure that all generated system prompts preserve ALL descriptions for components, component properties, functions, and function arguments exactly as written. DO NOT delete, shorten, or summarize any descriptive text or parameter usage explanations.
 
 ## Current reigning champion baseline
 
@@ -26,8 +26,8 @@ valueField = TextField("Deal Value", @/form/value, "0.00", "number", ?required)
 ### a2ui_express.md
 {A2UI_EXPRESS_CONTENT}
 
-### basic_prompt.md
-{BASIC_PROMPT_CONTENT}
+### prompt_generator.py
+{PROMPT_GENERATOR_CONTENT}
 
 ### compiler.py
 {COMPILER_CONTENT}
@@ -45,9 +45,9 @@ You must respond with precisely four XML blocks containing the fully updated, dr
 ...fully updated markdown specification...
 </a2ui_express.md>
 
-<basic_prompt.md>
-...fully updated LLM system prompt...
-</basic_prompt.md>
+<prompt_generator.py>
+...fully updated Python prompt generator class...
+</prompt_generator.py>
 
 <compiler.py>
 ...fully updated Python compiler logic...
