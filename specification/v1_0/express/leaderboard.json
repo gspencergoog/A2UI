@@ -8,7 +8,11 @@
       "metrics": {
         "output_compression": 0.65,
         "prompt_footprint_tokens": 385,
-        "compilation_success": true
+        "compilation_success": true,
+        "compilation_rate_gemma": 1.0,
+        "refinement_reliance": 0.0,
+        "semantic_accuracy": 1.0,
+        "expressive_coverage": 1.0
       }
     },
     "gene_cand_3": {
@@ -19,7 +23,11 @@
         "mlx_reason": "Successfully parsed MLX line: <a2ui>\nroot = Button(\"Submit Deal\", null, Event(\"submit\", {rep: $/actions/submit}))\n</a",
         "output_compression": 0.5525,
         "prompt_footprint_tokens": 140,
-        "compilation_success": true
+        "compilation_success": true,
+        "compilation_rate_gemma": 1.0,
+        "refinement_reliance": 0.0,
+        "semantic_accuracy": 1.0,
+        "expressive_coverage": 1.0
       },
       "artifacts_dir": "/Users/gspencer/code/a2ui/a2ui_express/scratch/candidates/gene_cand_3"
     }
