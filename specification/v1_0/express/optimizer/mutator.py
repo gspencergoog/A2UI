@@ -166,7 +166,7 @@ class ExpressMutator:
 
                 # Dynamically execute mutated prompt generator in-memory
                 spec_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-                catalog_path = os.path.join(spec_dir, "catalogs", "basic", "catalog.json")
+                catalog_path = os.path.join(spec_dir, "..", "catalogs", "basic", "catalog.json")
                 namespace = {"__package__": "specification.v1_0.express"}
                 exec(prompt_gen_code, namespace)
                 generator = namespace["ExpressPromptGenerator"](catalog_path)
