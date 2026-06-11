@@ -178,10 +178,10 @@ def main():
     args = parser.parse_args()
 
     # Ensure socket address reuse
-    socketserver.TCPServer.allow_reuse_address = True
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
 
     try:
-        with socketserver.TCPServer(("", args.port), DashboardAPIHandler) as httpd:
+        with socketserver.ThreadingTCPServer(("", args.port), DashboardAPIHandler) as httpd:
             print(f"=== A2UI Express Dashboard Backend (SSE Mode) active on http://localhost:{args.port} ===")
             print(f"Serving UI static assets from: {DASHBOARD_DIR}")
             print(f"Streaming SSE updates on: /api/stream")
