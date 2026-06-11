@@ -65,8 +65,9 @@ class ExpressPromptGenerator:
             sig = [f"• {name}({', '.join(ordered_args)})"]
             desc = ""
             for sub in sub_schemas:
-                if "description" in sub:
-                    desc = sub["description"].strip()
+                d = sub.get("description", "").strip()
+                if d:
+                    desc = d
                     break
             if desc:
                 sig.append(f"  {desc.split(chr(10))[0]}")

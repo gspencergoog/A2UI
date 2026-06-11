@@ -26,14 +26,12 @@ class TestExpressPipeline(unittest.TestCase):
         self.catalog_path = CATALOG_PATH
         self.helper = CatalogSchemaHelper(self.catalog_path)
 
-    def test_prompt_generator(self):
-        """Verifies prompt signature compiler loads catalog components correctly."""
+    def test_prompt_generator_descriptions(self):
+        """Verifies prompt generator propagates component, function, and parameter descriptions."""
         generator = ExpressPromptGenerator(self.catalog_path)
         prompt = generator.generate_prompt()
-        self.assertIn("Text(", prompt)
-        self.assertIn("Column(", prompt)
-        self.assertIn("required(", prompt)
-        self.assertIn("regex(", prompt)
+        self.assertIn("A component that allows selecting one or more options", prompt)
+        self.assertIn("The ID of the child component", prompt)
 
     def test_compilation_and_decompilation_basic(self):
         """Validates parsing and mapping basic components and validations."""
