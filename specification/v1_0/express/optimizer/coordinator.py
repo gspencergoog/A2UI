@@ -81,7 +81,7 @@ class EvolutionCoordinator:
 
     def bootstrap_temporary_git_repository(self) -> str:
         """Bootstraps a disposable root git repository for isolated subagent branching."""
-        scratch_dir = os.path.abspath(os.path.join(SPEC_EXPRESS_DIR, "..", "..", "scratch"))
+        scratch_dir = os.path.abspath(os.path.join(SPEC_EXPRESS_DIR, "..", "..", "..", "scratch"))
         repo_dir = os.path.join(scratch_dir, "mutation_repo")
         worktrees_dir = os.path.join(scratch_dir, "worktrees")
 
