@@ -53,7 +53,7 @@ class TestExpressMutator(unittest.TestCase):
             "<decompiler.py>def clean(): pass</decompiler.py>"
         )
 
-        mock_client.models.generate_content.side_effect = [bad_response, good_response]
+        mock_client.models.generate_content.side_effect = [bad_response, good_response, good_response]
 
         mutator = ExpressMutator(self.prompt_path)
         mutator.client = mock_client
@@ -63,7 +63,7 @@ class TestExpressMutator(unittest.TestCase):
         self.assertIsNotNone(offspring)
         self.assertEqual(offspring.parent_id, "gene_v1_0")
         self.assertEqual(offspring.compiler_content, "def closed_paren(): pass")
-        self.assertEqual(mock_client.models.generate_content.call_count, 2)
+        self.assertEqual(mock_client.models.generate_content.call_count, 3)
 
 
 if __name__ == "__main__":

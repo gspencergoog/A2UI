@@ -149,6 +149,45 @@ class ExpressMutator:
                         "against reference golden targets. Inspect syntax rules and logic."
                     )
 
+                # Stage 2: Actor-Critic Critique and Review Pass
+                critique_prompt = (
+                    "Review your proposed A2UI Express specification, system prompt, AST parser, and decompiler.\n"
+                    "Ensure that:\n"
+                    "1. All mandatory catalog component signatures (Button, Card, Column, Icon, Row, Text, TextField) remain fully documented in basic_prompt.md.\n"
+                    "2. Unquoted string parsing rules do not collide with component identifiers, boolean literals (true/false), or null.\n"
+                    "3. Parsing and decompilation logic is robust against extra whitespace and backticks.\n"
+                    "Output the final polished and verified four XML blocks precisely."
+                )
+                messages.append(
+                    types.Content(role="model", parts=[types.Part.from_text(text=output_text)])
+                )
+                messages.append(
+                    types.Content(role="user", parts=[types.Part.from_text(text=critique_prompt)])
+                )
+                print("Executing Stage 2 Actor-Critic Review Pass...")
+                critique_response = self.client.models.generate_content(
+                    model=self.model_name,
+                    contents=messages,
+                    config=config,
+                )
+                crit_out = critique_response.text
+                c_spec = self._extract_xml_block(crit_out, "a2ui_express.md")
+                c_prompt = self._extract_xml_block(crit_out, "basic_prompt.md")
+                c_comp = self._extract_xml_block(crit_out, "compiler.py")
+                c_dec = self._extract_xml_block(crit_out, "decompiler.py")
+
+                if c_spec and c_prompt and c_comp and c_dec:
+                    try:
+                        ast.parse(c_comp)
+                        ast.parse(c_dec)
+                        offspring.a2ui_express_content = c_spec
+                        offspring.basic_prompt_content = c_prompt
+                        offspring.compiler_content = c_comp
+                        offspring.decompiler_content = c_dec
+                        offspring.gene_id = f"gene_{offspring.compute_hash()}"
+                    except SyntaxError:
+                        pass
+
                 if target_disk_dir:
                     offspring.save_to_disk(target_disk_dir)
 

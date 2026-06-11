@@ -184,6 +184,41 @@ class EvaluationGauntlet:
             except Exception:
                 return False
 
+            # Check 6: Lexical ReDoS / Malformed Input Fuzzing
+            malformed_dsl = f"root = Column([{'a'*100}])\n{'a'*100} = Invalid(\"\\\"\\\"\\\"\\\"\\\"\\\""
+            cmd_redos = (
+                f"import sys; sys.path.insert(0, '{temp_dir}'); "
+                f"from compiler import ExpressCompiler; "
+                f"ExpressCompiler('{self.catalog_path}').compile({repr(malformed_dsl)})"
+            )
+            try:
+                # Should fail or return without hanging (sub-second cutoff)
+                subprocess.run([sys.executable, "-c", cmd_redos], capture_output=True, text=True, timeout=0.5)
+            except subprocess.TimeoutExpired:
+                return False
+
+            # Check 7: Hidden Hold-Out Layout Verification Suite
+            holdout_dsl = (
+                f"root = Modal(trigger, content)\n"
+                f"trigger = Button(\"Open\", \"primary\", Event(\"open\"))\n"
+                f"content = Card(title)\n"
+                f"title = Text(\"Holdout Modal\", \"h2\")"
+            )
+            cmd_holdout = (
+                f"import sys, json; sys.path.insert(0, '{temp_dir}'); "
+                f"from compiler import ExpressCompiler; "
+                f"print(json.dumps(ExpressCompiler('{self.catalog_path}').compile({repr(holdout_dsl)})))"
+            )
+            try:
+                res_holdout = subprocess.run([sys.executable, "-c", cmd_holdout], capture_output=True, text=True, timeout=2.0)
+                if res_holdout.returncode != 0:
+                    return False
+                env_holdout = json.loads(res_holdout.stdout)
+                if env_holdout.get("version") != "v1.0":
+                    return False
+            except Exception:
+                return False
+
             return True
 
     def _simulate_inspect_ai_subset(self, datasets: list[dict[str, Any]], gene: Gene) -> float:
