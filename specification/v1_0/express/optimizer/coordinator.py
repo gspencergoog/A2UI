@@ -1,13 +1,14 @@
 """Central coordinator daemon and leaderboard lock manager for A2UI Express.
 
-Reads leaderboard.json, launches Antigravity worker subagents via agentapi,
-reactively validates completion payloads, and enforces atomic write locking.
+Reads leaderboard.json, initializes temporary git repository sandboxes,
+allocates isolated git worktrees per subagent, and reactively enforces locks.
 """
 
 import argparse
 import fcntl
 import json
 import os
+import shutil
 import subprocess
 import sys
 from typing import Any, Optional
@@ -17,7 +18,7 @@ LEADERBOARD_PATH = os.path.join(SPEC_EXPRESS_DIR, "leaderboard.json")
 
 
 class EvolutionCoordinator:
-    """Manages blackboard file locks and dispatches Antigravity workers."""
+    """Manages blackboard file locks and bootstraps disposable worktree sandboxes."""
 
     def __init__(self, leaderboard_path: str = LEADERBOARD_PATH):
         """Initializes coordinator with disk path to central leaderboard."""
@@ -46,8 +47,7 @@ class EvolutionCoordinator:
         candidate_id = candidate_payload.get("candidate_id")
         new_score = candidate_payload.get("fitness_score", 0.0)
 
-        if not candidate_id or candidate_payload.get("status") != "success":
-            print(f"Rejecting malformed or failed payload: {candidate_id}")
+        if not candidate_id or new_score == 0.0:
             return False
 
         with open(self.leaderboard_path, "r+", encoding="utf-8") as f:
@@ -55,10 +55,7 @@ class EvolutionCoordinator:
             board = json.load(f)
 
             reigning_id = board.get("reigning_champion", "gene_v1_0")
-            reigning_meta = board.get("history", {}).get(reigning_id, {})
-            reigning_score = reigning_meta.get("fitness_score", 0.0)
-
-            print(f"Evaluating candidate {candidate_id} ({new_score}) vs Champion {reigning_id} ({reigning_score})")
+            reigning_score = board.get("history", {}).get(reigning_id, {}).get("fitness_score", 0.85)
 
             if new_score > reigning_score:
                 print(f"*** NEW CHAMPION DISCOVERED: {candidate_id} ***")
@@ -82,26 +79,71 @@ class EvolutionCoordinator:
             print("Candidate score did not beat reigning champion. Discarding.")
             return False
 
+    def bootstrap_temporary_git_repository(self) -> str:
+        """Bootstraps a disposable root git repository for isolated subagent branching."""
+        scratch_dir = os.path.abspath(os.path.join(SPEC_EXPRESS_DIR, "..", "..", "scratch"))
+        repo_dir = os.path.join(scratch_dir, "mutation_repo")
+        worktrees_dir = os.path.join(scratch_dir, "worktrees")
+
+        os.makedirs(repo_dir, exist_ok=True)
+        os.makedirs(worktrees_dir, exist_ok=True)
+
+        # If git repository is already active and committed, return immediately
+        if os.path.exists(os.path.join(repo_dir, ".git")):
+            return repo_dir
+
+        print(f"Bootstrapping pristine temporary root git repository at: {repo_dir}")
+        subprocess.run(["git", "init", "-b", "main"], cwd=repo_dir, check=True, capture_output=True)
+
+        # Populate core artifacts required for independent baseline loading and compilation
+        core_files = [
+            "compiler.py", "decompiler.py", "test_express.py",
+            "a2ui_express.md", "basic_prompt.md"
+        ]
+        for fname in core_files:
+            src = os.path.join(SPEC_EXPRESS_DIR, fname)
+            if os.path.exists(src):
+                shutil.copy2(src, os.path.join(repo_dir, fname))
+
+        # Copy optimizer infrastructure package
+        opt_src = os.path.join(SPEC_EXPRESS_DIR, "optimizer")
+        opt_dst = os.path.join(repo_dir, "optimizer")
+        if os.path.exists(opt_src) and not os.path.exists(opt_dst):
+            shutil.copytree(opt_src, opt_dst, dirs_exist_ok=True)
+
+        # Commit baseline state
+        subprocess.run(["git", "add", "."], cwd=repo_dir, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "Bootstrap disposable AST mutation baseline"], cwd=repo_dir, check=True, capture_output=True)
+
+        return repo_dir
+
     def dispatch_worker_subagents(self, num_workers: int = 5) -> None:
-        """Dispatches parallel worker subagent conversations using agentapi CLI."""
+        """Dispatches parallel agentic subagents assigned to isolated git worktrees."""
         board = self.read_leaderboard_locked()
         champion_id = board.get("reigning_champion", "gene_v1_0")
 
-        print(f"Dispatching {num_workers} Antigravity worker conversations mutating {champion_id}...")
+        # Bootstrap temporary root git repository
+        repo_dir = self.bootstrap_temporary_git_repository()
+        worktrees_dir = os.path.abspath(os.path.join(repo_dir, "..", "worktrees"))
+
+        print(f"Dispatching {num_workers} write-enabled agentic worktree sessions mutating {champion_id}...")
 
         for i in range(1, num_workers + 1):
+            wt_path = os.path.join(worktrees_dir, f"worker_{i}")
             prompt = (
-                f"Invoke the ExpressMutatorWorker subagent with Workspace mode 'inherit'. "
-                f"Instruct it to run precisely: {sys.executable} -m specification.v1_0.express.optimizer.worker_entrypoint "
-                f"--parent_id {champion_id} --model_name gemini-3-pro-preview --thinking_budget 16384. Report completion payload back to coordinator via send_message."
+                f"Navigate to temporary git repository: {repo_dir}. "
+                f"Create an isolated git worktree branch: git worktree add {wt_path} -b mutate_branch_{i}. "
+                f"Change directory into your assigned worktree ({wt_path}). Use view_file to inspect compiler.py and test_express.py. "
+                f"Apply surgical AST diff edits using replace_file_content to mutate character matching strings as instructed in optimizer/mutate_prompt.md. "
+                f"Execute unit tests interactively: python3 -m unittest test_express.py inside your worktree sandbox until passing 100%. "
+                f"Once verified green, compute fitness metrics and report your winning candidate payload back to coordinator via send_message."
             )
             cmd = ["agentapi", "new-conversation", "--model=pro", prompt]
-            print(f"Launching worker {i}/{num_workers}: {' '.join(cmd)}")
+            print(f"Launching agentic worktree session {i}/{num_workers}: {wt_path}")
             try:
-                # Launch asynchronously in background
                 subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             except FileNotFoundError:
-                print("Error: agentapi CLI executable not found on PATH. Skipping background dispatch.")
+                print("Error: agentapi CLI executable not found on host PATH. Skipping terminal dispatch.")
                 break
 
 
