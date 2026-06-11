@@ -1,5 +1,5 @@
 {
-  "reigning_champion": "gene_cand_3",
+  "reigning_champion": "gene_3831be10cbf9",
   "history": {
     "gene_v1_0": {
       "parent": null,
@@ -30,6 +30,22 @@
         "expressive_coverage": 1.0
       },
       "artifacts_dir": "/Users/gspencer/code/a2ui/a2ui_express/scratch/candidates/gene_cand_3"
+    },
+    "gene_3831be10cbf9": {
+      "parent": "gene_cand_3",
+      "fitness_score": 0.9255,
+      "metrics": {
+        "gate_reached": "Tier 3 Complete",
+        "mlx_reason": "Successfully parsed MLX line: root = Button(\"Submit Deal\", null, \"$/actions/submit\")",
+        "output_compression": 0.5553,
+        "prompt_footprint_tokens": 106,
+        "compilation_success": true,
+        "compilation_rate_gemma": 1.0,
+        "refinement_reliance": 0.0,
+        "semantic_accuracy": 1.0,
+        "expressive_coverage": 1.0
+      },
+      "artifacts_dir": "/Users/gspencer/code/a2ui/a2ui_express/scratch/worktrees/worker_3"
     }
   }
 }
