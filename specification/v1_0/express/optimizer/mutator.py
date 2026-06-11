@@ -26,7 +26,7 @@ from .manifest import Gene
 class ExpressMutator:
     """Orchestrates LLM mutations with automated syntax self-repair."""
 
-    def __init__(self, prompt_template_path: str, model_name: str = "gemini-pro-latest", thinking_budget: int = 8192):
+    def __init__(self, prompt_template_path: str, model_name: str = "gemini-3-pro-preview", thinking_budget: int = 16384):
         """Initializes the mutator with prompt template, target model, and thinking budget.
 
         Args:

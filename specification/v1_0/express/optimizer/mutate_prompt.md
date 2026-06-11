@@ -10,7 +10,8 @@ You are an expert compiler optimization agent. Your goal is to mutate the reigni
    - Introduce shorthand symbol overloads (e.g., prefixing `!` for primary buttons, `?` for optional fields).
 2. **Lockstep Synchrony:** You must modify all four core files simultaneously so that the mutated compiler correctly lexes and parses the mutated grammar, and the decompiler correctly translates standard JSON back into the new syntax.
 3. **AST Robustness:** The updated Python parser (`compiler.py`) and decompiler (`decompiler.py`) must be syntactically valid Python code and parse cleanly into a clean Abstract Syntax Tree.
-4. **Compile-Time Adherence:** Your mutated Python compiler MUST successfully tokenize and parse the following reference DSL syntax without raising exceptions:
+4. **Targeted AST Tweaking:** When mutating `compiler.py`, DO NOT rewrite the entire class from scratch. Maintain the existing recursive-descent parser structure (`parse_column`, `parse_textfield`) exactly as written; ONLY tweak the specific character-matching strings (e.g. changing `$/` to `@` or removing quotes) to match your proposed DSL grammar.
+5. **Compile-Time Adherence:** Your mutated Python compiler MUST successfully tokenize and parse the following reference DSL syntax without raising exceptions:
 
 <TIER0_GOLDEN_TARGET>
 root = Column([repField, valueField])
