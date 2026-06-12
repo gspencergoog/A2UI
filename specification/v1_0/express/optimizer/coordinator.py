@@ -48,11 +48,13 @@ class EvolutionCoordinator:
         Returns:
             True if candidate achieved a new high score and was recorded, False otherwise.
         """
-        candidate_id = candidate_payload.get("candidate_id")
+        candidate_id = candidate_payload.get("candidate_id") or candidate_payload.get("gene_id")
         reported_score = candidate_payload.get("fitness_score", 0.0)
         artifacts_dir = candidate_payload.get("artifacts_dir")
+        if not artifacts_dir and candidate_id:
+            artifacts_dir = os.path.abspath(os.path.join(SPEC_EXPRESS_DIR, "scratch", "candidates", candidate_id))
 
-        if not candidate_id or reported_score == 0.0 or not artifacts_dir:
+        if not candidate_id or reported_score == 0.0 or not os.path.exists(artifacts_dir):
             return False
 
         with open(self.leaderboard_path, "r+", encoding="utf-8") as f:
