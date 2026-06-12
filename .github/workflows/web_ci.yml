@@ -1,0 +1,40 @@
+name: Web and Node.js CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "renderers/**"
+      - "tools/**"
+      - "samples/client/**"
+      - "package.json"
+      - "yarn.lock"
+      - ".github/workflows/web_ci.yml"
+      - ".github/actions/setup-node/**"
+  pull_request:
+    paths:
+      - "renderers/**"
+      - "tools/**"
+      - "samples/client/**"
+      - "package.json"
+      - "yarn.lock"
+      - ".github/workflows/web_ci.yml"
+      - ".github/actions/setup-node/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-node
+      - name: Build all JS/TS workspaces
+        run: yarn build:all
+      - name: Run all JS/TS tests
+        run: yarn test:all

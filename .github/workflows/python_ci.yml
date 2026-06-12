@@ -1,0 +1,86 @@
+name: Python CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "agent_sdks/python/**"
+      - "specification/**/json/**"
+      - "agent_sdks/conformance/**"
+      - "samples/agent/adk/**"
+      - ".github/workflows/python_ci.yml"
+      - ".github/actions/setup-python/**"
+  pull_request:
+    paths:
+      - "agent_sdks/python/**"
+      - "specification/**/json/**"
+      - "agent_sdks/conformance/**"
+      - "samples/agent/adk/**"
+      - ".github/workflows/python_ci.yml"
+      - ".github/actions/setup-python/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-python
+
+      - name: Check Formatting for Agent
+        working-directory: agent_sdks/python/a2ui_agent
+        run: uv run pyink --check .
+
+      - name: Check Formatting for Core
+        working-directory: agent_sdks/python/a2ui_core
+        run: uv run --with pyink pyink --check .
+
+      - name: Check Formatting for Conformance
+        working-directory: agent_sdks/conformance
+        run: uv run --with pyink pyink --check tests/
+
+      - name: Check Formatting for ADK Samples
+        working-directory: samples/agent/adk
+        run: uv run pyink --check .
+
+      - name: Run unit tests for Agent
+        working-directory: agent_sdks/python/a2ui_agent
+        run: uv run --with pytest pytest tests/
+
+      - name: Run unit tests for Core
+        working-directory: agent_sdks/python/a2ui_core
+        run: uv run --with pytest pytest tests/
+
+      - name: Run conformance YAML validation
+        working-directory: agent_sdks/conformance
+        run: uv run pytest
+
+      - name: Validate ADK Sample Examples
+        run: |
+          PYTHONPATH=agent_sdks/python/a2ui_agent/src uv run --project agent_sdks/python/a2ui_agent pytest -vv samples/agent/adk/tests/test_examples_validation.py
+
+      - name: Build Agent SDK
+        working-directory: agent_sdks/python/a2ui_agent
+        run: uv build .
+
+      - name: Build Core
+        working-directory: agent_sdks/python/a2ui_core
+        run: uv build .
+
+      - name: Build ADK orchestrator
+        working-directory: samples/agent/adk/orchestrator
+        run: uv build .
+
+      - name: Build ADK restaurant_finder
+        working-directory: samples/agent/adk/restaurant_finder
+        run: uv build .
+
+      - name: Build ADK rizzcharts
+        working-directory: samples/agent/adk/rizzcharts/python
+        run: uv build .

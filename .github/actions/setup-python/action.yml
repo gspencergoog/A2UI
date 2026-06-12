@@ -1,0 +1,15 @@
+name: Setup Python
+description: Configures Python and astral-sh/setup-uv with dependency caching
+inputs:
+  python-version:
+    description: Target Python version
+    default: "3.12"
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v6
+      with:
+        python-version: ${{ inputs.python-version }}
+    - uses: astral-sh/setup-uv@v8
+      with:
+        enable-cache: true
