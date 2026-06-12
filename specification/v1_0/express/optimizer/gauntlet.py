@@ -260,11 +260,11 @@ class EvaluationGauntlet:
         if not datasets:
             return 0.0
 
-        # Evaluate compression and accuracy across datasets
-        base_tokens = 50  # Reference baseline DSL layout size
+        # Evaluate compression by character compactness relative to standard verbose baseline
+        base_chars = 100.0
         sample_dsl = getattr(gene, "sample_dsl_output", "root = Column([field])\nfield = TextField(\"Label\", @/key)")
-        output_tokens = len(sample_dsl.split())
-        compression = max(0.1, 1.0 - (output_tokens / base_tokens))
+        char_count = len(sample_dsl)
+        compression = max(0.1, 1.0 - (char_count / base_chars))
 
         prompt_tokens = len(gene.basic_prompt_content.split())
         prompt_compactness = max(0.1, 1.0 - (prompt_tokens / 1000.0))
