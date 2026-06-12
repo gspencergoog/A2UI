@@ -15,7 +15,7 @@ root = Column([repField, valueField])
 repField = TextField("Representative", @/form/rep, "Enter name")
 valueField = TextField("Deal Value", @/form/value, "0.00", "number", ?required)
 </TIER0_GOLDEN_TARGET>
-6. **Mandatory Documentation Preservation:** When updating `prompt_generator.py`, you MUST ensure that all generated system prompts preserve ALL descriptions for components, component properties, functions, and function arguments exactly as written. DO NOT delete, shorten, or summarize any descriptive text or parameter usage explanations.
+6. **Mandatory Documentation Preservation & Fluid Section Condensing:** When updating `prompt_generator.py`, you MUST preserve ALL descriptions for components, component properties, functions, and function arguments exactly as written. However, you are highly encouraged to condense the fluid non-catalog sections (such as the introductory preamble, grammar rules, and few-shot examples) to minimize prompt token utilization.
 
 ## Current reigning champion baseline
 
