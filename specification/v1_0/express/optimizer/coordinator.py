@@ -225,7 +225,7 @@ class EvolutionCoordinator:
                 f"Change directory into your assigned worktree ({wt_path}). "
                 f"Read the refactoring instructions saved in refactoring_instructions.json inside your candidate artifacts directory. "
                 f"Use view_file to inspect prompt_generator.py, compiler.py, decompiler.py, and test_express.py. "
-                f"Apply the requested refactoring instructions using your replace_file_content or multi_replace_file_content tools. "
+                f"Apply the requested refactoring instructions using write_to_file with Overwrite=True or replace_file_content. "
                 f"CRITICAL: When updating prompt_generator.py, you MUST ensure all generated system prompts preserve ALL descriptions for components, component properties, functions, and function arguments exactly as written. "
                 f"Execute unit tests interactively: python3 -m unittest test_express.py inside your worktree sandbox until passing 100%. "
                 f"Once verified green, compute fitness metrics and report your winning candidate payload back to coordinator via send_message."
