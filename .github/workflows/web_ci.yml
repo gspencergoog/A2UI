@@ -50,6 +50,8 @@ jobs:
       - uses: ./.github/actions/setup-node
       - name: Build all JS/TS workspaces
         run: yarn build:all
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
       - name: Run all JS/TS tests
         run: yarn test:all
       - name: Run publish script integration test
