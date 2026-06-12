@@ -165,15 +165,6 @@ class ExpressMutator:
                 if not a2ui_spec:
                     raise ValueError("Missing mandatory <a2ui_express.md> XML block.")
 
-                if target_disk_dir:
-                    os.makedirs(target_disk_dir, exist_ok=True)
-                    with open(os.path.join(target_disk_dir, "refactoring_instructions.json"), "w", encoding="utf-8") as pf:
-                        json.dump({
-                            "prompt_generator": prompt_gen_patch,
-                            "compiler": compiler_patch,
-                            "decompiler": decompiler_patch
-                        }, pf, indent=2)
-
                 prompt_gen_code = self._apply_patch_block(prompt_gen_content, prompt_gen_patch)
                 compiler_code = self._apply_patch_block(champion.compiler_content, compiler_patch)
                 decompiler_code = self._apply_patch_block(champion.decompiler_content, decompiler_patch)
@@ -199,6 +190,11 @@ class ExpressMutator:
                     compiler_content=compiler_code,
                     decompiler_content=decompiler_code,
                     parent_id=champion.gene_id,
+                    refactoring_instructions={
+                        "prompt_generator": prompt_gen_patch,
+                        "compiler": compiler_patch,
+                        "decompiler": decompiler_patch,
+                    },
                 )
                 offspring.gene_id = f"gene_{offspring.compute_hash()}"
 

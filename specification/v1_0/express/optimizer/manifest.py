@@ -22,6 +22,7 @@ class Gene:
     parent_id: Optional[str] = None
     fitness_score: float = 0.0
     metrics: dict[str, Any] = dataclasses.field(default_factory=dict)
+    refactoring_instructions: Optional[dict[str, Any]] = None
 
     def compute_hash(self) -> str:
         """Computes a SHA-256 hash uniquely identifying this genetic content."""
@@ -49,6 +50,10 @@ class Gene:
             f.write(self.compiler_content)
         with open(os.path.join(gene_dir, "decompiler.py"), "w", encoding="utf-8") as f:
             f.write(self.decompiler_content)
+
+        if self.refactoring_instructions:
+            with open(os.path.join(gene_dir, "refactoring_instructions.json"), "w", encoding="utf-8") as f:
+                json.dump(self.refactoring_instructions, f, indent=2)
 
         metadata = {
             "gene_id": self.gene_id,

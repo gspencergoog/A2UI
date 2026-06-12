@@ -223,7 +223,7 @@ class EvolutionCoordinator:
                 f"Instruct it precisely: Navigate to temporary root git repo {repo_dir}. "
                 f"Create an isolated git worktree branch: git worktree add {wt_path} -b mutate_branch_{i}. "
                 f"Change directory into your assigned worktree ({wt_path}). "
-                f"Read the refactoring instructions generated from optimizer/mutate_prompt.md. "
+                f"Read the refactoring instructions saved in refactoring_instructions.json inside your candidate artifacts directory. "
                 f"Use view_file to inspect prompt_generator.py, compiler.py, decompiler.py, and test_express.py. "
                 f"Apply the requested refactoring instructions using your replace_file_content or multi_replace_file_content tools. "
                 f"CRITICAL: When updating prompt_generator.py, you MUST ensure all generated system prompts preserve ALL descriptions for components, component properties, functions, and function arguments exactly as written. "
