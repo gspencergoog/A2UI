@@ -7,11 +7,11 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: corepack enable
-      shell: bash
     - uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs.node-version }}
         cache: "yarn"
+    - run: corepack enable
+      shell: bash
     - run: yarn install --immutable
       shell: bash
