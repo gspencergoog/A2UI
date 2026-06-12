@@ -191,6 +191,7 @@ class EvaluationGauntlet:
                 if res.returncode != 0:
                     return False, "Check4_DecompilerRoundTripGate"
                 decompiled_dsl = res.stdout.strip()
+                gene.sample_dsl_output = decompiled_dsl
                 if "root = Column(" not in decompiled_dsl or "TextField(" not in decompiled_dsl:
                     return False, "Check4_DecompilerRoundTripGate"
             except Exception:
@@ -260,8 +261,9 @@ class EvaluationGauntlet:
             return 0.0
 
         # Evaluate compression and accuracy across datasets
-        base_tokens = 1500  # Constant reference size to prevent scale-down gating deadlock
-        output_tokens = len(gene.compiler_content.split()) // 5
+        base_tokens = 50  # Reference baseline DSL layout size
+        sample_dsl = getattr(gene, "sample_dsl_output", "root = Column([field])\nfield = TextField(\"Label\", @/key)")
+        output_tokens = len(sample_dsl.split())
         compression = max(0.1, 1.0 - (output_tokens / base_tokens))
 
         prompt_tokens = len(gene.basic_prompt_content.split())
