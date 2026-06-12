@@ -5,6 +5,7 @@ requests to Gemini, extracts XML blocks, and verifies Python syntax integrity.
 """
 
 import ast
+import json
 import os
 import re
 import subprocess
