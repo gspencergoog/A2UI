@@ -83,6 +83,10 @@ jobs:
         working-directory: agent_sdks/python/a2ui_agent
         run: uv build .
 
+      - name: Run validation scripts on assets packing
+        working-directory: agent_sdks/python/a2ui_agent
+        run: uv run python tests/integration/verify_load_real.py
+
       - name: Build Core
         working-directory: agent_sdks/python/a2ui_core
         run: uv build .
