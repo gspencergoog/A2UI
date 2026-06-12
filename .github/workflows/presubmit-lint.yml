@@ -82,7 +82,6 @@ jobs:
         run: ./scripts/fix_format.sh --check
 
   workspace-lint:
-    needs: [static-checks, format-check]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
