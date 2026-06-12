@@ -52,3 +52,5 @@ jobs:
         run: yarn build:all
       - name: Run all JS/TS tests
         run: yarn test:all
+      - name: Run publish script integration test
+        run: node --test renderers/scripts/publish_npm.test.mjs

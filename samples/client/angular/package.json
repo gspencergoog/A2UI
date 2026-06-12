@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "watch": "ng build --watch --configuration development",
+    "build": "wireit",
     "test": "wireit",
     "serve:ssr:angular": "node dist/angular/server/server.mjs",
     "serve:ssr:restaurant": "node dist/restaurant/server/server.mjs",
@@ -80,6 +81,12 @@
     "wireit": "^0.15.0-pre.2"
   },
   "wireit": {
+    "build": {
+      "command": "ng build restaurant && ng build rizzcharts && ng build orchestrator",
+      "dependencies": [
+        "../../../renderers/angular:build"
+      ]
+    },
     "test": {
       "command": "ng test --watch=false --browsers=ChromeHeadless",
       "dependencies": [
