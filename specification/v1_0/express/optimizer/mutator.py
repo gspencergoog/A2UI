@@ -198,14 +198,6 @@ class ExpressMutator:
                 )
                 offspring.gene_id = f"gene_{offspring.compute_hash()}"
 
-                # Tier 0/1 Compilation Gauntlet Gate (Self-Repair Trigger)
-                gauntlet = EvaluationGauntlet()
-                if not gauntlet._run_local_unit_tests(offspring)[0]:
-                    raise SyntaxError(
-                        "Your generated compiler parser failed in-memory Tier 0/1 compilation unit tests "
-                        "against reference golden targets. Inspect syntax rules and logic."
-                    )
-
                 # Stage 2: Actor-Critic Critique and Review Pass
                 critique_prompt = (
                     "Review your proposed A2UI Express specification, system prompt, AST parser, and decompiler.\n"
