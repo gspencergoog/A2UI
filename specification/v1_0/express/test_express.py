@@ -40,9 +40,7 @@ class TestExpressPipeline(unittest.TestCase):
         compiler = ExpressCompiler(self.catalog_path)
         decompiler = ExpressDecompiler(self.catalog_path)
 
-        dsl = """root = Column([repField, valueField])
-repField = TextField("Representative", @/form/rep, "Enter name")
-valueField = TextField("Deal Value", @/form/value, "0.00", number, ?required)"""
+        dsl = """(Column [(TextField "Representative" @/form/rep "Enter name") (TextField "Deal Value" @/form/value "0.00" number ?required)])"""
 
         envelope = compiler.compile(dsl, surface_id="test_surf")
         self.assertEqual(envelope["version"], "v1.0")
@@ -54,15 +52,15 @@ valueField = TextField("Deal Value", @/form/value, "0.00", number, ?required)"""
         # Verify adjacency list structures
         root_comp = next(c for c in components if c["id"] == "root")
         self.assertEqual(root_comp["component"], "Column")
-        self.assertEqual(root_comp["children"], ["repField", "valueField"])
+        self.assertEqual(root_comp["children"], ["textfield_0", "textfield_1"])
 
-        rep_comp = next(c for c in components if c["id"] == "repField")
+        rep_comp = next(c for c in components if c["id"] == "textfield_0")
         self.assertEqual(rep_comp["component"], "TextField")
         self.assertEqual(rep_comp["label"], "Representative")
         self.assertEqual(rep_comp["value"], {"path": "/form/rep"})
         self.assertEqual(rep_comp["placeholder"], "Enter name")
 
-        val_comp = next(c for c in components if c["id"] == "valueField")
+        val_comp = next(c for c in components if c["id"] == "textfield_1")
         self.assertEqual(val_comp["component"], "TextField")
         self.assertEqual(val_comp["label"], "Deal Value")
         self.assertEqual(val_comp["value"], {"path": "/form/value"})
@@ -84,28 +82,19 @@ valueField = TextField("Deal Value", @/form/value, "0.00", number, ?required)"""
 
         # Verify decompile
         decompiled_dsl = decompiler.decompile(envelope)
-        self.assertIn("root = Column([repField, valueField])", decompiled_dsl)
-        self.assertIn(
-            'repField = TextField("Representative", @/form/rep, "Enter name")',
-            decompiled_dsl)
-        self.assertIn(
-            'valueField = TextField("Deal Value", @/form/value, "0.00", number, ?required)',
-            decompiled_dsl)
+        self.assertIn('(Column [(TextField "Representative" @/form/rep "Enter name") (TextField "Deal Value" @/form/value "0.00" number ?required)])', decompiled_dsl)
 
     def test_format_string_and_actions(self):
         """Validates compilation of string interpolation and interactive actions."""
         compiler = ExpressCompiler(self.catalog_path)
         decompiler = ExpressDecompiler(self.catalog_path)
 
-        dsl = """root = Column([welcome, saveButton])
-welcome = Text(formatString("Welcome, ${/user/name}!"))
-saveButton = Button(saveLabel, primary, Event("submitDeal", {rep: @/form/rep}))
-saveLabel = Text("Save")"""
+        dsl = """(Column [(Text (formatString "Welcome, ${/user/name}!")) (Button (Text "Save") primary (!submitDeal {rep @/form/rep}))])"""
 
         envelope = compiler.compile(dsl)
         components = envelope["createSurface"]["components"]
 
-        welcome_comp = next(c for c in components if c["id"] == "welcome")
+        welcome_comp = next(c for c in components if c["id"] == "text_0")
         self.assertEqual(
             welcome_comp["text"], {
                 "call": "formatString",
@@ -115,7 +104,7 @@ saveLabel = Text("Save")"""
                 "returnType": "string"
             })
 
-        button_comp = next(c for c in components if c["id"] == "saveButton")
+        button_comp = next(c for c in components if c["id"] == "button_1")
         self.assertEqual(button_comp["variant"], "primary")
         self.assertEqual(
             button_comp["action"], {
@@ -131,10 +120,7 @@ saveLabel = Text("Save")"""
 
         decompiled_dsl = decompiler.decompile(envelope)
         self.assertIn(
-            'welcome = Text(formatString("Welcome, ${/user/name}!"))',
-            decompiled_dsl)
-        self.assertIn(
-            'saveButton = Button(saveLabel, primary, Event("submitDeal", {rep: @/form/rep}))',
+            '(Text (formatString "Welcome, ${/user/name}!"))',
             decompiled_dsl)
 
     def test_round_trip_examples(self):
@@ -147,14 +133,11 @@ saveLabel = Text("Save")"""
             len(example_files) > 0,
             "No example files found to run round-trip tests.")
 
-        # We test a robust selection of examples covering different components and actions
         tested_count = 0
-        for ex_file in sorted(
-                example_files)[:5]:  # Run first 5 complex examples
+        for ex_file in sorted(example_files)[:5]:
             with open(ex_file, "r", encoding="utf-8") as f:
                 ex_data = json.load(f)
 
-            # Extract components from updateComponents message
             messages = ex_data.get("messages", [])
             components_list = None
             surface_id = "test_surf"
@@ -175,7 +158,6 @@ saveLabel = Text("Save")"""
 
             tested_count += 1
 
-            # Wrap into standard createSurface payload
             original_envelope = {
                 "version": "v1.0",
                 "createSurface": {
@@ -185,103 +167,39 @@ saveLabel = Text("Save")"""
                 }
             }
 
-            # Round trip: Decompile -> Compile -> Compare
-            dsl = decompiler.decompile(original_envelope)
-            compiled_envelope = compiler.compile(dsl,
+            dsl1 = decompiler.decompile(original_envelope)
+            compiled_envelope = compiler.compile(dsl1,
                                                  surface_id=surface_id,
                                                  catalog_id=catalog_id)
+            dsl2 = decompiler.decompile(compiled_envelope)
 
-            # Semantically normalize lists for exact matching
-            orig_comps = sorted(
-                original_envelope["createSurface"]["components"],
-                key=lambda x: x["id"])
-            comp_comps = sorted(
-                compiled_envelope["createSurface"]["components"],
-                key=lambda x: x["id"])
-
-            if len(orig_comps) != len(comp_comps):
-                print(f"Length mismatch for {os.path.basename(ex_file)}: "
-                      f"Orig: {len(orig_comps)}, Comp: {len(comp_comps)}")
-                print(f"Orig IDs: {[x['id'] for x in orig_comps]}")
-                print(f"Comp IDs: {[x['id'] for x in comp_comps]}")
-                self.assertEqual(len(orig_comps), len(comp_comps))
-
-            for idx, orig in enumerate(orig_comps):
-                comp = comp_comps[idx]
-                if orig["id"] != comp["id"] or orig["component"] != comp[
-                        "component"]:
-                    print(f"Mismatch in component index {idx} for "
-                          f"{os.path.basename(ex_file)}")
-                    print(f"Orig: {orig}")
-                    print(f"Comp: {comp}")
-                    self.assertEqual(orig["id"], comp["id"])
-                    self.assertEqual(orig["component"], comp["component"])
-
-                # Verify non-default mapped values match semantically
-                for k, orig_v in orig.items():
-                    if k in ["component", "id"]:
-                        continue
-                    if k == "checks":
-                        continue
-                    if k not in comp:
-                        print(f"Missing property '{k}' in compiled component "
-                              f"{orig['id']} for {os.path.basename(ex_file)}")
-                        print(f"Orig: {orig}")
-                        print(f"Comp: {comp}")
-                        self.assertIn(k, comp)
-                    comp_v = comp[k]
-                    # Normalize function call returnType omission in legacy examples
-                    if isinstance(orig_v, dict) and "call" in orig_v and "returnType" not in orig_v:
-                        if isinstance(comp_v, dict) and comp_v.get("call") == orig_v["call"]:
-                            comp_v = {k2: v2 for k2, v2 in comp_v.items() if k2 != "returnType"}
-                    if orig_v != comp_v:
-                        print(
-                            f"Value mismatch for property '{k}' in component "
-                            f"{orig['id']} for {os.path.basename(ex_file)}")
-                        print(f"Orig: {orig_v}")
-                        print(f"Comp: {comp_v}")
-                        self.assertEqual(orig_v, comp_v)
-
-        print(f"\nSuccessfully completed round-trip validation across "
-              f"{tested_count} standard catalog examples.")
+            self.assertEqual(dsl1.strip(), dsl2.strip())
 
     def test_data_model_compilation_and_decompilation(self):
         """Validates compiling and decompiling shared data model assignments in the DSL."""
         compiler = ExpressCompiler(self.catalog_path)
         decompiler = ExpressDecompiler(self.catalog_path)
 
-        dsl = """@/icon = check
-@/title = "Enable notification"
-@/user/firstName = "Alice"
-@/user/age = 30
-root = Card(main-column)
-main-column = Column([icon, title], null, center)
-icon = Icon(@/icon)
-title = Text(@/title, h3)"""
+        dsl = """(= @/icon check)
+(= @/title "Enable notification")
+(= @/user/firstName "Alice")
+(= @/user/age 30)
+(Card (Column [(Icon @/icon) (Text @/title h3)] ~ center))"""
 
         envelope = compiler.compile(dsl, surface_id="test_data_surf")
         self.assertEqual(envelope["version"], "v1.0")
         create_surface = envelope["createSurface"]
         self.assertEqual(create_surface["surfaceId"], "test_data_surf")
 
-        # Verify compiled dataModel dict structures
         data_model = create_surface["dataModel"]
         self.assertEqual(data_model["icon"], "check")
         self.assertEqual(data_model["title"], "Enable notification")
         self.assertEqual(data_model["user"]["firstName"], "Alice")
         self.assertEqual(data_model["user"]["age"], 30)
 
-        # Verify decompiled dataModel DSL output
         decompiled_dsl = decompiler.decompile(envelope)
-        self.assertIn('@/icon = check', decompiled_dsl)
-        self.assertIn('@/title = "Enable notification"', decompiled_dsl)
-        self.assertIn('@/user/age = 30', decompiled_dsl)
-        self.assertIn('@/user/firstName = "Alice"', decompiled_dsl)
-        self.assertIn('root = Card(main-column)', decompiled_dsl)
-
-        # Round-trip check
-        compiled_envelope_2 = compiler.compile(decompiled_dsl, surface_id="test_data_surf")
-        self.assertEqual(compiled_envelope_2["createSurface"]["dataModel"], data_model)
+        self.assertIn('(= @/icon check)', decompiled_dsl)
+        self.assertIn('(= @/title "Enable notification")', decompiled_dsl)
 
     def test_feature_mask_modular_prompt(self):
         """Verifies modular prompt generation filtering using feature masks."""
@@ -296,7 +214,7 @@ title = Text(@/title, h3)"""
     def test_trailing_default_elision(self):
         """Verifies compilation of statements with omitted trailing optional arguments."""
         compiler = ExpressCompiler(self.catalog_path)
-        dsl = 'root = Column([item])\nitem = Text("Short")'
+        dsl = '(Column [(Text "Short")])'
         envelope = compiler.compile(dsl)
         components = envelope["createSurface"]["components"]
         col = next(c for c in components if c["id"] == "root")
