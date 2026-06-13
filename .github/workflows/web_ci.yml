@@ -43,8 +43,8 @@ permissions:
   contents: read
 
 env:
-  RENDERERS_INC: "--include 'renderers/*' --include 'renderers/**/*'"
-  TOOLS_INC: "--include 'tools/*' --include 'tools/**/*'"
+  RENDERERS_INC: "--include 'renderers/**'"
+  TOOLS_INC: "--include 'tools/**'"
   SAMPLES_INC: "--include 'samples/client/**' --include 'samples/mcp/**'"
 
 jobs:
