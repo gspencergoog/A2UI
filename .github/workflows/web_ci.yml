@@ -58,6 +58,8 @@ jobs:
       - uses: ./.github/actions/setup-node
       - name: Build Renderers
         run: eval "yarn workspaces foreach -A $RENDERERS_INC -p --topological-dev run build"
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
       - name: Test Renderers
         run: eval "yarn workspaces foreach -A $RENDERERS_INC -p run test"
       - name: Verify NPM Publish Script
