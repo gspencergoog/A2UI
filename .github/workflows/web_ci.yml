@@ -60,3 +60,13 @@ jobs:
         run: yarn build:all
       - name: Test Samples
         run: yarn workspaces foreach --include 'samples/client/**' --include 'samples/mcp/**' -p run test
+
+  ci-other:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-node
+      - name: Build Dependencies
+        run: yarn build:all
+      - name: Test Other Workspaces
+        run: yarn workspaces foreach --exclude 'renderers/*' --exclude 'renderers/**/*' --exclude 'tools/*' --exclude 'tools/**/*' --exclude 'samples/client/**' --exclude 'samples/mcp/**' -p run test
