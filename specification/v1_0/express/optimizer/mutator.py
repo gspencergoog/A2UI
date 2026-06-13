@@ -149,25 +149,31 @@ class ExpressMutator:
                 output_text = response.text
 
                 a2ui_spec = self._extract_xml_block(output_text, "a2ui_express.md")
-                prompt_gen_patch = (
-                    self._extract_xml_block(output_text, "prompt_generator_patch") or
-                    self._extract_xml_block(output_text, "prompt_generator_instructions")
+                prompt_gen_raw = (
+                    self._extract_xml_block(output_text, "prompt_generator_content") or
+                    self._extract_xml_block(output_text, "prompt_generator.py") or
+                    prompt_gen_content
                 )
-                compiler_patch = (
-                    self._extract_xml_block(output_text, "compiler_patch") or
-                    self._extract_xml_block(output_text, "compiler_instructions")
+                compiler_raw = (
+                    self._extract_xml_block(output_text, "compiler_content") or
+                    self._extract_xml_block(output_text, "compiler.py") or
+                    champion.compiler_content
                 )
-                decompiler_patch = (
-                    self._extract_xml_block(output_text, "decompiler_patch") or
-                    self._extract_xml_block(output_text, "decompiler_instructions")
+                decompiler_raw = (
+                    self._extract_xml_block(output_text, "decompiler_content") or
+                    self._extract_xml_block(output_text, "decompiler.py") or
+                    champion.decompiler_content
                 )
 
                 if not a2ui_spec:
                     raise ValueError("Missing mandatory <a2ui_express.md> XML block.")
 
-                prompt_gen_code = self._apply_patch_block(prompt_gen_content, prompt_gen_patch)
-                compiler_code = self._apply_patch_block(champion.compiler_content, compiler_patch)
-                decompiler_code = self._apply_patch_block(champion.decompiler_content, decompiler_patch)
+                def clean_code(c: str) -> str:
+                    return re.sub(r"^```python\s*|\s*```$", "", c.strip(), flags=re.MULTILINE)
+
+                prompt_gen_code = clean_code(prompt_gen_raw)
+                compiler_code = clean_code(compiler_raw)
+                decompiler_code = clean_code(decompiler_raw)
 
                 # AST Robustness Gate (Self-Repair Trigger)
                 ast.parse(prompt_gen_code)
@@ -190,11 +196,6 @@ class ExpressMutator:
                     compiler_content=compiler_code,
                     decompiler_content=decompiler_code,
                     parent_id=champion.gene_id,
-                    refactoring_instructions={
-                        "prompt_generator": prompt_gen_patch,
-                        "compiler": compiler_patch,
-                        "decompiler": decompiler_patch,
-                    },
                 )
                 offspring.gene_id = f"gene_{offspring.compute_hash()}"
 

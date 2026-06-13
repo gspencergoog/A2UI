@@ -33,35 +33,24 @@ valueField = TextField("Deal Value", @/form/value, "0.00", "number", ?required)
 {DECOMPILER_CONTENT}
 </REIGNING_CHAMPION>
 
-## Output contract (Surgical Refactoring Instructions)
+## Output contract (Complete Drop-In File Replacements)
 
-Instead of outputting brittle XML patch blocks or full source files, you must output clear, actionable refactoring instructions for a peer coding agent (`prompt_generator_instructions`, `compiler_instructions`, `decompiler_instructions`).
-
-### Instructions Formatting Guidance:
-- Clearly explain what methods or lines to replace, modify, or add.
-- Provide precise drop-in code snippets for the coding agent to apply using its code editing tools.
-- State exactly how loops, delimiters, or AST parsing nodes should be modified.
+To prevent diff application errors, you must output the complete, ready-to-run file contents for each of the four core system artifacts. Do not truncate code or use placeholders.
 
 <OUTPUT_CONTRACT>
 <a2ui_express.md>
 ...fully updated markdown specification...
 </a2ui_express.md>
 
-<prompt_generator_instructions>
-1. Replace method X() with the following snippet:
-```python
-def X():
-    pass
-```
-2. Modify line Y to do Z...
-</prompt_generator_instructions>
+<prompt_generator_content>
+...complete prompt_generator.py source code...
+</prompt_generator_content>
 
-<compiler_instructions>
-1. In parse_column(), change delimiter handling...
-2. Insert new helper method...
-</compiler_instructions>
+<compiler_content>
+...complete compiler.py source code...
+</compiler_content>
 
-<decompiler_instructions>
-1. Update decompilation mapping...
-</decompiler_instructions>
+<decompiler_content>
+...complete decompiler.py source code...
+</decompiler_content>
 </OUTPUT_CONTRACT>

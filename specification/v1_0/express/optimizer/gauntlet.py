@@ -85,10 +85,12 @@ class EvaluationGauntlet:
             # Copy schema helper files
             shutil.copy2(os.path.join(SPEC_EXPRESS_DIR, "schema_helper.py"), os.path.join(temp_dir, "schema_helper.py"))
 
-            # Check 1: Basic component layout and structural integrity
-            dsl1 = "root = Column([field])\nfield = TextField(\"Label\", @/key)"
-            if "@" not in gene.a2ui_express_content:
-                dsl1 = "root = Column([field])\nfield = TextField(\"Label\", $/key)"
+            def extract_tag(content: str, tag: str) -> Optional[str]:
+                match = re.search(rf"<{tag}>(.*?)</{tag}>", content, re.DOTALL)
+                return match.group(1).strip() if match else None
+
+            golden = extract_tag(gene.a2ui_express_content, "TIER0_GOLDEN_TARGET")
+            dsl1 = golden if golden else "root = Column([field])\nfield = TextField(\"Label\", @/key)"
 
             cmd_compile1 = (
                 f"import sys, json; sys.path.insert(0, '{temp_dir}'); "
