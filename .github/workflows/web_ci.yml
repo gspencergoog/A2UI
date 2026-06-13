@@ -51,8 +51,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-node
-      - name: Build Dependencies
-        run: yarn build:all
+      - name: Build Tools
+        run: eval "yarn workspaces foreach $TOOLS_INC -p --topological-dev -R run build"
       - name: Test Tools
         run: eval "yarn workspaces foreach $TOOLS_INC -p run test"
 
@@ -61,8 +61,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-node
-      - name: Build Dependencies
-        run: yarn build:all
+      - name: Build Samples
+        run: eval "yarn workspaces foreach $SAMPLES_INC -p --topological-dev -R run build"
       - name: Test Samples
         run: eval "yarn workspaces foreach $SAMPLES_INC -p run test"
 
