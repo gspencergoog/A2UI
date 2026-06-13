@@ -88,7 +88,7 @@ jobs:
       - name: Build Other Workspaces
         run: |
           EXCLUDE=$(echo "$RENDERERS_INC $TOOLS_INC $SAMPLES_INC" | sed 's/--include/--exclude/g')
-          eval "yarn workspaces foreach -A $EXCLUDE -p --topological-dev -R run build"
+          eval "yarn workspaces foreach -A $EXCLUDE -p --topological-dev run build"
       - name: Test Other Workspaces
         run: |
           EXCLUDE=$(echo "$RENDERERS_INC $TOOLS_INC $SAMPLES_INC" | sed 's/--include/--exclude/g')
