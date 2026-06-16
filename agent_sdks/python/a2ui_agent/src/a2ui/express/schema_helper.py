@@ -22,163 +22,167 @@ import json
 
 
 class CatalogSchemaHelper:
-    """Dynamic schema crawler for A2UI catalogs.
+  """Dynamic schema crawler for A2UI catalogs.
 
-    Resolves component and function properties in strict schema definition order
-    to support positional parameter mapping for compact generative notations.
+  Resolves component and function properties in strict schema definition order
+  to support positional parameter mapping for compact generative notations.
 
-    Attributes:
+  Attributes:
+      catalog_path: The absolute filesystem path to the catalog JSON file.
+      catalog: The parsed catalog JSON dictionary.
+      components: A dictionary mapping component names to their catalog schemas.
+      functions: A dictionary mapping function names to their catalog schemas.
+  """
+
+  def __init__(self, catalog_path: str):
+    """Initializes the helper by loading and parsing the catalog file.
+
+    Args:
         catalog_path: The absolute filesystem path to the catalog JSON file.
-        catalog: The parsed catalog JSON dictionary.
-        components: A dictionary mapping component names to their catalog schemas.
-        functions: A dictionary mapping function names to their catalog schemas.
     """
+    self.catalog_path = catalog_path
+    with open(catalog_path, "r", encoding="utf-8") as f:
+      self.catalog = json.load(f)
+    self.components = self.catalog.get("components", {})
+    self.functions = self.catalog.get("functions", {})
+    self._load_mappings()
 
-    def __init__(self, catalog_path: str):
-        """Initializes the helper by loading and parsing the catalog file.
+  def _load_mappings(self):
+    """Crawls the component and function schemas to build internal mappings."""
+    self.component_properties = {}
+    self.component_required = {}
+    self.component_is_checkable = {}
+    self.component_property_enums = {}
 
-        Args:
-            catalog_path: The absolute filesystem path to the catalog JSON file.
-        """
-        self.catalog_path = catalog_path
-        with open(catalog_path, "r", encoding="utf-8") as f:
-            self.catalog = json.load(f)
-        self.components = self.catalog.get("components", {})
-        self.functions = self.catalog.get("functions", {})
-        self._load_mappings()
+    for name, schema in self.components.items():
+      props = {}
+      reqs = []
+      is_checkable = False
 
-    def _load_mappings(self):
-        """Crawls the component and function schemas to build internal mappings."""
-        self.component_properties = {}
-        self.component_required = {}
-        self.component_is_checkable = {}
-        self.component_property_enums = {}
+      # Crawl allOf and root schema for properties
+      sub_schemas = [schema]
+      if "allOf" in schema:
+        sub_schemas.extend(schema["allOf"])
 
-        for name, schema in self.components.items():
-            props = {}
-            reqs = []
-            is_checkable = False
+      for sub in sub_schemas:
+        if "$ref" in sub:
+          ref = sub["$ref"]
+          if "Checkable" in ref:
+            is_checkable = True
+        if "properties" in sub:
+          props.update(sub["properties"])
+          for pk, pv in sub["properties"].items():
+            if isinstance(pv, dict) and "enum" in pv:
+              self.component_property_enums[(name, pk)] = pv["enum"]
+        if "required" in sub:
+          reqs.extend(sub["required"])
 
-            # Crawl allOf and root schema for properties
-            sub_schemas = [schema]
-            if "allOf" in schema:
-                sub_schemas.extend(schema["allOf"])
+      # Filter out structural properties component and id
+      ordered_keys = []
+      for k in props:
+        if k not in ["component", "id"]:
+          ordered_keys.append(k)
 
-            for sub in sub_schemas:
-                if "$ref" in sub:
-                    ref = sub["$ref"]
-                    if "Checkable" in ref:
-                        is_checkable = True
-                if "properties" in sub:
-                    props.update(sub["properties"])
-                    for pk, pv in sub["properties"].items():
-                        if isinstance(pv, dict) and "enum" in pv:
-                            self.component_property_enums[(name, pk)] = pv["enum"]
-                if "required" in sub:
-                    reqs.extend(sub["required"])
+      # If it's checkable, add checks at the end
+      if is_checkable:
+        ordered_keys.append("checks")
 
-            # Filter out structural properties component and id
-            ordered_keys = []
-            for k in props:
-                if k not in ["component", "id"]:
-                    ordered_keys.append(k)
+      self.component_properties[name] = ordered_keys
+      self.component_required[name] = reqs
+      self.component_is_checkable[name] = is_checkable
 
-            # If it's checkable, add checks at the end
-            if is_checkable:
-                ordered_keys.append("checks")
+    self.function_properties = {}
+    self.function_required = {}
 
-            self.component_properties[name] = ordered_keys
-            self.component_required[name] = reqs
-            self.component_is_checkable[name] = is_checkable
+    for name, schema in self.functions.items():
+      args_obj = schema.get("properties", {}).get("args", {})
+      props = args_obj.get("properties", {})
+      reqs = args_obj.get("required", [])
+      self.function_properties[name] = list(props.keys())
+      self.function_required[name] = reqs
 
-        self.function_properties = {}
-        self.function_required = {}
+  def get_component_properties(self, name: str) -> list[str]:
+    """Returns the ordered properties of the specified component.
 
-        for name, schema in self.functions.items():
-            args_obj = schema.get("properties", {}).get("args", {})
-            props = args_obj.get("properties", {})
-            reqs = args_obj.get("required", [])
-            self.function_properties[name] = list(props.keys())
-            self.function_required[name] = reqs
+    Args:
+        name: The catalog name of the component.
 
-    def get_component_properties(self, name: str) -> list[str]:
-        """Returns the ordered properties of the specified component.
+    Returns:
+        A list of property keys in their schema definition order.
+    """
+    return self.component_properties.get(name, [])
 
-        Args:
-            name: The catalog name of the component.
+  def get_component_required(self, name: str) -> list[str]:
+    """Returns the list of required properties for the specified component.
 
-        Returns:
-            A list of property keys in their schema definition order.
-        """
-        return self.component_properties.get(name, [])
+    Args:
+        name: The catalog name of the component.
 
-    def get_component_required(self, name: str) -> list[str]:
-        """Returns the list of required properties for the specified component.
+    Returns:
+        A list of property keys that are required.
+    """
+    return self.component_required.get(name, [])
 
-        Args:
-            name: The catalog name of the component.
+  def is_checkable(self, name: str) -> bool:
+    """Returns whether the specified component supports client-side checks.
 
-        Returns:
-            A list of property keys that are required.
-        """
-        return self.component_required.get(name, [])
+    Args:
+        name: The catalog name of the component.
 
-    def is_checkable(self, name: str) -> bool:
-        """Returns whether the specified component supports client-side checks.
+    Returns:
+        Whether the component implements the Checkable interface.
+    """
+    return self.component_is_checkable.get(name, False)
 
-        Args:
-            name: The catalog name of the component.
+  def get_function_properties(self, name: str) -> list[str]:
+    """Returns the ordered properties of the specified function's arguments.
 
-        Returns:
-            Whether the component implements the Checkable interface.
-        """
-        return self.component_is_checkable.get(name, False)
+    Args:
+        name: The catalog name of the function.
 
-    def get_function_properties(self, name: str) -> list[str]:
-        """Returns the ordered properties of the specified function's arguments.
+    Returns:
+        A list of function parameter names in their schema definition order.
+    """
+    return self.function_properties.get(name, [])
 
-        Args:
-            name: The catalog name of the function.
+  def get_function_required(self, name: str) -> list[str]:
+    """Returns the list of required argument properties for the function.
 
-        Returns:
-            A list of function parameter names in their schema definition order.
-        """
-        return self.function_properties.get(name, [])
+    Args:
+        name: The catalog name of the function.
 
-    def get_function_required(self, name: str) -> list[str]:
-        """Returns the list of required argument properties for the function.
+    Returns:
+        A list of function parameter names that are required.
+    """
+    return self.function_required.get(name, [])
 
-        Args:
-            name: The catalog name of the function.
+  def get_property_enum(
+      self, component_name: str, property_name: str
+  ) -> Optional[list]:
+    """Returns the list of allowed enum values for a component property, or None.
 
-        Returns:
-            A list of function parameter names that are required.
-        """
-        return self.function_required.get(name, [])
+    Args:
+        component_name: The catalog name of the component.
+        property_name: The property key name.
 
-    def get_property_enum(self, component_name: str, property_name: str) -> Optional[list]:
-        """Returns the list of allowed enum values for a component property, or None.
+    Returns:
+        A list of allowed enum string values, or None if not restricted.
+    """
+    return self.component_property_enums.get((component_name, property_name))
 
-        Args:
-            component_name: The catalog name of the component.
-            property_name: The property key name.
+  def get_property_schema(
+      self, component_name: str, property_name: str
+  ) -> Optional[dict]:
+    """Crawls all sub-schemas of a component to retrieve a property's schema definition."""
+    schema = self.components.get(component_name)
+    if not schema:
+      return None
 
-        Returns:
-            A list of allowed enum string values, or None if not restricted.
-        """
-        return self.component_property_enums.get((component_name, property_name))
+    sub_schemas = [schema]
+    if "allOf" in schema:
+      sub_schemas.extend(schema["allOf"])
 
-    def get_property_schema(self, component_name: str, property_name: str) -> Optional[dict]:
-        """Crawls all sub-schemas of a component to retrieve a property's schema definition."""
-        schema = self.components.get(component_name)
-        if not schema:
-            return None
-        
-        sub_schemas = [schema]
-        if "allOf" in schema:
-            sub_schemas.extend(schema["allOf"])
-
-        for sub in sub_schemas:
-            if "properties" in sub and property_name in sub["properties"]:
-                return sub["properties"][property_name]
-        return None
+    for sub in sub_schemas:
+      if "properties" in sub and property_name in sub["properties"]:
+        return sub["properties"][property_name]
+    return None

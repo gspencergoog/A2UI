@@ -15,10 +15,10 @@
 import os
 
 if os.environ.get("A2UI_EXPRESS_ENABLED", "").lower() not in ("true", "1", "yes"):
-    raise ImportError(
-        "A2UI Express is an experimental proposal extension and is disabled by default. "
-        "To enable it, set the environment variable A2UI_EXPRESS_ENABLED=true."
-    )
+  raise ImportError(
+      "A2UI Express is an experimental proposal extension and is disabled by default. "
+      "To enable it, set the environment variable A2UI_EXPRESS_ENABLED=true."
+  )
 
 from .compiler import ExpressCompiler
 from .decompiler import ExpressDecompiler

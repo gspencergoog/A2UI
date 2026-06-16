@@ -24,7 +24,22 @@ import argparse
 import json
 import os
 import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "agent_sdks", "python", "a2ui_agent", "src")))
+
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "..",
+            "..",
+            "agent_sdks",
+            "python",
+            "a2ui_agent",
+            "src",
+        )
+    ),
+)
 from a2ui.express.decompiler import ExpressDecompiler
 
 
@@ -64,15 +79,16 @@ def decompile_example(example_path: str, catalog_path: str) -> str:
 
     if not components_list:
         raise ValueError(
-            f"Could not find any 'updateComponents' message in {example_path}")
+            f"Could not find any 'updateComponents' message in {example_path}"
+        )
 
     envelope = {
         "version": "v1.0",
         "createSurface": {
             "surfaceId": surface_id,
             "catalogId": catalog_id,
-            "components": components_list
-        }
+            "components": components_list,
+        },
     }
 
     decompiler = ExpressDecompiler(catalog_path)
@@ -82,16 +98,18 @@ def decompile_example(example_path: str, catalog_path: str) -> str:
 def main():
     """CLI entrypoint for the decompiler."""
     parser = argparse.ArgumentParser(
-        description=
-        "Decompile standard A2UI JSON examples into A2UI Express DSL.")
+        description="Decompile standard A2UI JSON examples into A2UI Express DSL."
+    )
     parser.add_argument(
-        "example_file",
-        help="Path to the A2UI JSON example file to decompile.")
+        "example_file", help="Path to the A2UI JSON example file to decompile."
+    )
     parser.add_argument(
         "--catalog",
-        default=os.path.join(os.path.dirname(__file__), "..", "catalogs",
-                             "basic", "catalog.json"),
-        help="Path to the catalog JSON schema (default: basic catalog).")
+        default=os.path.join(
+            os.path.dirname(__file__), "..", "catalogs", "basic", "catalog.json"
+        ),
+        help="Path to the catalog JSON schema (default: basic catalog).",
+    )
 
     args = parser.parse_args()
 

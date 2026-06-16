@@ -23,7 +23,22 @@ containing complete instructions and positional signatures on stdout.
 import argparse
 import os
 import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "agent_sdks", "python", "a2ui_agent", "src")))
+
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "..",
+            "..",
+            "agent_sdks",
+            "python",
+            "a2ui_agent",
+            "src",
+        )
+    ),
+)
 from a2ui.express.prompt_generator import ExpressPromptGenerator
 
 
@@ -49,14 +64,15 @@ def generate_prompt_text(catalog_path: str) -> str:
 def main():
     """CLI entrypoint for the prompt generator."""
     parser = argparse.ArgumentParser(
-        description=
-        "Generate model system prompts for A2UI Express from a catalog schema."
+        description="Generate model system prompts for A2UI Express from a catalog schema."
     )
     parser.add_argument(
         "--catalog",
-        default=os.path.join(os.path.dirname(__file__), "..", "catalogs",
-                             "basic", "catalog.json"),
-        help="Path to the catalog JSON schema (default: basic catalog).")
+        default=os.path.join(
+            os.path.dirname(__file__), "..", "catalogs", "basic", "catalog.json"
+        ),
+        help="Path to the catalog JSON schema (default: basic catalog).",
+    )
 
     args = parser.parse_args()
 
