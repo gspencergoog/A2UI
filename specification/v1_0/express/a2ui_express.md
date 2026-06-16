@@ -35,11 +35,12 @@ Every component definition is assigned to a unique, alphanumeric variable. The c
 
 ### Core primitive types
 
-The syntax supports four literal primitive types:
+The syntax supports three literal primitive types:
 * Strings are enclosed in straight double quotes, for example `"Enter your name"`.
 * Numbers are written as plain integers or decimals, for example `42` or `3.14`.
 * Booleans are represented by `true` or `false`.
-* Empty states are represented by `null`.
+
+Omitted or skipped arguments are not represented by a literal type; instead, they are handled via syntax rules (see [Schema-driven key mapping](#schema-driven-key-mapping)).
 
 ### Structural lists
 
@@ -105,8 +106,8 @@ The compiler reads the input text line-by-line. It discards empty lines and pars
 
 If the compiler encounters a syntax error or catalog schema mismatch during parsing, it triggers a structured error recovery workflow:
 1. Isolation. The compiler flags the invalid line, discards that sub-branch of the AST, and continues parsing the remaining lines to avoid collapsing the user interface.
-2. Local micro-refinement. The host application packages the invalid line, the targeted component signature, and the parser error message into a tiny correction prompt.
-3. On-device correction. This correction prompt is sent to the local on-device model (Gemma 4). Because the prompt is small and targets a single line, execution is fast.
+2. Server-side micro-refinement. The host application packages the invalid line, the targeted component signature, and the parser error message into a tiny correction prompt.
+3. Fast foundation model correction. This correction prompt is sent to a fast, cloud-based foundation model (such as Gemini Flash or Gemini Flash Lite) on the server before converting the A2UI Express syntax to proper A2UI. Because the prompt is small and targets a single line, execution is fast.
 4. Hot swapping. The model returns the corrected statement, which the compiler hot-swaps into the active AST before finalizing the render output.
 
 ### Schema-driven key mapping
@@ -115,6 +116,8 @@ Because A2UI Express omits property keys, the compiler relies entirely on the JS
 1. The compiler looks up the component or function name in the catalog schema, discarding structural keys like `component` and `id`.
 2. It reads the declared properties in their strict definition order.
 3. It maps the positional arguments of the A2UI Express statement to these property keys in sequence.
+4. Trailing optional arguments can be omitted from the end of the statement. For example, if a component signature is `Button(child, action?)` where `action` is optional, `Button(label-text)` is compiled with `action` as null/omitted.
+5. Skipped optional arguments (where a subsequent argument must be specified) are represented by an underscore `_` placeholder. For example, if `justify` is optional in `Column(children, justify?, align?)`, `Column([icon, title], _, "center")` maps the array to `children` and `"center"` to `align`, leaving `justify` unspecified.
 
 ### Adjacency list flattening
 
@@ -152,15 +155,15 @@ The input file defines a notification permission card, using positional argument
 ```
 <a2ui>
 root = Card(main-column)
-main-column = Column([icon, title, description, actions], null, "center")
+main-column = Column([icon, title, description, actions], _, "center")
 icon = Icon($/icon)
 title = Text($/title, "h3")
 description = Text($/description, "body")
 actions = Row([yes-btn, no-btn], "center")
 yes-btn-text = Text("Yes")
-yes-btn = Button(yes-btn-text, null, Event("accept"))
+yes-btn = Button(yes-btn-text, _, Event("accept"))
 no-btn-text = Text("No")
-no-btn = Button(no-btn-text, null, Event("decline"))
+no-btn = Button(no-btn-text, _, Event("decline"))
 </a2ui>
 ```
 
