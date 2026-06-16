@@ -28,7 +28,7 @@ def main():
     parser.add_argument("--limit", type=int, default=None, help="Maximum number of samples to evaluate")
     parser.add_argument("--log-dir", type=str, default="logs", help="Directory to save logs")
     parser.add_argument("--sample-shuffle", type=int, default=None, help="Seed for shuffling samples")
-    parser.add_argument("--strategies", type=str, default="direct,subagent_tool", help="Comma-separated list of strategies to run (direct, subagent_tool, express)")
+    parser.add_argument("--strategies", type=str, action="append", help="Evaluation strategies to run (choices: direct, subagent_tool, express). Can be comma-separated or specified multiple times.")
     args = parser.parse_args()
 
     model = "google/gemini-3.1-flash-lite" if args.sanity else args.model
@@ -37,7 +37,14 @@ def main():
     sample_shuffle = None if args.sanity else args.sample_shuffle
 
     # Parse and validate strategies
-    selected_strategies = [s.strip() for s in args.strategies.split(",") if s.strip()]
+    selected_strategies = []
+    raw_strategies = args.strategies if args.strategies else ["direct", "subagent_tool"]
+    for item in raw_strategies:
+        for s in item.split(","):
+            s_clean = s.strip()
+            if s_clean and s_clean not in selected_strategies:
+                selected_strategies.append(s_clean)
+
     tasks = []
     for strat in selected_strategies:
         if strat not in ["direct", "subagent_tool", "express"]:
