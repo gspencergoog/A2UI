@@ -13,6 +13,8 @@
 # limitations under the License.
 
 import json
+import os
+os.environ["A2UI_EXPRESS_ENABLED"] = "true"
 from inspect_ai.solver import Solver, solver, TaskState, Generate
 from inspect_ai.model import ChatMessageSystem, ModelOutput, ChatCompletionChoice, ChatMessageAssistant
 from a2ui.express.prompt_generator import ExpressPromptGenerator

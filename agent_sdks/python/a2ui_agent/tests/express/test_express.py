@@ -5,6 +5,7 @@ comprehensive semantic round-trip checks on standard v1.0 catalog examples.
 """
 
 import os
+os.environ["A2UI_EXPRESS_ENABLED"] = "true"
 import json
 import glob
 import unittest

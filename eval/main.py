@@ -28,6 +28,7 @@ def main():
     parser.add_argument("--limit", type=int, default=None, help="Maximum number of samples to evaluate")
     parser.add_argument("--log-dir", type=str, default="logs", help="Directory to save logs")
     parser.add_argument("--sample-shuffle", type=int, default=None, help="Seed for shuffling samples")
+    parser.add_argument("--include-express", action="store_true", help="Include experimental A2UI Express evaluation strategy")
     args = parser.parse_args()
 
     model = "google/gemini-3.1-flash-lite" if args.sanity else args.model
@@ -35,13 +36,16 @@ def main():
     retry_attempts = 0 if args.sanity else args.max_retries
     sample_shuffle = None if args.sanity else args.sample_shuffle
 
+    tasks = [
+        a2ui_v0_9_eval(strategy="direct", grading_model=args.grading_model),
+        a2ui_v0_9_eval(strategy="subagent_tool", grading_model=args.grading_model)
+    ]
+    if args.include_express:
+        tasks.append(a2ui_v0_9_eval(strategy="express", grading_model=args.grading_model))
+
     print("Starting evaluation for multiple strategies...")
     success, logs = eval_set(
-        tasks=[
-            a2ui_v0_9_eval(strategy="direct", grading_model=args.grading_model),
-            a2ui_v0_9_eval(strategy="subagent_tool", grading_model=args.grading_model),
-            a2ui_v0_9_eval(strategy="express", grading_model=args.grading_model)
-        ],
+        tasks=tasks,
         model=model,
         log_dir=args.log_dir,
         retry_attempts=retry_attempts,
