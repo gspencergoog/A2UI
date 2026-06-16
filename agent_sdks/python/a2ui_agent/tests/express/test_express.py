@@ -134,7 +134,6 @@ saveLabel = Text("Save")"""
         {
             "call": "formatString",
             "args": {"value": "Welcome, ${/user/name}!"},
-            "returnType": "string",
         },
     )
 

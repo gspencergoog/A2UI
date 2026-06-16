@@ -84,11 +84,11 @@ def compile_express_dsl(catalog_path: str) -> Solver:
         # Try to extract target surface ID from the prompt input
         prompt_text = state.input if isinstance(state.input, str) else str(state.input)
         surface_id_match = re.search(
-            r"surface(?:Id)?(?:\s+of)?\s+['\"]([^'\"]+)['\"]",
+            r"surface(?:Id|\s+Id)?(?:\s+of)?\s+['\"]([^'\"]+)['\"]",
             prompt_text,
             re.IGNORECASE
         )
-        surface_id = surface_id_match.group(1) if surface_id_match else "eval_surface"
+        surface_id = surface_id_match.group(1) if surface_id_match else "main"
 
         # 1. Check if the model output is standard JSON wrapped in <a2ui-json> tags
         if "<a2ui-json>" in completion:

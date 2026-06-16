@@ -643,25 +643,17 @@ class ExpressCompiler:
           for idx, arg in enumerate(fn_args):
             if idx < len(fn_props):
               if isinstance(arg, dict) and arg.get("skipped"):
-                compiled_args[fn_props[idx]] = None
                 continue
-              compiled_args[fn_props[idx]] = self._compile_value(
-                  arg, raw_symbols, is_action
-              )
+              val = self._compile_value(arg, raw_symbols, is_action)
+              if val is not None:
+                compiled_args[fn_props[idx]] = val
 
           # Wrap in functionCall only if inside an action field
           if is_action:
             return {"functionCall": {"call": fn_name, "args": compiled_args}}
 
-          # Otherwise, compile direct dynamic function call expression (with returnType!)
+          # Otherwise, compile direct dynamic function call expression
           res_expr = {"call": fn_name, "args": compiled_args}
-          # Read returnType from catalog definition if present
-          fn_def = self.helper.functions.get(fn_name, {})
-          return_type_const = fn_def.get("returnType") or fn_def.get(
-              "properties", {}
-          ).get("returnType", {}).get("const")
-          if return_type_const:
-            res_expr["returnType"] = return_type_const
           return res_expr
 
         # Fallback

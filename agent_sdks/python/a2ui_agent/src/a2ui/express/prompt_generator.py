@@ -142,8 +142,7 @@ IMPORTANT: You must ALWAYS output A2UI Express DSL notation wrapped inside `<a2u
 5. Data bindings: prefix absolute paths in the data model with '$', e.g., $/user/firstName.
    Prefix relative list scopes with '$', e.g., $firstName.
 
-6. Logic and validation: prefix client check rules with '?', e.g., ?required or
-   ?regex("^[0-9]{5}$").
+6. Logic and validation: prefix client check rules with '?', e.g., ?required or ?regex("^[0-9]{{5}}$"). To specify a custom error message for validation failures, append it as an extra string argument, e.g. ?regex("^[0-9]{{5}}$", "Postal code must be 5 digits").
 
 7. Action events: represent server-side actions using the Event helper:
    Event("save_deal", {{rep: $/form/rep}})
@@ -161,8 +160,8 @@ IMPORTANT: You must ALWAYS output A2UI Express DSL notation wrapped inside `<a2u
 11. Lifecycle & Deletion: To delete a user interface surface, output the standalone `deleteSurface(surfaceId)` command (with no variable assignment):
     deleteSurface("dashboard-surface-1")
 
-12. String Concatenation & Formatting: A2UI Express DSL does not support binary operators like '+' or formatting symbols. To concatenate strings or dynamically inject data bindings into text, you must use the basic catalog function `formatString(template, arguments)`:
-    formatString("Hello {{name}}", {{name: $/user/name}})
+12. String Concatenation & Formatting: A2UI Express DSL does not support binary operators like '+' or formatting symbols. To concatenate strings or dynamically inject data bindings into text, you must use the basic catalog function `formatString(value)` where the value string contains placeholders formatted as `\${{expression}}`:
+    formatString("Hello ${{/user/name}}")
 
 ## Positional Component Signatures
 
