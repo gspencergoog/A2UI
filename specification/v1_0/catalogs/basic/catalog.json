@@ -4,7 +4,7 @@
   "title": "A2UI Basic Catalog",
   "description": "Unified catalog of basic A2UI components and functions.",
   "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
-  "instructions": "./instructions.md",
+  "instructions": "For layout, use the Row and Column components to organize other components.",
   "components": {
     "Text": {
       "type": "object",
@@ -28,7 +28,7 @@
             "variant": {
               "type": "string",
               "description": "A hint for the base text style.",
-              "enum": ["h1", "h2", "h3", "h4", "h5", "caption", "body"],
+              "enum": ["caption", "body"],
               "default": "body"
             }
           },
