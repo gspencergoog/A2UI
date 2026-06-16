@@ -33,6 +33,8 @@ The syntax rules define how types, structures, data paths, and validation action
 
 Every component definition is assigned to a unique, alphanumeric variable. The compiler uses these variables to resolve parent-child hierarchies. A reserved variable named `root` acts as the primary entry point for the interface tree.
 
+To eliminate syntax errors from complex bracket structures and enable line-oriented streaming compilation, A2UI Express prohibits inline component nesting. Component constructor calls (e.g., `Text(...)`, `Column(...)`) can **only** appear on the right-hand side of a variable assignment (`var = ComponentName(...)`). They **cannot** be passed directly as positional arguments to other components. Instead, you must declare them separately and reference their variable names.
+
 ### Core primitive types
 
 The syntax supports three literal primitive types:

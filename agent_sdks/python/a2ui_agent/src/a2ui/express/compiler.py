@@ -568,8 +568,9 @@ class ExpressCompiler:
                 ref_name = val["variable"]
                 if ref_name in raw_symbols:
                     symbol_val = raw_symbols[ref_name]
-                    if isinstance(symbol_val, dict) and "call" not in symbol_val:
-                        return self._compile_value(symbol_val, raw_symbols, is_action)
+                    if isinstance(symbol_val, dict) and symbol_val.get("call") in self.helper.components:
+                        return ref_name
+                    return self._compile_value(symbol_val, raw_symbols, is_action)
                 return ref_name
             if "call" in val:
                 # Nested function call (e.g. formatString or actions)
@@ -578,12 +579,10 @@ class ExpressCompiler:
 
                 # Is it an inline component constructor?
                 if fn_name in self.helper.components:
-                    self._inline_counter += 1
-                    inline_id = f"{fn_name.lower()}_{self._inline_counter}"
-                    compiled_comp = self._compile_ast_node(inline_id, val, raw_symbols)
-                    if compiled_comp:
-                        self._extra_components.append(compiled_comp)
-                    return inline_id
+                    raise ValueError(
+                        f"Inline component instantiations are disallowed: {fn_name}(...). "
+                        "You must assign it to a variable on its own line and reference that variable instead."
+                    )
 
                 # Is it a reserved Template signature?
                 if fn_name == "_template":

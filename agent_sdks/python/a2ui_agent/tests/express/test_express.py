@@ -177,6 +177,37 @@ contentCol = Column([])"""
         decompiled_dsl = decompiler.decompile(envelope)
         self.assertIn('root = Tabs([{title: "Overview", child: contentCol}])', decompiled_dsl)
 
+    def test_event_and_list_variable_inlining(self):
+        """Validates that Event helper assignments and custom list arrays assigned to variables inline correctly."""
+        compiler = ExpressCompiler(self.catalog_path)
+
+        dsl = """root = Column([btn1, btn2])
+btn1 = Button(btn1Label, "primary", myAction)
+btn1Label = Text("Save")
+btn2 = Button(btn2Label, "outline", closeAction)
+btn2Label = Text("Cancel")
+myAction = Event("submit", {val: "42"})
+closeAction = Event("close")"""
+
+        envelope = compiler.compile(dsl)
+        components = envelope["createSurface"]["components"]
+
+        btn1 = next(c for c in components if c["id"] == "btn1")
+        self.assertEqual(btn1["action"], {
+            "event": {
+                "name": "submit",
+                "context": {"val": "42"}
+            }
+        })
+
+        btn2 = next(c for c in components if c["id"] == "btn2")
+        self.assertEqual(btn2["action"], {
+            "event": {
+                "name": "close",
+                "context": {}
+            }
+        })
+
     def test_round_trip_examples(self):
         """Runs a semantically rigorous round-trip test on real catalog examples."""
         compiler = ExpressCompiler(self.catalog_path)

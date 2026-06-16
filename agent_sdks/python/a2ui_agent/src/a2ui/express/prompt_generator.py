@@ -83,6 +83,8 @@ IMPORTANT: You must ALWAYS output A2UI Express DSL notation wrapped inside `<a2u
 1. Output exactly one variable assignment statement per line:
    variable_name = ComponentName(arg1, arg2, ...)
 
+   CRITICAL: Component constructors (such as Column(...), Text(...), Button(...)) can ONLY appear on the right-hand side of a variable assignment. They CANNOT be passed directly as positional arguments to other components. You must assign every component to a variable on its own line and reference that variable name instead.
+
 2. The interface tree must have a single entry point assigned to the reserved variable 'root'.
 
 3. Primitives:
