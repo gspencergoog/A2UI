@@ -349,6 +349,8 @@ class ExpressCompiler:
       trimmed = stmt.strip()
       try:
         tokens = tokenize(trimmed)
+      except SyntaxError:
+        raise
       except Exception:
         continue
 

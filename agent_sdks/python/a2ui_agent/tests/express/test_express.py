@@ -457,6 +457,42 @@ $/age = 25"""
         [{"id": 1, "meta": {"name": "Alice"}}],
     )
 
+  def test_compiler_robustness_and_edge_cases(self):
+    """Verifies tokenizer errors, string parsing with '=' chars, and boolean schemas."""
+    compiler = ExpressCompiler(self.catalog_path)
+
+    # 1. Test tokenizer syntax error on unrecognized character
+    with self.assertRaises(SyntaxError):
+      compiler.compile("root = Column(@rep)")
+
+    # 2. Test string containing '=' character inside assignment value
+    dsl_with_equals = 'welcome = Text("Hello = World")\nroot = Column([welcome])'
+    envelope = compiler.compile(dsl_with_equals)
+    welcome_comp = next(
+        c for c in envelope["createSurface"]["components"] if c["id"] == "welcome"
+    )
+    self.assertEqual(welcome_comp["text"], "Hello = World")
+
+    # 3. Test prompt generator with boolean schemas safety check
+    # We mock schema helper to return a boolean schema for a property
+    original_get_property_schema = self.helper.get_property_schema
+
+    def mock_get_property_schema(comp_name, prop_name):
+      if comp_name == "Button" and prop_name == "disabled":
+        return False  # boolean schema
+      return original_get_property_schema(comp_name, prop_name)
+
+    self.helper.get_property_schema = mock_get_property_schema
+    try:
+      generator = ExpressPromptGenerator(self.catalog_path)
+      # Override the internal helper with our mocked helper
+      generator.helper = self.helper
+      prompt = generator.generate_prompt()
+      # Should compile without throwing AttributeError on boolean schema check
+      self.assertIsNotNone(prompt)
+    finally:
+      self.helper.get_property_schema = original_get_property_schema
+
 
 if __name__ == "__main__":
   unittest.main()
