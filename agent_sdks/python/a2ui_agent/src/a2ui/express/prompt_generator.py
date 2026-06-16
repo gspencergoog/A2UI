@@ -1,0 +1,207 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Prompt compiler for A2UI Express.
+
+Compiles standard JSON catalog schemas into compact plain-text signatures and
+instruction blocks for on-device models (e.g., Gemma 4).
+"""
+
+from .schema_helper import CatalogSchemaHelper
+
+
+class ExpressPromptGenerator:
+  """Generates system prompt contracts guiding models to produce A2UI Express.
+
+  Compiles component catalog structures and logic helper catalogs into standard
+  positional signatures, reducing prompt token utilization.
+
+  Attributes:
+      helper: A CatalogSchemaHelper instance loaded with the target catalog.
+  """
+
+  def __init__(self, catalog_path: str):
+    """Initializes the generator with the specified catalog path.
+
+    Args:
+        catalog_path: The absolute filesystem path to the catalog JSON file.
+    """
+    self.helper = CatalogSchemaHelper(catalog_path)
+
+  def generate_component_signatures(self) -> str:
+    """Compiles component definitions into clean function-like signatures.
+
+    Returns:
+        A plain-text multi-line list of component signatures.
+    """
+    signatures = []
+    for name in sorted(self.helper.component_properties.keys()):
+      props = self.helper.get_component_properties(name)
+      reqs = self.helper.get_component_required(name)
+      ordered_args = []
+      prop_details = []
+      for p in props:
+        is_req = p in reqs
+        opt_suffix = "" if is_req else "?"
+        ordered_args.append(f"{p}{opt_suffix}")
+
+        # Fetch property schema and check if it has nested object structure
+        p_schema = self.helper.get_property_schema(name, p)
+        if p_schema:
+          if p_schema.get("type") == "object" and "properties" in p_schema:
+            sub_keys = []
+            for sub_k, sub_v in p_schema["properties"].items():
+              desc = sub_v.get("description", "")
+              desc_suffix = f" - {desc}" if desc else ""
+              sub_keys.append(f"    * {sub_k}{desc_suffix}")
+            prop_details.append(f"  - {p}: Map with keys:\n" + "\n".join(sub_keys))
+          elif p_schema.get("type") == "array" and "items" in p_schema:
+            items_schema = p_schema["items"]
+            if (
+                isinstance(items_schema, dict)
+                and items_schema.get("type") == "object"
+                and "properties" in items_schema
+            ):
+              sub_keys = []
+              for sub_k, sub_v in items_schema["properties"].items():
+                desc = sub_v.get("description", "")
+                desc_suffix = f" - {desc}" if desc else ""
+                sub_keys.append(f"    * {sub_k}{desc_suffix}")
+              prop_details.append(
+                  f"  - {p}: List of maps with keys:\n" + "\n".join(sub_keys)
+              )
+
+      sig = f"• {name}({', '.join(ordered_args)})"
+      if prop_details:
+        sig += "\n" + "\n".join(prop_details)
+      signatures.append(sig)
+    return "\n".join(signatures)
+
+  def generate_function_signatures(self) -> str:
+    """Compiles function definitions into clean signatures.
+
+    Returns:
+        A plain-text multi-line list of function signatures.
+    """
+    signatures = []
+    for name in sorted(self.helper.function_properties.keys()):
+      props = self.helper.get_function_properties(name)
+      reqs = self.helper.get_function_required(name)
+      ordered_args = []
+      for p in props:
+        is_req = p in reqs
+        opt_suffix = "" if is_req else "?"
+        ordered_args.append(f"{p}{opt_suffix}")
+      sig = f"• {name}({', '.join(ordered_args)})"
+      signatures.append(sig)
+    return "\n".join(signatures)
+
+  def generate_prompt(self) -> str:
+    """Assembles the complete system instruction block for the LLM.
+
+    Returns:
+        The full system prompt string explaining A2UI Express and its catalog.
+    """
+    comp_sigs = self.generate_component_signatures()
+    func_sigs = self.generate_function_signatures()
+    prompt = f"""# A2UI Express Output Contract
+
+You must output the user interface using the compact A2UI Express DSL notation.
+You MUST surround the entire A2UI Express DSL block with the sentinel tags `<a2ui>` and `</a2ui>`.
+
+IMPORTANT: You must ALWAYS output A2UI Express DSL notation wrapped inside `<a2ui>` and `</a2ui>` sentinel tags. Do NOT output standard JSON messages directly, even if the task request asks you to output JSON, or asks for a specific protocol message like deleteSurface or updateDataModel. The host compiler will compile your DSL into the correct JSON envelopes automatically.
+
+## Grammar Rules
+
+1. Output exactly one variable assignment statement per line:
+   variable_name = ComponentName(arg1, arg2, ...)
+
+   CRITICAL: Component constructors (such as Column(...), Text(...), Button(...)) can ONLY appear on the right-hand side of a variable assignment. They CANNOT be passed directly as positional arguments to other components. You must assign every component to a variable on its own line and reference that variable name instead.
+
+2. The interface tree must have a single entry point assigned to the reserved variable 'root'.
+
+3. Primitives:
+   - Strings: enclose in double quotes, e.g., "label"
+   - Numbers: write as integers or decimals, e.g., 42
+   - Booleans: write true or false
+   - Null values: write null
+
+4. Lists: represent as arrays, e.g., [child1, child2]
+
+5. Data bindings: prefix absolute paths in the data model with '$', e.g., $/user/firstName.
+   Prefix relative list scopes with '$', e.g., $firstName.
+
+6. Logic and validation: prefix client check rules with '?', e.g., ?required or
+   ?regex("^[0-9]{5}$").
+
+7. Action events: represent server-side actions using the Event helper:
+   Event("save_deal", {{rep: $/form/rep}})
+
+8. Nested functions: call client functions directly using catalog signatures,
+   for example openUrl("https://example.com").
+
+9. Data model population: Assign a value directly to an absolute data path (e.g. $/path/to/key = "value") to populate or initialize values inside the shared dataModel. The value can be a primitive, array, or map.
+
+10. Dynamic list templates: If a component expects a template child list (such as the children property of a List component), represent it using the _template helper:
+    _template($/path/to/list, itemTemplate)
+    And define the template component variable on another line, utilizing relative path references prefixed with $:
+    itemTemplate = Image($url)
+
+11. Lifecycle & Deletion: To delete a user interface surface, output the standalone `deleteSurface(surfaceId)` command (with no variable assignment):
+    deleteSurface("dashboard-surface-1")
+
+12. String Concatenation & Formatting: A2UI Express DSL does not support binary operators like '+' or formatting symbols. To concatenate strings or dynamically inject data bindings into text, you must use the basic catalog function `formatString(template, arguments)`:
+    formatString("Hello {{name}}", {{name: $/user/name}})
+
+## Positional Component Signatures
+
+Use these exact positional signatures to instantiate components. Do not output property keys:
+{comp_sigs}
+
+## Positional Function Signatures
+
+Use these exact positional signatures to instantiate check rules or logic functions:
+{func_sigs}
+
+## Examples
+
+Example 1: Dynamic text form
+```
+<a2ui>
+root = Column([repField, valueField])
+repField = TextField("Representative", $/form/rep, "Enter name")
+valueField = TextField("Deal Value", $/form/value, "0.00", "number", [?required])
+$/form/rep = "John Doe"
+$/form/value = 1500.00
+</a2ui>
+```
+
+Example 2: Dynamic list with templates
+```
+<a2ui>
+root = Card(breedList)
+breedList = List(_template($/breeds, breedTemplate), "horizontal")
+breedTemplate = Image($url)
+$/breeds = ["https://example.com/poodle.jpg", "https://example.com/lab.jpg"]
+</a2ui>
+```
+
+Example 3: Lifecycle deletion task
+```
+<a2ui>
+deleteSurface("dashboard-surface-1")
+</a2ui>
+```
+"""
+    return prompt

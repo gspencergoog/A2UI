@@ -28,6 +28,7 @@ def main():
     parser.add_argument("--limit", type=int, default=None, help="Maximum number of samples to evaluate")
     parser.add_argument("--log-dir", type=str, default="logs", help="Directory to save logs")
     parser.add_argument("--sample-shuffle", type=int, default=None, help="Seed for shuffling samples")
+    parser.add_argument("--strategies", type=str, action="append", help="Evaluation strategies to run (choices: direct, subagent_tool, express). Can be comma-separated or specified multiple times.")
     args = parser.parse_args()
 
     model = "google/gemini-3.1-flash-lite" if args.sanity else args.model
@@ -35,12 +36,24 @@ def main():
     retry_attempts = 0 if args.sanity else args.max_retries
     sample_shuffle = None if args.sanity else args.sample_shuffle
 
+    # Parse and validate strategies
+    selected_strategies = []
+    raw_strategies = args.strategies if args.strategies else ["direct", "subagent_tool"]
+    for item in raw_strategies:
+        for s in item.split(","):
+            s_clean = s.strip()
+            if s_clean and s_clean not in selected_strategies:
+                selected_strategies.append(s_clean)
+
+    tasks = []
+    for strat in selected_strategies:
+        if strat not in ["direct", "subagent_tool", "express"]:
+            raise ValueError(f"Unknown evaluation strategy: {strat}. Valid choices: direct, subagent_tool, express")
+        tasks.append(a2ui_v0_9_eval(strategy=strat, grading_model=args.grading_model))
+
     print("Starting evaluation for multiple strategies...")
     success, logs = eval_set(
-        tasks=[
-            a2ui_v0_9_eval(strategy="direct", grading_model=args.grading_model),
-            a2ui_v0_9_eval(strategy="subagent_tool", grading_model=args.grading_model)
-        ],
+        tasks=tasks,
         model=model,
         log_dir=args.log_dir,
         retry_attempts=retry_attempts,

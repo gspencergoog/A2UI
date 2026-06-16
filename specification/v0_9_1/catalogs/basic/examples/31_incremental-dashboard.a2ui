@@ -1,0 +1,7 @@
+root = Column([header, content-grid], null, "stretch")
+header = Text("System Dashboard", "h2")
+content-grid = Row([left-panel, right-panel])
+left-panel = Column([panel-a-loading])
+right-panel = Column([panel-b-loading])
+panel-a-loading = Text("Loading analytics...", "caption")
+panel-b-loading = Text("Loading logs...", "caption")

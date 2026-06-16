@@ -1,0 +1,8 @@
+root = Card(main-column)
+main-column = Column([title-text, item-list], null, "stretch")
+title-text = Text("Dynamic Item List", "h3")
+item-list = List(Template($/items, item-row))
+item-row = Row([item-name, qty-label, item-qty])
+item-name = Text($name)
+qty-label = Text(" - Qty: ")
+item-qty = Text($quantity)
