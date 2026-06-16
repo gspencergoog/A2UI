@@ -29,8 +29,8 @@ from a2ui_eval.scorers import a2ui_scorer, measured_model_graded_qa
 # Paths relative to the eval directory where we run inspect
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATASET_PATH = os.path.abspath(os.path.join(CURRENT_DIR, "datasets/v0_9_prompts.yaml"))
-SCHEMA_PATH = os.path.abspath(os.path.join(CURRENT_DIR, "../specification/v0_9/json/server_to_client.json"))
-CATALOG_PATH = os.path.abspath(os.path.join(CURRENT_DIR, "../specification/v0_9/catalogs/basic/catalog.json"))
+SCHEMA_PATH = os.path.abspath(os.path.join(CURRENT_DIR, "../specification/v0_9_1/json/server_to_client.json"))
+CATALOG_PATH = os.path.abspath(os.path.join(CURRENT_DIR, "../specification/v0_9_1/catalogs/basic/catalog.json"))
 
 GRADER_INSTRUCTIONS = """
 After assessing the submitted answer, reply with 'GRADE: $LETTER' (without quotes) where LETTER is one of C, P or I.  Please choose ONE option for the grade: either "C" for correct answers, "P" for partial credit, or "I" for incorrect answers.
@@ -50,12 +50,12 @@ Notes for grading:
 """
 
 @task
-def a2ui_v0_9_eval(
+def a2ui_v0_9_1_eval(
     list_models: bool = False, 
     grading_model: str = "google/gemini-3-flash-preview",
     strategy: str = "direct"
 ) -> Task:
-    """Evaluation task for A2UI v0.9 protocol generation.
+    """Evaluation task for A2UI v0.9.1 protocol generation.
 
     Args:
         list_models: Whether to list available Gemini models and exit.
@@ -63,7 +63,7 @@ def a2ui_v0_9_eval(
         strategy: The evaluation strategy to use (e.g., 'direct').
 
     Returns:
-        An Inspect Task object configured for A2UI v0.9 evaluation.
+        An Inspect Task object configured for A2UI v0.9.1 evaluation.
     """
 
     if list_models:
@@ -91,7 +91,7 @@ def a2ui_v0_9_eval(
 
     active_schema = SCHEMA_PATH
     active_catalog = CATALOG_PATH
-    active_version = "0.9"
+    active_version = "0.9.1"
 
     if strategy == "express":
         active_schema = os.path.abspath(os.path.join(CURRENT_DIR, "../specification/v1_0/json/server_to_client.json"))

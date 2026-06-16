@@ -17,7 +17,7 @@ import sys
 import traceback
 import argparse
 from inspect_ai import eval_set
-from tasks import a2ui_v0_9_eval
+from tasks import a2ui_v0_9_1_eval
 
 def main():
     parser = argparse.ArgumentParser(description="Run A2UI evaluations")
@@ -49,7 +49,7 @@ def main():
     for strat in selected_strategies:
         if strat not in ["direct", "subagent_tool", "express"]:
             raise ValueError(f"Unknown evaluation strategy: {strat}. Valid choices: direct, subagent_tool, express")
-        tasks.append(a2ui_v0_9_eval(strategy=strat, grading_model=args.grading_model))
+        tasks.append(a2ui_v0_9_1_eval(strategy=strat, grading_model=args.grading_model))
 
     print("Starting evaluation for multiple strategies...")
     success, logs = eval_set(
