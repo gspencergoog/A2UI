@@ -120,6 +120,7 @@ Validation checks are defined using the `?` prefix. If a component expects valid
 To execute standalone lifecycle operations or invoke client-side functions directly from the server, A2UI Express supports standalone function call lines without variable assignments:
 
 #### Deleting a surface
+
 When the compiler encounters the standalone `deleteSurface` command, it produces a standard `deleteSurface` lifecycle message:
 
 ```
@@ -136,6 +137,7 @@ deleteSurface("dashboard-surface-1")
 ```
 
 #### Executing client-side functions (RPC)
+
 When the compiler encounters any other standalone function call, it resolves the arguments against catalog definitions and produces a standard `callFunction` RPC message with an auto-generated `functionCallId`:
 
 ```

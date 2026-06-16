@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 
 """Command-line script to decompile A2UI JSON examples into A2UI Express.
 
@@ -10,7 +24,22 @@ import argparse
 import json
 import os
 import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "agent_sdks", "python", "a2ui_agent", "src")))
+
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",
+            "..",
+            "..",
+            "agent_sdks",
+            "python",
+            "a2ui_agent",
+            "src",
+        )
+    ),
+)
 from a2ui.express.decompiler import ExpressDecompiler
 
 
@@ -50,15 +79,16 @@ def decompile_example(example_path: str, catalog_path: str) -> str:
 
     if not components_list:
         raise ValueError(
-            f"Could not find any 'updateComponents' message in {example_path}")
+            f"Could not find any 'updateComponents' message in {example_path}"
+        )
 
     envelope = {
         "version": "v1.0",
         "createSurface": {
             "surfaceId": surface_id,
             "catalogId": catalog_id,
-            "components": components_list
-        }
+            "components": components_list,
+        },
     }
 
     decompiler = ExpressDecompiler(catalog_path)
@@ -68,16 +98,18 @@ def decompile_example(example_path: str, catalog_path: str) -> str:
 def main():
     """CLI entrypoint for the decompiler."""
     parser = argparse.ArgumentParser(
-        description=
-        "Decompile standard A2UI JSON examples into A2UI Express DSL.")
+        description="Decompile standard A2UI JSON examples into A2UI Express DSL."
+    )
     parser.add_argument(
-        "example_file",
-        help="Path to the A2UI JSON example file to decompile.")
+        "example_file", help="Path to the A2UI JSON example file to decompile."
+    )
     parser.add_argument(
         "--catalog",
-        default=os.path.join(os.path.dirname(__file__), "..", "catalogs",
-                             "basic", "catalog.json"),
-        help="Path to the catalog JSON schema (default: basic catalog).")
+        default=os.path.join(
+            os.path.dirname(__file__), "..", "catalogs", "basic", "catalog.json"
+        ),
+        help="Path to the catalog JSON schema (default: basic catalog).",
+    )
 
     args = parser.parse_args()
 
