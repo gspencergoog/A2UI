@@ -539,7 +539,7 @@ $/age = 25"""
       self.helper.components = original_components
 
   def test_v10_validator_gating(self):
-    """Verifies that A2uiValidator gates v1.0 validation behind A2UI_EXPRESS_ENABLED flag."""
+    """Verifies that A2uiValidator gates v1.0 validation behind flags."""
     from a2ui.schema.catalog import CatalogConfig
     from a2ui.schema.manager import A2uiSchemaManager
     from a2ui.schema.validator import A2uiValidator
@@ -548,24 +548,46 @@ $/age = 25"""
     manager = A2uiSchemaManager(version="1.0", catalogs=[catalog_config])
     catalog = manager.get_selected_catalog()
 
-    # Save the original env variable
-    orig_env = os.environ.get("A2UI_EXPRESS_ENABLED")
+    # Save original environment
+    orig_express = os.environ.get("A2UI_EXPRESS_ENABLED")
+    orig_v1_0 = os.environ.get("A2UI_VERSION_1_0")
+
+    # Clear both environment variables
     if "A2UI_EXPRESS_ENABLED" in os.environ:
       del os.environ["A2UI_EXPRESS_ENABLED"]
+    if "A2UI_VERSION_1_0" in os.environ:
+      del os.environ["A2UI_VERSION_1_0"]
 
     try:
-      # Instantiating the validator when A2UI_EXPRESS_ENABLED is not set should raise ValueError
+      # Instantiating the validator when neither flag is set should raise ValueError
       with self.assertRaises(ValueError) as context:
         A2uiValidator(catalog)
       self.assertIn("A2UI v1.0 validation is experimental", str(context.exception))
-    finally:
-      if orig_env is not None:
-        os.environ["A2UI_EXPRESS_ENABLED"] = orig_env
 
-    # Instantiating with A2UI_EXPRESS_ENABLED=true should succeed
-    os.environ["A2UI_EXPRESS_ENABLED"] = "true"
-    validator = A2uiValidator(catalog)
-    self.assertEqual(validator.version, "1.0")
+      # Instantiating with A2UI_VERSION_1_0=true should succeed
+      os.environ["A2UI_VERSION_1_0"] = "true"
+      validator = A2uiValidator(catalog)
+      self.assertEqual(validator.version, "1.0")
+
+      # Clear A2UI_VERSION_1_0
+      del os.environ["A2UI_VERSION_1_0"]
+
+      # Instantiating with A2UI_EXPRESS_ENABLED=true should succeed (auto-enablement)
+      os.environ["A2UI_EXPRESS_ENABLED"] = "true"
+      validator = A2uiValidator(catalog)
+      self.assertEqual(validator.version, "1.0")
+
+    finally:
+      # Restore original environment
+      if orig_express is not None:
+        os.environ["A2UI_EXPRESS_ENABLED"] = orig_express
+      elif "A2UI_EXPRESS_ENABLED" in os.environ:
+        del os.environ["A2UI_EXPRESS_ENABLED"]
+
+      if orig_v1_0 is not None:
+        os.environ["A2UI_VERSION_1_0"] = orig_v1_0
+      elif "A2UI_VERSION_1_0" in os.environ:
+        del os.environ["A2UI_VERSION_1_0"]
 
 
 if __name__ == "__main__":
