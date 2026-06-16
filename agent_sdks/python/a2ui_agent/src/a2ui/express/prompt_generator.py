@@ -58,7 +58,7 @@ class ExpressPromptGenerator:
 
         # Fetch property schema and check if it has nested object structure
         p_schema = self.helper.get_property_schema(name, p)
-        if p_schema:
+        if isinstance(p_schema, dict):
           if p_schema.get("type") == "object" and "properties" in p_schema:
             sub_keys = []
             for sub_k, sub_v in p_schema["properties"].items():

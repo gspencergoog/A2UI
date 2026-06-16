@@ -116,7 +116,10 @@ def compile_express_dsl(catalog_path: str) -> Solver:
                                     if "<a2ui>" in inner_dsl:
                                         s_idx = inner_dsl.find("<a2ui>") + len("<a2ui>")
                                         e_idx = inner_dsl.find("</a2ui>")
-                                        inner_dsl = inner_dsl[s_idx:e_idx].strip()
+                                        if e_idx != -1:
+                                            inner_dsl = inner_dsl[s_idx:e_idx].strip()
+                                        else:
+                                            inner_dsl = inner_dsl[s_idx:].strip()
                                     compiled_inner = compiler.compile(inner_dsl, surface_id=surface_id)
                                     uc.pop("dsl")
                                     uc["components"] = compiled_inner["createSurface"].get("components", [])
@@ -136,7 +139,10 @@ def compile_express_dsl(catalog_path: str) -> Solver:
         if "<a2ui>" in completion:
             start_idx = completion.find("<a2ui>") + len("<a2ui>")
             end_idx = completion.find("</a2ui>")
-            dsl_content = completion[start_idx:end_idx].strip()
+            if end_idx != -1:
+                dsl_content = completion[start_idx:end_idx].strip()
+            else:
+                dsl_content = completion[start_idx:].strip()
         else:
             if dsl_content.startswith("```"):
                 lines = dsl_content.splitlines()

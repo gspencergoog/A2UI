@@ -77,9 +77,13 @@ def tokenize(text: str) -> list[tuple[str, Any]]:
   """
   tok_regex = "|".join(f"(?P<{name}>{pattern})" for name, pattern in TOKEN_SPEC)
   tokens = []
+  last_end = 0
   for mo in re.finditer(tok_regex, text):
+    if mo.start() != last_end:
+      raise SyntaxError(f"Unexpected character: {text[last_end:mo.start()]!r}")
     kind = mo.lastgroup
     val = mo.group()
+    last_end = mo.end()
     if kind == "WS":
       continue
     elif kind == "STRING":
@@ -91,6 +95,8 @@ def tokenize(text: str) -> list[tuple[str, Any]]:
     elif kind == "NULL":
       val = None
     tokens.append((kind, val))
+  if last_end < len(text):
+    raise SyntaxError(f"Unexpected character: {text[last_end:]!r}")
   return tokens
 
 
@@ -340,10 +346,36 @@ class ExpressCompiler:
 
     # Line parser and error recovery loop
     for stmt in statements:
-      if "=" not in stmt:
-        trimmed = stmt.strip()
+      trimmed = stmt.strip()
+      try:
+        tokens = tokenize(trimmed)
+      except Exception:
+        continue
+
+      if not tokens:
+        continue
+
+      if (
+          len(tokens) >= 2
+          and tokens[0][0] in ("IDENTIFIER", "PATH")
+          and tokens[1][0] == "EQUALS"
+      ):
+        var_name = tokens[0][1]
+        expr_tokens = tokens[2:]
         try:
-          tokens = tokenize(trimmed)
+          parser = TokenParser(expr_tokens)
+          parsed_val = parser.parse_expression()
+          if var_name.startswith("$"):
+            data_path_assignments[var_name] = parsed_val
+          else:
+            raw_symbols[var_name] = parsed_val
+        except Exception:
+          if var_name.startswith("$"):
+            data_path_assignments[var_name] = None
+          else:
+            raw_symbols[var_name] = {"call": "Text", "args": ["Loading..."]}
+      else:
+        try:
           parser = TokenParser(tokens)
           parsed_val = parser.parse_expression()
           if isinstance(parsed_val, dict) and parsed_val.get("call") == "deleteSurface":
@@ -354,24 +386,6 @@ class ExpressCompiler:
             standalone_function_calls.append(parsed_val)
         except Exception:
           pass
-        continue
-      var_part, expr_part = stmt.split("=", 1)
-      var_name = var_part.strip()
-      expr_text = expr_part.strip()
-
-      try:
-        tokens = tokenize(expr_text)
-        parser = TokenParser(tokens)
-        parsed_val = parser.parse_expression()
-        if var_name.startswith("$"):
-          data_path_assignments[var_name] = parsed_val
-        else:
-          raw_symbols[var_name] = parsed_val
-      except Exception:
-        if var_name.startswith("$"):
-          data_path_assignments[var_name] = None
-        else:
-          raw_symbols[var_name] = {"call": "Text", "args": ["Loading..."]}
 
     # Compile data model paths
     data_model = {}
