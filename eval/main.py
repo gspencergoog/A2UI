@@ -39,7 +39,8 @@ def main():
     success, logs = eval_set(
         tasks=[
             a2ui_v0_9_eval(strategy="direct", grading_model=args.grading_model),
-            a2ui_v0_9_eval(strategy="subagent_tool", grading_model=args.grading_model)
+            a2ui_v0_9_eval(strategy="subagent_tool", grading_model=args.grading_model),
+            a2ui_v0_9_eval(strategy="express", grading_model=args.grading_model)
         ],
         model=model,
         log_dir=args.log_dir,

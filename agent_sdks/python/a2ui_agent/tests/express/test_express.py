@@ -8,12 +8,12 @@ import os
 import json
 import glob
 import unittest
-from .prompt_generator import ExpressPromptGenerator
-from .compiler import ExpressCompiler
-from .decompiler import ExpressDecompiler
-from .schema_helper import CatalogSchemaHelper
+from a2ui.express.prompt_generator import ExpressPromptGenerator
+from a2ui.express.compiler import ExpressCompiler
+from a2ui.express.decompiler import ExpressDecompiler
+from a2ui.express.schema_helper import CatalogSchemaHelper
 
-SPEC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+SPEC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..", "specification", "v1_0"))
 CATALOG_PATH = os.path.join(SPEC_DIR, "catalogs", "basic", "catalog.json")
 EXAMPLES_DIR = os.path.join(SPEC_DIR, "catalogs", "basic", "examples")
 
@@ -84,6 +84,8 @@ valueField = TextField("Deal Value", $/form/value, "0.00", "number", ?required)"
 
         # Verify decompile
         decompiled_dsl = decompiler.decompile(envelope)
+        self.assertTrue(decompiled_dsl.startswith("<a2ui>\n"))
+        self.assertTrue(decompiled_dsl.endswith("\n</a2ui>"))
         self.assertIn("root = Column([repField, valueField])", decompiled_dsl)
         self.assertIn(
             'repField = TextField("Representative", $/form/rep, "Enter name")',
@@ -255,7 +257,7 @@ $/title = "Enable notification"
 $/user/firstName = "Alice"
 $/user/age = 30
 root = Card(main-column)
-main-column = Column([icon, title], null, "center")
+main-column = Column([icon, title], _, "center")
 icon = Icon($/icon)
 title = Text($/title, "h3")"""
 
@@ -282,6 +284,35 @@ title = Text($/title, "h3")"""
         # Round-trip check
         compiled_envelope_2 = compiler.compile(decompiled_dsl, surface_id="test_data_surf")
         self.assertEqual(compiled_envelope_2["createSurface"]["dataModel"], data_model)
+
+    def test_skipped_and_omitted_arguments(self):
+        """Validates skipped (_) and trailing omitted positional arguments compile and decompile correctly."""
+        compiler = ExpressCompiler(self.catalog_path)
+        decompiler = ExpressDecompiler(self.catalog_path)
+
+        dsl = """root = Column([btn1, btn2])
+btn1 = Button(btn1-label, _, Event("click"))
+btn1-label = Text("Click")
+btn2 = Button(btn2-label)
+btn2-label = Text("Submit")"""
+
+        envelope = compiler.compile(dsl)
+        components = envelope["createSurface"]["components"]
+
+        btn1_comp = next(c for c in components if c["id"] == "btn1")
+        self.assertEqual(btn1_comp["variant"], None)
+        self.assertEqual(btn1_comp["action"], {"event": {"name": "click", "context": {}}})
+
+        btn2_comp = next(c for c in components if c["id"] == "btn2")
+        self.assertEqual(btn2_comp["child"], "btn2-label")
+        self.assertNotIn("variant", btn2_comp)
+        self.assertNotIn("action", btn2_comp)
+
+        decompiled_dsl = decompiler.decompile(envelope)
+        self.assertIn("btn1 = Button(btn1-label, _, Event(\"click\"))", decompiled_dsl)
+        self.assertIn("btn2 = Button(btn2-label)", decompiled_dsl)
+        # Ensure no nulls are decompiled
+        self.assertNotIn("null", decompiled_dsl)
 
 
 if __name__ == "__main__":

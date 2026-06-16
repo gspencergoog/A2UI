@@ -71,11 +71,12 @@ class ExpressPromptGenerator:
         """
         comp_sigs = self.generate_component_signatures()
         func_sigs = self.generate_function_signatures()
-
         prompt = f"""# A2UI Express Output Contract
 
 You must output the user interface using the compact A2UI Express DSL notation.
 You MUST surround the entire A2UI Express DSL block with the sentinel tags `<a2ui>` and `</a2ui>`.
+
+IMPORTANT: Even if the task request asks you to generate specific A2UI protocol messages (such as createSurface, updateComponents, or updateDataModel) to describe a user interface or layout, do NOT output JSON. Instead, describe the entire user interface using the A2UI Express DSL notation wrapped in `<a2ui>` and `</a2ui>` sentinels. The host environment will compile and split your DSL into the required messages automatically.
 
 ## Grammar Rules
 
@@ -106,6 +107,16 @@ You MUST surround the entire A2UI Express DSL block with the sentinel tags `<a2u
 
 9. Data model population: Assign a value directly to an absolute data path (e.g. $/path/to/key = "value") to populate or initialize values inside the shared dataModel. The value can be a primitive, array, or map.
 
+10. Dynamic list templates: If a component expects a template child list (such as the children property of a List component), represent it using the Template helper:
+    Template($/path/to/list, itemTemplate)
+    And define the template component variable on another line, utilizing relative path references prefixed with $:
+    itemTemplate = Image($url)
+
+11. Non-UI tasks: If the user request does not ask to design or update a UI (for example, if it asks to perform a non-UI operation like deleteSurface, updateDataModel without a UI, or standard client-to-server action/error messaging), do NOT generate A2UI Express DSL. Instead, output the standard A2UI JSON message block wrapped in `<a2ui-json>` and `</a2ui-json>` tags.
+
+12. String Concatenation & Formatting: A2UI Express DSL does not support binary operators like '+' or formatting symbols. To concatenate strings or dynamically inject data bindings into text, you must use the standard catalog function `formatString(template, arguments)`:
+    formatString("Hello {{name}}", {{name: $/user/name}})
+
 ## Positional Component Signatures
 
 Use these exact positional signatures to instantiate components. Do not output property keys:
@@ -118,6 +129,7 @@ Use these exact positional signatures to instantiate check rules or logic functi
 
 ## Examples
 
+Example 1: Dynamic text form
 ```
 <a2ui>
 root = Column([repField, valueField])
@@ -126,6 +138,30 @@ valueField = TextField("Deal Value", $/form/value, "0.00", "number", [?required]
 $/form/rep = "John Doe"
 $/form/value = 1500.00
 </a2ui>
+```
+
+Example 2: Dynamic list with templates
+```
+<a2ui>
+root = Card(breedList)
+breedList = List(Template($/breeds, breedTemplate), "horizontal")
+breedTemplate = Image($url)
+$/breeds = ["https://example.com/poodle.jpg", "https://example.com/lab.jpg"]
+</a2ui>
+```
+
+Example 3: Non-UI deletion task
+```
+<a2ui-json>
+[
+  {{
+    "version": "v0.9",
+    "deleteSurface": {{
+      "surfaceId": "dashboard-surface-1"
+    }}
+  }}
+]
+</a2ui-json>
 ```
 """
         return prompt

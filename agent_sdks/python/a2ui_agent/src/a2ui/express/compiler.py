@@ -152,6 +152,8 @@ class TokenParser:
             next_tok = self.peek()
             if next_tok and next_tok[0] == 'LPAREN':
                 return self.parse_call(val)
+            if val == "_":
+                return {"skipped": True}
             return {"variable": val}
         if kind in ('STRING', 'NUMBER', 'BOOLEAN', 'NULL'):
             self.consume()
@@ -278,6 +280,8 @@ class ExpressCompiler:
         Raises:
             ValueError: If the root component variable is missing.
         """
+        self._extra_components = []
+        self._inline_counter = 0
         # Detect if sentinel tags exist in the input
         has_sentinels = "<a2ui>" in dsl_text
         lines = []
@@ -358,6 +362,8 @@ class ExpressCompiler:
             if comp_dict:
                 compiled_components.append(comp_dict)
 
+        compiled_components.extend(self._extra_components)
+
         # Resolve catalog ID
         if not catalog_id:
             catalog_id = self.helper.catalog.get(
@@ -412,10 +418,19 @@ class ExpressCompiler:
             if prop_name == "checks":
                 continue  # Compile checks in second pass
 
+            if isinstance(arg, dict) and arg.get("skipped"):
+                comp_dict[prop_name] = None
+                continue
+
             mapped_val = self._compile_value(
                 arg,
                 raw_symbols,
                 is_action=(prop_name in ["action", "submitAction"]))
+            if comp_name == "ChoicePicker" and prop_name == "options" and isinstance(mapped_val, list):
+                mapped_val = [
+                    {"label": opt, "value": opt} if isinstance(opt, str) else opt
+                    for opt in mapped_val
+                ]
             comp_dict[prop_name] = mapped_val
 
             if prop_name == "value" and isinstance(
@@ -459,6 +474,9 @@ class ExpressCompiler:
                         for c_idx, c_arg in enumerate(explicit_args):
                             prop_target_idx = c_idx + start_prop_idx
                             if prop_target_idx < len(check_props):
+                                if isinstance(c_arg, dict) and c_arg.get("skipped"):
+                                    compiled_args[check_props[prop_target_idx]] = None
+                                    continue
                                 compiled_args[check_props[
                                     prop_target_idx]] = self._compile_value(
                                         c_arg, raw_symbols)
@@ -502,6 +520,15 @@ class ExpressCompiler:
                 fn_name = val["call"]
                 fn_args = val["args"]
 
+                # Is it an inline component constructor?
+                if fn_name in self.helper.components:
+                    self._inline_counter += 1
+                    inline_id = f"{fn_name.lower()}_{self._inline_counter}"
+                    compiled_comp = self._compile_ast_node(inline_id, val, raw_symbols)
+                    if compiled_comp:
+                        self._extra_components.append(compiled_comp)
+                    return inline_id
+
                 # Is it a reserved Template signature?
                 if fn_name == "Template":
                     path_val = self._compile_value(fn_args[0], raw_symbols,
@@ -534,6 +561,9 @@ class ExpressCompiler:
                     compiled_args = {}
                     for idx, arg in enumerate(fn_args):
                         if idx < len(fn_props):
+                            if isinstance(arg, dict) and arg.get("skipped"):
+                                compiled_args[fn_props[idx]] = None
+                                continue
                             compiled_args[fn_props[idx]] = self._compile_value(
                                 arg, raw_symbols, is_action)
 

@@ -77,7 +77,7 @@ class ExpressDecompiler:
                     # Decompile checks
                     checks_val = c.get("checks", [])
                     if not checks_val:
-                        args_reprs.append("null")
+                        args_reprs.append("_")
                         continue
 
                     compiled_checks_list = []
@@ -127,16 +127,17 @@ class ExpressDecompiler:
                     val = c[prop_name]
                     args_reprs.append(self._decompile_value(val, comp_ids))
                 else:
-                    args_reprs.append("null")
+                    args_reprs.append("_")
 
-            # Strip trailing optional null arguments for readability
-            while args_reprs and args_reprs[-1] == "null":
+            # Strip trailing optional skipped arguments for readability
+            while args_reprs and args_reprs[-1] == "_":
                 args_reprs.pop()
 
             dsl_lines.append(
                 f"{comp_id} = {comp_name}({', '.join(args_reprs)})")
 
-        return "\n".join(dsl_lines)
+        dsl_body = "\n".join(dsl_lines)
+        return f"<a2ui>\n{dsl_body}\n</a2ui>"
 
     def _decompile_value(self, val: Any, comp_ids: set[str]) -> str:
         """Decompiles a single value node back to A2UI Express notation.
@@ -187,9 +188,9 @@ class ExpressDecompiler:
                         args_reprs.append(
                             self._decompile_value(args[p], comp_ids))
                     else:
-                        args_reprs.append("null")
+                        args_reprs.append("_")
 
-                while args_reprs and args_reprs[-1] == "null":
+                while args_reprs and args_reprs[-1] == "_":
                     args_reprs.pop()
                 return f"{name}({', '.join(args_reprs)})"
 
@@ -204,9 +205,9 @@ class ExpressDecompiler:
                         args_reprs.append(
                             self._decompile_value(args[p], comp_ids))
                     else:
-                        args_reprs.append("null")
+                        args_reprs.append("_")
 
-                while args_reprs and args_reprs[-1] == "null":
+                while args_reprs and args_reprs[-1] == "_":
                     args_reprs.pop()
                 return f"{name}({', '.join(args_reprs)})"
 
@@ -237,6 +238,6 @@ class ExpressDecompiler:
             return "true" if val else "false"
 
         if val is None:
-            return "null"
+            return "_"
 
         return str(val)

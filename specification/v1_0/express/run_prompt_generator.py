@@ -9,8 +9,8 @@ containing complete instructions and positional signatures on stdout.
 import argparse
 import os
 import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
-from specification.v1_0.express.prompt_generator import ExpressPromptGenerator
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "agent_sdks", "python", "a2ui_agent", "src")))
+from a2ui.express.prompt_generator import ExpressPromptGenerator
 
 
 def generate_prompt_text(catalog_path: str) -> str:

@@ -27,11 +27,11 @@ except ImportError:
 # Support direct script execution from any directory
 sys.path.insert(
     0,
-    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "agent_sdks", "python", "a2ui_agent", "src")))
 
 # pylint: disable=import-error, wrong-import-position
-from specification.v1_0.express.compiler import ExpressCompiler
-from specification.v1_0.express.prompt_generator import ExpressPromptGenerator
+from a2ui.express.compiler import ExpressCompiler
+from a2ui.express.prompt_generator import ExpressPromptGenerator
 # pylint: enable=import-error, wrong-import-position
 
 

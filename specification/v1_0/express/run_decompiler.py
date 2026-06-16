@@ -10,8 +10,8 @@ import argparse
 import json
 import os
 import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
-from specification.v1_0.express.decompiler import ExpressDecompiler
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "agent_sdks", "python", "a2ui_agent", "src")))
+from a2ui.express.decompiler import ExpressDecompiler
 
 
 def decompile_example(example_path: str, catalog_path: str) -> str:
