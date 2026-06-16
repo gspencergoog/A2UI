@@ -67,11 +67,11 @@ else
 fi
 
 echo "Running Pyink for Python Specification Proposals..."
-cd "$REPO_ROOT/agent_sdks/python/a2ui_agent" || exit 1
+cd "$REPO_ROOT"
 if [ "$CHECK_ONLY" = true ]; then
-  uv run pyink --check "$REPO_ROOT/specification/proposals"
+  uv run --with pyink pyink --check "$REPO_ROOT/specification/proposals"
 else
-  uv run pyink "$REPO_ROOT/specification/proposals"
+  uv run --with pyink pyink "$REPO_ROOT/specification/proposals"
 fi
 
 echo "Running Dart format..."

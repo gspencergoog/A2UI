@@ -22,94 +22,100 @@ from .schema_helper import CatalogSchemaHelper
 
 
 class ExpressPromptGenerator:
-    """Generates system prompt contracts guiding models to produce A2UI Express.
+  """Generates system prompt contracts guiding models to produce A2UI Express.
 
-    Compiles component catalog structures and logic helper catalogs into standard
-    positional signatures, reducing prompt token utilization.
+  Compiles component catalog structures and logic helper catalogs into standard
+  positional signatures, reducing prompt token utilization.
 
-    Attributes:
-        helper: A CatalogSchemaHelper instance loaded with the target catalog.
+  Attributes:
+      helper: A CatalogSchemaHelper instance loaded with the target catalog.
+  """
+
+  def __init__(self, catalog_path: str):
+    """Initializes the generator with the specified catalog path.
+
+    Args:
+        catalog_path: The absolute filesystem path to the catalog JSON file.
     """
+    self.helper = CatalogSchemaHelper(catalog_path)
 
-    def __init__(self, catalog_path: str):
-        """Initializes the generator with the specified catalog path.
+  def generate_component_signatures(self) -> str:
+    """Compiles component definitions into clean function-like signatures.
 
-        Args:
-            catalog_path: The absolute filesystem path to the catalog JSON file.
-        """
-        self.helper = CatalogSchemaHelper(catalog_path)
+    Returns:
+        A plain-text multi-line list of component signatures.
+    """
+    signatures = []
+    for name in sorted(self.helper.component_properties.keys()):
+      props = self.helper.get_component_properties(name)
+      reqs = self.helper.get_component_required(name)
+      ordered_args = []
+      prop_details = []
+      for p in props:
+        is_req = p in reqs
+        opt_suffix = "" if is_req else "?"
+        ordered_args.append(f"{p}{opt_suffix}")
 
-    def generate_component_signatures(self) -> str:
-        """Compiles component definitions into clean function-like signatures.
+        # Fetch property schema and check if it has nested object structure
+        p_schema = self.helper.get_property_schema(name, p)
+        if p_schema:
+          if p_schema.get("type") == "object" and "properties" in p_schema:
+            sub_keys = []
+            for sub_k, sub_v in p_schema["properties"].items():
+              desc = sub_v.get("description", "")
+              desc_suffix = f" - {desc}" if desc else ""
+              sub_keys.append(f"    * {sub_k}{desc_suffix}")
+            prop_details.append(f"  - {p}: Map with keys:\n" + "\n".join(sub_keys))
+          elif p_schema.get("type") == "array" and "items" in p_schema:
+            items_schema = p_schema["items"]
+            if (
+                isinstance(items_schema, dict)
+                and items_schema.get("type") == "object"
+                and "properties" in items_schema
+            ):
+              sub_keys = []
+              for sub_k, sub_v in items_schema["properties"].items():
+                desc = sub_v.get("description", "")
+                desc_suffix = f" - {desc}" if desc else ""
+                sub_keys.append(f"    * {sub_k}{desc_suffix}")
+              prop_details.append(
+                  f"  - {p}: List of maps with keys:\n" + "\n".join(sub_keys)
+              )
 
-        Returns:
-            A plain-text multi-line list of component signatures.
-        """
-        signatures = []
-        for name in sorted(self.helper.component_properties.keys()):
-            props = self.helper.get_component_properties(name)
-            reqs = self.helper.get_component_required(name)
-            ordered_args = []
-            prop_details = []
-            for p in props:
-                is_req = p in reqs
-                opt_suffix = "" if is_req else "?"
-                ordered_args.append(f"{p}{opt_suffix}")
+      sig = f"• {name}({', '.join(ordered_args)})"
+      if prop_details:
+        sig += "\n" + "\n".join(prop_details)
+      signatures.append(sig)
+    return "\n".join(signatures)
 
-                # Fetch property schema and check if it has nested object structure
-                p_schema = self.helper.get_property_schema(name, p)
-                if p_schema:
-                    if p_schema.get("type") == "object" and "properties" in p_schema:
-                        sub_keys = []
-                        for sub_k, sub_v in p_schema["properties"].items():
-                            desc = sub_v.get("description", "")
-                            desc_suffix = f" - {desc}" if desc else ""
-                            sub_keys.append(f"    * {sub_k}{desc_suffix}")
-                        prop_details.append(f"  - {p}: Map with keys:\n" + "\n".join(sub_keys))
-                    elif p_schema.get("type") == "array" and "items" in p_schema:
-                        items_schema = p_schema["items"]
-                        if isinstance(items_schema, dict) and items_schema.get("type") == "object" and "properties" in items_schema:
-                            sub_keys = []
-                            for sub_k, sub_v in items_schema["properties"].items():
-                                desc = sub_v.get("description", "")
-                                desc_suffix = f" - {desc}" if desc else ""
-                                sub_keys.append(f"    * {sub_k}{desc_suffix}")
-                            prop_details.append(f"  - {p}: List of maps with keys:\n" + "\n".join(sub_keys))
+  def generate_function_signatures(self) -> str:
+    """Compiles function definitions into clean signatures.
 
-            sig = f"• {name}({', '.join(ordered_args)})"
-            if prop_details:
-                sig += "\n" + "\n".join(prop_details)
-            signatures.append(sig)
-        return "\n".join(signatures)
+    Returns:
+        A plain-text multi-line list of function signatures.
+    """
+    signatures = []
+    for name in sorted(self.helper.function_properties.keys()):
+      props = self.helper.get_function_properties(name)
+      reqs = self.helper.get_function_required(name)
+      ordered_args = []
+      for p in props:
+        is_req = p in reqs
+        opt_suffix = "" if is_req else "?"
+        ordered_args.append(f"{p}{opt_suffix}")
+      sig = f"• {name}({', '.join(ordered_args)})"
+      signatures.append(sig)
+    return "\n".join(signatures)
 
-    def generate_function_signatures(self) -> str:
-        """Compiles function definitions into clean signatures.
+  def generate_prompt(self) -> str:
+    """Assembles the complete system instruction block for the LLM.
 
-        Returns:
-            A plain-text multi-line list of function signatures.
-        """
-        signatures = []
-        for name in sorted(self.helper.function_properties.keys()):
-            props = self.helper.get_function_properties(name)
-            reqs = self.helper.get_function_required(name)
-            ordered_args = []
-            for p in props:
-                is_req = p in reqs
-                opt_suffix = "" if is_req else "?"
-                ordered_args.append(f"{p}{opt_suffix}")
-            sig = f"• {name}({', '.join(ordered_args)})"
-            signatures.append(sig)
-        return "\n".join(signatures)
-
-    def generate_prompt(self) -> str:
-        """Assembles the complete system instruction block for the LLM.
-
-        Returns:
-            The full system prompt string explaining A2UI Express and its catalog.
-        """
-        comp_sigs = self.generate_component_signatures()
-        func_sigs = self.generate_function_signatures()
-        prompt = f"""# A2UI Express Output Contract
+    Returns:
+        The full system prompt string explaining A2UI Express and its catalog.
+    """
+    comp_sigs = self.generate_component_signatures()
+    func_sigs = self.generate_function_signatures()
+    prompt = f"""# A2UI Express Output Contract
 
 You must output the user interface using the compact A2UI Express DSL notation.
 You MUST surround the entire A2UI Express DSL block with the sentinel tags `<a2ui>` and `</a2ui>`.
@@ -198,4 +204,4 @@ deleteSurface("dashboard-surface-1")
 </a2ui>
 ```
 """
-        return prompt
+    return prompt
