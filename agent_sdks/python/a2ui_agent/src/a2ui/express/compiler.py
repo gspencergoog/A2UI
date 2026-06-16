@@ -142,6 +142,8 @@ class TokenParser:
         kind, val = tok
         if kind == 'LBRACKET':
             return self.parse_array()
+        if kind == 'LBRACE':
+            return self.parse_map()
         if kind == 'PATH':
             self.consume()
             return {"path": val[1:]}
@@ -208,17 +210,11 @@ class TokenParser:
         self.consume('LPAREN')
         args = []
         if self.peek() and self.peek()[0] != 'RPAREN':
-            if self.peek()[0] == 'LBRACE':
-                args.append(self.parse_map())
-            else:
-                args.append(self.parse_expression())
+            args.append(self.parse_expression())
 
             while self.peek() and self.peek()[0] == 'COMMA':
                 self.consume('COMMA')
-                if self.peek()[0] == 'LBRACE':
-                    args.append(self.parse_map())
-                else:
-                    args.append(self.parse_expression())
+                args.append(self.parse_expression())
         self.consume('RPAREN')
         return {"call": name, "args": args}
 
@@ -231,13 +227,19 @@ class TokenParser:
         self.consume('LBRACE')
         res = {}
         if self.peek() and self.peek()[0] != 'RBRACE':
-            k_tok = self.consume('IDENTIFIER')
+            next_tok = self.peek()
+            if next_tok[0] not in ('IDENTIFIER', 'STRING'):
+                raise SyntaxError(f"Expected IDENTIFIER or STRING key, got {next_tok[0]}")
+            k_tok = self.consume()
             self.consume('COLON')
             v = self.parse_expression()
             res[k_tok[1]] = v
             while self.peek() and self.peek()[0] == 'COMMA':
                 self.consume('COMMA')
-                k_tok = self.consume('IDENTIFIER')
+                next_tok = self.peek()
+                if next_tok[0] not in ('IDENTIFIER', 'STRING'):
+                    raise SyntaxError(f"Expected IDENTIFIER or STRING key, got {next_tok[0]}")
+                k_tok = self.consume()
                 self.consume('COLON')
                 v = self.parse_expression()
                 res[k_tok[1]] = v
@@ -301,27 +303,44 @@ class ExpressCompiler:
 
         statements = []
         current_statement = []
-        assignment_start_regex = re.compile(
-            r'^(?:[a-zA-Z_][a-zA-Z0-9_-]*|\$[a-zA-Z0-9_/]+)\s*='
-        )
-
+        open_p = 0
+        open_b = 0
+        open_c = 0
         for line in lines:
-            if assignment_start_regex.match(line):
-                if current_statement:
-                    statements.append("\n".join(current_statement))
-                current_statement = [line]
-            else:
-                if current_statement:
-                    current_statement.append(line)
+            current_statement.append(line)
+            open_p += line.count("(") - line.count(")")
+            open_b += line.count("[") - line.count("]")
+            open_c += line.count("{") - line.count("}")
+            if open_p <= 0 and open_b <= 0 and open_c <= 0:
+                statements.append("\n".join(current_statement))
+                current_statement = []
+                open_p = 0
+                open_b = 0
+                open_c = 0
         if current_statement:
             statements.append("\n".join(current_statement))
 
         raw_symbols = {}
         data_path_assignments = {}
+        target_delete_surface_id = None
+        standalone_function_calls = []
 
         # Line parser and error recovery loop
         for stmt in statements:
             if "=" not in stmt:
+                trimmed = stmt.strip()
+                try:
+                    tokens = tokenize(trimmed)
+                    parser = TokenParser(tokens)
+                    parsed_val = parser.parse_expression()
+                    if isinstance(parsed_val, dict) and parsed_val.get("call") == "deleteSurface":
+                        args = parsed_val.get("args", [])
+                        if args and isinstance(args[0], str):
+                            target_delete_surface_id = args[0]
+                    elif isinstance(parsed_val, dict) and "call" in parsed_val:
+                        standalone_function_calls.append(parsed_val)
+                except Exception:
+                    pass
                 continue
             var_part, expr_part = stmt.split("=", 1)
             var_name = var_part.strip()
@@ -350,12 +369,42 @@ class ExpressCompiler:
             compiled_val = self._compile_value(ast_val, raw_symbols)
             _set_nested_path(data_model, path_name, compiled_val)
 
+        if target_delete_surface_id is not None:
+            return {
+                "version": "v1.0",
+                "deleteSurface": {
+                    "surfaceId": target_delete_surface_id
+                }
+            }
+
+        if standalone_function_calls:
+            first_call = standalone_function_calls[0]
+            self._inline_counter += 1
+            compiled_val = self._compile_value(first_call, raw_symbols, is_action=False)
+            return {
+                "version": "v1.0",
+                "functionCallId": f"call_{self._inline_counter}",
+                "callFunction": {
+                    "call": compiled_val.get("call"),
+                    "args": compiled_val.get("args", {})
+                }
+            }
+
         compiled_components = []
 
         # Adjacency list flattening starting at root
         if "root" not in raw_symbols:
+            if data_path_assignments:
+                return {
+                    "version": "v1.0",
+                    "updateDataModel": {
+                        "surfaceId": surface_id,
+                        "path": "/",
+                        "value": data_model
+                    }
+                }
             raise ValueError(
-                "A2UI Express source must define a 'root' variable.")
+                "A2UI Express source must define a 'root' variable or have data model path assignments.")
 
         for var_name, ast in raw_symbols.items():
             comp_dict = self._compile_ast_node(var_name, ast, raw_symbols)
@@ -431,6 +480,9 @@ class ExpressCompiler:
                     {"label": opt, "value": opt} if isinstance(opt, str) else opt
                     for opt in mapped_val
                 ]
+            enum_vals = self.helper.get_property_enum(comp_name, prop_name)
+            if enum_vals and isinstance(mapped_val, str) and mapped_val not in enum_vals:
+                mapped_val = None
             comp_dict[prop_name] = mapped_val
 
             if prop_name == "value" and isinstance(
@@ -493,7 +545,7 @@ class ExpressCompiler:
                         })
                 comp_dict["checks"] = compiled_checks
 
-        return comp_dict
+        return {k: v for k, v in comp_dict.items() if v is not None}
 
     def _compile_value(self,
                        val: Any,
@@ -513,8 +565,12 @@ class ExpressCompiler:
             if "path" in val:
                 return val
             if "variable" in val:
-                # Resolve variable ID
-                return val["variable"]
+                ref_name = val["variable"]
+                if ref_name in raw_symbols:
+                    symbol_val = raw_symbols[ref_name]
+                    if isinstance(symbol_val, dict) and "call" not in symbol_val:
+                        return self._compile_value(symbol_val, raw_symbols, is_action)
+                return ref_name
             if "call" in val:
                 # Nested function call (e.g. formatString or actions)
                 fn_name = val["call"]
@@ -530,7 +586,7 @@ class ExpressCompiler:
                     return inline_id
 
                 # Is it a reserved Template signature?
-                if fn_name == "Template":
+                if fn_name == "_template":
                     path_val = self._compile_value(fn_args[0], raw_symbols,
                                                    is_action)
                     comp_id_val = self._compile_value(fn_args[1], raw_symbols,

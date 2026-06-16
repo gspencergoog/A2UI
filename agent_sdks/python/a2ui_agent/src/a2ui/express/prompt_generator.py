@@ -76,7 +76,7 @@ class ExpressPromptGenerator:
 You must output the user interface using the compact A2UI Express DSL notation.
 You MUST surround the entire A2UI Express DSL block with the sentinel tags `<a2ui>` and `</a2ui>`.
 
-IMPORTANT: Even if the task request asks you to generate specific A2UI protocol messages (such as createSurface, updateComponents, or updateDataModel) to describe a user interface or layout, do NOT output JSON. Instead, describe the entire user interface using the A2UI Express DSL notation wrapped in `<a2ui>` and `</a2ui>` sentinels. The host environment will compile and split your DSL into the required messages automatically.
+IMPORTANT: You must ALWAYS output A2UI Express DSL notation wrapped inside `<a2ui>` and `</a2ui>` sentinel tags. Do NOT output standard JSON messages directly, even if the task request asks you to output JSON, or asks for a specific protocol message like deleteSurface or updateDataModel. The host compiler will compile your DSL into the correct JSON envelopes automatically.
 
 ## Grammar Rules
 
@@ -107,14 +107,15 @@ IMPORTANT: Even if the task request asks you to generate specific A2UI protocol 
 
 9. Data model population: Assign a value directly to an absolute data path (e.g. $/path/to/key = "value") to populate or initialize values inside the shared dataModel. The value can be a primitive, array, or map.
 
-10. Dynamic list templates: If a component expects a template child list (such as the children property of a List component), represent it using the Template helper:
-    Template($/path/to/list, itemTemplate)
+10. Dynamic list templates: If a component expects a template child list (such as the children property of a List component), represent it using the _template helper:
+    _template($/path/to/list, itemTemplate)
     And define the template component variable on another line, utilizing relative path references prefixed with $:
     itemTemplate = Image($url)
 
-11. Non-UI tasks: If the user request does not ask to design or update a UI (for example, if it asks to perform a non-UI operation like deleteSurface, updateDataModel without a UI, or standard client-to-server action/error messaging), do NOT generate A2UI Express DSL. Instead, output the standard A2UI JSON message block wrapped in `<a2ui-json>` and `</a2ui-json>` tags.
+11. Lifecycle & Deletion: To delete a user interface surface, output the standalone `deleteSurface(surfaceId)` command (with no variable assignment):
+    deleteSurface("dashboard-surface-1")
 
-12. String Concatenation & Formatting: A2UI Express DSL does not support binary operators like '+' or formatting symbols. To concatenate strings or dynamically inject data bindings into text, you must use the standard catalog function `formatString(template, arguments)`:
+12. String Concatenation & Formatting: A2UI Express DSL does not support binary operators like '+' or formatting symbols. To concatenate strings or dynamically inject data bindings into text, you must use the basic catalog function `formatString(template, arguments)`:
     formatString("Hello {{name}}", {{name: $/user/name}})
 
 ## Positional Component Signatures
@@ -144,24 +145,17 @@ Example 2: Dynamic list with templates
 ```
 <a2ui>
 root = Card(breedList)
-breedList = List(Template($/breeds, breedTemplate), "horizontal")
+breedList = List(_template($/breeds, breedTemplate), "horizontal")
 breedTemplate = Image($url)
 $/breeds = ["https://example.com/poodle.jpg", "https://example.com/lab.jpg"]
 </a2ui>
 ```
 
-Example 3: Non-UI deletion task
+Example 3: Lifecycle deletion task
 ```
-<a2ui-json>
-[
-  {{
-    "version": "v0.9",
-    "deleteSurface": {{
-      "surfaceId": "dashboard-surface-1"
-    }}
-  }}
-]
-</a2ui-json>
+<a2ui>
+deleteSurface("dashboard-surface-1")
+</a2ui>
 ```
 """
         return prompt

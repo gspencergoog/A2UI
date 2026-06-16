@@ -48,6 +48,47 @@ class ExpressDecompiler:
         Returns:
             The decompiled A2UI Express DSL string.
         """
+        # Handle deleteSurface action
+        if "deleteSurface" in envelope_json:
+            surf_op = envelope_json["deleteSurface"]
+            surface_id = surf_op.get("surfaceId", "")
+            return f"<a2ui>\ndeleteSurface(\"{surface_id}\")\n</a2ui>"
+
+        # Handle updateDataModel action
+        if "updateDataModel" in envelope_json:
+            val_op = envelope_json["updateDataModel"]
+            data_val = val_op.get("value", {})
+            dsl_lines = []
+            if data_val:
+                for path, val in sorted(_flatten_data_model(data_val)):
+                    val_str = self._decompile_value(val, set())
+                    dsl_lines.append(f"${path} = {val_str}")
+            dsl_body = "\n".join(dsl_lines)
+            return f"<a2ui>\n{dsl_body}\n</a2ui>"
+
+        # Handle callFunction action
+        if "callFunction" in envelope_json:
+            func_op = envelope_json["callFunction"]
+            fn_name = func_op.get("call", "")
+            fn_args = func_op.get("args", {})
+            args_list = []
+            if fn_name in self.helper.functions:
+                fn_props = self.helper.get_function_properties(fn_name)
+                for prop_name in fn_props:
+                    if prop_name in fn_args:
+                        val_str = self._decompile_value(fn_args[prop_name], set())
+                        args_list.append(val_str)
+                    else:
+                        args_list.append("_")
+            else:
+                for k, v in fn_args.items():
+                    val_str = self._decompile_value(v, set())
+                    args_list.append(val_str)
+            while args_list and args_list[-1] == "_":
+                args_list.pop()
+            args_str = ", ".join(args_list)
+            return f"<a2ui>\n{fn_name}({args_str})\n</a2ui>"
+
         create_surface = envelope_json.get("createSurface", {})
         components = create_surface.get("components", [])
         data_model = create_surface.get("dataModel", {})
@@ -155,7 +196,7 @@ class ExpressDecompiler:
                     path_repr = self._decompile_value({"path": val["path"]},
                                                       comp_ids)
                     comp_id_repr = val["componentId"]
-                    return f"Template({path_repr}, {comp_id_repr})"
+                    return f"_template({path_repr}, {comp_id_repr})"
                 # Decompile path: prefixed by $
                 path_str = val["path"]
                 if path_str.startswith("/"):

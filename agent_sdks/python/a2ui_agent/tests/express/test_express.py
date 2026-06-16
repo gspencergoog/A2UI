@@ -139,6 +139,44 @@ saveLabel = Text("Save")"""
             'saveButton = Button(saveLabel, "primary", Event("submitDeal", {rep: $/form/rep}))',
             decompiled_dsl)
 
+    def test_standalone_function_call(self):
+        """Validates compilation of standalone function calls into CallFunctionMessages."""
+        compiler = ExpressCompiler(self.catalog_path)
+        decompiler = ExpressDecompiler(self.catalog_path)
+
+        dsl = """openUrl("https://example.com")"""
+        envelope = compiler.compile(dsl)
+
+        self.assertEqual(envelope["version"], "v1.0")
+        self.assertIn("callFunction", envelope)
+        self.assertIn("functionCallId", envelope)
+        self.assertEqual(envelope["callFunction"]["call"], "openUrl")
+        self.assertEqual(envelope["callFunction"]["args"], {"url": "https://example.com"})
+
+        # Verify decompilation
+        decompiled_dsl = decompiler.decompile(envelope)
+        self.assertIn('openUrl("https://example.com")', decompiled_dsl)
+
+    def test_map_variable_inlining(self):
+        """Validates compiling variable assignments holding map literals and inlining them."""
+        compiler = ExpressCompiler(self.catalog_path)
+        decompiler = ExpressDecompiler(self.catalog_path)
+
+        dsl = """root = Tabs([tab1])
+tab1 = {title: "Overview", child: contentCol}
+contentCol = Column([])"""
+
+        envelope = compiler.compile(dsl)
+        components = envelope["createSurface"]["components"]
+
+        tabs_comp = next(c for c in components if c["id"] == "root")
+        self.assertEqual(tabs_comp["component"], "Tabs")
+        self.assertEqual(tabs_comp["tabs"], [{"title": "Overview", "child": "contentCol"}])
+
+        # Verify decompilation back to inline map literals
+        decompiled_dsl = decompiler.decompile(envelope)
+        self.assertIn('root = Tabs([{title: "Overview", child: contentCol}])', decompiled_dsl)
+
     def test_round_trip_examples(self):
         """Runs a semantically rigorous round-trip test on real catalog examples."""
         compiler = ExpressCompiler(self.catalog_path)
@@ -300,7 +338,7 @@ btn2-label = Text("Submit")"""
         components = envelope["createSurface"]["components"]
 
         btn1_comp = next(c for c in components if c["id"] == "btn1")
-        self.assertEqual(btn1_comp["variant"], None)
+        self.assertNotIn("variant", btn1_comp)
         self.assertEqual(btn1_comp["action"], {"event": {"name": "click", "context": {}}})
 
         btn2_comp = next(c for c in components if c["id"] == "btn2")
@@ -313,6 +351,63 @@ btn2-label = Text("Submit")"""
         self.assertIn("btn2 = Button(btn2-label)", decompiled_dsl)
         # Ensure no nulls are decompiled
         self.assertNotIn("null", decompiled_dsl)
+
+    def test_delete_surface_and_template_and_rootless_data(self):
+        """Validates standalone deleteSurface, _template helper, and rootless updateDataModel."""
+        compiler = ExpressCompiler(self.catalog_path)
+        decompiler = ExpressDecompiler(self.catalog_path)
+
+        # 1. Test deleteSurface parsing/compiling/decompiling
+        delete_dsl = "deleteSurface(\"my-surface-123\")"
+        del_envelope = compiler.compile(delete_dsl)
+        self.assertEqual(del_envelope, {
+            "version": "v1.0",
+            "deleteSurface": {
+                "surfaceId": "my-surface-123"
+            }
+        })
+        self.assertEqual(decompiler.decompile(del_envelope).strip(), f"<a2ui>\n{delete_dsl}\n</a2ui>")
+
+        # 2. Test rootless updateDataModel parsing/compiling/decompiling
+        data_dsl = """$/form/firstName = "Alice"
+$/form/lastName = "Smith"
+$/age = 25"""
+        data_envelope = compiler.compile(data_dsl, surface_id="data-surf")
+        self.assertEqual(data_envelope, {
+            "version": "v1.0",
+            "updateDataModel": {
+                "surfaceId": "data-surf",
+                "path": "/",
+                "value": {
+                    "form": {
+                        "firstName": "Alice",
+                        "lastName": "Smith"
+                    },
+                    "age": 25
+                }
+            }
+        })
+        self.assertIn('$/form/firstName = "Alice"', decompiler.decompile(data_envelope))
+
+        # 3. Test _template helper list compilation
+        list_dsl = """root = Card(breedList)
+        breedList = List(_template($/breeds, breedTemplate))
+        breedTemplate = Image($url)"""
+        list_envelope = compiler.compile(list_dsl)
+        components = list_envelope["createSurface"]["components"]
+        list_comp = next(c for c in components if c["id"] == "breedList")
+        self.assertEqual(list_comp["children"], {
+            "path": "/breeds",
+            "componentId": "breedTemplate"
+        })
+        self.assertIn("breedList = List(_template($/breeds, breedTemplate))", decompiler.decompile(list_envelope))
+
+        # 4. Test map literal parsing and nested array of maps
+        map_dsl = """$/form/data = [{"id": 1, "meta": {"name": "Alice"}}]"""
+        map_envelope = compiler.compile(map_dsl)
+        self.assertEqual(map_envelope["updateDataModel"]["value"]["form"]["data"], [
+            {"id": 1, "meta": {"name": "Alice"}}
+        ])
 
 
 if __name__ == "__main__":

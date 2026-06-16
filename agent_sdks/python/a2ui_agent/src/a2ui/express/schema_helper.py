@@ -38,6 +38,7 @@ class CatalogSchemaHelper:
         self.component_properties = {}
         self.component_required = {}
         self.component_is_checkable = {}
+        self.component_property_enums = {}
 
         for name, schema in self.components.items():
             props = {}
@@ -56,6 +57,9 @@ class CatalogSchemaHelper:
                         is_checkable = True
                 if "properties" in sub:
                     props.update(sub["properties"])
+                    for pk, pv in sub["properties"].items():
+                        if isinstance(pv, dict) and "enum" in pv:
+                            self.component_property_enums[(name, pk)] = pv["enum"]
                 if "required" in sub:
                     reqs.extend(sub["required"])
 
@@ -137,3 +141,15 @@ class CatalogSchemaHelper:
             A list of function parameter names that are required.
         """
         return self.function_required.get(name, [])
+
+    def get_property_enum(self, component_name: str, property_name: str) -> Optional[list]:
+        """Returns the list of allowed enum values for a component property, or None.
+
+        Args:
+            component_name: The catalog name of the component.
+            property_name: The property key name.
+
+        Returns:
+            A list of allowed enum string values, or None if not restricted.
+        """
+        return self.component_property_enums.get((component_name, property_name))

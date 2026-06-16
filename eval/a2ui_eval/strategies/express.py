@@ -27,6 +27,41 @@ def a2ui_express_prompt(catalog_path: str) -> Solver:
 
     async def solve(state: TaskState, generate: Generate) -> TaskState:
         state.messages.insert(0, ChatMessageSystem(content=prompt))
+        for message in state.messages:
+            if message.role == "user" and isinstance(message.content, str):
+                content = message.content
+                content = re.sub(
+                    r"(?i)generate a JSON message containing a?|generate a JSON payload containing a?",
+                    "Generate a",
+                    content
+                )
+                content = re.sub(
+                    r"(?i)generate a JSON message|generate a JSON payload",
+                    "generate A2UI Express DSL",
+                    content
+                )
+                content = re.sub(
+                    r"(?i)generate a? 'createSurface' message (?:and|followed by) a? 'updateComponents' message",
+                    "generate A2UI Express DSL",
+                    content
+                )
+                content = re.sub(
+                    r"(?i)generate a? 'createSurface' (?:message )?and a? 'updateComponents' (?:message)?",
+                    "generate A2UI Express DSL",
+                    content
+                )
+                content = re.sub(
+                    r"(?i)generate 'createSurface' and 'updateComponents' messages?",
+                    "generate A2UI Express DSL",
+                    content
+                )
+                message.content = (
+                    "Translate the following request into A2UI Express DSL wrapped inside <a2ui> and </a2ui> sentinels:\n\n"
+                    + content
+                    + "\n\nREMINDER: You must output ONLY A2UI Express DSL wrapped in <a2ui> and </a2ui> sentinels. "
+                    "Do NOT output JSON or <a2ui-json> blocks under any circumstances. Directly generating JSON will fail compilation."
+                )
+        print("MESSAGES PATH:", [(m.role, m.content[:40]) for m in state.messages])
         return state
         
     return solve
@@ -112,42 +147,52 @@ def compile_express_dsl(catalog_path: str) -> Solver:
         try:
             compiled_json = compiler.compile(dsl_content, surface_id=surface_id)
             
-            # v0.9 separating logic
-            extracted_create = compiled_json.get("createSurface", {})
-            catalog_id = extracted_create.get("catalogId", "")
-            components = extracted_create.get("components", [])
-            data_model = extracted_create.get("dataModel", {})
-            
-            messages = []
-            
-            # Message 1: createSurface (no inline components or dataModel under v0.9)
-            messages.append({
-                "version": "v0.9",
-                "createSurface": {
-                    "surfaceId": surface_id,
-                    "catalogId": catalog_id
-                }
-            })
-            
-            # Message 2: updateComponents
-            if components:
+            if "deleteSurface" in compiled_json:
+                messages = [{
+                    "version": "v0.9",
+                    "deleteSurface": compiled_json["deleteSurface"]
+                }]
+            elif "updateDataModel" in compiled_json:
+                messages = [{
+                    "version": "v0.9",
+                    "updateDataModel": compiled_json["updateDataModel"]
+                }]
+            else:
+                extracted_create = compiled_json.get("createSurface", {})
+                catalog_id = extracted_create.get("catalogId", "")
+                components = extracted_create.get("components", [])
+                data_model = extracted_create.get("dataModel", {})
+                
+                messages = []
+                
+                # Message 1: createSurface (no inline components or dataModel under v0.9)
                 messages.append({
                     "version": "v0.9",
-                    "updateComponents": {
+                    "createSurface": {
                         "surfaceId": surface_id,
-                        "components": components
+                        "catalogId": catalog_id
                     }
                 })
                 
-            # Message 3: updateDataModel (if dataModel is not empty)
-            if data_model:
-                messages.append({
-                    "version": "v0.9",
-                    "updateDataModel": {
-                        "surfaceId": surface_id,
-                        "value": data_model
-                    }
-                })
+                # Message 2: updateComponents
+                if components:
+                    messages.append({
+                        "version": "v0.9",
+                        "updateComponents": {
+                            "surfaceId": surface_id,
+                            "components": components
+                        }
+                    })
+                    
+                # Message 3: updateDataModel (if dataModel is not empty)
+                if data_model:
+                    messages.append({
+                        "version": "v0.9",
+                        "updateDataModel": {
+                            "surfaceId": surface_id,
+                            "value": data_model
+                        }
+                    })
 
             formatted = f"<a2ui-json>\n{json.dumps(messages, indent=2)}\n</a2ui-json>"
             state.output = ModelOutput(

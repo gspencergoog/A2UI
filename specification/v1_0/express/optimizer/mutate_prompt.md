@@ -22,16 +22,21 @@ valueField = TextField("Deal Value", $/form/value, "0.00", "number", ?required)
 ## Current reigning champion baseline
 
 <REIGNING_CHAMPION>
+
 ### a2ui_express.md
+
 {A2UI_EXPRESS_CONTENT}
 
 ### basic_prompt.md
+
 {BASIC_PROMPT_CONTENT}
 
 ### compiler.py
+
 {COMPILER_CONTENT}
 
 ### decompiler.py
+
 {DECOMPILER_CONTENT}
 </REIGNING_CHAMPION>
 
