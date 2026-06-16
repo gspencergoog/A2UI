@@ -93,7 +93,13 @@ def main():
     parser.add_argument(
         "--catalog",
         default=os.path.join(
-            os.path.dirname(__file__), "..", "catalogs", "basic", "catalog.json"
+            os.path.dirname(__file__),
+            "..",
+            "..",
+            "v1_0",
+            "catalogs",
+            "basic",
+            "catalog.json",
         ),
         help="Path to the catalog JSON schema (default: basic catalog).",
     )

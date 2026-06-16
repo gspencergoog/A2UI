@@ -44,7 +44,7 @@ cd specification/proposals/express
 
 # Run inference against your local Gemma 4 server
 uv run ./run_inference.py \
-  ../catalogs/basic/examples/01_flight-status.json \
+  ../../v1_0/catalogs/basic/examples/01_flight-status.json \
   --mlx
 ```
 
@@ -68,7 +68,7 @@ Generate the model prompt contract, containing positional component signatures a
 
 ```bash
 # Direct execution from any path
-./run_prompt_generator.py --catalog ../catalogs/basic/catalog.json
+./run_prompt_generator.py --catalog ../../v1_0/catalogs/basic/catalog.json
 ```
 
 ### Plain DSL compiler
@@ -86,5 +86,5 @@ Compile an offline A2UI Express DSL file directly into standard pretty-printed v
 Convert standard A2UI v1.0 JSON envelopes back into compact A2UI Express code:
 
 ```bash
-./run_decompiler.py ../catalogs/basic/examples/01_flight-status.json
+./run_decompiler.py ../../v1_0/catalogs/basic/examples/01_flight-status.json
 ```
