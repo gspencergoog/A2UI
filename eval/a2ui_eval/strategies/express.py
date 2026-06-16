@@ -98,11 +98,11 @@ def compile_express_dsl(catalog_path: str) -> Solver:
                 json_content = completion[start_idx:end_idx].strip()
                 messages = json.loads(json_content)
                 
-                # Standardize to v0.9 messages
+                # Standardize to v1.0 messages
                 if isinstance(messages, list):
                     for msg in messages:
                         if isinstance(msg, dict):
-                            msg["version"] = "v0.9"
+                            msg["version"] = "v1.0"
                             # Make sure surface ID matches if it contains operations
                             for key in ["createSurface", "updateComponents", "updateDataModel", "deleteSurface"]:
                                 if key in msg and isinstance(msg[key], dict):
@@ -154,54 +154,7 @@ def compile_express_dsl(catalog_path: str) -> Solver:
 
         try:
             compiled_json = compiler.compile(dsl_content, surface_id=surface_id)
-            
-            if "deleteSurface" in compiled_json:
-                messages = [{
-                    "version": "v0.9",
-                    "deleteSurface": compiled_json["deleteSurface"]
-                }]
-            elif "updateDataModel" in compiled_json:
-                messages = [{
-                    "version": "v0.9",
-                    "updateDataModel": compiled_json["updateDataModel"]
-                }]
-            else:
-                extracted_create = compiled_json.get("createSurface", {})
-                catalog_id = extracted_create.get("catalogId", "")
-                components = extracted_create.get("components", [])
-                data_model = extracted_create.get("dataModel", {})
-                
-                messages = []
-                
-                # Message 1: createSurface (no inline components or dataModel under v0.9)
-                messages.append({
-                    "version": "v0.9",
-                    "createSurface": {
-                        "surfaceId": surface_id,
-                        "catalogId": catalog_id
-                    }
-                })
-                
-                # Message 2: updateComponents
-                if components:
-                    messages.append({
-                        "version": "v0.9",
-                        "updateComponents": {
-                            "surfaceId": surface_id,
-                            "components": components
-                        }
-                    })
-                    
-                # Message 3: updateDataModel (if dataModel is not empty)
-                if data_model:
-                    messages.append({
-                        "version": "v0.9",
-                        "updateDataModel": {
-                            "surfaceId": surface_id,
-                            "value": data_model
-                        }
-                    })
-
+            messages = [compiled_json]
             formatted = f"<a2ui-json>\n{json.dumps(messages, indent=2)}\n</a2ui-json>"
             state.output = ModelOutput(
                 model=state.output.model,

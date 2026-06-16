@@ -89,11 +89,20 @@ def a2ui_v0_9_eval(
 
     dataset = load_a2ui_dataset(DATASET_PATH)
 
+    active_schema = SCHEMA_PATH
+    active_catalog = CATALOG_PATH
+    active_version = "0.9"
+
+    if strategy == "express":
+        active_schema = os.path.abspath(os.path.join(CURRENT_DIR, "../specification/v1_0/json/server_to_client.json"))
+        active_catalog = os.path.abspath(os.path.join(CURRENT_DIR, "../specification/v1_0/catalogs/basic/catalog.json"))
+        active_version = "1.0"
+
     return Task(
         dataset=dataset,
-        solver=get_solver(strategy, SCHEMA_PATH, CATALOG_PATH),
+        solver=get_solver(strategy, active_schema, active_catalog),
         scorer=[
-            a2ui_scorer(CATALOG_PATH),
+            a2ui_scorer(active_catalog, version=active_version),
             measured_model_graded_qa(
                 model=grading_model,
                 instructions=GRADER_INSTRUCTIONS

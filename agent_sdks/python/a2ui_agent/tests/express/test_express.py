@@ -495,32 +495,32 @@ $/age = 25"""
 
     # 4. Verify ValueError on parser expression failures
     with self.assertRaises(ValueError):
-      compiler.compile(
-          "root = Column(repField)\nrepField = TextField(invalid_syntax_!!!!)"
-      )
+      compiler.compile("root = Column(repField)\nrepField = TextField(,)")
 
     # 5. Verify ValueError on template helper with missing args
     with self.assertRaises(ValueError):
       compiler.compile("root = List(_template($/path))")
 
     # 6. Verify Event helper compilation with both dictionary and list of dictionaries context layouts
-    event_dsl_dict = 'root = Button("Submit", Event("click", {"source": "btn"}))'
+    event_dsl_dict = 'root = Button("Submit", _, Event("click", {"source": "btn"}))'
     event_envelope_dict = compiler.compile(event_dsl_dict)
     btn_comp_dict = next(
         c
         for c in event_envelope_dict["createSurface"]["components"]
         if c["id"] == "root"
     )
-    self.assertEqual(btn_comp_dict["onClick"]["event"]["context"]["source"], "btn")
+    self.assertEqual(btn_comp_dict["action"]["event"]["context"]["source"], "btn")
 
-    event_dsl_list = 'root = Button("Submit", Event("click", [{"source": "btn_list"}]))'
+    event_dsl_list = (
+        'root = Button("Submit", _, Event("click", [{"source": "btn_list"}]))'
+    )
     event_envelope_list = compiler.compile(event_dsl_list)
     btn_comp_list = next(
         c
         for c in event_envelope_list["createSurface"]["components"]
         if c["id"] == "root"
     )
-    self.assertEqual(btn_comp_list["onClick"]["event"]["context"]["source"], "btn_list")
+    self.assertEqual(btn_comp_list["action"]["event"]["context"]["source"], "btn_list")
 
     # 7. Verify allOf boolean schema safety checks in CatalogSchemaHelper
     # We dynamically inject a boolean schema into helper.components["Button"]["allOf"]
