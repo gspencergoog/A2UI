@@ -173,7 +173,15 @@ class A2uiValidator:
     if self.version == VERSION_0_8:
       self._delegator = LegacyA2uiValidatorV08(catalog)
     elif self.version == VERSION_1_0:
-      self._delegator = A2uiValidatorWrapperV10(catalog)
+      import os
+
+      if os.environ.get("A2UI_EXPRESS_ENABLED", "").lower() in ("true", "1", "yes"):
+        self._delegator = A2uiValidatorWrapperV10(catalog)
+      else:
+        raise ValueError(
+            "A2UI v1.0 validation is experimental and is disabled by default. "
+            "To enable it, set the environment variable A2UI_EXPRESS_ENABLED=true."
+        )
     else:
       self._delegator = A2uiValidatorWrapper(catalog)
 
