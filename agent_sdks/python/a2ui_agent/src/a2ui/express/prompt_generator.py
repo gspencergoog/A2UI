@@ -36,11 +36,35 @@ class ExpressPromptGenerator:
             props = self.helper.get_component_properties(name)
             reqs = self.helper.get_component_required(name)
             ordered_args = []
+            prop_details = []
             for p in props:
                 is_req = p in reqs
                 opt_suffix = "" if is_req else "?"
                 ordered_args.append(f"{p}{opt_suffix}")
+
+                # Fetch property schema and check if it has nested object structure
+                p_schema = self.helper.get_property_schema(name, p)
+                if p_schema:
+                    if p_schema.get("type") == "object" and "properties" in p_schema:
+                        sub_keys = []
+                        for sub_k, sub_v in p_schema["properties"].items():
+                            desc = sub_v.get("description", "")
+                            desc_suffix = f" - {desc}" if desc else ""
+                            sub_keys.append(f"    * {sub_k}{desc_suffix}")
+                        prop_details.append(f"  - {p}: Map with keys:\n" + "\n".join(sub_keys))
+                    elif p_schema.get("type") == "array" and "items" in p_schema:
+                        items_schema = p_schema["items"]
+                        if isinstance(items_schema, dict) and items_schema.get("type") == "object" and "properties" in items_schema:
+                            sub_keys = []
+                            for sub_k, sub_v in items_schema["properties"].items():
+                                desc = sub_v.get("description", "")
+                                desc_suffix = f" - {desc}" if desc else ""
+                                sub_keys.append(f"    * {sub_k}{desc_suffix}")
+                            prop_details.append(f"  - {p}: List of maps with keys:\n" + "\n".join(sub_keys))
+
             sig = f"• {name}({', '.join(ordered_args)})"
+            if prop_details:
+                sig += "\n" + "\n".join(prop_details)
             signatures.append(sig)
         return "\n".join(signatures)
 

@@ -153,3 +153,18 @@ class CatalogSchemaHelper:
             A list of allowed enum string values, or None if not restricted.
         """
         return self.component_property_enums.get((component_name, property_name))
+
+    def get_property_schema(self, component_name: str, property_name: str) -> Optional[dict]:
+        """Crawls all sub-schemas of a component to retrieve a property's schema definition."""
+        schema = self.components.get(component_name)
+        if not schema:
+            return None
+        
+        sub_schemas = [schema]
+        if "allOf" in schema:
+            sub_schemas.extend(schema["allOf"])
+
+        for sub in sub_schemas:
+            if "properties" in sub and property_name in sub["properties"]:
+                return sub["properties"][property_name]
+        return None
