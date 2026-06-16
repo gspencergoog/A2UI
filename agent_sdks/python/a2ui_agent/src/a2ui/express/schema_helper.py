@@ -183,6 +183,10 @@ class CatalogSchemaHelper:
       sub_schemas.extend(schema["allOf"])
 
     for sub in sub_schemas:
-      if "properties" in sub and property_name in sub["properties"]:
+      if (
+          isinstance(sub, dict)
+          and "properties" in sub
+          and property_name in sub["properties"]
+      ):
         return sub["properties"][property_name]
     return None

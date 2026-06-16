@@ -159,7 +159,11 @@ class ExpressDecompiler:
                     self._decompile_value(check_args[p], comp_ids)
                 )
 
-            if message and message != f"{check_name.capitalize()} check failed":
+            if (
+                check_name
+                and message
+                and message != f"{check_name.capitalize()} check failed"
+            ):
               escaped_msg = message.replace('"', '\\"')
               explicit_args_reprs.append(f'"{escaped_msg}"')
 

@@ -40,7 +40,7 @@ To test local generation and compiler correctness in a single command, run the i
 
 ```bash
 # Navigate to the express directory
-cd main/specification/v1_0/express
+cd specification/proposals/express
 
 # Run inference against your local Gemma 4 server
 uv run ./run_inference.py \

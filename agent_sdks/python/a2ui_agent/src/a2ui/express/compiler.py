@@ -371,11 +371,10 @@ class ExpressCompiler:
             data_path_assignments[var_name] = parsed_val
           else:
             raw_symbols[var_name] = parsed_val
-        except Exception:
-          if var_name.startswith("$"):
-            data_path_assignments[var_name] = None
-          else:
-            raw_symbols[var_name] = {"call": "Text", "args": ["Loading..."]}
+        except Exception as e:
+          raise ValueError(
+              f"Failed to parse expression for variable '{var_name}': {e}"
+          ) from e
       else:
         try:
           parser = TokenParser(tokens)
@@ -386,8 +385,8 @@ class ExpressCompiler:
               target_delete_surface_id = args[0]
           elif isinstance(parsed_val, dict) and "call" in parsed_val:
             standalone_function_calls.append(parsed_val)
-        except Exception:
-          pass
+        except Exception as e:
+          raise ValueError(f"Failed to parse expression: {e}") from e
 
     # Compile data model paths
     data_model = {}
@@ -613,6 +612,11 @@ class ExpressCompiler:
 
         # Is it a reserved Template signature?
         if fn_name == "_template":
+          if len(fn_args) < 2:
+            raise ValueError(
+                "_template helper requires exactly 2 arguments: path and"
+                " templateComponent."
+            )
           path_val = self._compile_value(fn_args[0], raw_symbols, is_action)
           comp_id_val = self._compile_value(fn_args[1], raw_symbols, is_action)
           return {"path": path_val["path"], "componentId": comp_id_val}
@@ -622,8 +626,14 @@ class ExpressCompiler:
           event_name = fn_args[0] if len(fn_args) > 0 else ""
           context_map = fn_args[1] if len(fn_args) > 1 else {}
           compiled_context = {}
-          for k, v in context_map.items():
-            compiled_context[k] = self._compile_value(v, raw_symbols, is_action)
+          if isinstance(context_map, dict):
+            for k, v in context_map.items():
+              compiled_context[k] = self._compile_value(v, raw_symbols, is_action)
+          elif isinstance(context_map, list):
+            for item in context_map:
+              if isinstance(item, dict):
+                for k, v in item.items():
+                  compiled_context[k] = self._compile_value(v, raw_symbols, is_action)
           return {"event": {"name": event_name, "context": compiled_context}}
 
         # Is it a regular catalog function?

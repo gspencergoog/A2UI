@@ -493,6 +493,52 @@ $/age = 25"""
     finally:
       self.helper.get_property_schema = original_get_property_schema
 
+    # 4. Verify ValueError on parser expression failures
+    with self.assertRaises(ValueError):
+      compiler.compile(
+          "root = Column(repField)\nrepField = TextField(invalid_syntax_!!!!)"
+      )
+
+    # 5. Verify ValueError on template helper with missing args
+    with self.assertRaises(ValueError):
+      compiler.compile("root = List(_template($/path))")
+
+    # 6. Verify Event helper compilation with both dictionary and list of dictionaries context layouts
+    event_dsl_dict = 'root = Button("Submit", Event("click", {"source": "btn"}))'
+    event_envelope_dict = compiler.compile(event_dsl_dict)
+    btn_comp_dict = next(
+        c
+        for c in event_envelope_dict["createSurface"]["components"]
+        if c["id"] == "root"
+    )
+    self.assertEqual(btn_comp_dict["onClick"]["event"]["context"]["source"], "btn")
+
+    event_dsl_list = 'root = Button("Submit", Event("click", [{"source": "btn_list"}]))'
+    event_envelope_list = compiler.compile(event_dsl_list)
+    btn_comp_list = next(
+        c
+        for c in event_envelope_list["createSurface"]["components"]
+        if c["id"] == "root"
+    )
+    self.assertEqual(btn_comp_list["onClick"]["event"]["context"]["source"], "btn_list")
+
+    # 7. Verify allOf boolean schema safety checks in CatalogSchemaHelper
+    # We dynamically inject a boolean schema into helper.components["Button"]["allOf"]
+    original_components = self.helper.components.copy()
+    try:
+      self.helper.components["Button"] = {
+          "allOf": [True, {"properties": {"test_prop": {"type": "string"}}}]
+      }
+      # Should return None for missing prop without raising TypeError
+      self.assertIsNone(self.helper.get_property_schema("Button", "non_existent"))
+      # Should return the correct schema for test_prop
+      self.assertEqual(
+          self.helper.get_property_schema("Button", "test_prop"),
+          {"type": "string"},
+      )
+    finally:
+      self.helper.components = original_components
+
 
 if __name__ == "__main__":
   unittest.main()
