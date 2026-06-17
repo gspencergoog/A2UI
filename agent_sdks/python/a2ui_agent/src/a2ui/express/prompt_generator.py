@@ -163,6 +163,8 @@ IMPORTANT: You must ALWAYS output A2UI Express DSL notation wrapped inside `<a2u
 12. String Concatenation & Formatting: A2UI Express DSL does not support binary operators like '+' or formatting symbols. To concatenate strings or dynamically inject data bindings into text, you must use the basic catalog function `formatString(value)` where the value string contains placeholders formatted as `\${{expression}}`:
     formatString("Hello ${{/user/name}}")
 
+13. Strict Hierarchy: You must strictly adhere to the requested component nesting and hierarchy. If the prompt specifies that a component (like a Row of buttons) is 'inside' or 'contained in' another component (like a Card or Column), you MUST place it as a child of that specific component, not as a sibling or in a different container.
+
 ## Positional Component Signatures
 
 Use these exact positional signatures to instantiate components. Do not output property keys:
