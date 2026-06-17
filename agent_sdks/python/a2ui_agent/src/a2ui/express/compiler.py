@@ -52,6 +52,9 @@ def schema_allows_databinding(schema: Any) -> bool:
     ref = schema["$ref"]
     if isinstance(ref, str) and ("DataBinding" in ref or "Dynamic" in ref):
       return True
+  if "properties" in schema and "path" in schema["properties"]:
+    if "componentId" not in schema["properties"]:
+      return True
   for key in ["allOf", "oneOf", "anyOf"]:
     if key in schema and isinstance(schema[key], list):
       for sub in schema[key]:
@@ -544,10 +547,11 @@ class ExpressCompiler:
       )
       prop_schema = self.helper.get_property_schema(comp_name, prop_name)
       if prop_schema and not schema_allows_databinding(prop_schema):
-        if isinstance(mapped_val, dict) and "path" in mapped_val:
-          path_key = "$" + ("/" if not mapped_val["path"].startswith("/") else "") + mapped_val["path"]
-          if hasattr(self, "_data_path_assignments") and path_key in self._data_path_assignments:
-            mapped_val = self._compile_value(self._data_path_assignments[path_key], raw_symbols)
+        if isinstance(mapped_val, dict) and "path" in mapped_val and "componentId" not in mapped_val:
+          raise ValueError(
+              f"Property ''{prop_name}'' of component ''{comp_name}'' does not support dynamic data bindings (paths). "
+              "You must provide a static value/array instead."
+          )
         if isinstance(mapped_val, list) and schema_expects_option_objects(prop_schema):
           mapped_val = [
               {"label": opt, "value": opt} if isinstance(opt, str) else opt
