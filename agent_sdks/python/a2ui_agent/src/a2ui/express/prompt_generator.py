@@ -170,7 +170,7 @@ class ExpressPromptGenerator:
           f"\n\n## Catalog Instructions\n\n{catalog_instructions}"
       )
 
-    prompt = f"""# A2UI Express Output Contract
+    prompt_template = """# A2UI Express Output Contract
 
 You must output the user interface using the compact A2UI Express DSL notation.
 You MUST surround the entire A2UI Express DSL block with the sentinel tags `<a2ui>` and `</a2ui>`.
@@ -197,10 +197,10 @@ IMPORTANT: You must ALWAYS output A2UI Express DSL notation wrapped inside `<a2u
 5. Data bindings: prefix absolute paths in the data model with '$', e.g., $/user/firstName.
    Prefix relative list scopes with '$', e.g., $firstName.
 
-6. Logic and validation: prefix client check rules with '?', e.g., ?required or ?regex("^[0-9]{{5}}$"). To specify a custom error message for validation failures, append it as an extra string argument, e.g. ?regex("^[0-9]{{5}}$", "Postal code must be 5 digits").
+6. Logic and validation: prefix client check rules with '?', e.g., ?required or ?regex("^[0-9]{5}$"). To specify a custom error message for validation failures, append it as an extra string argument, e.g. ?regex("^[0-9]{5}$", "Postal code must be 5 digits").
 
 7. Action events: represent server-side actions using the Event helper:
-   Event("save_deal", {{rep: $/form/rep}})
+   Event("save_deal", {rep: $/form/rep})
 
 8. Nested functions: call client functions directly using catalog signatures,
    for example openUrl("https://example.com").
@@ -218,10 +218,16 @@ IMPORTANT: You must ALWAYS output A2UI Express DSL notation wrapped inside `<a2u
 ## Positional Component Signatures
 
 Use these exact positional signatures to instantiate components. Do not output property keys:
-{comp_sigs}
+[COMP_SIGS]
 
 ## Positional Function Signatures
 
 Use these exact positional signatures to instantiate check rules or logic functions:
-{func_sigs}{catalog_instructions_block}"""
+[FUNC_SIGS][CATALOG_INSTRUCTIONS_BLOCK]"""
+
+    prompt = (
+        prompt_template.replace("[COMP_SIGS]", comp_sigs)
+        .replace("[FUNC_SIGS]", func_sigs)
+        .replace("[CATALOG_INSTRUCTIONS_BLOCK]", catalog_instructions_block)
+    )
     return prompt
