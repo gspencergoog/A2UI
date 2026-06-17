@@ -170,6 +170,26 @@ class CatalogSchemaHelper:
     """
     return self.component_property_enums.get((component_name, property_name))
 
+  def get_component_description(self, name: str) -> Optional[str]:
+    """Retrieves the description of the component from its catalog schema."""
+    schema = self.components.get(name)
+    if not schema:
+      return None
+    if "description" in schema:
+      return schema["description"]
+    if "allOf" in schema:
+      for sub in schema["allOf"]:
+        if isinstance(sub, dict) and "description" in sub:
+          return sub["description"]
+    return None
+
+  def get_function_description(self, name: str) -> Optional[str]:
+    """Retrieves the description of the function from its catalog schema."""
+    schema = self.functions.get(name)
+    if not schema:
+      return None
+    return schema.get("description")
+
   def get_property_schema(
       self, component_name: str, property_name: str
   ) -> Optional[dict]:

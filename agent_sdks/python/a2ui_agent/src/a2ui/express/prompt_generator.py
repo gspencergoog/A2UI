@@ -84,6 +84,10 @@ class ExpressPromptGenerator:
     for name in sorted(self.helper.component_properties.keys()):
       props = self.helper.get_component_properties(name)
       reqs = self.helper.get_component_required(name)
+      
+      # Retrieve component-level description
+      comp_desc = self.helper.get_component_description(name)
+      
       ordered_args = []
       prop_details = []
       for p in props:
@@ -107,11 +111,19 @@ class ExpressPromptGenerator:
 
         ordered_args.append(arg_label)
 
-        # Add enum options details if present
+        # Retrieve parameter description
+        p_desc = p_schema.get("description") if isinstance(p_schema, dict) else None
         enum_vals = _get_schema_enum(p_schema)
-        if enum_vals:
-          enum_vals_str = ", ".join([f"'{v}'" for v in enum_vals])
-          prop_details.append(f"  - {p}: Must be one of: {enum_vals_str}")
+
+        # Build property detail description
+        if p_desc or enum_vals:
+          p_line_parts = []
+          if p_desc:
+            p_line_parts.append(p_desc)
+          if enum_vals:
+            enum_vals_str = ", ".join([f"'{v}'" for v in enum_vals])
+            p_line_parts.append(f"Must be one of: {enum_vals_str}")
+          prop_details.append(f"  - {p}: {' '.join(p_line_parts)}")
 
         # Fetch property schema and check if it has nested object structure
         if isinstance(p_schema, dict):
@@ -121,7 +133,11 @@ class ExpressPromptGenerator:
               desc = sub_v.get("description", "")
               desc_suffix = f" - {desc}" if desc else ""
               sub_keys.append(f"    * {sub_k}{desc_suffix}")
-            prop_details.append(f"  - {p}: Map with keys:\n" + "\n".join(sub_keys))
+            
+            if prop_details and prop_details[-1].startswith(f"  - {p}:"):
+              prop_details[-1] += "\n    Map keys:\n" + "\n".join(sub_keys)
+            else:
+              prop_details.append(f"  - {p}: Map with keys:\n" + "\n".join(sub_keys))
           elif p_schema.get("type") == "array" and "items" in p_schema:
             items_schema = p_schema["items"]
             if (
@@ -134,11 +150,17 @@ class ExpressPromptGenerator:
                 desc = sub_v.get("description", "")
                 desc_suffix = f" - {desc}" if desc else ""
                 sub_keys.append(f"    * {sub_k}{desc_suffix}")
-              prop_details.append(
-                  f"  - {p}: List of maps with keys:\n" + "\n".join(sub_keys)
-              )
+              
+              if prop_details and prop_details[-1].startswith(f"  - {p}:"):
+                prop_details[-1] += "\n    List of maps keys:\n" + "\n".join(sub_keys)
+              else:
+                prop_details.append(
+                    f"  - {p}: List of maps with keys:\n" + "\n".join(sub_keys)
+                )
 
       sig = f"• {name}({', '.join(ordered_args)})"
+      if comp_desc:
+        sig += f"\n  - Description: {comp_desc}"
       if prop_details:
         sig += "\n" + "\n".join(prop_details)
       signatures.append(sig)
@@ -154,12 +176,31 @@ class ExpressPromptGenerator:
     for name in sorted(self.helper.function_properties.keys()):
       props = self.helper.get_function_properties(name)
       reqs = self.helper.get_function_required(name)
+      
+      # Retrieve function-level description
+      f_desc = self.helper.get_function_description(name)
+      
       ordered_args = []
+      prop_details = []
+      
+      func_schema = self.helper.functions.get(name, {})
+      args_properties = func_schema.get("properties", {}).get("args", {}).get("properties", {})
+      
       for p in props:
         is_req = p in reqs
         opt_suffix = "" if is_req else "?"
         ordered_args.append(f"{p}{opt_suffix}")
+        
+        p_schema = args_properties.get(p, {})
+        p_desc = p_schema.get("description") if isinstance(p_schema, dict) else None
+        if p_desc:
+          prop_details.append(f"  - {p}: {p_desc}")
+          
       sig = f"• {name}({', '.join(ordered_args)})"
+      if f_desc:
+        sig += f"\n  - Description: {f_desc}"
+      if prop_details:
+        sig += "\n" + "\n".join(prop_details)
       signatures.append(sig)
     return "\n".join(signatures)
 
