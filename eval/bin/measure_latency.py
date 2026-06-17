@@ -25,45 +25,39 @@ def analyze_latency(eval_path, name):
                 sample = json.loads(z.read(sf))
                 events = sample.get("events", [])
                 
-                # Preferentially read duration from metadata (which isolates solver active time)
-                metadata = sample.get("metadata", {})
-                sample_duration = metadata.get("inference_duration_seconds")
-                sample_out_tokens = metadata.get("inference_output_tokens")
-                sample_total_tokens = None
+                # Extract duration and token counts directly from solver model events
+                # (working_time represents pure API execution, excluding runner queue/semaphore wait time)
+                sample_duration = 0.0
+                sample_out_tokens = 0
+                sample_total_tokens = 0
                 
-                # If not present in metadata, fallback to parsing events
-                if sample_duration is None:
-                    sample_duration = 0.0
-                    sample_out_tokens = 0
-                    sample_total_tokens = 0
-                    for e in events:
-                        if e.get("event") == "model" and "gemini-3.5-flash" in e.get("model", ""):
-                            # Skip grader model calls if they happen to share the same model name
-                            # The grader event prompt usually contains grading rubrics
-                            call_data = e.get("call", {})
-                            req = call_data.get("request", {})
-                            sys_inst = str(req.get("system_instruction", ""))
-                            if "rubric" in sys_inst.lower() or "grader" in sys_inst.lower() or "grading" in sys_inst.lower():
-                                continue
+                for e in events:
+                    if e.get("event") == "model" and "gemini-3.5-flash" in e.get("model", ""):
+                        # Skip grader model calls if they happen to share the same model name
+                        call_data = e.get("call", {})
+                        req = call_data.get("request", {})
+                        sys_inst = str(req.get("system_instruction", ""))
+                        if "rubric" in sys_inst.lower() or "grader" in sys_inst.lower() or "grading" in sys_inst.lower():
+                            continue
+                            
+                        wt = e.get("working_time")
+                        if wt is not None:
+                            sample_duration += wt
+                            
+                        out_tok = 0
+                        tot_tok = 0
+                        usage = e.get("output", {}).get("usage")
+                        if isinstance(usage, dict):
+                            out_tok = usage.get("output_tokens", 0)
+                            tot_tok = usage.get("total_tokens", 0)
+                        else:
+                            meta = e.get("output", {}).get("usageMetadata", {})
+                            if isinstance(meta, dict):
+                                out_tok = meta.get("candidatesTokenCount", 0)
+                                tot_tok = meta.get("totalTokenCount", 0)
                                 
-                            sample_duration += e.get("working_time", 0.0)
-                            out_tok = 0
-                            tot_tok = 0
-                            usage = e.get("output", {}).get("usage")
-                            if isinstance(usage, dict):
-                                out_tok = usage.get("output_tokens", 0)
-                                tot_tok = usage.get("total_tokens", 0)
-                            else:
-                                meta = e.get("output", {}).get("usageMetadata", {})
-                                if isinstance(meta, dict):
-                                    out_tok = meta.get("candidatesTokenCount", 0)
-                                    tot_tok = meta.get("totalTokenCount", 0)
-                            sample_out_tokens += out_tok
-                            sample_total_tokens += tot_tok
-                else:
-                    # Resolve total tokens for metadata path
-                    inf_input = metadata.get("inference_input_tokens", 0)
-                    sample_total_tokens = inf_input + (sample_out_tokens or 0)
+                        sample_out_tokens += out_tok
+                        sample_total_tokens += tot_tok
                             
                 if sample_duration is not None and sample_duration > 0:
                     latencies.append(sample_duration)
