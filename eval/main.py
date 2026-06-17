@@ -19,6 +19,9 @@ import argparse
 from inspect_ai import eval_set
 from tasks import a2ui_v0_9_1_eval
 
+# Automatically override Inspect AI's connection rate-limiter limit to prevent queuing delays in latency measurements
+os.environ["INSPECT_MAX_CONNECTIONS"] = "50"
+
 def main():
     parser = argparse.ArgumentParser(description="Run A2UI evaluations")
     parser.add_argument("--sanity", action="store_true", help="Run a quick sanity check (2 samples, gemini-3.1-flash-lite, 0 retry)")

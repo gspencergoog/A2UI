@@ -24,6 +24,9 @@ import shutil
 import subprocess
 import sys
 
+# Automatically override Inspect AI's connection rate-limiter limit to prevent queuing delays in latency measurements
+os.environ["INSPECT_MAX_CONNECTIONS"] = "50"
+
 from report_evals import extract_accuracy, print_results_summary, load_log_data
 
 
