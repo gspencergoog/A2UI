@@ -63,12 +63,12 @@ def _get_refs_recursively(
                 val_id = val["componentId"]
                 if isinstance(val_id, str):
                     yield val_id, f"{current_path}.componentId"
-            elif current_path.endswith("tabs") or ".tabs[" in current_path:
-                if "child" in val:
-                    yield from extract_pointers(val["child"], f"{current_path}.child")
             else:
                 for sub_key, sub_val in val.items():
-                    yield from extract_pointers(sub_val, f"{current_path}.{sub_key}")
+                    if sub_key in ("child", "componentId", "trigger", "content"):
+                        yield from extract_pointers(sub_val, f"{current_path}.{sub_key}")
+                    elif sub_key not in ("title", "label", "value", "path"):
+                        yield from extract_pointers(sub_val, f"{current_path}.{sub_key}")
 
     for key, value in props.items():
         if key in single_refs or key in list_refs:
