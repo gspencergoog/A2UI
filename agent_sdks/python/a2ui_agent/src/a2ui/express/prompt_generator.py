@@ -22,6 +22,22 @@ import json
 import re
 from .decompiler import ExpressDecompiler
 from .schema_helper import CatalogSchemaHelper
+from typing import Any
+
+def _schema_allows_databinding(prop_schema: Any) -> bool:
+  """Helper to check if a JSON schema allows data binding (DynamicString/DataBinding, etc)."""
+  if not isinstance(prop_schema, dict):
+    return False
+  if "$ref" in prop_schema:
+    ref = prop_schema["$ref"]
+    if "DataBinding" in ref or "Dynamic" in ref:
+      return True
+  if "oneOf" in prop_schema or "anyOf" in prop_schema:
+    subs = prop_schema.get("oneOf", []) + prop_schema.get("anyOf", [])
+    for sub in subs:
+      if _schema_allows_databinding(sub):
+        return True
+  return False
 
 
 class ExpressPromptGenerator:
@@ -58,10 +74,14 @@ class ExpressPromptGenerator:
       for p in props:
         is_req = p in reqs
         opt_suffix = "" if is_req else "?"
-        ordered_args.append(f"{p}{opt_suffix}")
+
+        p_schema = self.helper.get_property_schema(name, p)
+        if not _schema_allows_databinding(p_schema):
+          ordered_args.append(f"{p}{opt_suffix} (static only)")
+        else:
+          ordered_args.append(f"{p}{opt_suffix}")
 
         # Fetch property schema and check if it has nested object structure
-        p_schema = self.helper.get_property_schema(name, p)
         if isinstance(p_schema, dict):
           if p_schema.get("type") == "object" and "properties" in p_schema:
             sub_keys = []
@@ -215,7 +235,7 @@ IMPORTANT: You must ALWAYS output A2UI Express DSL notation wrapped inside `<a2u
 11. Lifecycle & Deletion: To delete a user interface surface, output the standalone `deleteSurface(surfaceId)` command (with no variable assignment):
     deleteSurface("dashboard-surface-1")
 
-12. ChoicePicker Options: The 'options' argument of ChoicePicker must be a literal array of options or a reference to a local variable/data-path containing the array. Do not use a dynamic data path binding for 'options' if the schema requires a static list.
+12. Static properties: Arguments annotated with '(static only)' in the signatures below MUST be defined as literal values or arrays inline (or as a local DSL variable representing a static structure). You CANNOT use a dynamic data binding path (prefixed by $) for these arguments.
 
 ## Positional Component Signatures
 
