@@ -28,6 +28,7 @@ def main():
     parser.add_argument("--limit", type=int, default=None, help="Maximum number of samples to evaluate")
     parser.add_argument("--log-dir", type=str, default="logs", help="Directory to save logs")
     parser.add_argument("--sample-shuffle", type=int, default=None, help="Seed for shuffling samples")
+    parser.add_argument("--thinking-budget", type=int, default=None, help="Thinking budget for reasoning models")
     parser.add_argument("--strategies", type=str, action="append", help="Evaluation strategies to run (choices: direct, subagent_tool, express). Can be comma-separated or specified multiple times.")
     args = parser.parse_args()
 
@@ -51,15 +52,19 @@ def main():
             raise ValueError(f"Unknown evaluation strategy: {strat}. Valid choices: direct, subagent_tool, express")
         tasks.append(a2ui_v0_9_1_eval(strategy=strat, grading_model=args.grading_model))
 
+    eval_set_kwargs = {
+        "tasks": tasks,
+        "model": model,
+        "log_dir": args.log_dir,
+        "retry_attempts": retry_attempts,
+        "limit": limit,
+        "sample_shuffle": sample_shuffle
+    }
+    if args.thinking_budget is not None:
+        eval_set_kwargs["thinking_budget"] = args.thinking_budget
+
     print("Starting evaluation for multiple strategies...")
-    success, logs = eval_set(
-        tasks=tasks,
-        model=model,
-        log_dir=args.log_dir,
-        retry_attempts=retry_attempts,
-        limit=limit,
-        sample_shuffle=sample_shuffle
-    )
+    success, logs = eval_set(**eval_set_kwargs)
     if not success:
         print("Evaluation returned failure status!")
         sys.exit(1)
