@@ -436,13 +436,27 @@ $/age = 25"""
     # 3. Test _template helper list compilation
     list_dsl = """root = Card(breedList)
         breedList = List(_template($/breeds, breedTemplate))
-        breedTemplate = Image($url)"""
+        breedTemplate = Image($url)
+        $/breeds = [{"url": "https://example.com/poodle.jpg"}]"""
     list_envelope = compiler.compile(list_dsl)
     components = list_envelope["createSurface"]["components"]
+    
+    # Assert breedList component children path mapping
     list_comp = next(c for c in components if c["id"] == "breedList")
     self.assertEqual(
         list_comp["children"], {"path": "/breeds", "componentId": "breedTemplate"}
     )
+    
+    # Assert breedTemplate image url data binding path mapping
+    template_comp = next(c for c in components if c["id"] == "breedTemplate")
+    self.assertEqual(template_comp["url"], {"path": "url"})
+    
+    # Assert dataModel contains the list of objects with url keys
+    self.assertEqual(
+        list_envelope["createSurface"]["dataModel"]["breeds"],
+        [{"url": "https://example.com/poodle.jpg"}]
+    )
+    
     self.assertIn(
         "breedList = List(_template($/breeds, breedTemplate))",
         decompiler.decompile(list_envelope),
