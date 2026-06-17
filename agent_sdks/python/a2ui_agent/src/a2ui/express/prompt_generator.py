@@ -18,6 +18,9 @@ Compiles standard JSON catalog schemas into compact plain-text signatures and
 instruction blocks for on-device models (e.g., Gemma 4).
 """
 
+import json
+import re
+from .decompiler import ExpressDecompiler
 from .schema_helper import CatalogSchemaHelper
 
 
@@ -38,6 +41,7 @@ class ExpressPromptGenerator:
         catalog_path: The absolute filesystem path to the catalog JSON file.
     """
     self.helper = CatalogSchemaHelper(catalog_path)
+    self.decompiler = ExpressDecompiler(catalog_path)
 
   def generate_component_signatures(self) -> str:
     """Compiles component definitions into clean function-like signatures.
@@ -115,6 +119,57 @@ class ExpressPromptGenerator:
     """
     comp_sigs = self.generate_component_signatures()
     func_sigs = self.generate_function_signatures()
+    catalog_instructions = self.helper.catalog.get("instructions", "")
+
+    # Translate json examples in catalog instructions into A2UI Express DSL
+    if catalog_instructions:
+      pattern = r"```json\s*\n(.*?)\n```"
+
+      def replace_json_block(match):
+        json_content = match.group(1).strip()
+        try:
+          parsed = json.loads(json_content)
+          if isinstance(parsed, dict):
+            messages = [parsed]
+          elif isinstance(parsed, list):
+            messages = parsed
+          else:
+            return match.group(0)
+
+          dsl_blocks = []
+          for msg in messages:
+            if any(
+                k in msg
+                for k in [
+                    "createSurface",
+                    "updateDataModel",
+                    "deleteSurface",
+                    "callFunction",
+                ]
+            ):
+              dsl = self.decompiler.decompile(msg)
+              # Strip outer <a2ui> / </a2ui> wrapper tags
+              dsl_clean = dsl.replace("<a2ui>\n", "").replace("\n</a2ui>", "")
+              dsl_blocks.append(dsl_clean)
+            else:
+              return match.group(0)
+
+          full_dsl = "<a2ui>\n" + "\n".join(dsl_blocks) + "\n</a2ui>"
+          return f"```\n{full_dsl}\n```"
+        except Exception:
+          return match.group(0)
+
+      catalog_instructions = re.sub(
+          pattern, replace_json_block, catalog_instructions, flags=re.DOTALL
+      )
+
+    # Format catalog instructions block if it exists
+    catalog_instructions_block = ""
+    if catalog_instructions:
+      catalog_instructions_block = (
+          f"\n\n## Catalog Instructions\n\n{catalog_instructions}"
+      )
+
     prompt = f"""# A2UI Express Output Contract
 
 You must output the user interface using the compact A2UI Express DSL notation.
@@ -127,7 +182,7 @@ IMPORTANT: You must ALWAYS output A2UI Express DSL notation wrapped inside `<a2u
 1. Output exactly one variable assignment statement per line:
    variable_name = ComponentName(arg1, arg2, ...)
 
-   CRITICAL: Component constructors (such as Column(...), Text(...), Button(...)) can ONLY appear on the right-hand side of a variable assignment. They CANNOT be passed directly as positional arguments to other components. You must assign every component to a variable on its own line and reference that variable name instead.
+   CRITICAL: Component constructors can ONLY appear on the right-hand side of a variable assignment. They CANNOT be passed directly as positional arguments to other components. You must assign every component to a variable on its own line and reference that variable name instead.
 
 2. The interface tree must have a single entry point assigned to the reserved variable 'root'.
 
@@ -152,18 +207,13 @@ IMPORTANT: You must ALWAYS output A2UI Express DSL notation wrapped inside `<a2u
 
 9. Data model population: Assign a value directly to an absolute data path (e.g. $/path/to/key = "value") to populate or initialize values inside the shared dataModel. The value can be a primitive, array, or map.
 
-10. Dynamic list templates: If a component expects a template child list (such as the children property of a List component), represent it using the _template helper:
+10. Dynamic list templates: If a component expects a template child list, represent it using the _template helper:
     _template($/path/to/list, itemTemplate)
     And define the template component variable on another line, utilizing relative path references prefixed with $:
     itemTemplate = Image($url)
 
 11. Lifecycle & Deletion: To delete a user interface surface, output the standalone `deleteSurface(surfaceId)` command (with no variable assignment):
     deleteSurface("dashboard-surface-1")
-
-12. String Concatenation & Formatting: A2UI Express DSL does not support binary operators like '+' or formatting symbols. To concatenate strings or dynamically inject data bindings into text, you must use the basic catalog function `formatString(value)` where the value string contains placeholders formatted as `\${{expression}}`:
-    formatString("Hello ${{/user/name}}")
-
-13. Strict Hierarchy: You must strictly adhere to the requested component nesting and hierarchy. If the prompt specifies that a component (like a Row of buttons) is 'inside' or 'contained in' another component (like a Card or Column), you MUST place it as a child of that specific component, not as a sibling or in a different container.
 
 ## Positional Component Signatures
 
@@ -173,36 +223,5 @@ Use these exact positional signatures to instantiate components. Do not output p
 ## Positional Function Signatures
 
 Use these exact positional signatures to instantiate check rules or logic functions:
-{func_sigs}
-
-## Examples
-
-Example 1: Dynamic text form
-```
-<a2ui>
-root = Column([repField, valueField])
-repField = TextField("Representative", $/form/rep, "Enter name")
-valueField = TextField("Deal Value", $/form/value, "0.00", "number", [?required])
-$/form/rep = "John Doe"
-$/form/value = 1500.00
-</a2ui>
-```
-
-Example 2: Dynamic list with templates
-```
-<a2ui>
-root = Card(breedList)
-breedList = List(_template($/breeds, breedTemplate), "horizontal")
-breedTemplate = Image($url)
-$/breeds = ["https://example.com/poodle.jpg", "https://example.com/lab.jpg"]
-</a2ui>
-```
-
-Example 3: Lifecycle deletion task
-```
-<a2ui>
-deleteSurface("dashboard-surface-1")
-</a2ui>
-```
-"""
+{func_sigs}{catalog_instructions_block}"""
     return prompt

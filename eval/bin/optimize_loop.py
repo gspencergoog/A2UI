@@ -131,7 +131,7 @@ Below is the current system prompt generator code ('agent_sdks/python/a2ui_agent
 Below is the current compiler code ('agent_sdks/python/a2ui_agent/src/a2ui/express/compiler.py'):
 {compiler_code}
 
-Based on these failures, propose up to 3 candidate mutations (mutually exclusive proposals) that could fix these errors.
+Based on these failures, propose up to {num_candidates} candidate mutations (mutually exclusive proposals) that could fix these errors.
 Each mutation must target either the system prompt instructions inside `prompt_generator.py`, or code logic inside `compiler.py` (or both).
 Focus on making specific, small, high-impact edits.
 
@@ -180,7 +180,8 @@ def generate_mutations(num_candidates=3):
     prompt = MUTATE_PROMPT.format(
         failures_json=failures_json,
         prompt_generator_code=prompt_generator_code,
-        compiler_code=compiler_code
+        compiler_code=compiler_code,
+        num_candidates=num_candidates
     )
     
     response = client.models.generate_content(
@@ -479,7 +480,8 @@ def main():
     analyze_parser.add_argument("--log-dir", type=str, help="Subdirectory name inside eval/logs to search")
     
     # Mutate command
-    subparsers.add_parser("mutate", help="Generate mutation candidates using Gemini and create local branches")
+    mutate_parser = subparsers.add_parser("mutate", help="Generate mutation candidates using Gemini and create local branches")
+    mutate_parser.add_argument("--num-candidates", type=int, default=3, help="Number of mutation candidates to generate")
     
     # Evaluate command
     subparsers.add_parser("evaluate", help="Checkout each candidate and run evaluations sequentially")
@@ -496,7 +498,7 @@ def main():
             sys.exit(1)
         analyze_failures(latest)
     elif args.command == "mutate":
-        candidates = generate_mutations()
+        candidates = generate_mutations(num_candidates=args.num_candidates)
         if not candidates:
             sys.exit(0)
         for i in range(len(candidates)):
