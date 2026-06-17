@@ -44,6 +44,47 @@ def _set_nested_path(d: dict, path_str: str, val: Any) -> None:
   current[keys[-1]] = val
 
 
+def schema_allows_databinding(schema: Any) -> bool:
+  """Recursively checks if a property's schema allows a dynamic DataBinding ref."""
+  if not isinstance(schema, dict):
+    return False
+  if "$ref" in schema:
+    ref = schema["$ref"]
+    if isinstance(ref, str) and ("DataBinding" in ref or "Dynamic" in ref):
+      return True
+  for key in ["allOf", "oneOf", "anyOf"]:
+    if key in schema and isinstance(schema[key], list):
+      for sub in schema[key]:
+        if schema_allows_databinding(sub):
+          return True
+  return False
+
+
+def schema_expects_option_objects(schema: Any) -> bool:
+  """Checks if a property's schema expects a list of objects with label/value properties."""
+  if not isinstance(schema, dict):
+    return False
+  if "items" in schema:
+    items_schema = schema["items"]
+    def has_label_value(sub: Any) -> bool:
+      if not isinstance(sub, dict):
+        return False
+      if "properties" in sub and "label" in sub["properties"] and "value" in sub["properties"]:
+        return True
+      for k in ["allOf", "oneOf", "anyOf"]:
+        if k in sub and isinstance(sub[k], list):
+          if any(has_label_value(s) for s in sub[k]):
+            return True
+      return False
+    return has_label_value(items_schema)
+  for key in ["allOf", "oneOf", "anyOf"]:
+    if key in schema and isinstance(schema[key], list):
+      if any(schema_expects_option_objects(sub) for sub in schema[key]):
+        return True
+  return False
+
+
+
 # Scanner rules for lexical tokenizing
 TOKEN_SPEC = [
     ("STRING", r'"(?:[^"\\]|\\.)*"'),
@@ -501,15 +542,13 @@ class ExpressCompiler:
       mapped_val = self._compile_value(
           arg, raw_symbols, is_action=(prop_name in ["action", "submitAction"])
       )
-      if (
-          comp_name == "ChoicePicker"
-          and prop_name == "options"
-      ):
+      prop_schema = self.helper.get_property_schema(comp_name, prop_name)
+      if prop_schema and not schema_allows_databinding(prop_schema):
         if isinstance(mapped_val, dict) and "path" in mapped_val:
           path_key = "$" + ("/" if not mapped_val["path"].startswith("/") else "") + mapped_val["path"]
           if hasattr(self, "_data_path_assignments") and path_key in self._data_path_assignments:
             mapped_val = self._compile_value(self._data_path_assignments[path_key], raw_symbols)
-        if isinstance(mapped_val, list):
+        if isinstance(mapped_val, list) and schema_expects_option_objects(prop_schema):
           mapped_val = [
               {"label": opt, "value": opt} if isinstance(opt, str) else opt
               for opt in mapped_val
