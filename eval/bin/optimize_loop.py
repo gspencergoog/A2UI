@@ -27,9 +27,9 @@ TMP_DIR = os.path.join(WORKSPACE_ROOT, "tmp")
 
 os.makedirs(TMP_DIR, exist_ok=True)
 
-def find_latest_eval_file(log_dir_name=None):
+def find_latest_eval_file(log_dir_name=None, base_eval_dir=None):
     """Finds the latest .eval file in the specified log subdirectory or globally."""
-    base_logs = os.path.join(WORKSPACE_ROOT, "eval/logs")
+    base_logs = base_eval_dir if base_eval_dir else os.path.join(WORKSPACE_ROOT, "eval/logs")
     search_path = os.path.join(base_logs, "*.eval")
     if log_dir_name:
         search_path = os.path.join(base_logs, log_dir_name, "*.eval")
@@ -37,10 +37,11 @@ def find_latest_eval_file(log_dir_name=None):
     eval_files = glob.glob(search_path)
     if not log_dir_name:
         # Also check subdirectories
-        for d in os.listdir(base_logs):
-            sub = os.path.join(base_logs, d)
-            if os.path.isdir(sub):
-                eval_files.extend(glob.glob(os.path.join(sub, "*.eval")))
+        if os.path.exists(base_logs):
+            for d in os.listdir(base_logs):
+                sub = os.path.join(base_logs, d)
+                if os.path.isdir(sub):
+                    eval_files.extend(glob.glob(os.path.join(sub, "*.eval")))
                 
     if not eval_files:
         return None
@@ -345,7 +346,8 @@ def extract_metrics_from_eval(eval_file_path):
     }
 
 def run_evals():
-    """Runs evaluations sequentially for each candidate branch and extracts metrics."""
+    """Checkout each candidate and run evaluations in parallel using git worktrees."""
+    import shutil
     candidates_path = os.path.join(TMP_DIR, "mutation_candidates.json")
     if not os.path.exists(candidates_path):
         print("Error: No mutation candidates found. Run 'mutate' command first.")
@@ -354,41 +356,83 @@ def run_evals():
         candidates = json.load(f)
         
     results = {}
+    active_runs = []
+    worktrees_root = os.path.join(TMP_DIR, "worktrees")
+    os.makedirs(worktrees_root, exist_ok=True)
+    
+    # Prune any existing stale worktrees to start clean
+    subprocess.run(["git", "worktree", "prune"], check=True)
+    
+    print(f"\nLaunching {len(candidates)} evaluations in parallel...")
     
     for cand in candidates:
         name = cand.get("name")
         branch_name = f"express_mut_{name}"
         log_dir = f"run_{name}"
+        wt_path = os.path.join(worktrees_root, branch_name)
         
-        print("\n" + "="*60)
-        print(f"RUNNING EVALUATION FOR CANDIDATE: {name}")
-        print(f"Checking out branch {branch_name}...")
-        print("="*60)
+        # Clean up target path if it already exists
+        if os.path.exists(wt_path):
+            subprocess.run(["git", "worktree", "remove", "--force", wt_path], stderr=subprocess.DEVNULL)
+            shutil.rmtree(wt_path, ignore_errors=True)
+            
+        print(f"Creating git worktree for branch {branch_name} at {wt_path}...")
+        # Add worktree
+        subprocess.run(["git", "worktree", "add", "-f", wt_path, branch_name], check=True)
         
-        # Checkout branch
-        subprocess.run(["git", "checkout", branch_name], check=True)
-        
-        # Run eval command
+        # Run eval command asynchronously in worktree
         cmd = [
             "uv", "run", "main.py",
             "--strategies", "express",
             "--log-dir", f"logs/{log_dir}"
         ]
-        print(f"Executing: {' '.join(cmd)}")
-        subprocess.run(cmd, cwd=os.path.join(WORKSPACE_ROOT, "eval"), check=True)
+        log_file_path = os.path.join(TMP_DIR, f"{branch_name}_eval.log")
+        log_file = open(log_file_path, "w")
         
-        # Find latest log file in logs/log_dir
-        latest_eval = find_latest_eval_file(log_dir)
+        print(f"Executing in background: {' '.join(cmd)}")
+        proc = subprocess.Popen(
+            cmd,
+            cwd=os.path.join(wt_path, "eval"),
+            stdout=log_file,
+            stderr=log_file
+        )
+        
+        active_runs.append({
+            "name": name,
+            "branch_name": branch_name,
+            "log_dir": log_dir,
+            "wt_path": wt_path,
+            "proc": proc,
+            "log_file": log_file,
+            "log_file_path": log_file_path
+        })
+        
+    print("\nAll evaluations launched. Waiting for completion...")
+    
+    # Wait for all processes
+    for run in active_runs:
+        run["proc"].wait()
+        run["log_file"].close()
+        print(f"Candidate '{run['name']}' evaluation finished. Log saved to: {run['log_file_path']}")
+        
+        # Find latest log file in log_dir (inside the worktree)
+        wt_eval_logs_dir = os.path.join(run["wt_path"], "eval/logs")
+        latest_eval = find_latest_eval_file(run["log_dir"], base_eval_dir=wt_eval_logs_dir)
         if not latest_eval:
-            print(f"Error: No evaluation log found for candidate {name}")
+            print(f"Error: No evaluation log found for candidate {run['name']}")
             continue
             
         metrics = extract_metrics_from_eval(latest_eval)
-        results[name] = metrics
-        print(f"Candidate {name} results extracted: {metrics}")
+        results[run["name"]] = metrics
+        print(f"Candidate '{run['name']}' results: {metrics}")
         
-    # Revert to base branch
-    subprocess.run(["git", "checkout", "a2ui_express_iterate"], check=True)
+    # Clean up worktrees
+    print("\nCleaning up git worktrees...")
+    for run in active_runs:
+        subprocess.run(["git", "worktree", "remove", "--force", run["wt_path"]], check=True)
+        shutil.rmtree(run["wt_path"], ignore_errors=True)
+        
+    subprocess.run(["git", "worktree", "prune"], check=True)
     
     # Save results
     results_path = os.path.join(TMP_DIR, "eval_results.json")
