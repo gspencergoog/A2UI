@@ -40,6 +40,21 @@ def _schema_allows_databinding(prop_schema: Any) -> bool:
   return False
 
 
+def _get_schema_enum(prop_schema: Any) -> Optional[list[str]]:
+  """Helper to recursively find enum definitions inside a JSON schema."""
+  if not isinstance(prop_schema, dict):
+    return None
+  if "enum" in prop_schema:
+    return prop_schema["enum"]
+  if "oneOf" in prop_schema or "anyOf" in prop_schema:
+    subs = prop_schema.get("oneOf", []) + prop_schema.get("anyOf", [])
+    for sub in subs:
+      enum_val = _get_schema_enum(sub)
+      if enum_val:
+        return enum_val
+  return None
+
+
 class ExpressPromptGenerator:
   """Generates system prompt contracts guiding models to produce A2UI Express.
 
@@ -76,10 +91,27 @@ class ExpressPromptGenerator:
         opt_suffix = "" if is_req else "?"
 
         p_schema = self.helper.get_property_schema(name, p)
-        if not _schema_allows_databinding(p_schema):
-          ordered_args.append(f"{p}{opt_suffix} (static only)")
-        else:
-          ordered_args.append(f"{p}{opt_suffix}")
+
+        # Determine signature argument label
+        arg_label = f"{p}{opt_suffix}"
+
+        is_component_id = False
+        if isinstance(p_schema, dict) and "$ref" in p_schema:
+          if "ComponentId" in p_schema["$ref"]:
+            is_component_id = True
+
+        if is_component_id:
+          arg_label += " (component ID)"
+        elif not _schema_allows_databinding(p_schema):
+          arg_label += " (static only)"
+
+        ordered_args.append(arg_label)
+
+        # Add enum options details if present
+        enum_vals = _get_schema_enum(p_schema)
+        if enum_vals:
+          enum_vals_str = ", ".join([f"'{v}'" for v in enum_vals])
+          prop_details.append(f"  - {p}: Must be one of: {enum_vals_str}")
 
         # Fetch property schema and check if it has nested object structure
         if isinstance(p_schema, dict):
@@ -236,6 +268,8 @@ IMPORTANT: You must ALWAYS output A2UI Express DSL notation wrapped inside `<a2u
     deleteSurface("dashboard-surface-1")
 
 12. Static properties: Arguments annotated with '(static only)' in the signatures below MUST be defined as literal values or arrays inline (or as a local DSL variable representing a static structure). You CANNOT use a dynamic data binding path (prefixed by $) for these arguments.
+
+13. Required actions: Parameters named 'action' (or annotated as required in component signatures) are strictly required. You must pass a valid Event (e.g. Event("click")) or function call. If no specific action is described in the user request, you must provide a dummy click event like Event("click") instead of passing null or omitting the parameter.
 
 ## Positional Component Signatures
 
