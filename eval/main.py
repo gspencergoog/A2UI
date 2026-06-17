@@ -33,6 +33,8 @@ def main():
     parser.add_argument("--sample-shuffle", type=int, default=None, help="Seed for shuffling samples")
     parser.add_argument("--thinking-budget", type=int, default=None, help="Thinking budget for reasoning models")
     parser.add_argument("--temperature", type=float, default=None, help="Generation temperature")
+    parser.add_argument("--max-tasks", type=int, default=None, help="Maximum number of concurrent tasks to execute")
+    parser.add_argument("--max-samples", type=int, default=None, help="Maximum number of concurrent samples to evaluate")
     parser.add_argument("--strategies", type=str, action="append", help="Evaluation strategies to run (choices: direct, subagent_tool, express). Can be comma-separated or specified multiple times.")
     args = parser.parse_args()
 
@@ -68,6 +70,10 @@ def main():
         eval_set_kwargs["reasoning_tokens"] = args.thinking_budget
     if args.temperature is not None:
         eval_set_kwargs["temperature"] = args.temperature
+    if args.max_tasks is not None:
+        eval_set_kwargs["max_tasks"] = args.max_tasks
+    if args.max_samples is not None:
+        eval_set_kwargs["max_samples"] = args.max_samples
 
     print("Starting evaluation for multiple strategies...")
     success, logs = eval_set(**eval_set_kwargs)
