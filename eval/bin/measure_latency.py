@@ -3,8 +3,8 @@ import json
 import numpy as np
 import os
 
-DIRECT_EVAL = "/Users/gspencer/code/a2ui/a2ui_express/eval/logs/baseline_gemini_3_5/2026-06-17T17-28-26-00-00_a2ui-v0-9-1-eval_DaPL73xrEZkseUykkkBEj6.eval"
-EXPRESS_EVAL = "/Users/gspencer/code/a2ui/a2ui_express/eval/logs/baseline_gemini_3_5_express/2026-06-17T17-32-10-00-00_a2ui-v0-9-1-eval_BkPqNBgUpcLT2NdVGc6LpD.eval"
+DIRECT_EVAL = "/Users/gspencer/code/a2ui/a2ui_express/eval/logs/budget_1000_temp_0_direct/2026-06-17T17-56-02-00-00_a2ui-v0-9-1-eval_XqiSAB4zMmnKTXeEwkTdA4.eval"
+EXPRESS_EVAL = "/Users/gspencer/code/a2ui/a2ui_express/eval/logs/budget_1000_temp_0_express/2026-06-17T18-07-54-00-00_a2ui-v0-9-1-eval_GA926D229vyZ2fYZJR46em.eval"
 
 def analyze_latency(eval_path, name):
     print(f"Checking {name} path: {eval_path}")

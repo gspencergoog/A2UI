@@ -32,6 +32,7 @@ def main():
     parser.add_argument("--log-dir", type=str, default="logs", help="Directory to save logs")
     parser.add_argument("--sample-shuffle", type=int, default=None, help="Seed for shuffling samples")
     parser.add_argument("--thinking-budget", type=int, default=None, help="Thinking budget for reasoning models")
+    parser.add_argument("--temperature", type=float, default=None, help="Generation temperature")
     parser.add_argument("--strategies", type=str, action="append", help="Evaluation strategies to run (choices: direct, subagent_tool, express). Can be comma-separated or specified multiple times.")
     args = parser.parse_args()
 
@@ -64,7 +65,9 @@ def main():
         "sample_shuffle": sample_shuffle
     }
     if args.thinking_budget is not None:
-        eval_set_kwargs["thinking_budget"] = args.thinking_budget
+        eval_set_kwargs["reasoning_tokens"] = args.thinking_budget
+    if args.temperature is not None:
+        eval_set_kwargs["temperature"] = args.temperature
 
     print("Starting evaluation for multiple strategies...")
     success, logs = eval_set(**eval_set_kwargs)
