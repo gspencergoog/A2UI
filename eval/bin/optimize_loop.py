@@ -466,10 +466,23 @@ def select_best():
         print("No evaluation results found.")
         sys.exit(1)
         
+    # Load baseline metrics if available
+    baseline_path = os.path.join(WORKSPACE_ROOT, "eval/baseline_results.json")
+    baseline_qa = -1.0
+    baseline_syntax = -1.0
+    baseline_tokens = float("inf")
+    if os.path.exists(baseline_path):
+        with open(baseline_path, "r") as f:
+            base_data = json.load(f)
+            baseline_qa = base_data.get("qa_accuracy", -1.0)
+            baseline_syntax = base_data.get("a2ui_accuracy", -1.0)
+            baseline_tokens = base_data.get("total_tokens", float("inf"))
+            print(f"Loaded baseline metrics: QA {baseline_qa:.3f}, Syntax {baseline_syntax:.3f}, Tokens {baseline_tokens:,}")
+            
     best_candidate = None
-    best_qa = -1.0
-    best_syntax = -1.0
-    best_tokens = float("inf")
+    best_qa = baseline_qa
+    best_syntax = baseline_syntax
+    best_tokens = baseline_tokens
     
     for name, m in results.items():
         qa = m["qa_accuracy"]
@@ -492,6 +505,20 @@ def select_best():
             best_syntax = syntax
             best_tokens = tokens
             
+    if best_candidate is None:
+        print("\n" + "="*60)
+        print("No candidate outperformed the baseline.")
+        print(f"Baseline remains at QA {baseline_qa:.3f}, Syntax {baseline_syntax:.3f}")
+        print("="*60)
+        
+        # Clean up all branches
+        for cand in candidates:
+            c_name = cand.get("name")
+            branch_name = f"express_mut_{c_name}"
+            print(f"Deleting candidate branch '{branch_name}'...")
+            subprocess.run(["git", "branch", "-D", branch_name], stderr=subprocess.DEVNULL)
+        return
+        
     print("\n" + "="*60)
     print(f"BEST CANDIDATE SELECTED: {best_candidate}")
     print(f"  QA Score: {best_qa:.3f}")
@@ -505,6 +532,14 @@ def select_best():
     subprocess.run(["git", "checkout", "a2ui_express_iterate"], check=True)
     subprocess.run(["git", "merge", best_branch, "--no-edit"], check=True)
     
+    # Update baseline_results.json
+    with open(baseline_path, "w") as f:
+        json.dump({
+            "a2ui_accuracy": best_syntax,
+            "qa_accuracy": best_qa,
+            "total_tokens": best_tokens
+        }, f, indent=2)
+        
     # Clean up other branches
     for cand in candidates:
         c_name = cand.get("name")
