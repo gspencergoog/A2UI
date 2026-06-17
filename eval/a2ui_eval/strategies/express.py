@@ -90,49 +90,7 @@ def compile_express_dsl(catalog_path: str) -> Solver:
         )
         surface_id = surface_id_match.group(1) if surface_id_match else "main"
 
-        # 1. Check if the model output is standard JSON wrapped in <a2ui-json> tags
-        if "<a2ui-json>" in completion:
-            try:
-                start_idx = completion.find("<a2ui-json>") + len("<a2ui-json>")
-                end_idx = completion.find("</a2ui-json>")
-                json_content = completion[start_idx:end_idx].strip()
-                messages = json.loads(json_content)
-                
-                # Standardize to v1.0 messages
-                if isinstance(messages, list):
-                    for msg in messages:
-                        if isinstance(msg, dict):
-                            msg["version"] = "v1.0"
-                            # Make sure surface ID matches if it contains operations
-                            for key in ["createSurface", "updateComponents", "updateDataModel", "deleteSurface"]:
-                                if key in msg and isinstance(msg[key], dict):
-                                    msg[key]["surfaceId"] = surface_id
 
-                            # Handle hybrid inline DSL compilation
-                            if "updateComponents" in msg and isinstance(msg["updateComponents"], dict):
-                                uc = msg["updateComponents"]
-                                if "dsl" in uc and isinstance(uc["dsl"], str):
-                                    inner_dsl = uc["dsl"].strip()
-                                    if "<a2ui>" in inner_dsl:
-                                        s_idx = inner_dsl.find("<a2ui>") + len("<a2ui>")
-                                        e_idx = inner_dsl.find("</a2ui>")
-                                        if e_idx != -1:
-                                            inner_dsl = inner_dsl[s_idx:e_idx].strip()
-                                        else:
-                                            inner_dsl = inner_dsl[s_idx:].strip()
-                                    compiled_inner = compiler.compile(inner_dsl, surface_id=surface_id)
-                                    uc.pop("dsl")
-                                    uc["components"] = compiled_inner["createSurface"].get("components", [])
-
-                    formatted = f"<a2ui-json>\n{json.dumps(messages, indent=2)}\n</a2ui-json>"
-                    state.output = ModelOutput(
-                        model=state.output.model,
-                        choices=[ChatCompletionChoice(message=ChatMessageAssistant(content=formatted))]
-                    )
-                    return state
-            except Exception:
-                # If JSON parsing failed, fall back to compiling the string as DSL
-                pass
 
         # 2. Extract DSL content inside <a2ui> tags if present, or clean markdown blocks
         dsl_content = completion

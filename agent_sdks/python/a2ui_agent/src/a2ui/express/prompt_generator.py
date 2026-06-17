@@ -215,6 +215,8 @@ IMPORTANT: You must ALWAYS output A2UI Express DSL notation wrapped inside `<a2u
 11. Lifecycle & Deletion: To delete a user interface surface, output the standalone `deleteSurface(surfaceId)` command (with no variable assignment):
     deleteSurface("dashboard-surface-1")
 
+12. ChoicePicker Options: The 'options' argument of ChoicePicker must be a literal array of options or a reference to a local variable/data-path containing the array. Do not use a dynamic data path binding for 'options' if the schema requires a static list.
+
 ## Positional Component Signatures
 
 Use these exact positional signatures to instantiate components. Do not output property keys:

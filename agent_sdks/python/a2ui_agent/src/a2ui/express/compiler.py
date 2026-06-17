@@ -388,6 +388,8 @@ class ExpressCompiler:
         except Exception as e:
           raise ValueError(f"Failed to parse expression: {e}") from e
 
+    self._data_path_assignments = data_path_assignments
+
     # Compile data model paths
     data_model = {}
     for path_name, ast_val in data_path_assignments.items():
@@ -502,12 +504,16 @@ class ExpressCompiler:
       if (
           comp_name == "ChoicePicker"
           and prop_name == "options"
-          and isinstance(mapped_val, list)
       ):
-        mapped_val = [
-            {"label": opt, "value": opt} if isinstance(opt, str) else opt
-            for opt in mapped_val
-        ]
+        if isinstance(mapped_val, dict) and "path" in mapped_val:
+          path_key = "$" + ("/" if not mapped_val["path"].startswith("/") else "") + mapped_val["path"]
+          if hasattr(self, "_data_path_assignments") and path_key in self._data_path_assignments:
+            mapped_val = self._compile_value(self._data_path_assignments[path_key], raw_symbols)
+        if isinstance(mapped_val, list):
+          mapped_val = [
+              {"label": opt, "value": opt} if isinstance(opt, str) else opt
+              for opt in mapped_val
+          ]
       enum_vals = self.helper.get_property_enum(comp_name, prop_name)
       if enum_vals and isinstance(mapped_val, str) and mapped_val not in enum_vals:
         mapped_val = None
