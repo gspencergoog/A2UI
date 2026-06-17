@@ -28,7 +28,8 @@ from a2ui_eval.scorers import a2ui_scorer, measured_model_graded_qa
 
 # Paths relative to the eval directory where we run inspect
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-DATASET_PATH = os.path.abspath(os.path.join(CURRENT_DIR, "datasets/v0_9_prompts.yaml"))
+DATASET_PATH_V09 = os.path.abspath(os.path.join(CURRENT_DIR, "datasets/v0_9_prompts.yaml"))
+DATASET_PATH_V10 = os.path.abspath(os.path.join(CURRENT_DIR, "datasets/v1_0_prompts.yaml"))
 SCHEMA_PATH = os.path.abspath(os.path.join(CURRENT_DIR, "../specification/v0_9_1/json/server_to_client.json"))
 CATALOG_PATH = os.path.abspath(os.path.join(CURRENT_DIR, "../specification/v0_9_1/catalogs/basic/catalog.json"))
 
@@ -87,16 +88,18 @@ def a2ui_v0_9_1_eval(
             scorer=[dummy_scorer()]
         )
 
-    dataset = load_a2ui_dataset(DATASET_PATH)
-
+    active_dataset_path = DATASET_PATH_V09
     active_schema = SCHEMA_PATH
     active_catalog = CATALOG_PATH
     active_version = "0.9.1"
 
     if strategy == "express":
+        active_dataset_path = DATASET_PATH_V10
         active_schema = os.path.abspath(os.path.join(CURRENT_DIR, "../specification/v1_0/json/server_to_client.json"))
         active_catalog = os.path.abspath(os.path.join(CURRENT_DIR, "../specification/v1_0/catalogs/basic/catalog.json"))
         active_version = "1.0"
+
+    dataset = load_a2ui_dataset(active_dataset_path)
 
     return Task(
         dataset=dataset,
