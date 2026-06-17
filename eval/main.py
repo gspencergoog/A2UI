@@ -25,7 +25,7 @@ os.environ["INSPECT_MAX_CONNECTIONS"] = "50"
 def main():
     parser = argparse.ArgumentParser(description="Run A2UI evaluations")
     parser.add_argument("--sanity", action="store_true", help="Run a quick sanity check (2 samples, gemini-3.1-flash-lite, 0 retry)")
-    parser.add_argument("--model", type=str, default="google/gemini-3-flash-preview", help="Model used to evaluate tasks")
+    parser.add_argument("--model", type=str, default="google/gemini-3.5-flash", help="Model used to evaluate tasks")
     parser.add_argument("--grading-model", type=str, default="google/gemini-3.5-flash", help="Model used for grading")
     parser.add_argument("--max-retries", type=int, default=0, help="Maximum number of retries")
     parser.add_argument("--limit", type=int, default=None, help="Maximum number of samples to evaluate")
