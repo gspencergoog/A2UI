@@ -53,7 +53,7 @@ Notes for grading:
 @task
 def a2ui_v0_9_1_eval(
     list_models: bool = False, 
-    grading_model: str = "google/gemini-3-flash-preview",
+    grading_model: str = "google/gemini-3.5-flash",
     strategy: str = "direct"
 ) -> Task:
     """Evaluation task for A2UI v0.9.1 protocol generation.
