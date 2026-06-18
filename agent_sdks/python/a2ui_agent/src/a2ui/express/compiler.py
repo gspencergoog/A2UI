@@ -91,6 +91,7 @@ def schema_expects_option_objects(schema: Any) -> bool:
 # Scanner rules for lexical tokenizing
 TOKEN_SPEC = [
     ("STRING", r'"(?:[^"\\]|\\.)*"'),
+    ("COMMENT", r"(?:#|//).*"),
     ("PATH", r"\$[a-zA-Z0-9_/]*"),
     ("CHECK", r"\?[a-zA-Z_][a-zA-Z0-9_]*"),
     ("NUMBER", r"-?\d+(?:\.\d+)?"),
@@ -128,7 +129,7 @@ def tokenize(text: str) -> list[tuple[str, Any]]:
     kind = mo.lastgroup
     val = mo.group()
     last_end = mo.end()
-    if kind == "WS":
+    if kind in ("WS", "COMMENT"):
       continue
     elif kind == "STRING":
       val = val[1:-1].replace('\\"', '"')
@@ -686,11 +687,12 @@ class ExpressCompiler:
 
         # Is it an inline component constructor?
         if fn_name in self.helper.components:
-          raise ValueError(
-              f"Inline component instantiations are disallowed: {fn_name}(...). You"
-              " must assign it to a variable on its own line and reference that"
-              " variable instead."
-          )
+          self._inline_counter += 1
+          inline_id = f"_inline_{self._inline_counter}"
+          compiled_inline = self._compile_ast_node(inline_id, val, raw_symbols)
+          if compiled_inline:
+            self._extra_components.append(compiled_inline)
+          return inline_id
 
         # Is it a reserved Template signature?
         if fn_name == "_template":

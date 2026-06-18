@@ -582,6 +582,35 @@ $/age = 25"""
         },
     )
 
+    # 10. Verify inline component constructor unrolling
+    inline_dsl = """root = Row([Text("Soup"), Text("$8")])"""
+    inline_envelope = compiler.compile(inline_dsl)
+    comps = inline_envelope["createSurface"]["components"]
+    self.assertEqual(len(comps), 3)
+
+    row_comp = next(c for c in comps if c["id"] == "root")
+    self.assertEqual(row_comp["component"], "Row")
+    self.assertEqual(row_comp["children"], ["_inline_1", "_inline_2"])
+
+    text1 = next(c for c in comps if c["id"] == "_inline_1")
+    self.assertEqual(text1["component"], "Text")
+    self.assertEqual(text1["text"], "Soup")
+
+    text2 = next(c for c in comps if c["id"] == "_inline_2")
+    self.assertEqual(text2["component"], "Text")
+    self.assertEqual(text2["text"], "$8")
+
+    # 11. Verify comment line skipping (# and //)
+    comment_dsl = """
+    # This is a comment at the top
+    root = Row([btn]) # Inline comment here
+    // Another comment block
+    btn = Button("Submit") // Inline comment 2
+    """
+    comment_envelope = compiler.compile(comment_dsl)
+    comment_comps = comment_envelope["createSurface"]["components"]
+    self.assertEqual(len(comment_comps), 2)
+
   def test_v10_validator_gating(self):
     """Verifies that A2uiValidator gates v1.0 validation behind flags."""
     from a2ui.schema.catalog import CatalogConfig
