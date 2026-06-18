@@ -91,7 +91,7 @@ def schema_expects_option_objects(schema: Any) -> bool:
 # Scanner rules for lexical tokenizing
 TOKEN_SPEC = [
     ("STRING", r'"(?:[^"\\]|\\.)*"'),
-    ("PATH", r"\$[a-zA-Z0-9_/]+"),
+    ("PATH", r"\$[a-zA-Z0-9_/]*"),
     ("CHECK", r"\?[a-zA-Z_][a-zA-Z0-9_]*"),
     ("NUMBER", r"-?\d+(?:\.\d+)?"),
     ("BOOLEAN", r"\b(?:true|false)\b"),
@@ -328,6 +328,7 @@ class ExpressCompiler:
         catalog_path: The absolute filesystem path to the catalog JSON file.
     """
     self.helper = CatalogSchemaHelper(catalog_path)
+    self._active_value_path = None
 
   def compile(
       self, dsl_text: str, surface_id: str = "default_surface", catalog_id: str = ""
@@ -565,6 +566,9 @@ class ExpressCompiler:
       if prop_name == "value" and isinstance(mapped_val, dict) and "path" in mapped_val:
         sibling_value_path = mapped_val
 
+    # Set active path for nested check compile resolution
+    self._active_value_path = sibling_value_path
+
     # Second pass: compile checks with implicit path injection
     for idx, arg in enumerate(args):
       if idx >= len(properties):
@@ -619,6 +623,7 @@ class ExpressCompiler:
             })
         comp_dict["checks"] = compiled_checks
 
+    self._active_value_path = None
     return {k: v for k, v in comp_dict.items() if v is not None}
 
   def _compile_value(self, val: Any, raw_symbols: dict, is_action: bool = False) -> Any:
@@ -646,6 +651,34 @@ class ExpressCompiler:
             return ref_name
           return self._compile_value(symbol_val, raw_symbols, is_action)
         return ref_name
+      if "check" in val:
+        check_name = val["check"]
+        check_args = val.get("args", [])
+
+        compiled_args = {}
+        check_props = self.helper.get_function_properties(check_name)
+
+        explicit_args = list(check_args)
+        is_value_injected = False
+
+        if check_props:
+          if check_props[0] == "value":
+            if not (explicit_args and isinstance(explicit_args[0], dict) and "path" in explicit_args[0]):
+              if self._active_value_path:
+                compiled_args["value"] = self._active_value_path
+                is_value_injected = True
+
+          start_prop_idx = 1 if is_value_injected else 0
+          for c_idx, c_arg in enumerate(explicit_args):
+            prop_target_idx = c_idx + start_prop_idx
+            if prop_target_idx < len(check_props):
+              if isinstance(c_arg, dict) and c_arg.get("skipped"):
+                continue
+              compiled_args[check_props[prop_target_idx]] = self._compile_value(
+                  c_arg, raw_symbols, is_action
+              )
+
+        return {"call": check_name, "args": compiled_args}
       if "call" in val:
         # Nested function call (e.g. formatString or actions)
         fn_name = val["call"]

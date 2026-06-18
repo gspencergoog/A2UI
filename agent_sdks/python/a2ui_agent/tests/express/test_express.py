@@ -552,6 +552,36 @@ $/age = 25"""
     finally:
       self.helper.components = original_components
 
+    # 8. Verify bare $ path compilation (resolves to {"path": ""})
+    dollar_dsl = """root = Text($)"""
+    dollar_envelope = compiler.compile(dollar_dsl)
+    text_comp = next(
+        c for c in dollar_envelope["createSurface"]["components"] if c["id"] == "root"
+    )
+    self.assertEqual(text_comp["text"], {"path": ""})
+
+    # 9. Verify nested check compilation and active value path injection
+    nested_check_dsl = """root = TextField("Label", $/form/email, "placeholder", "shortText", ?and([?required, ?email]))"""
+    nested_check_envelope = compiler.compile(nested_check_dsl)
+    textfield_comp = next(
+        c for c in nested_check_envelope["createSurface"]["components"] if c["id"] == "root"
+    )
+    checks = textfield_comp["checks"]
+    self.assertEqual(len(checks), 1)
+    self.assertEqual(checks[0]["message"], "And check failed")
+    self.assertEqual(
+        checks[0]["condition"],
+        {
+            "call": "and",
+            "args": {
+                "values": [
+                    {"call": "required", "args": {"value": {"path": "/form/email"}}},
+                    {"call": "email", "args": {"value": {"path": "/form/email"}}},
+                ]
+            },
+        },
+    )
+
   def test_v10_validator_gating(self):
     """Verifies that A2uiValidator gates v1.0 validation behind flags."""
     from a2ui.schema.catalog import CatalogConfig
