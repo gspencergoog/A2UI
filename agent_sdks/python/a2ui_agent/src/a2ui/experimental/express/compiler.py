@@ -145,13 +145,11 @@ TOKEN_SPEC = [
     ("UNCLOSED_RAW_TRIPLE_STRING", r'[rR]"""[\s\S]*'),
     ("TRIPLE_STRING", r'"""(?:(?!"""(?!"))(?:[^\\]|\\[\s\S]))*"""(?!")'),
     ("UNCLOSED_TRIPLE_STRING", r'"""[\s\S]*'),
-
     # Single-quoted strings
     ("RAW_STRING", r'[rR]"[^"]*"'),
     ("UNCLOSED_RAW_STRING", r'[rR]"[^"]*'),
     ("STRING", r'"(?:[^"\\]|\\.)*"'),
     ("UNCLOSED_STRING", r'"(?:[^"\\]|\\.)*'),
-
     # Comments & symbols
     ("COMMENT", r"(?:#|//).*"),
     ("PATH", r"\$[a-zA-Z0-9_/]*"),
