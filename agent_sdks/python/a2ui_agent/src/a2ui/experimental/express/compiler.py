@@ -16,6 +16,41 @@
 
 Tokenizes, lexes, and parses A2UI Express plain-text statements into a clean
 AST, compiling it directly into standard A2UI v1.0 JSON messages.
+
+================================================================================
+A2UI EXPRESS EBNF GRAMMAR
+================================================================================
+NOTE TO DEVELOPERS / CODING AGENTS:
+If you modify the scanner rules (TOKEN_SPEC) or the recursive-descent parser
+methods (TokenParser), you MUST keep this EBNF grammar definition synchronized.
+
+program              = { statement } ;
+statement            = [ assignment | expression ] ;
+assignment           = ( identifier | path ) "=" expression ;
+expression           = array
+                     | map
+                     | path
+                     | check
+                     | call
+                     | variable
+                     | literal ;
+array                = "[" [ expression { "," expression } ] [ "," ] "]" ;
+map                  = "{" [ map_entry { "," map_entry } ] [ "," ] "}" ;
+map_entry            = ( identifier | string ) ":" expression ;
+path                 = "$" { path_char } ;  (* path_char = a-zA-Z0-9_/ *)
+check                = "?" identifier [ "(" [ expression { "," expression } ] [ "," ] ")" ] ;
+call                 = identifier "(" [ expression { "," expression } ] [ "," ] ")" ;
+variable             = "_"  (* skipped argument sentinel *)
+                     | identifier ;
+literal              = string
+                     | number
+                     | boolean
+                     | "null" ;
+identifier           = letter { letter | digit | "_" } ;
+string               = raw_triple_string | raw_string | triple_string | standard_string ;
+number               = [ "-" ] digit { digit } [ "." digit { digit } ] ;
+boolean              = "true" | "false" ;
+================================================================================
 """
 
 import re
@@ -105,15 +140,19 @@ def is_check_expression(val: Any) -> bool:
 
 # Scanner rules for lexical tokenizing
 TOKEN_SPEC = [
+    # Triple-quoted strings (must be matched before single-quoted strings)
     ("RAW_TRIPLE_STRING", r'[rR]"""(?:(?!"""(?!"))[\s\S])*"""(?!")'),
-    ("RAW_STRING", r'[rR]"[^"]*"'),
-    ("TRIPLE_STRING", r'"""(?:(?!"""(?!"))(?:[^\\]|\\[\s\S]))*"""(?!")'),
-    ("STRING", r'"(?:[^"\\]|\\.)*"'),
-    # Unclosed string fallback rules (must be defined AFTER closed strings)
     ("UNCLOSED_RAW_TRIPLE_STRING", r'[rR]"""[\s\S]*'),
-    ("UNCLOSED_RAW_STRING", r'[rR]"[^"]*'),
+    ("TRIPLE_STRING", r'"""(?:(?!"""(?!"))(?:[^\\]|\\[\s\S]))*"""(?!")'),
     ("UNCLOSED_TRIPLE_STRING", r'"""[\s\S]*'),
+
+    # Single-quoted strings
+    ("RAW_STRING", r'[rR]"[^"]*"'),
+    ("UNCLOSED_RAW_STRING", r'[rR]"[^"]*'),
+    ("STRING", r'"(?:[^"\\]|\\.)*"'),
     ("UNCLOSED_STRING", r'"(?:[^"\\]|\\.)*'),
+
+    # Comments & symbols
     ("COMMENT", r"(?:#|//).*"),
     ("PATH", r"\$[a-zA-Z0-9_/]*"),
     ("CHECK", r"\?[a-zA-Z_][a-zA-Z0-9_]*"),
@@ -130,6 +169,7 @@ TOKEN_SPEC = [
     ("COLON", r":"),
     ("LBRACE", r"\{"),
     ("RBRACE", r"\}"),
+    ("SEMICOLON", r";"),
     ("WS", r"[ \t]+"),
     ("NEWLINE", r"[\r\n]+"),
 ]
@@ -175,7 +215,7 @@ def tokenize(text: str, is_final: bool = True) -> list[tuple[str, Any]]:
     kind = mo.lastgroup
     val = mo.group()
     last_end = mo.end()
-    if kind in ("WS", "COMMENT"):
+    if kind in ("WS", "COMMENT", "NEWLINE", "SEMICOLON"):
       continue
     elif kind == "RAW_TRIPLE_STRING":
       kind = "STRING"
@@ -259,6 +299,30 @@ class TokenParser:
     self.pos += 1
     return tok
 
+  def parse_statement(self) -> tuple[str, Any, Any]:
+    """Parses a single statement from the token stream.
+
+    A statement is either:
+    1. An assignment: target = expression (where target is IDENTIFIER or PATH)
+    2. A standalone expression
+
+    Returns:
+        A tuple of (StatementKind, *StatementArgs).
+    """
+    tok = self.peek()
+    if not tok:
+      raise SyntaxError("Unexpected end of input")
+
+    if tok[0] in ("IDENTIFIER", "PATH"):
+      if self.pos + 1 < len(self.tokens) and self.tokens[self.pos + 1][0] == "EQUALS":
+        target_tok = self.consume()
+        self.consume("EQUALS")
+        expr = self.parse_expression()
+        return ("ASSIGN", target_tok[1], expr)
+
+    expr = self.parse_expression()
+    return ("EXPR", expr)
+
   def parse_expression(self) -> Any:
     """Parses a standalone expression.
 
@@ -296,27 +360,21 @@ class TokenParser:
     raise SyntaxError(f"Unexpected token {kind}: {val}")
 
   def parse_array(self) -> list:
-    """Parses an array of expressions.
-
-    Returns:
-        A list of parsed expression AST nodes.
-    """
+    """Parses an array of expressions with optional trailing comma."""
     self.consume("LBRACKET")
     items = []
     if self.peek() and self.peek()[0] != "RBRACKET":
       items.append(self.parse_expression())
       while self.peek() and self.peek()[0] == "COMMA":
         self.consume("COMMA")
+        if self.peek() and self.peek()[0] == "RBRACKET":
+          break
         items.append(self.parse_expression())
     self.consume("RBRACKET")
     return items
 
   def parse_check(self) -> dict:
-    """Parses a check validation expression.
-
-    Returns:
-        A check rule AST dictionary.
-    """
+    """Parses a check validation expression with optional trailing comma."""
     tok = self.consume("CHECK")
     name = tok[1][1:]  # strip ?
     next_tok = self.peek()
@@ -327,12 +385,14 @@ class TokenParser:
         args.append(self.parse_expression())
         while self.peek() and self.peek()[0] == "COMMA":
           self.consume("COMMA")
+          if self.peek() and self.peek()[0] == "RPAREN":
+            break
           args.append(self.parse_expression())
       self.consume("RPAREN")
     return {"check": name, "args": args}
 
   def parse_call(self, name: str) -> dict:
-    """Parses a component or function call.
+    """Parses a component or function call with optional trailing comma.
 
     Args:
         name: The identifier name of the component or function.
@@ -347,12 +407,14 @@ class TokenParser:
 
       while self.peek() and self.peek()[0] == "COMMA":
         self.consume("COMMA")
+        if self.peek() and self.peek()[0] == "RPAREN":
+          break
         args.append(self.parse_expression())
     self.consume("RPAREN")
     return {"call": name, "args": args}
 
   def parse_map(self) -> dict:
-    """Parses a key-value dictionary block.
+    """Parses a key-value dictionary block with optional trailing comma.
 
     Returns:
         A dictionary mapping string keys to parsed expressions.
@@ -369,6 +431,8 @@ class TokenParser:
       res[k_tok[1]] = v
       while self.peek() and self.peek()[0] == "COMMA":
         self.consume("COMMA")
+        if self.peek() and self.peek()[0] == "RBRACE":
+          break
         next_tok = self.peek()
         if next_tok[0] not in ("IDENTIFIER", "STRING"):
           raise SyntaxError(f"Expected IDENTIFIER or STRING key, got {next_tok[0]}")
@@ -452,97 +516,39 @@ class ExpressCompiler:
     # Tokenize the entire text block
     tokens = tokenize(dsl_body, is_final=is_final)
 
-    statements = []
-    current_statement = []
-    open_p = 0
-    open_b = 0
-    open_c = 0
-    has_incomplete_token = False
-
-    for tok_kind, tok_val in tokens:
-      if tok_kind == "NEWLINE":
-        if (
-            current_statement
-            and open_p <= 0
-            and open_b <= 0
-            and open_c <= 0
-            and not has_incomplete_token
-        ):
-          statements.append(current_statement)
-          current_statement = []
-        continue
-
-      if tok_kind == "LPAREN":
-        open_p += 1
-      elif tok_kind == "RPAREN":
-        open_p -= 1
-      elif tok_kind == "LBRACKET":
-        open_b += 1
-      elif tok_kind == "RBRACKET":
-        open_b -= 1
-      elif tok_kind == "LBRACE":
-        open_c += 1
-      elif tok_kind == "RBRACE":
-        open_c -= 1
-      elif tok_kind == "INCOMPLETE_STRING":
-        has_incomplete_token = True
-        if is_final:
+    if is_final:
+      for tok_kind, _ in tokens:
+        if tok_kind == "INCOMPLETE_STRING":
           raise SyntaxError("Unterminated string literal.")
-
-      current_statement.append((tok_kind, tok_val))
-
-    # For streaming compatibility: compile the last statement only if complete and balanced
-    if current_statement:
-      if open_p <= 0 and open_b <= 0 and open_c <= 0 and not has_incomplete_token:
-        statements.append(current_statement)
-      elif is_final:
-        if has_incomplete_token:
-          raise SyntaxError("Unterminated string literal at end of input.")
-        raise SyntaxError(
-            f"Unbalanced symbols at end of input (open parentheses: {open_p}, "
-            f"open brackets: {open_b}, open braces: {open_c})."
-        )
 
     raw_symbols = {}
     data_path_assignments = {}
     target_delete_surface_id = None
     standalone_function_calls = []
 
-    # Token parser loop
-    for tokens in statements:
-      if not tokens:
-        continue
-
-      if (
-          len(tokens) >= 2
-          and tokens[0][0] in ("IDENTIFIER", "PATH")
-          and tokens[1][0] == "EQUALS"
-      ):
-        var_name = tokens[0][1]
-        expr_tokens = tokens[2:]
-        try:
-          parser = TokenParser(expr_tokens)
-          parsed_val = parser.parse_expression()
+    parser = TokenParser(tokens)
+    while parser.pos < len(tokens):
+      try:
+        stmt_type, *stmt_args = parser.parse_statement()
+        if stmt_type == "ASSIGN":
+          var_name, parsed_val = stmt_args
           if var_name.startswith("$"):
             data_path_assignments[var_name] = parsed_val
           else:
             raw_symbols[var_name] = parsed_val
-        except Exception as e:
-          raise ValueError(
-              f"Failed to parse expression for variable '{var_name}': {e}"
-          ) from e
-      else:
-        try:
-          parser = TokenParser(tokens)
-          parsed_val = parser.parse_expression()
+        elif stmt_type == "EXPR":
+          parsed_val = stmt_args[0]
           if isinstance(parsed_val, dict) and parsed_val.get("call") == "deleteSurface":
             args = parsed_val.get("args", [])
             if args and isinstance(args[0], str):
               target_delete_surface_id = args[0]
           elif isinstance(parsed_val, dict) and "call" in parsed_val:
             standalone_function_calls.append(parsed_val)
-        except Exception as e:
-          raise ValueError(f"Failed to parse expression: {e}") from e
+      except Exception as e:
+        if not is_final:
+          # During streaming, ignore any trailing incomplete statement/tokens gracefully
+          break
+        raise ValueError(f"Failed to parse expression: {e}") from e
 
     # Compile data model paths
     data_model = {}

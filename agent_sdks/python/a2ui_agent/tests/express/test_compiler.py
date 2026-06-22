@@ -465,6 +465,44 @@ btnLabel = Text("Click Thread 2")
       elif "A2UI_VERSION_1_0" in os.environ:
         del os.environ["A2UI_VERSION_1_0"]
 
+  def test_semicolons_and_trailing_commas_and_line_continuation(self):
+    """Verifies that optional semicolons, trailing commas, and line continuations compile correctly."""
+    compiler = ExpressCompiler(self.catalog_path)
+
+    # 1. Test optional semicolons at the end of statements
+    semicolon_dsl = """
+    root = Column([btn1]);
+    btn1 = Button("Click Me");
+    """
+    envelope = compiler.compile(semicolon_dsl)
+    self.assertEqual(len(envelope["createSurface"]["components"]), 2)
+
+    # 2. Test trailing commas in lists, maps, component calls, and checks
+    trailing_comma_dsl = """
+    root = Column([btn1, btn2,],);
+    btn1 = Button("Label", "primary", myAction,);
+    btn2 = TextField("Input", $/val, "placeholder", _, ?numeric(1, 10,),);
+    myAction = Event("click", {a: 1, b: 2,},);
+    """
+    envelope2 = compiler.compile(trailing_comma_dsl)
+    components = envelope2["createSurface"]["components"]
+    self.assertEqual(len(components), 3)
+
+    # 3. Test line continuation where newlines are completely insignificant
+    continuation_dsl = """
+    root
+      =
+      Column
+      (
+        [
+          btn1
+        ]
+      )
+    btn1 = Text("Hello World")
+    """
+    envelope3 = compiler.compile(continuation_dsl)
+    self.assertEqual(len(envelope3["createSurface"]["components"]), 2)
+
 
 if __name__ == "__main__":
   unittest.main()

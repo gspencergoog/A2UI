@@ -295,32 +295,35 @@ IMPORTANT: You must ALWAYS output A2UI Express DSL notation wrapped inside `<a2u
    - Booleans: write true or false
    - Null values: write null
 
-4. Lists: represent as arrays, e.g., [child1, child2]
+4. Lists: represent as arrays, e.g., [child1, child2].
 
-5. Data bindings: prefix absolute paths in the data model with '$', e.g., $/user/firstName.
+5. Maps: represent as key-value blocks, e.g., {title: "Overview", child: contentCol}. Map keys are always literal strings (dynamic variable resolution is not supported for keys).
+
+6. Data bindings: prefix absolute paths in the data model with '$', e.g., $/user/firstName.
    Prefix relative list scopes with '$', e.g., $firstName.
+   A lone '$' represents an empty relative path which resolves to the root of the current context (e.g. inside a template, representing the entire item itself).
 
-6. Logic and validation: prefix client check rules with '?', e.g., ?required or ?regex("^[0-9]{5}$"). To specify a custom error message for validation failures, append it as an extra string argument, e.g. ?regex("^[0-9]{5}$", "Postal code must be 5 digits").
+7. Logic and validation: prefix client check rules with '?', e.g., ?required or ?regex("^[0-9]{5}$"). To specify a custom error message for validation failures, append it as an extra string argument, e.g. ?regex("^[0-9]{5}$", "Postal code must be 5 digits").
 
-7. Action events: represent server-side actions using the Event helper:
+8. Action events: represent server-side actions using the Event helper:
    Event("save_deal", {rep: $/form/rep})
 
-8. Nested functions: call client functions directly using catalog signatures,
+9. Nested functions: call client functions directly using catalog signatures,
    for example openUrl("https://example.com").
 
-9. Data model population: Assign a value directly to an absolute data path (e.g. $/path/to/key = "value") to populate or initialize values inside the shared dataModel. The value can be a primitive, array, or map.
+10. Data model population: Assign a value directly to an absolute data path (e.g. $/path/to/key = "value") to populate or initialize values inside the shared dataModel. The value can be a primitive, array, or map.
 
-10. Dynamic list templates: If a component expects a template child list, represent it using the _template helper:
+11. Dynamic list templates: If a component expects a template child list, represent it using the _template helper:
     _template($/path/to/list, itemTemplate)
     And define the template component variable on another line, utilizing relative path references prefixed with $:
     itemTemplate = Image($url)
 
-11. Lifecycle & Deletion: To delete a user interface surface, output the standalone `deleteSurface(surfaceId)` command (with no variable assignment):
+12. Lifecycle & Deletion: To delete a user interface surface, output the standalone `deleteSurface(surfaceId)` command (with no variable assignment):
     deleteSurface("dashboard-surface-1")
 
-12. Static properties: Arguments annotated with '(static only)' in the signatures below MUST be defined as literal values or arrays inline (or as a local DSL variable representing a static structure). You CANNOT use a dynamic data binding path (prefixed by $) for these arguments.
+13. Static properties: Arguments annotated with '(static only)' in the signatures below MUST be defined as literal values or arrays inline (or as a local DSL variable representing a static structure). You CANNOT use a dynamic data binding path (prefixed by $) for these arguments.
 
-13. Required actions: Parameters named 'action' (or annotated as required in component signatures) are strictly required. You must pass a valid Event (e.g. Event("click")) or function call. If no specific action is described in the user request, you must provide a dummy click event like Event("click") instead of passing null or omitting the parameter.
+14. Required actions: Parameters named 'action' (or annotated as required in component signatures) are strictly required. You must pass a valid Event (e.g. Event("click")) or function call. If no specific action is described in the user request, you must provide a dummy click event like Event("click") instead of passing null or omitting the parameter.
 
 ## Positional Component Signatures
 
