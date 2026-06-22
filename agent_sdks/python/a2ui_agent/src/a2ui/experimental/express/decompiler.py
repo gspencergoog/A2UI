@@ -38,6 +38,28 @@ def _flatten_data_model(data_dict: dict) -> list[tuple[str, Any]]:
   return results
 
 
+def _is_component_reference_property(prop_schema: Any) -> bool:
+  """Checks if a property schema defines a component reference (ComponentId or list of ComponentId)."""
+  if not isinstance(prop_schema, dict):
+    return False
+  if "$ref" in prop_schema:
+    ref = prop_schema["$ref"]
+    if "ComponentId" in ref or "ChildList" in ref:
+      return True
+  if "oneOf" in prop_schema or "anyOf" in prop_schema or "allOf" in prop_schema:
+    subs = (
+        prop_schema.get("oneOf", [])
+        + prop_schema.get("anyOf", [])
+        + prop_schema.get("allOf", [])
+    )
+    for sub in subs:
+      if _is_component_reference_property(sub):
+        return True
+  if prop_schema.get("type") == "array" and "items" in prop_schema:
+    return _is_component_reference_property(prop_schema["items"])
+  return False
+
+
 def _decompile_string(val: str) -> str:
   """Formats a string literal using the cleanest/most readable representation."""
   has_newline = "\n" in val or "\r" in val
@@ -214,7 +236,8 @@ class ExpressDecompiler:
         # Map other regular properties
         if prop_name in c:
           val = c[prop_name]
-          is_prop_ref = prop_name in ("child", "children", "trigger", "content")
+          p_schema = self.helper.get_property_schema(comp_name, prop_name)
+          is_prop_ref = _is_component_reference_property(p_schema)
           args_reprs.append(self._decompile_value(val, comp_ids, is_prop_ref))
         else:
           # Only append "_" if there is a subsequent regular property that has a value

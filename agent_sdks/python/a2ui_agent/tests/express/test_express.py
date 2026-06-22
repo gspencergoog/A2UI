@@ -1237,6 +1237,71 @@ This is bold.
     self.assertEqual(tf["value"]["call"], "my_unregistered_func")
     self.assertEqual(tf["value"]["args"], [1, 2])
 
+  def test_schema_driven_child_reference_detection_and_unclosed_tag_parsing(self):
+    """Regression tests for schema-driven component reference detection in decompiler and unclosed tag parsing in parser."""
+    from a2ui.experimental.express.decompiler import _is_component_reference_property
+    from a2ui.experimental.express.parser import parse_express_response
+
+    # 1. Verify schema-driven component reference helper
+    # Case A: Direct ref to ComponentId
+    direct_ref = {
+        "$ref": (
+            "https://a2ui.org/specification/v1_0/common_types.json#/$defs/ComponentId"
+        )
+    }
+    self.assertTrue(_is_component_reference_property(direct_ref))
+
+    # Case B: Array of ComponentId refs
+    array_ref = {
+        "type": "array",
+        "items": {
+            "$ref": (
+                "https://a2ui.org/specification/v1_0/common_types.json#/$defs/ComponentId"
+            )
+        },
+    }
+    self.assertTrue(_is_component_reference_property(array_ref))
+
+    # Case C: Nested inside oneOf/anyOf/allOf
+    nested_ref = {
+        "oneOf": [
+            {"type": "string"},
+            {
+                "$ref": (
+                    "https://a2ui.org/specification/v1_0/common_types.json#/$defs/ComponentId"
+                )
+            },
+        ]
+    }
+    self.assertTrue(_is_component_reference_property(nested_ref))
+
+    # Case D: Non-ref static type
+    static_type = {"type": "string"}
+    self.assertFalse(_is_component_reference_property(static_type))
+
+    # 2. Verify parser unclosed tag auto-closing and compilation with is_final=False
+    # Truncated response containing a complete statement and an incomplete statement at the end.
+    # The parser should auto-close, compile the complete statement, and discard the incomplete trailing one.
+    truncated_response = (
+        "Here is the partial UI:\n"
+        "<a2ui>\n"
+        "root = Column([text1])\n"
+        'text1 = Text("Hello")\n'
+        'btn = Button("Cli'
+    )
+    parts = parse_express_response(truncated_response, self.catalog_path)
+    self.assertEqual(len(parts), 1)
+    self.assertEqual(parts[0].text, "Here is the partial UI:")
+    self.assertIsNotNone(parts[0].a2ui_json)
+
+    # Verify that 'root' and 'text1' compiled successfully, but 'btn' was discarded due to is_final=False
+    compiled_components = parts[0].a2ui_json[0]["createSurface"]["components"]
+    self.assertEqual(len(compiled_components), 2)
+    self.assertEqual(compiled_components[0]["id"], "root")
+    self.assertEqual(compiled_components[1]["id"], "text1")
+    # Verify btn is not in the compiled list
+    self.assertFalse(any(c["id"] == "btn" for c in compiled_components))
+
 
 if __name__ == "__main__":
   unittest.main()

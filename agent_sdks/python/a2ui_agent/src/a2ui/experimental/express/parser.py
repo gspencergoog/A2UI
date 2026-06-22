@@ -27,6 +27,12 @@ def parse_express_response(
 ) -> List[ResponsePart]:
   """Parses response containing A2UI Express DSL and compiles it to ResponseParts.
 
+  NOTE: This parser supports unclosed tag auto-closing for real-time streaming preview
+  rendering. If the final <a2ui> block is unclosed (truncated), it will be auto-closed
+  and compiled with is_final=False to discard any trailing incomplete statements.
+  IMPORTANT: For stateful continuations, client applications must accumulate streaming chunks
+  at the string level before parsing, rather than parsing chunks in isolation.
+
   Args:
       content: The raw LLM response.
       catalog_path: Filepath to the catalog JSON.
@@ -34,10 +40,14 @@ def parse_express_response(
 
   Returns:
       A list of ResponsePart objects containing compiled JSON payload list.
-
-  Raises:
-      ValueError: If no A2UI Express sentinel tags are found.
   """
+  is_truncated = False
+  last_open = content.rfind("<a2ui>")
+  last_close = content.rfind("</a2ui>")
+  if last_open != -1 and last_open > last_close:
+    content += "</a2ui>"
+    is_truncated = True
+
   matches = list(_A2UI_DSL_BLOCK_PATTERN.finditer(content))
   if not matches:
     return [ResponsePart(text=content, a2ui_json=None)]
@@ -46,16 +56,26 @@ def parse_express_response(
   response_parts = []
   last_end = 0
 
-  for match in matches:
+  for idx, match in enumerate(matches):
     start, end = match.span()
     text_part = content[last_end:start].strip()
 
     dsl_content = match.group(1).strip()
-    compiled_json = compiler.compile(dsl_content, surface_id=surface_id)
+    is_block_final = not (is_truncated and idx == len(matches) - 1)
 
-    response_parts.append(
-        ResponsePart(text=text_part if text_part else None, a2ui_json=[compiled_json])
-    )
+    try:
+      compiled_json = compiler.compile(
+          dsl_content, surface_id=surface_id, is_final=is_block_final
+      )
+      response_parts.append(
+          ResponsePart(text=text_part if text_part else None, a2ui_json=[compiled_json])
+      )
+    except Exception:
+      # Graceful fallback: treat malformed/unparseable blocks as plain text so the app doesn't crash
+      fallback_text = f"<a2ui>\n{dsl_content}\n</a2ui>"
+      full_text = f"{text_part}\n{fallback_text}" if text_part else fallback_text
+      response_parts.append(ResponsePart(text=full_text, a2ui_json=None))
+
     last_end = end
 
   trailing_text = content[last_end:].strip()
