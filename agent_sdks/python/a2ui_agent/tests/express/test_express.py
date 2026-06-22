@@ -1130,6 +1130,78 @@ This is bold.
     self.assertIsNone(parts_ui[0].text)  # Text should be None, not ""
     self.assertIsNotNone(parts_ui[0].a2ui_json)
 
+  def test_code_review_deep_dive_regression(self):
+    """Regression tests for second-pass deep-dive code review fixes (template path validation, decompiler key quoting, check message unified strings)."""
+    from a2ui.experimental.express.compiler import ExpressCompiler
+    from a2ui.experimental.express.decompiler import ExpressDecompiler
+
+    compiler = ExpressCompiler(self.catalog_path)
+    decompiler = ExpressDecompiler(self.catalog_path)
+
+    # 1. Test template path validation in compiler
+    dsl_invalid_template = 'root = List(_template("invalid_string_no_dollar", itemTemplate))\nitemTemplate = Text($/val)'
+    with self.assertRaises(ValueError) as context:
+      compiler.compile(dsl_invalid_template)
+    self.assertIn("must be a dynamic data binding path", str(context.exception))
+
+    # 2. Test unquoted dictionary keys in decompiler
+    wire_json_dict = {
+        "version": "v1.0",
+        "createSurface": {
+            "surfaceId": "main",
+            "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
+            "components": [
+                {
+                    "id": "root",
+                    "component": "Tabs",
+                    "tabs": [
+                        {
+                            "title": "Overview",
+                            "user-id-hyphen": 123,
+                            "session token space": "abc",
+                            "valid_id": True
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+    decompiled_dsl = decompiler.decompile(wire_json_dict)
+    # Check that keys with special characters are quoted as string literals in the DSL
+    self.assertIn('root = Tabs([{title: "Overview", "user-id-hyphen": 123, "session token space": "abc", valid_id: true}])', decompiled_dsl)
+
+    # Round-trip verify that the decompiled string with quoted keys compiles cleanly back to the same json!
+    compiled_back = compiler.compile(decompiled_dsl, surface_id="main")
+    compiled_tabs = compiled_back["createSurface"]["components"][0]["tabs"]
+    self.assertEqual(len(compiled_tabs), 1)
+    self.assertEqual(compiled_tabs[0]["user-id-hyphen"], 123)
+    self.assertEqual(compiled_tabs[0]["session token space"], "abc")
+    self.assertEqual(compiled_tabs[0]["valid_id"], True)
+
+    # 3. Test check message formatting with unified string decompiler (supports multiline)
+    multiline_msg_envelope = {
+        "version": "v1.0",
+        "createSurface": {
+            "surfaceId": "main",
+            "components": [{
+                "id": "root",
+                "component": "TextField",
+                "label": "Name",
+                "value": {"path": "/name"},
+                "checks": [{
+                    "condition": {
+                        "call": "required",
+                        "args": {"value": {"path": "/name"}},
+                    },
+                    "message": "First Line\nSecond Line",
+                }],
+            }],
+        },
+    }
+    decompiled_msg = decompiler.decompile(multiline_msg_envelope)
+    # Should use triple-quotes for multi-line error messages
+    self.assertIn('"""First Line\nSecond Line"""', decompiled_msg)
+
 
 if __name__ == "__main__":
   unittest.main()

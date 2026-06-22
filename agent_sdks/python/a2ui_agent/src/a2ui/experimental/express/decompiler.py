@@ -196,8 +196,7 @@ class ExpressDecompiler:
                 and message
                 and message != f"{check_name.capitalize()} check failed"
             ):
-              escaped_msg = message.replace('"', '\\"')
-              explicit_args_reprs.append(f'"{escaped_msg}"')
+              explicit_args_reprs.append(_decompile_string(message))
 
             if explicit_args_reprs:
               compiled_checks_list.append(
@@ -307,10 +306,12 @@ class ExpressDecompiler:
         return f"{name}({', '.join(args_reprs)})"
 
       # General dict
+      import re
       items_reprs = []
       for k, v in val.items():
         item_is_ref = is_ref or k in ("child", "componentId")
-        items_reprs.append(f"{k}: {self._decompile_value(v, comp_ids, item_is_ref)}")
+        k_repr = k if re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", k) else _decompile_string(k)
+        items_reprs.append(f"{k_repr}: {self._decompile_value(v, comp_ids, item_is_ref)}")
       return f'{{{", ".join(items_reprs)}}}'
 
     if isinstance(val, list):
