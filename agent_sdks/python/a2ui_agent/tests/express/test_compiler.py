@@ -147,7 +147,7 @@ contentCol = Column([])"""
     dsl = """root = Column([btn1, btn2])
 btn1 = Button(btn1Label, "primary", myAction)
 btn1Label = Text("Save")
-btn2 = Button(btn2Label, "outline", closeAction)
+btn2 = Button(btn2Label, "borderless", closeAction)
 btn2Label = Text("Cancel")
 myAction = Event("submit", {val: "42"})
 closeAction = Event("close")"""
@@ -502,6 +502,16 @@ btnLabel = Text("Click Thread 2")
     """
     envelope3 = compiler.compile(continuation_dsl)
     self.assertEqual(len(envelope3["createSurface"]["components"]), 2)
+
+  def test_strict_enum_validation(self):
+    """Verifies that the compiler raises a ValueError when an invalid enum option is passed."""
+    compiler = ExpressCompiler(self.catalog_path)
+    invalid_dsl = 'root = Button("Click", "invalid_variant")'
+    with self.assertRaises(ValueError) as context:
+      compiler.compile(invalid_dsl)
+    self.assertIn(
+        "is not a valid enum choice for property 'variant'", str(context.exception)
+    )
 
 
 if __name__ == "__main__":

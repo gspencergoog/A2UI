@@ -235,7 +235,7 @@ $/user/age = 30
 root = Card(main_column)
 main_column = Column([icon, title], _, "center")
 icon = Icon($/icon)
-title = Text($/title, "h3")"""
+title = Text($/title, "body")"""
 
     envelope = compiler.compile(dsl, surface_id="test_data_surf")
     self.assertEqual(envelope["version"], "v1.0")

@@ -91,6 +91,9 @@ def schema_allows_databinding(schema: Any) -> bool:
   if "properties" in schema and "path" in schema["properties"]:
     if "componentId" not in schema["properties"]:
       return True
+  if "items" in schema:
+    if schema_allows_databinding(schema["items"]):
+      return True
   for key in ["allOf", "oneOf", "anyOf"]:
     if key in schema and isinstance(schema[key], list):
       for sub in schema[key]:
@@ -689,8 +692,13 @@ class ExpressCompiler:
                 for opt in mapped_val
             ]
         enum_vals = self.helper.get_property_enum(comp_name, prop_name)
-        if enum_vals and isinstance(mapped_val, str) and mapped_val not in enum_vals:
-          mapped_val = None
+        if enum_vals and isinstance(mapped_val, str):
+          if mapped_val not in enum_vals:
+            raise ValueError(
+                f"Value '{mapped_val}' is not a valid enum choice for property"
+                f" '{prop_name}' of component '{comp_name}'. Allowed values are:"
+                f" {enum_vals}"
+            )
         comp_dict[prop_name] = mapped_val
 
         if (
@@ -885,15 +893,11 @@ class ExpressCompiler:
           )
           compiled_context = {}
           if isinstance(raw_context, dict):
-            for k, v in raw_context.items():
-              compiled_context[k] = self._compile_value(v, raw_symbols, ctx, is_action)
+            compiled_context.update(raw_context)
           elif isinstance(raw_context, list):
             for item in raw_context:
               if isinstance(item, dict):
-                for k, v in item.items():
-                  compiled_context[k] = self._compile_value(
-                      v, raw_symbols, ctx, is_action
-                  )
+                compiled_context.update(item)
           return {"event": {"name": compiled_event_name, "context": compiled_context}}
 
         # Is it a regular catalog function?
