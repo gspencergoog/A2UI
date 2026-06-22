@@ -33,6 +33,7 @@ sys.path.insert(
             "..",
             "..",
             "..",
+            "..",
             "agent_sdks",
             "python",
             "a2ui_agent",
@@ -107,6 +108,7 @@ def main():
         "--catalog",
         default=os.path.join(
             os.path.dirname(__file__),
+            "..",
             "..",
             "..",
             "v1_0",
