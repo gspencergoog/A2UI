@@ -1095,8 +1095,8 @@ This is bold.
     self.assertEqual(res_partial_brackets["updateDataModel"]["value"]["foo"], 123)
     self.assertNotIn("bar", res_partial_brackets["updateDataModel"]["value"])
 
-  def test_code_review_fixes_regression(self):
-    """Regression tests for code review fixes (Event variable resolution, parser fallbacks, empty text parts)."""
+  def test_parser_robustness_and_event_variable_resolution(self):
+    """Regression tests for parser fallbacks, empty text parts, and event variable resolution."""
     from a2ui.experimental.express.compiler import ExpressCompiler
     from a2ui.experimental.express.parser import parse_express_response
 
@@ -1130,8 +1130,8 @@ This is bold.
     self.assertIsNone(parts_ui[0].text)  # Text should be None, not ""
     self.assertIsNotNone(parts_ui[0].a2ui_json)
 
-  def test_code_review_deep_dive_regression(self):
-    """Regression tests for second-pass deep-dive code review fixes (template path validation, decompiler key quoting, check message unified strings)."""
+  def test_template_validation_and_decompiler_quoted_keys(self):
+    """Regression tests for template path validation, decompiler dictionary key quoting, and check message string formatting."""
     from a2ui.experimental.express.compiler import ExpressCompiler
     from a2ui.experimental.express.decompiler import ExpressDecompiler
 
@@ -1201,6 +1201,31 @@ This is bold.
     decompiled_msg = decompiler.decompile(multiline_msg_envelope)
     # Should use triple-quotes for multi-line error messages
     self.assertIn('"""First Line\nSecond Line"""', decompiled_msg)
+
+  def test_compiler_custom_validation_messages_and_fallback_functions(self):
+    """Targeted tests covering custom validation error messages and unregistered fallback function compilation."""
+    from a2ui.experimental.express.compiler import ExpressCompiler
+
+    compiler = ExpressCompiler(self.catalog_path)
+
+    # 1. Test check with custom error message breaking the positional property mapping loop
+    # numeric(min, max) expects numbers. Passing a string literal custom message breaks the loop and maps to 'message'.
+    dsl_check_msg = 'root = TextField("Label", $/val, ?numeric(1, 10, "Custom range error message"))'
+    res = compiler.compile(dsl_check_msg)
+    checks = res["createSurface"]["components"][0]["checks"]
+    self.assertEqual(len(checks), 1)
+    self.assertEqual(checks[0]["condition"]["call"], "numeric")
+    self.assertEqual(checks[0]["condition"]["args"]["min"], 1)
+    self.assertEqual(checks[0]["condition"]["args"]["max"], 10)
+    self.assertEqual(checks[0]["message"], "Custom range error message")
+
+    # 2. Test unregistered function call fallback (line 915)
+    # my_unregistered_func(1, 2) is passed as the second positional argument (value)
+    dsl_fallback_fn = 'root = TextField("Label", my_unregistered_func(1, 2))'
+    res_fallback = compiler.compile(dsl_fallback_fn)
+    tf = res_fallback["createSurface"]["components"][0]
+    self.assertEqual(tf["value"]["call"], "my_unregistered_func")
+    self.assertEqual(tf["value"]["args"], [1, 2])
 
 
 if __name__ == "__main__":
