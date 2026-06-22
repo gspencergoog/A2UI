@@ -1095,6 +1095,41 @@ This is bold.
     self.assertEqual(res_partial_brackets["updateDataModel"]["value"]["foo"], 123)
     self.assertNotIn("bar", res_partial_brackets["updateDataModel"]["value"])
 
+  def test_code_review_fixes_regression(self):
+    """Regression tests for code review fixes (Event variable resolution, parser fallbacks, empty text parts)."""
+    from a2ui.experimental.express.compiler import ExpressCompiler
+    from a2ui.experimental.express.parser import parse_express_response
+
+    compiler = ExpressCompiler(self.catalog_path)
+
+    # 1. Event name and context variable resolution
+    dsl_event_var = """
+    root = Button("Click", _, Event(MY_EVENT, MY_CONTEXT))
+    MY_EVENT = "my_custom_click"
+    MY_CONTEXT = {userId: 123, "active": true}
+    """
+    res = compiler.compile(dsl_event_var)
+    btn = res["createSurface"]["components"][0]
+    self.assertEqual(btn["action"]["event"]["name"], "my_custom_click")
+    self.assertEqual(btn["action"]["event"]["context"]["userId"], 123)
+    self.assertEqual(btn["action"]["event"]["context"]["active"], True)
+
+    # 2. Conversational parser robustness (no sentinels)
+    conversational_content = (
+        "Hello there! I am a conversational response without any UI tags."
+    )
+    parts = parse_express_response(conversational_content, self.catalog_path)
+    self.assertEqual(len(parts), 1)
+    self.assertEqual(parts[0].text, conversational_content)
+    self.assertIsNone(parts[0].a2ui_json)
+
+    # 3. Empty text part omission
+    ui_only_content = '<a2ui>root = Text("Hello")</a2ui>'
+    parts_ui = parse_express_response(ui_only_content, self.catalog_path)
+    self.assertEqual(len(parts_ui), 1)
+    self.assertIsNone(parts_ui[0].text)  # Text should be None, not ""
+    self.assertIsNotNone(parts_ui[0].a2ui_json)
+
 
 if __name__ == "__main__":
   unittest.main()

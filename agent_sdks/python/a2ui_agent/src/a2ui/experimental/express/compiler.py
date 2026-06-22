@@ -864,20 +864,28 @@ class ExpressCompiler:
 
         # Is it a reserved Event signature?
         if fn_name == "Event":
-          event_name = fn_args[0] if len(fn_args) > 0 else ""
-          context_map = fn_args[1] if len(fn_args) > 1 else {}
+          compiled_event_name = (
+              self._compile_value(fn_args[0], raw_symbols, ctx, is_action)
+              if len(fn_args) > 0
+              else ""
+          )
+          raw_context = (
+              self._compile_value(fn_args[1], raw_symbols, ctx, is_action)
+              if len(fn_args) > 1
+              else {}
+          )
           compiled_context = {}
-          if isinstance(context_map, dict):
-            for k, v in context_map.items():
+          if isinstance(raw_context, dict):
+            for k, v in raw_context.items():
               compiled_context[k] = self._compile_value(v, raw_symbols, ctx, is_action)
-          elif isinstance(context_map, list):
-            for item in context_map:
+          elif isinstance(raw_context, list):
+            for item in raw_context:
               if isinstance(item, dict):
                 for k, v in item.items():
                   compiled_context[k] = self._compile_value(
                       v, raw_symbols, ctx, is_action
                   )
-          return {"event": {"name": event_name, "context": compiled_context}}
+          return {"event": {"name": compiled_event_name, "context": compiled_context}}
 
         # Is it a regular catalog function?
         if fn_name in self.helper.functions:

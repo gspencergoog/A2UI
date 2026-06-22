@@ -39,9 +39,8 @@ def parse_express_response(
       ValueError: If no A2UI Express sentinel tags are found.
   """
   matches = list(_A2UI_DSL_BLOCK_PATTERN.finditer(content))
-
   if not matches:
-    raise ValueError("A2UI Express tags '<a2ui>' and '</a2ui>' not found in response.")
+    return [ResponsePart(text=content, a2ui_json=None)]
 
   compiler = ExpressCompiler(catalog_path)
   response_parts = []
@@ -54,7 +53,9 @@ def parse_express_response(
     dsl_content = match.group(1).strip()
     compiled_json = compiler.compile(dsl_content, surface_id=surface_id)
 
-    response_parts.append(ResponsePart(text=text_part, a2ui_json=[compiled_json]))
+    response_parts.append(
+        ResponsePart(text=text_part if text_part else None, a2ui_json=[compiled_json])
+    )
     last_end = end
 
   trailing_text = content[last_end:].strip()
