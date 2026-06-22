@@ -861,7 +861,8 @@ class ExpressCompiler:
           path_val = self._compile_value(fn_args[0], raw_symbols, ctx, is_action)
           if not isinstance(path_val, dict) or "path" not in path_val:
             raise ValueError(
-                f"The first argument to _template must be a dynamic data binding path (prefixed by $), got: {fn_args[0]}"
+                "The first argument to _template must be a dynamic data binding path"
+                f" (prefixed by $), got: {fn_args[0]}"
             )
           comp_id_val = self._compile_value(fn_args[1], raw_symbols, ctx, is_action)
           return {"path": path_val["path"], "componentId": comp_id_val}

@@ -614,8 +614,8 @@ $/age = 25"""
     comment_comps = comment_envelope["createSurface"]["components"]
     self.assertEqual(len(comment_comps), 2)
 
-  def test_decompiler_coverage_boost(self):
-    """Boosts coverage of ExpressDecompiler by hitting uncovered paths."""
+  def test_decompiler_rpc_actions_functional_expressions_and_custom_checks(self):
+    """Verifies decompilation of custom RPC calls, local action mappings, dynamic functional expressions, and custom checks."""
     decompiler = ExpressDecompiler(self.catalog_path)
 
     # 1. callFunction with custom function not in catalog
@@ -933,8 +933,10 @@ btnLabel = Text("Click Thread 2")
 
     self.assertEqual(errors, [], f"Concurrency errors encountered: {errors}")
 
-  def test_pr_fixes_regression(self):
-    """Regression tests for sentinel spacing, decompiler string refs, empty lines."""
+  def test_sentinel_spacing_literal_matching_multiline_strings_and_boolean_allof_schemas(
+      self,
+  ):
+    """Regression tests for sentinel spacing, literal string matching, multiline string preservation, and boolean allOf schemas."""
     from a2ui.experimental.express.compiler import ExpressCompiler
     from a2ui.experimental.express.decompiler import ExpressDecompiler
     from a2ui.experimental.express.schema_helper import CatalogSchemaHelper
@@ -1139,7 +1141,10 @@ This is bold.
     decompiler = ExpressDecompiler(self.catalog_path)
 
     # 1. Test template path validation in compiler
-    dsl_invalid_template = 'root = List(_template("invalid_string_no_dollar", itemTemplate))\nitemTemplate = Text($/val)'
+    dsl_invalid_template = (
+        'root = List(_template("invalid_string_no_dollar", itemTemplate))\nitemTemplate'
+        " = Text($/val)"
+    )
     with self.assertRaises(ValueError) as context:
       compiler.compile(dsl_invalid_template)
     self.assertIn("must be a dynamic data binding path", str(context.exception))
@@ -1149,26 +1154,28 @@ This is bold.
         "version": "v1.0",
         "createSurface": {
             "surfaceId": "main",
-            "catalogId": "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json",
-            "components": [
-                {
-                    "id": "root",
-                    "component": "Tabs",
-                    "tabs": [
-                        {
-                            "title": "Overview",
-                            "user-id-hyphen": 123,
-                            "session token space": "abc",
-                            "valid_id": True
-                        }
-                    ]
-                }
-            ]
-        }
+            "catalogId": (
+                "https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json"
+            ),
+            "components": [{
+                "id": "root",
+                "component": "Tabs",
+                "tabs": [{
+                    "title": "Overview",
+                    "user-id-hyphen": 123,
+                    "session token space": "abc",
+                    "valid_id": True,
+                }],
+            }],
+        },
     }
     decompiled_dsl = decompiler.decompile(wire_json_dict)
     # Check that keys with special characters are quoted as string literals in the DSL
-    self.assertIn('root = Tabs([{title: "Overview", "user-id-hyphen": 123, "session token space": "abc", valid_id: true}])', decompiled_dsl)
+    self.assertIn(
+        'root = Tabs([{title: "Overview", "user-id-hyphen": 123, "session token space":'
+        ' "abc", valid_id: true}])',
+        decompiled_dsl,
+    )
 
     # Round-trip verify that the decompiled string with quoted keys compiles cleanly back to the same json!
     compiled_back = compiler.compile(decompiled_dsl, surface_id="main")
@@ -1210,7 +1217,10 @@ This is bold.
 
     # 1. Test check with custom error message breaking the positional property mapping loop
     # numeric(min, max) expects numbers. Passing a string literal custom message breaks the loop and maps to 'message'.
-    dsl_check_msg = 'root = TextField("Label", $/val, ?numeric(1, 10, "Custom range error message"))'
+    dsl_check_msg = (
+        'root = TextField("Label", $/val, ?numeric(1, 10, "Custom range error'
+        ' message"))'
+    )
     res = compiler.compile(dsl_check_msg)
     checks = res["createSurface"]["components"][0]["checks"]
     self.assertEqual(len(checks), 1)
