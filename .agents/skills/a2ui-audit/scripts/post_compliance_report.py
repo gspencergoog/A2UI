@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 import datetime
 import os
 import subprocess
@@ -20,11 +21,16 @@ import sys
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: post_compliance_report.py <path_to_report_file>")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="Post blueprint compliance report as a GitHub issue."
+    )
+    parser.add_argument("report_path", help="Path to the markdown report file")
+    parser.add_argument(
+        "--repo", help="Target GitHub repository (e.g., 'a2ui-project/a2ui')"
+    )
+    args = parser.parse_args()
 
-    report_path = sys.argv[1]
+    report_path = args.report_path
     if not os.path.exists(report_path):
         print(f"Error: Report file not found at '{report_path}'")
         sys.exit(1)
@@ -45,6 +51,8 @@ def main():
         "--label",
         "component: specification",
     ]
+    if args.repo:
+        cmd.extend(["--repo", args.repo])
 
     print(f"Running: {' '.join(cmd)}")
     env = os.environ.copy()
