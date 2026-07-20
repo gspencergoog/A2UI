@@ -96,23 +96,36 @@ def extract_metrics(json_path: str, label_name: str = "") -> Dict[str, Any]:
     input_tokens = []
     output_tokens = []
     cached_tokens = []
+    reasoning_tokens = []
 
     for sample in samples:
         meta = sample.get("metadata", {})
         
         # Redefined inference_duration_seconds: extract pure model working_time excluding retries
         sample_duration = None
+        sample_reasoning = None
         events = sample.get("events", [])
         model_events = [e for e in events if e.get("event") == "model"]
         if model_events:
             m = model_events[0]
             sample_duration = m.get("working_time") or m.get("time") or (m.get("call", {}).get("time") if isinstance(m.get("call"), dict) else None)
+            
+            call_res = m.get("call", {}).get("response", {}) if isinstance(m.get("call"), dict) else {}
+            if isinstance(call_res, dict):
+                usage_meta = call_res.get("usageMetadata", {})
+                sample_reasoning = usage_meta.get("thoughtsTokenCount")
 
         if sample_duration is None and "inference_duration_seconds" in meta:
             sample_duration = meta["inference_duration_seconds"]
 
+        if sample_reasoning is None and "inference_reasoning_tokens" in meta:
+            sample_reasoning = meta["inference_reasoning_tokens"]
+
         if sample_duration is not None:
             durations.append(sample_duration)
+
+        if sample_reasoning is not None:
+            reasoning_tokens.append(sample_reasoning)
 
         if "inference_input_tokens" in meta:
             input_tokens.append(meta["inference_input_tokens"])
@@ -145,6 +158,12 @@ def extract_metrics(json_path: str, label_name: str = "") -> Dict[str, Any]:
     avg_input_tokens = sum(input_tokens) / max(len(input_tokens), 1) if input_tokens else (primary_usage.get("input_tokens", 0) / max(sample_count, 1))
     avg_output_tokens = sum(output_tokens) / max(len(output_tokens), 1) if output_tokens else (primary_usage.get("output_tokens", 0) / max(sample_count, 1))
     avg_cached_tokens = sum(cached_tokens) / max(len(cached_tokens), 1) if cached_tokens else (primary_usage.get("input_tokens_cache_read", 0) / max(sample_count, 1))
+    avg_reasoning_tokens = sum(reasoning_tokens) / max(len(reasoning_tokens), 1) if reasoning_tokens else (primary_usage.get("reasoning_tokens", 0) / max(sample_count, 1))
+
+    total_gen_tokens = avg_reasoning_tokens + avg_output_tokens
+    reasoning_frac = avg_reasoning_tokens / max(total_gen_tokens, 1.0)
+    est_reasoning_time = avg_duration * reasoning_frac
+    est_code_time = avg_duration * (1.0 - reasoning_frac)
 
     total_duration = sum(durations)
     total_input_tokens = sum(input_tokens) if input_tokens else primary_usage.get("input_tokens", 0)
@@ -162,6 +181,9 @@ def extract_metrics(json_path: str, label_name: str = "") -> Dict[str, Any]:
         "avg_input_tokens": avg_input_tokens,
         "avg_output_tokens": avg_output_tokens,
         "avg_cached_tokens": avg_cached_tokens,
+        "avg_reasoning_tokens": avg_reasoning_tokens,
+        "est_reasoning_time": est_reasoning_time,
+        "est_code_time": est_code_time,
         "total_duration": total_duration,
         "total_input_tokens": total_input_tokens,
         "total_output_tokens": total_output_tokens,
@@ -198,9 +220,12 @@ def generate_markdown_table(
         "Schema Acc (Delta)",
         "Quality Score (Delta)",
         "Wall Latency (Delta)",
-        "Sample Latency (Delta)",
-        "Avg Input Tokens (Delta)",
-        "Avg Output Tokens (Delta)",
+        "Sample Working Time (Delta)",
+        "Est. Reasoning Time (Delta)",
+        "Est. Code Time (Delta)",
+        "Avg Input Tok (Delta)",
+        "Avg Reasoning Tok (Delta)",
+        "Avg Code Output Tok (Delta)",
     ]
 
     lines.append("| " + " | ".join(headers) + " |")
@@ -212,11 +237,14 @@ def generate_markdown_table(
     b_quality_str = f"{b['quality_acc']*100:.1f}%" if b['quality_acc'] is not None else "N/A"
     b_wall_str = f"{b['wall_clock_per_sample']:.2f}s" if b['wall_clock_per_sample'] > 0 else "N/A"
     b_lat_str = f"{b['avg_duration']:.2f}s"
+    b_rtime_str = f"{b.get('est_reasoning_time', 0):.2f}s"
+    b_ctime_str = f"{b.get('est_code_time', 0):.2f}s"
     b_inp_str = f"{b['avg_input_tokens']:,.0f}"
+    b_rtok_str = f"{b.get('avg_reasoning_tokens', 0):,.0f}"
     b_out_str = f"{b['avg_output_tokens']:,.0f}"
 
     lines.append(
-        f"| **Baseline**: `{b['name']}` | {b['sample_count']} | {b_schema_str} | {b_quality_str} | {b_wall_str} | {b_lat_str} | {b_inp_str} | {b_out_str} |"
+        f"| **Baseline**: `{b['name']}` | {b['sample_count']} | {b_schema_str} | {b_quality_str} | {b_wall_str} | {b_lat_str} | {b_rtime_str} | {b_ctime_str} | {b_inp_str} | {b_rtok_str} | {b_out_str} |"
     )
 
     # Format comparison rows
@@ -253,10 +281,25 @@ def generate_markdown_table(
         d_lat = format_delta_pct(c["avg_duration"], b["avg_duration"])
         latency_cell = f"{c_lat_val} ({d_lat})"
 
+        # Reasoning Time
+        c_rtime_val = f"{c.get('est_reasoning_time', 0):.2f}s"
+        d_rtime = format_delta_pct(c.get('est_reasoning_time', 0), b.get('est_reasoning_time', 0))
+        rtime_cell = f"{c_rtime_val} ({d_rtime})"
+
+        # Code Time
+        c_ctime_val = f"{c.get('est_code_time', 0):.2f}s"
+        d_ctime = format_delta_pct(c.get('est_code_time', 0), b.get('est_code_time', 0))
+        ctime_cell = f"{c_ctime_val} ({d_ctime})"
+
         # Input Tokens
         c_inp_val = f"{c['avg_input_tokens']:,.0f}"
         d_inp = format_delta_pct(c["avg_input_tokens"], b["avg_input_tokens"])
         inp_cell = f"{c_inp_val} ({d_inp})"
+
+        # Reasoning Tokens
+        c_rtok_val = f"{c.get('avg_reasoning_tokens', 0):,.0f}"
+        d_rtok = format_delta_pct(c.get('avg_reasoning_tokens', 0), b.get('avg_reasoning_tokens', 0))
+        rtok_cell = f"{c_rtok_val} ({d_rtok})"
 
         # Output Tokens
         c_out_val = f"{c['avg_output_tokens']:,.0f}"
@@ -264,7 +307,7 @@ def generate_markdown_table(
         out_cell = f"{c_out_val} ({d_out})"
 
         lines.append(
-            f"| {name_str} | {samples_str} | {schema_cell} | {quality_cell} | {wall_cell} | {latency_cell} | {inp_cell} | {out_cell} |"
+            f"| {name_str} | {samples_str} | {schema_cell} | {quality_cell} | {wall_cell} | {latency_cell} | {rtime_cell} | {ctime_cell} | {inp_cell} | {rtok_cell} | {out_cell} |"
         )
 
     lines.append("")
