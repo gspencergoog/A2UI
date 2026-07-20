@@ -105,7 +105,7 @@ def extract_metrics(json_path: str, label_name: str = "") -> Dict[str, Any]:
         sample_duration = None
         sample_reasoning = None
         events = sample.get("events", [])
-        model_events = [e for e in events if e.get("event") == "model"]
+        model_events = [e for e in events if e.get("event") == "model" and e.get("working_time") is not None]
         if model_events:
             m = model_events[0]
             sample_duration = m.get("working_time") or m.get("time") or (m.get("call", {}).get("time") if isinstance(m.get("call"), dict) else None)
