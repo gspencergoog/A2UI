@@ -181,6 +181,13 @@ class AtomCompiler:
                         "args": args,
                     },
                 }
+            elif head in ("createSurface", "surface"):
+                for sub in expr[1:]:
+                    if isinstance(sub, list) and sub:
+                        if str(sub[0]) in ("data", "set!"):
+                            self._parse_data_node(sub, data_model)
+                        elif self._is_component_type(str(sub[0])):
+                            self._compile_component(sub, components, data_model, is_root=True)
             else:
                 # Component root tree
                 root_id = self._compile_component(expr, components, data_model, is_root=True)
@@ -346,7 +353,10 @@ class AtomCompiler:
                 i += 2
             else:
                 i += 1
-        return {"event": event_name, "context": context} if context else {"event": event_name}
+        ev_obj: Dict[str, Any] = {"name": event_name}
+        if context:
+            ev_obj["context"] = {k: self._resolve_val(v, []) for k, v in context.items()}
+        return {"event": ev_obj}
 
     def _compile_template(self, expr: List[Any], components: List[Dict[str, Any]]) -> Dict[str, Any]:
         # (template :item item_var child_expr)
