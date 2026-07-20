@@ -59,6 +59,12 @@ Read the generated report in `eval/iterative/current_report.md`. Analyze:
    - `inference_output_tokens` (generation size cost)
 4. **Git Diff**: Verify that only the intended files were modified.
 
+#### Comparing Historical Runs Against Baseline
+To generate a Markdown comparison table showing percentage gain/loss against a baseline directory (e.g. `eval/baselines/transport` or `eval/baselines/<format>`), use:
+```bash
+uv run python eval/iterative/compare_results.py --baseline eval/baselines/<format> eval/iterative/history/run_001_... eval/iterative/history/run_002_...
+```
+
 ### Step 5: Progression or Rollback Decision
 * **If accuracy degrades (or efficiency metrics spike significantly with no gain)**: You **must** roll back the changes using Git (`git reset --hard HEAD` or `git checkout -- <files>`). Document this as a failed/backtracked run in history.
 * **If accuracy improves or remains neutral with clean conformance**: Keep the changes and prepare to archive.

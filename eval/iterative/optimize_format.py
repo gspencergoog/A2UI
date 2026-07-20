@@ -27,6 +27,8 @@ from typing import Any, Dict, List, Optional
 # Ensure rate limiter connections limit (matches max_tasks=10)
 os.environ["INSPECT_MAX_CONNECTIONS"] = "10"
 
+from compare_results import format_delta_pct
+
 
 def _get_uv_binary() -> str:
     return shutil.which("uv") or "/usr/local/google/home/gspencer/.local/bin/uv"
@@ -207,11 +209,11 @@ def generate_optimization_report(
         base_input = f"{base_metrics['avg_input_tokens']:.0f}"
         base_output = f"{base_metrics['avg_output_tokens']:.0f}"
 
-        diff_overall = f"{((metrics['overall_accuracy'] - base_metrics['overall_accuracy']) * 100):+.1f}%"
-        diff_algo = f"{((metrics['algo_accuracy'] - base_metrics['algo_accuracy']) * 100):+.1f}%"
-        diff_latency = f"{(metrics['avg_latency_seconds'] - base_metrics['avg_latency_seconds']):+.2f}s"
-        diff_input = f"{(metrics['avg_input_tokens'] - base_metrics['avg_input_tokens']):+.0f}"
-        diff_output = f"{(metrics['avg_output_tokens'] - base_metrics['avg_output_tokens']):+.0f}"
+        diff_overall = format_delta_pct(metrics['overall_accuracy'], base_metrics['overall_accuracy'], is_percentage_points=True)
+        diff_algo = format_delta_pct(metrics['algo_accuracy'], base_metrics['algo_accuracy'], is_percentage_points=True)
+        diff_latency = format_delta_pct(metrics['avg_latency_seconds'], base_metrics['avg_latency_seconds'])
+        diff_input = format_delta_pct(metrics['avg_input_tokens'], base_metrics['avg_input_tokens'])
+        diff_output = format_delta_pct(metrics['avg_output_tokens'], base_metrics['avg_output_tokens'])
 
     report = []
     report.append("# Inference Format Optimization Report")

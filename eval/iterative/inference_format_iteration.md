@@ -98,6 +98,12 @@ The subagent reads `eval/logs/optimization_report.md` to diagnose issues. The re
   1. **Algorithmic/Parser Failures**: Thrown when compilation or schema validation fails. Includes the raw model output and the exception message.
   2. **Semantic Grader Failures**: Thrown when output is syntactically valid but fails user intent grading (LLM Grade is `I` or `P`). Includes the grader's reasoning.
 
+### Multi-Run Comparison & Baseline Delta Tool
+To compare metrics and percentage gain/loss across multiple historical iteration runs or formats against a reference baseline directory (e.g., `eval/baselines/transport` or `eval/baselines/<format>`), use:
+```bash
+uv run python eval/iterative/compare_results.py --baseline eval/baselines/<format> eval/iterative/history/run_001_... eval/iterative/history/run_002_...
+```
+
 ---
 
 ## Step 5: Implement Changes and Mitigate Failures
