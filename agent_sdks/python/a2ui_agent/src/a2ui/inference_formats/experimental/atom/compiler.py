@@ -288,8 +288,11 @@ class AtomCompiler:
                         if isinstance(child_item, list):
                             child_id = self._compile_component(child_item, components, data_model)
                             children.append(child_id)
-                        elif isinstance(child_item, str):
-                            children.append(child_item)
+                        elif isinstance(child_item, str) and child_item not in ("]", ")", "[", "("):
+                            raise ValueError(
+                                f"Flat adjacency lists and string child ID references ('{child_item}') are disallowed in Atom format. "
+                                "Child components must be directly nested S-expressions."
+                            )
                 elif key == "child" and isinstance(val, list):
                     child_id = self._compile_component(val, components, data_model)
                     comp_dict["child"] = child_id
@@ -315,15 +318,20 @@ class AtomCompiler:
                         if isinstance(sub_c, list) and sub_c and self._is_component_type(str(sub_c[0])):
                             child_id = self._compile_component(sub_c, components, data_model)
                             children.append(child_id)
-                        elif isinstance(sub_c, str):
-                            if sub_c not in ("]", ")", "[", "("):
-                                children.append(sub_c)
+                        elif isinstance(sub_c, str) and sub_c not in ("]", ")", "[", "("):
+                            raise ValueError(
+                                f"Flat adjacency lists and string child ID references ('{sub_c}') are disallowed in Atom format. "
+                                "Child components must be directly nested S-expressions."
+                            )
                 i += 1
             else:
                 # Positional attribute matching schema definition order
                 if comp_type in ("Column", "Row", "List", "Container", "Page"):
                     if isinstance(item, str) and item not in ("]", ")", "[", "("):
-                        children.append(item)
+                        raise ValueError(
+                            f"Flat adjacency lists and string child ID references ('{item}') are disallowed in Atom format. "
+                            "Child components must be directly nested S-expressions."
+                        )
                 else:
                     if pos_arg_index < len(prop_keys):
                         pkey = prop_keys[pos_arg_index]

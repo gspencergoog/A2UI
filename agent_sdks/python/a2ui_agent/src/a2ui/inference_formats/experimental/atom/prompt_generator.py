@@ -44,8 +44,9 @@ IMPORTANT: Wrap your output inside `<a2ui>` and `</a2ui>` sentinel tags. Do NOT 
    - Tagged attributes: Prefixed with a colon ':', e.g., :align "stretch" or :variant "body". Tagged keys are order-independent.
    - Positional attributes: Can be passed sequentially matching catalog signature order.
 
-4. Child Components:
-   - Nested parenthesized expressions without a property key are treated as children of the component, e.g., (Card (Column (Text "Hello"))).
+4. Child Components & Strict Tree Nesting:
+   - You MUST nest child components directly inside their parent container expressions, e.g., (Card (Column (Text "Hello"))).
+   - Do NOT output flat adjacency lists, explicit `:id` attributes, or separate component variable IDs. Every UI component must be nested directly within a single root tree expression.
 
 5. Data Bindings:
    - Absolute data model paths start with '$/', e.g., $/user/firstName.

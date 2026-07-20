@@ -379,6 +379,50 @@ class TestAtomFormat(unittest.TestCase):
         self.assertEqual(_get_schema_enum({"enum": ["opt1", "opt2"]}), ["opt1", "opt2"])
         self.assertIsNone(_get_schema_enum("not_a_dict"))
 
+    def test_reject_adjacency_list_string_child_ids(self):
+        """Negative test: Disallow string child ID references and flat adjacency lists."""
+        # Flat positional string ID in Column
+        text_positional_string_id = '(Column "node_1")'
+        with self.assertRaises(ValueError):
+            self.compiler.compile(text_positional_string_id)
+
+        # Flat tagged :children ["node_1"] string list in Column
+        text_tagged_string_id = '(Column :children ["node_1"])'
+        with self.assertRaises(ValueError):
+            self.compiler.compile(text_tagged_string_id)
+
+    def test_complex_deeply_nested_tree(self):
+        """Positive test: Verify 6+ level deeply nested tree compilation and schema integrity."""
+        text = """
+(Card
+  (Column :align "stretch"
+    (Row :justify "spaceBetween"
+      (Text "Header Title")
+      (Icon "star"))
+    (Card
+      (Column
+        (Text "Nested Level 4")
+        (Row
+          (Button :action (Event "submit" :name $/user/name)
+            (Text "Confirm")))))))
+"""
+        compiled = self.compiler.compile(text)
+        self.assertIn("createSurface", compiled)
+        comps = compiled["createSurface"]["components"]
+        # Verify 11 total component nodes created cleanly in tree topology
+        self.assertEqual(len(comps), 11)
+        
+        # Verify root component is Card
+        root = next(c for c in comps if c["id"] == "root")
+        self.assertEqual(root["component"], "Card")
+
+        # Verify deep child Action event object
+        btn = next(c for c in comps if c["component"] == "Button")
+        self.assertEqual(
+            btn["action"],
+            {"event": {"name": "submit", "context": {"name": {"path": "/user/name"}}}}
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
