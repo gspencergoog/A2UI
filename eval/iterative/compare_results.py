@@ -58,7 +58,12 @@ def resolve_results_file(target_path: str) -> str:
     raise FileNotFoundError(f"Could not find valid results.json or .eval file in: '{target_path}'")
 
 
-def extract_metrics(json_path: str, label_name: str = "", use_median: bool = True) -> Dict[str, Any]:
+def extract_metrics(
+    json_path: str,
+    label_name: str = "",
+    use_median: bool = True,
+    filter_sample_ids: Optional[set] = None,
+) -> Dict[str, Any]:
     """Extracts summary and per-sample metadata metrics from results JSON data."""
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -71,25 +76,43 @@ def extract_metrics(json_path: str, label_name: str = "", use_median: bool = Tru
     eval_spec = data.get("eval", {})
     task_name = eval_spec.get("task", "unknown")
 
-    # Scorer metrics
-    scores = data.get("results", {}).get("scores", [])
-    schema_acc = None
-    quality_acc = None
-
-    for s in scores:
-        s_name = s.get("name") or s.get("scorer", "")
-        metrics = s.get("metrics", {})
-        acc_val = metrics.get("accuracy", {}).get("value")
-        if acc_val is not None:
-            if s_name == "a2ui_scorer":
-                schema_acc = float(acc_val)
-            elif s_name == "measured_model_graded_qa":
-                quality_acc = float(acc_val)
-            elif schema_acc is None:
-                schema_acc = float(acc_val)
-
     samples = data.get("samples", [])
-    sample_count = len(samples) if samples else data.get("results", {}).get("total_samples", 0)
+    filtered_samples = []
+    extracted_sample_ids = set()
+
+    for s in samples:
+        s_id = str(s.get("metadata", {}).get("name") or s.get("id") or "")
+        extracted_sample_ids.add(s_id)
+        if filter_sample_ids and s_id not in filter_sample_ids:
+            continue
+        filtered_samples.append(s)
+
+    sample_count = len(filtered_samples) if filtered_samples else len(samples)
+    active_samples = filtered_samples if filtered_samples else samples
+
+    # Calculate schema and quality accuracy over active samples
+    schema_passes = 0
+    quality_passes = 0
+    total_schema = 0
+    total_quality = 0
+
+    for s in active_samples:
+        s_scores = s.get("scores", {})
+        if "a2ui_scorer" in s_scores:
+            val = s_scores["a2ui_scorer"].get("value")
+            if val is not None:
+                total_schema += 1
+                if val == 1.0:
+                    schema_passes += 1
+        if "measured_model_graded_qa" in s_scores:
+            val = s_scores["measured_model_graded_qa"].get("value")
+            if val is not None:
+                total_quality += 1
+                if val == "C":
+                    quality_passes += 1
+
+    schema_acc = (schema_passes / total_schema) if total_schema > 0 else None
+    quality_acc = (quality_passes / total_quality) if total_quality > 0 else None
 
     # Metadata aggregation
     durations = []
@@ -98,7 +121,7 @@ def extract_metrics(json_path: str, label_name: str = "", use_median: bool = Tru
     cached_tokens = []
     reasoning_tokens = []
 
-    for sample in samples:
+    for sample in active_samples:
         meta = sample.get("metadata", {})
         
         # Redefined inference_duration_seconds: extract pure model working_time excluding retries
@@ -195,6 +218,7 @@ def extract_metrics(json_path: str, label_name: str = "", use_median: bool = Tru
         "total_input_tokens": total_input_tokens,
         "total_output_tokens": total_output_tokens,
         "use_median": use_median,
+        "sample_ids": extracted_sample_ids,
     }
 
 
@@ -363,21 +387,26 @@ def main():
 
     use_median = not args.average
 
-    # Load baseline
-    baseline_json = resolve_results_file(args.baseline)
-    baseline_metrics = extract_metrics(
-        baseline_json,
-        label_name=os.path.basename(os.path.normpath(args.baseline)),
-        use_median=use_median,
-    )
-
     # Load comparison runs
     comp_metrics_list = []
+    target_sample_ids = None
+
     for r_dir in args.results_dirs:
         res_json = resolve_results_file(r_dir)
         label = os.path.basename(os.path.normpath(r_dir))
         m = extract_metrics(res_json, label_name=label, use_median=use_median)
         comp_metrics_list.append(m)
+        if target_sample_ids is None and m.get("sample_ids"):
+            target_sample_ids = m["sample_ids"]
+
+    # Load baseline (filtered to target sample IDs if target is a validation subset)
+    baseline_json = resolve_results_file(args.baseline)
+    baseline_metrics = extract_metrics(
+        baseline_json,
+        label_name=os.path.basename(os.path.normpath(args.baseline)),
+        use_median=use_median,
+        filter_sample_ids=target_sample_ids if (target_sample_ids and len(target_sample_ids) < 50) else None,
+    )
 
     table_md = generate_markdown_table(baseline_metrics, comp_metrics_list, use_median=use_median)
     print(table_md)

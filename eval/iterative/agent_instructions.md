@@ -106,7 +106,7 @@ To save the historical run context for future analysis and allow the orchestrato
    ```bash
    uv run python eval/iterative/sync_history.py
    ```
-2. **Full Suite Check**: Once the small-scale validation set achieves 100% success (or plateaus), run a full verification across the entire 50+ prompt evaluation suite:
+2. **Mandatory Full Suite Check for Kept Milestone Runs**: Whenever an iteration run is kept (`KEEP`) and shows accuracy gains on the validation subset, the agent **MUST** execute a full verification across all evaluation samples before finalizing the milestone:
    ```bash
    uv run python eval/iterative/optimize_format.py --format <format> --model <model> --full
    ```

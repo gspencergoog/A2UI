@@ -65,7 +65,26 @@ IMPORTANT: Wrap your output inside `<a2ui>` and `</a2ui>` sentinel tags. Do NOT 
    - Delete surface: (deleteSurface "surface_id")
    - Call RPC function: (callFunction "openUrl" :url "https://example.com")
 
-10. Strict Catalog Adherence:
+10. Concrete Syntax Examples:
+   Example 1 (Card with Form & Inputs):
+   <a2ui>
+   (Card
+     (Column
+       (Text :text "Sign In" :variant "heading")
+       (TextField :label "Username" :value $/form/username)
+       (Button :text "Submit" :onPress (Event "login" :user $/form/username))))
+   </a2ui>
+
+   Example 2 (Tabs & Dynamic List Template):
+   <a2ui>
+   (Tabs
+     :items ["Overview" "Items"]
+     :content [
+       (Column (Text :text "Welcome"))
+       (List :items $/products :template (template item (Card (Text :text item/name))))])
+   </a2ui>
+
+11. Strict Catalog Adherence:
    - You MUST ONLY use property names listed in the Component Catalog Signatures below.
    - Do NOT invent CSS or style attributes (e.g. style, padding, margin, backgroundColor, color, fontSize, size, minHeight, borderRadius, spacing, align, justify).
    - Use correct catalog property names (e.g. Image uses :url, not :src. Text variant must be "caption" or "body").

@@ -317,6 +317,13 @@ def regenerate_master_index(iterative_dir: str) -> None:
     history_dir = os.path.join(iterative_dir, "history")
     index_file = os.path.join(iterative_dir, "history_summary.md")
 
+    # Auto-sync any worktree history folders if sync_history is available
+    try:
+        from sync_history import sync_worktree_history
+        sync_worktree_history()
+    except Exception:
+        pass
+
     if not os.path.exists(history_dir):
         return
 
