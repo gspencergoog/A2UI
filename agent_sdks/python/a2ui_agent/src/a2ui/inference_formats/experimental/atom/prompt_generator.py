@@ -163,9 +163,9 @@ class AtomPromptGenerator(PromptGenerator):
                         p_line_parts.append(f"Must be one of: {enum_vals_str}")
                     prop_details.append(f"  - :{p}: {' '.join(p_line_parts)}")
 
-            sig = f"• ({name} {' '.join(ordered_args)})"
+            sig = f"- ({name} {' '.join(ordered_args)})"
             if comp_desc:
-                sig += f"\n  - Description: {comp_desc}"
+                sig += f"\n  - {comp_desc}"
             if prop_details:
                 sig += "\n" + "\n".join(prop_details)
             signatures.append(sig)
@@ -203,9 +203,9 @@ class AtomPromptGenerator(PromptGenerator):
                         p_line_parts.append(f"Must be one of: {enum_vals_str}")
                     prop_details.append(f"  - :{p}: {' '.join(p_line_parts)}")
 
-            sig = f"• ({name} {' '.join(ordered_args)})"
+            sig = f"- ({name} {' '.join(ordered_args)})"
             if f_desc:
-                sig += f"\n  - Description: {f_desc}"
+                sig += f"\n  - {f_desc}"
             if prop_details:
                 sig += "\n" + "\n".join(prop_details)
             signatures.append(sig)
