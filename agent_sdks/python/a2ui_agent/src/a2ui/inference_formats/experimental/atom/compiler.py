@@ -186,24 +186,42 @@ class AtomCompiler:
                 root_id = self._compile_component(expr, components, data_model, is_root=True)
 
         if not components and data_model:
-            return {
+            return [{
                 "version": "v1.0",
                 "updateDataModel": {
                     "surfaceId": surface_id,
                     "path": "/",
                     "value": data_model,
                 },
-            }
+            }]
 
-        return {
-            "version": "v1.0",
-            "createSurface": {
-                "surfaceId": surface_id,
-                "catalogId": getattr(self.catalog, "id", "basic"),
-                "components": components,
-                "dataModel": data_model,
-            },
-        }
+        ops = [
+            {
+                "version": "v1.0",
+                "createSurface": {
+                    "surfaceId": surface_id,
+                    "catalogId": getattr(self.catalog, "id", "basic"),
+                },
+            }
+        ]
+        if components:
+            ops.append({
+                "version": "v1.0",
+                "updateComponents": {
+                    "surfaceId": surface_id,
+                    "components": components,
+                },
+            })
+        if data_model:
+            ops.append({
+                "version": "v1.0",
+                "updateDataModel": {
+                    "surfaceId": surface_id,
+                    "path": "/",
+                    "value": data_model,
+                },
+            })
+        return ops
 
     def _parse_data_node(self, expr: List[Any], data_model: Dict[str, Any]) -> None:
         """Parses (data $/path/key val ...) into data_model structure."""
