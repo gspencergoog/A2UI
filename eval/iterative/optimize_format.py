@@ -28,6 +28,10 @@ from typing import Any, Dict, List, Optional
 os.environ["INSPECT_MAX_CONNECTIONS"] = "10"
 
 
+def _get_uv_binary() -> str:
+    return shutil.which("uv") or "/usr/local/google/home/gspencer/.local/bin/uv"
+
+
 def run_unit_tests() -> Dict[str, Any]:
     """Runs pytest unit tests for the python SDK."""
     print("Running pytest unit tests...")
@@ -35,7 +39,7 @@ def run_unit_tests() -> Dict[str, Any]:
     eval_root = os.path.dirname(script_dir)
     workspace_root = os.path.dirname(eval_root)
 
-    cmd = ["uv", "run", "pytest", "agent_sdks/python/a2ui_agent/tests/"]
+    cmd = [_get_uv_binary(), "run", "pytest", "agent_sdks/python/a2ui_agent/tests/"]
     result = subprocess.run(
         cmd, cwd=workspace_root, capture_output=True, text=True
     )
@@ -60,13 +64,14 @@ def run_evaluation(
     script_dir = os.path.dirname(os.path.abspath(__file__))
     eval_root = os.path.dirname(script_dir)
 
+    strategy_name = "direct" if format_name == "transport" else format_name
     cmd = [
-        "uv",
+        _get_uv_binary(),
         "run",
         "python",
         "main.py",
         "--strategies",
-        format_name,
+        strategy_name,
         "--model",
         model,
         "--log-dir",
@@ -87,7 +92,7 @@ def run_evaluation(
 
 def load_log_data(log_path: str) -> Dict[str, Any]:
     """Runs inspect log dump and parses the JSON."""
-    dump_cmd = ["uv", "run", "inspect", "log", "dump", log_path]
+    dump_cmd = [_get_uv_binary(), "run", "inspect", "log", "dump", log_path]
     dump_output = subprocess.check_output(dump_cmd, text=True)
     return json.loads(dump_output)
 
@@ -405,7 +410,7 @@ def main(argv: Optional[List[str]] = None) -> None:
         "--format",
         type=str,
         required=True,
-        choices=["express", "elemental", "atom"],
+        choices=["transport", "express", "elemental", "atom"],
         help="Target inference format strategy to optimize",
     )
     parser.add_argument(
