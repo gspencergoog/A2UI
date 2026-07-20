@@ -58,7 +58,7 @@ def resolve_results_file(target_path: str) -> str:
     raise FileNotFoundError(f"Could not find valid results.json or .eval file in: '{target_path}'")
 
 
-def extract_metrics(json_path: str, label_name: str = "") -> Dict[str, Any]:
+def extract_metrics(json_path: str, label_name: str = "", use_median: bool = False) -> Dict[str, Any]:
     """Extracts summary and per-sample metadata metrics from results JSON data."""
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -154,11 +154,18 @@ def extract_metrics(json_path: str, label_name: str = "") -> Dict[str, Any]:
     model_usage = data.get("stats", {}).get("model_usage", {})
     primary_usage = next(iter(model_usage.values()), {}) if model_usage else {}
 
-    avg_duration = sum(durations) / max(len(durations), 1) if durations else 0.0
-    avg_input_tokens = sum(input_tokens) / max(len(input_tokens), 1) if input_tokens else (primary_usage.get("input_tokens", 0) / max(sample_count, 1))
-    avg_output_tokens = sum(output_tokens) / max(len(output_tokens), 1) if output_tokens else (primary_usage.get("output_tokens", 0) / max(sample_count, 1))
-    avg_cached_tokens = sum(cached_tokens) / max(len(cached_tokens), 1) if cached_tokens else (primary_usage.get("input_tokens_cache_read", 0) / max(sample_count, 1))
-    avg_reasoning_tokens = sum(reasoning_tokens) / max(len(reasoning_tokens), 1) if reasoning_tokens else (primary_usage.get("reasoning_tokens", 0) / max(sample_count, 1))
+    import statistics
+
+    def _calc_stat(lst: List[float], fallback: float = 0.0) -> float:
+        if not lst:
+            return fallback
+        return float(statistics.median(lst)) if use_median else (sum(lst) / len(lst))
+
+    avg_duration = _calc_stat(durations)
+    avg_input_tokens = _calc_stat(input_tokens, primary_usage.get("input_tokens", 0) / max(sample_count, 1))
+    avg_output_tokens = _calc_stat(output_tokens, primary_usage.get("output_tokens", 0) / max(sample_count, 1))
+    avg_cached_tokens = _calc_stat(cached_tokens, primary_usage.get("input_tokens_cache_read", 0) / max(sample_count, 1))
+    avg_reasoning_tokens = _calc_stat(reasoning_tokens, primary_usage.get("reasoning_tokens", 0) / max(sample_count, 1))
 
     total_gen_tokens = avg_reasoning_tokens + avg_output_tokens
     reasoning_frac = avg_reasoning_tokens / max(total_gen_tokens, 1.0)
@@ -187,6 +194,7 @@ def extract_metrics(json_path: str, label_name: str = "") -> Dict[str, Any]:
         "total_duration": total_duration,
         "total_input_tokens": total_input_tokens,
         "total_output_tokens": total_output_tokens,
+        "use_median": use_median,
     }
 
 
@@ -208,24 +216,27 @@ def format_delta_pct(val: float, base_val: float, is_percentage_points: bool = F
 def generate_markdown_table(
     baseline_metrics: Dict[str, Any],
     comparison_metrics_list: List[Dict[str, Any]],
+    use_median: bool = False,
 ) -> str:
     """Renders a GFM comparison markdown table."""
     lines = []
-    lines.append("### A2UI Evaluation Comparison & Baseline Delta")
+    stat_title = "Median" if use_median else "Average"
+    lines.append(f"### A2UI Evaluation Comparison & Baseline Delta ({stat_title} Metrics)")
     lines.append("")
 
+    stat_name = "Median" if use_median else "Avg"
     headers = [
         "Run / Results Directory",
         "Samples",
         "Schema Acc (Delta)",
         "Quality Score (Delta)",
         "Wall Latency (Delta)",
-        "Sample Working Time (Delta)",
-        "Est. Reasoning Time (Delta)",
-        "Est. Code Time (Delta)",
-        "Avg Input Tok (Delta)",
-        "Avg Reasoning Tok (Delta)",
-        "Avg Code Output Tok (Delta)",
+        f"Sample Working Time ({stat_name})",
+        f"Est. Reasoning Time ({stat_name})",
+        f"Est. Code Time ({stat_name})",
+        f"{stat_name} Input Tok (Delta)",
+        f"{stat_name} Reasoning Tok (Delta)",
+        f"{stat_name} Code Output Tok (Delta)",
     ]
 
     lines.append("| " + " | ".join(headers) + " |")
@@ -317,14 +328,15 @@ def generate_markdown_table(
     lines.append("- **Schema Acc (Delta)**: Percentage of outputs passing strict compiler compilation and schema validation (`a2ui_scorer`), with point diff vs baseline.")
     lines.append("- **Quality Score (Delta)**: LLM-graded semantic intent accuracy score (`measured_model_graded_qa`), with point diff vs baseline.")
     lines.append("- **Wall Latency (Delta)**: Total wall-clock run duration divided by sample count `(completed_at - started_at) / samples`, measuring parallel batch throughput.")
-    lines.append("- **Sample Working Time (Delta)**: Average pure HTTP execution duration (`working_time`) per sample, excluding API rate-limit backoffs and task queue wait times.")
+    lines.append("- **Sample Working Time (Delta)**: Sample pure HTTP execution duration (`working_time`), excluding API rate-limit backoffs and task queue wait times.")
     lines.append("- **Est. Reasoning Time (Delta)**: Estimated time spent during model internal reasoning, calculated as `Working Time × (Reasoning Tokens / Total Generated Tokens)`.")
     lines.append("- **Est. Code Time (Delta)**: Estimated time spent emitting final code output, calculated as `Working Time × (Code Output Tokens / Total Generated Tokens)`.")
-    lines.append("- **Avg Input Tok (Delta)**: Average prompt input tokens sent per sample, including system instructions and catalog schema definitions.")
-    lines.append("- **Avg Reasoning Tok (Delta)**: Average internal thinking/reasoning tokens (`thoughtsTokenCount`) generated by the model per sample.")
-    lines.append("- **Avg Code Output Tok (Delta)**: Average final code output tokens (`candidatesTokenCount`) generated by the model per sample.")
+    lines.append("- **Input Tok (Delta)**: Prompt input tokens sent per sample, including system instructions and catalog schema definitions.")
+    lines.append("- **Reasoning Tok (Delta)**: Internal thinking/reasoning tokens (`thoughtsTokenCount`) generated by the model per sample.")
+    lines.append("- **Code Output Tok (Delta)**: Final code output tokens (`candidatesTokenCount`) generated by the model per sample.")
     lines.append("")
-    lines.append("*Notes: Latency and token metrics represent per-sample averages. Delta percentages indicate relative gain (+) or reduction (-) against the baseline.*")
+    stat_note = "medians" if use_median else "averages"
+    lines.append(f"*Notes: Latency and token metrics represent per-sample {stat_note}. Delta percentages indicate relative gain (+) or reduction (-) against the baseline.*")
     return "\n".join(lines)
 
 
@@ -344,6 +356,11 @@ def main():
         help="One or more target results directories or json files to compare against baseline",
     )
     parser.add_argument(
+        "--median",
+        action="store_true",
+        help="Compute and display sample medians instead of averages for latency and token metrics",
+    )
+    parser.add_argument(
         "--output",
         type=str,
         default=None,
@@ -354,17 +371,21 @@ def main():
 
     # Load baseline
     baseline_json = resolve_results_file(args.baseline)
-    baseline_metrics = extract_metrics(baseline_json, label_name=os.path.basename(os.path.normpath(args.baseline)))
+    baseline_metrics = extract_metrics(
+        baseline_json,
+        label_name=os.path.basename(os.path.normpath(args.baseline)),
+        use_median=args.median,
+    )
 
     # Load comparison runs
     comp_metrics_list = []
     for r_dir in args.results_dirs:
         res_json = resolve_results_file(r_dir)
         label = os.path.basename(os.path.normpath(r_dir))
-        m = extract_metrics(res_json, label_name=label)
+        m = extract_metrics(res_json, label_name=label, use_median=args.median)
         comp_metrics_list.append(m)
 
-    table_md = generate_markdown_table(baseline_metrics, comp_metrics_list)
+    table_md = generate_markdown_table(baseline_metrics, comp_metrics_list, use_median=args.median)
     print(table_md)
 
     if args.output:
