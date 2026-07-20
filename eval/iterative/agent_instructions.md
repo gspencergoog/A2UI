@@ -100,13 +100,17 @@ To save the historical run context for future analysis and allow the orchestrato
 
 ---
 
-## Verification & Merging
+## Verification, History Synchronization & Merging
 
-1. **Full Suite Check**: Once the small-scale validation set achieves 100% success (or plateaus), run a full verification across the entire 50+ prompt evaluation suite:
+1. **Synchronizing Multi-Worktree History**: If multiple agents ran concurrently in parallel worktrees (`../worktrees/`), collect all history runs into the main history and rebuild `history_summary.md`:
+   ```bash
+   uv run python eval/iterative/sync_history.py
+   ```
+2. **Full Suite Check**: Once the small-scale validation set achieves 100% success (or plateaus), run a full verification across the entire 50+ prompt evaluation suite:
    ```bash
    uv run python eval/iterative/optimize_format.py --format <format> --model <model> --full
    ```
-2. **PR creation**: Create a Pull Request to merge your worktree branch back to the main repository. When branches are merged, the history run folders merge conflict-free. The index `history_summary.md` will be rebuilt automatically on the next execution.
+3. **PR Creation & Merging**: Create a Pull Request to merge your worktree branch back to the main repository. When branches are merged, the history run folders merge conflict-free. Future agents starting from `main` will automatically inherit the complete collective history of all previous runs.
 
 ---
 
