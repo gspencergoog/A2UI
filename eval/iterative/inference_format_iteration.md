@@ -32,13 +32,14 @@ To optimize format engineering efficiently, the process uses a **hybrid design**
 
 ---
 
-## Step 1: Formulate a Well-Reasoned, Data-Driven Hypothesis
+## Step 1: Analyze History & Formulate a Well-Reasoned Hypothesis
 
-Before making any changes, establish a clear reasoning for *why* the change will improve model performance or compliance.
+Before making any changes, establish a clear reasoning for *why* the change will improve model performance or compliance, while ensuring past failed attempts are not repeated.
 
-1. **Analyze Existing Baselines**: Compare current logs against baseline runs stored in the repository under `eval/baselines/{format}/` (containing `results.json` and metric summaries).
-2. **Identify Patterns**: Read the failure breakdown in the latest optimization report (e.g., "model consistently fails to close parentheses", "struggles with nested layouts", or "misses required accessibility labels").
-3. **Formulate Hypothesis**: Propose a specific, minimal modification to:
+1. **Inspect Historical Experiment Memory**: Read `eval/iterative/history_summary.md` and scan recent `run_meta.json` files in `eval/iterative/history/` to understand past hypotheses, status (`KEEP` vs `REVERT`), and code diffs.
+2. **Anti-Repetition Rule**: Do **NOT** retry a hypothesis or prompt modification that was previously attempted and reverted.
+3. **Analyze Unresolved Failure Patterns**: Compare current logs against baseline runs stored under `eval/baselines/{format}/` to identify unaddressed syntax or schema failures.
+4. **Formulate a Minimal Hypothesis**: State a specific, targeted modification to:
    - System prompts and format rules (in `prompt_generator.py` or prompt templates).
    - Compiler, decompiler, or parser rules (in `compiler.py`, `decompiler.py`, or `parser.py`).
 

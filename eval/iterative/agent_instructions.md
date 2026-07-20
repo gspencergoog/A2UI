@@ -20,11 +20,11 @@ Execute all subsequent steps inside that worktree directory.
 
 For each iteration, perform the following steps:
 
-### Step 1: Analyze & Formulate Hypothesis
-1. Check the baseline results under `eval/baselines/{format}/results.json`.
-2. Scan the current optimization index `eval/iterative/history_summary.md` and read recent reports in `eval/iterative/history/` to understand past experiments and avoid duplicate/failing paths.
-3. Identify a failure pattern (e.g. invalid syntax, schema violation, or grader grade of "I" or "P").
-4. Formulate a hypothesis (e.g., "Adding negative examples in the system prompt will reduce redundant parent container generation").
+### Step 1: Analyze History & Formulate Hypothesis
+1. **Check Historical Index & Past Runs**: Read `eval/iterative/history_summary.md` and scan recent `run_meta.json` files in `eval/iterative/history/` to inspect all previous experiments, their hypotheses, status (`KEEP` vs `REVERT`), and code diffs.
+2. **Anti-Repetition Constraint**: **DO NOT** repeat or retry a hypothesis, prompt rule edit, or code modification that was already tested and reverted in a past run.
+3. **Analyze Failure Patterns**: Review baseline failure logs in `eval/baselines/{format}/results.json` to identify unresolved failure patterns (e.g. nested layout errors, dangling string references, missing optional attributes).
+4. **Formulate a Minimal Hypothesis**: State a specific, targeted hypothesis (e.g. "Replacing positional parameter placeholders with explicit keyword syntax will eliminate container nesting ambiguity").
 
 ### Step 2: Implement and Verify Code
 1. Implement changes in:
