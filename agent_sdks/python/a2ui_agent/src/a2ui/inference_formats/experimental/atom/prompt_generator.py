@@ -63,7 +63,27 @@ IMPORTANT: Wrap your output inside `<a2ui>` and `</a2ui>` sentinel tags. Do NOT 
 9. Standalone Operations:
    - Delete surface: (deleteSurface "surface_id")
    - Call RPC function: (callFunction "openUrl" :url "https://example.com")
+
+10. Strict Catalog Adherence:
+   - You MUST ONLY use property names listed in the Component Catalog Signatures below.
+   - Do NOT invent CSS or style attributes (e.g. style, padding, margin, backgroundColor, color, fontSize, size, minHeight, borderRadius, spacing, align, justify).
+   - Use correct catalog property names (e.g. Image uses :url, not :src. Text variant must be "caption" or "body").
 '''
+
+
+def _get_schema_enum(prop_schema: Any) -> Optional[list[str]]:
+    """Helper to recursively find enum definitions inside a JSON schema."""
+    if not isinstance(prop_schema, dict):
+        return None
+    if "enum" in prop_schema:
+        return prop_schema["enum"]
+    if "oneOf" in prop_schema or "anyOf" in prop_schema:
+        subs = prop_schema.get("oneOf", []) + prop_schema.get("anyOf", [])
+        for sub in subs:
+            enum_val = _get_schema_enum(sub)
+            if enum_val:
+                return enum_val
+    return None
 
 
 class AtomPromptGenerator(PromptGenerator):
@@ -77,30 +97,116 @@ class AtomPromptGenerator(PromptGenerator):
         except Exception:
             self.schema_helper = None
 
-    def generate_system_prompt(
-        self, client_capabilities: Optional[V09Capabilities] = None
+    def generate(
+        self,
+        role_description: str = "",
+        workflow_description: str = "",
+        ui_description: str = "",
+        client_ui_capabilities: Optional[Any] = None,
+        allowed_components: Optional[list[str]] = None,
+        allowed_messages: Optional[list[str]] = None,
+        include_schema: bool = True,
+        include_examples: bool = True,
+        validate_examples: bool = False,
     ) -> str:
         """Generates system prompt for Atom format."""
-        prompt = [ATOM_RULES, "\n## Component Catalog Signatures\n"]
-        for comp_name in sorted(self.schema_helper.get_all_component_names()):
-            sig = self._get_component_signature(comp_name)
-            prompt.append(f"- {sig}")
+        parts = []
+        if role_description:
+            parts.append(role_description)
 
-        if self.format.examples_path:
-            examples = self.get_examples(self.format.examples_path)
-            if examples:
-                prompt.append("\n## Examples\n")
-                prompt.append(examples)
+        rules = ATOM_RULES
+        if workflow_description:
+            rules += f"\n\n{workflow_description}"
+        parts.append(f"## Instructions:\n{rules}")
 
-        return "\n".join(prompt)
+        if include_schema and self.schema_helper:
+            comp_sigs = self.generate_component_signatures()
+            func_sigs = self.generate_function_signatures()
+            if comp_sigs:
+                parts.append(f"## Component Catalog Signatures:\n{comp_sigs}")
+            if func_sigs:
+                parts.append(f"## Function Signatures:\n{func_sigs}")
 
-    def _get_component_signature(self, comp_name: str) -> str:
-        """Generates S-expression signature string for a component."""
-        props = self.schema_helper.get_component_properties(comp_name)
-        params = []
-        for prop_name, prop_schema in props.items():
-            if prop_name in ("id", "component"):
-                continue
-            is_req = self.schema_helper.is_property_required(comp_name, prop_name)
-            params.append(f":{prop_name}" if is_req else f"[:{prop_name}]")
-        return f"({comp_name} {' '.join(params)})"
+        return "\n\n".join(parts)
+
+    def generate_component_signatures(self) -> str:
+        """Compiles component definitions into S-expression signatures."""
+        if not self.schema_helper:
+            return ""
+        signatures = []
+        for name in sorted(self.schema_helper.component_properties.keys()):
+            props = self.schema_helper.get_component_properties(name)
+            reqs = self.schema_helper.get_component_required(name)
+            comp_desc = self.schema_helper.get_component_description(name)
+
+            ordered_args = []
+            prop_details = []
+            for p in props:
+                if p in ("id", "component"):
+                    continue
+                is_req = p in reqs
+                opt_suffix = "" if is_req else "?"
+                p_schema = self.schema_helper.get_property_schema(name, p)
+
+                arg_label = f":{p}{opt_suffix}"
+                ordered_args.append(arg_label)
+
+                p_desc = p_schema.get("description") if isinstance(p_schema, dict) else None
+                enum_vals = _get_schema_enum(p_schema)
+
+                if p_desc or enum_vals:
+                    p_line_parts = []
+                    if p_desc:
+                        p_line_parts.append(p_desc)
+                    if enum_vals:
+                        enum_vals_str = ", ".join([f"'{v}'" for v in enum_vals])
+                        p_line_parts.append(f"Must be one of: {enum_vals_str}")
+                    prop_details.append(f"  - :{p}: {' '.join(p_line_parts)}")
+
+            sig = f"• ({name} {' '.join(ordered_args)})"
+            if comp_desc:
+                sig += f"\n  - Description: {comp_desc}"
+            if prop_details:
+                sig += "\n" + "\n".join(prop_details)
+            signatures.append(sig)
+        return "\n".join(signatures)
+
+    def generate_function_signatures(self) -> str:
+        """Compiles function definitions into S-expression signatures."""
+        if not self.schema_helper:
+            return ""
+        signatures = []
+        for name in sorted(self.schema_helper.function_properties.keys()):
+            props = self.schema_helper.get_function_properties(name)
+            reqs = self.schema_helper.get_function_required(name)
+            f_desc = self.schema_helper.get_function_description(name)
+
+            ordered_args = []
+            prop_details = []
+            for p in props:
+                is_req = p in reqs
+                opt_suffix = "" if is_req else "?"
+                p_schema = self.schema_helper.get_property_schema(name, p)
+
+                arg_label = f":{p}{opt_suffix}"
+                ordered_args.append(arg_label)
+
+                p_desc = p_schema.get("description") if isinstance(p_schema, dict) else None
+                enum_vals = _get_schema_enum(p_schema)
+
+                if p_desc or enum_vals:
+                    p_line_parts = []
+                    if p_desc:
+                        p_line_parts.append(p_desc)
+                    if enum_vals:
+                        enum_vals_str = ", ".join([f"'{v}'" for v in enum_vals])
+                        p_line_parts.append(f"Must be one of: {enum_vals_str}")
+                    prop_details.append(f"  - :{p}: {' '.join(p_line_parts)}")
+
+            sig = f"• ({name} {' '.join(ordered_args)})"
+            if f_desc:
+                sig += f"\n  - Description: {f_desc}"
+            if prop_details:
+                sig += "\n" + "\n".join(prop_details)
+            signatures.append(sig)
+        return "\n".join(signatures)

@@ -82,7 +82,7 @@ def main() -> None:
         action="append",
         help=(
             "Evaluation strategies to run (choices: direct, subagent_tool, express,"
-            " elemental). Can be comma-separated or specified multiple times."
+            " elemental, atom). Can be comma-separated or specified multiple times."
         ),
     )
     args = parser.parse_args()
@@ -108,7 +108,7 @@ def main() -> None:
                 f"Unknown evaluation strategy: {strat}. Valid choices:"
                 f" {', '.join(STRATEGIES.keys())}"
             )
-        if strat in ["express", "elemental"]:
+        if strat in ["express", "elemental", "atom"]:
             tasks.append(
                 a2ui_v1_0_eval(strategy=strat, grading_model=args.grading_model)
             )
