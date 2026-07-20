@@ -49,25 +49,32 @@ uv run python eval/iterative/optimize_format.py --format <format> --model <model
 uv run python eval/iterative/optimize_format.py --format <format> --model <model> --prompt <prompt_name>
 ```
 
-### Step 4: Evaluate Metrics & Git Diff
-Read the generated report in `eval/iterative/current_report.md`. Analyze:
-1. **Pytest Conformance**: Must be `PASS`.
-2. **Accuracies**: Overall Accuracy (LLM graded) and Algorithmic Schema Pass Rate.
-3. **Resource footprints**:
-   - `inference_duration_seconds` (latency)
-   - `inference_input_tokens` (prompt size cost)
-   - `inference_output_tokens` (generation size cost)
-4. **Git Diff**: Verify that only the intended files were modified.
-
-#### Comparing Historical Runs Against Baseline
-To generate a Markdown comparison table showing percentage gain/loss against a baseline directory (e.g. `eval/baselines/transport` or `eval/baselines/<format>`), use:
+### Step 4: Evaluate Metrics & Compare Against Baseline
+Run `compare_results.py` to compare your current run directory against the baseline directory (`eval/baselines/transport` or `eval/baselines/<format>`). By default, it computes median metrics:
 ```bash
-uv run python eval/iterative/compare_results.py --baseline eval/baselines/<format> eval/iterative/history/run_001_... eval/iterative/history/run_002_...
+uv run python eval/iterative/compare_results.py --baseline eval/baselines/<format> <current_run_dir_or_eval_log>
 ```
+*(To inspect mean averages instead of default medians, pass `--average`)*.
+
+Analyze the generated Markdown table and Metric Definitions Key:
+1. **Pytest Conformance**: Must be `PASS`.
+2. **Correctness Guardrails**:
+   - `Schema Acc (Delta)`: Percentage of outputs passing strict compiler syntax and schema validation (`a2ui_scorer`).
+   - `Quality Score (Delta)`: LLM-graded semantic intent accuracy score (`measured_model_graded_qa`).
+3. **Efficiency Optimization Metrics**:
+   - `Median Code Output Tok (Delta)`: Token count of generated code. Direct target of format design optimization.
+   - `Non-reasoning Output Time (Median)`: Estimated time spent emitting code. Shrinks proportionally with code output tokens.
+   - `Median Input Tok (Delta)`: System prompt and catalog schema token size. Lower input tokens prevent API throttling.
+   - `Parallel Wall Latency (Delta)`: Batch wall-clock throughput under 10 concurrent tasks.
 
 ### Step 5: Progression or Rollback Decision
-* **If accuracy degrades (or efficiency metrics spike significantly with no gain)**: You **must** roll back the changes using Git (`git reset --hard HEAD` or `git checkout -- <files>`). Document this as a failed/backtracked run in history.
-* **If accuracy improves or remains neutral with clean conformance**: Keep the changes and prepare to archive.
+Evaluate your iteration against these 3 decision rules:
+1. **Rule 1 (Correctness Guardrail - Non-negotiable)**: `Schema Acc` and `Quality Score` **MUST NOT** regress below Baseline.
+   - *If Accuracy Degrades* $\rightarrow$ You **MUST** immediately roll back the changes (`git reset --hard HEAD`).
+2. **Rule 2 (Code Footprint)**: Did `Median Code Output Tok` decrease without degrading accuracy?
+   - *If YES* $\rightarrow$ **KEEP CHANGE** (The format is demonstrably more compact).
+3. **Rule 3 (Prompt Overhead)**: Did `Median Input Tok` decrease without degrading accuracy?
+   - *If YES* $\rightarrow$ **KEEP CHANGE** (The prompt instructions are more concise).
 
 ### Step 6: Archive Iteration Run
 To save the historical run context for future analysis and allow the orchestrator to automatically maintain the summary index:

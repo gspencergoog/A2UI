@@ -83,26 +83,23 @@ uv run python eval/iterative/optimize_format.py --format <format> --model <model
 
 ---
 
-## Step 4: Analyze the Optimization Report (LLM Stage)
+## Step 4: Analyze the Optimization Report & Compare Against Baseline
 
-The subagent reads `eval/logs/optimization_report.md` to diagnose issues. The report contains:
-- **Pytest Conformance Status**: `PASS` or `FAIL`.
-- **Pass Rate Metrics**: Overall, Algorithmic (Schema), and LLM Judge accuracy, including comparison differences against the baseline or previous iteration.
-- **Efficiency & Cost Metrics**: Evaluates and tracks resource expenditures:
-  - `inference_duration_seconds`: Generation latency.
-  - `inference_input_tokens`: Input tokens (governed by prompt/system template size).
-  - `inference_output_tokens`: Output tokens (governed by format verbosity and LLM reasoning steps).
-  *Format optimization aims to maximize pass rates while minimizing these duration and token counts.*
-- **Active Git Diff**: Code/prompt changes made since the last baseline.
-- **Failure Breakdown**: Categorized details for every failing sample:
-  1. **Algorithmic/Parser Failures**: Thrown when compilation or schema validation fails. Includes the raw model output and the exception message.
-  2. **Semantic Grader Failures**: Thrown when output is syntactically valid but fails user intent grading (LLM Grade is `I` or `P`). Includes the grader's reasoning.
-
-### Multi-Run Comparison & Baseline Delta Tool
-To compare metrics and percentage gain/loss across multiple historical iteration runs or formats against a reference baseline directory (e.g., `eval/baselines/transport` or `eval/baselines/<format>`), use:
+The subagent runs `compare_results.py` to compare current run metrics against the reference baseline directory (`eval/baselines/transport` or `eval/baselines/<format>`):
 ```bash
-uv run python eval/iterative/compare_results.py --baseline eval/baselines/<format> eval/iterative/history/run_001_... eval/iterative/history/run_002_...
+uv run python eval/iterative/compare_results.py --baseline eval/baselines/<format> <current_run_dir_or_eval_log>
 ```
+*(By default, this outputs median metrics. Pass `--average` to inspect mean averages).*
+
+### Evaluation & Decision Criteria:
+1. **Pytest Conformance Status**: Must be `PASS`.
+2. **Correctness Guardrails**: `Schema Acc` and `Quality Score` must be $\ge$ Baseline.
+3. **Efficiency Optimization Metrics**:
+   - `Median Code Output Tok`: Direct measure of format verbosity. Primary optimization target.
+   - `Non-reasoning Output Time`: Estimated time spent streaming output code. Shrinks with code token reduction.
+   - `Median Input Tok`: Prompt instructions size. Lower input tokens prevent API throttling.
+   - `Parallel Wall Latency`: Concurrency throughput across 10 tasks.
+4. **Failure Breakdown**: Categorized details for every failing sample (Parser failures vs LLM Intent failures).
 
 ---
 

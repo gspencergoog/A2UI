@@ -27,7 +27,7 @@ from typing import Any, Dict, List, Optional
 # Ensure rate limiter connections limit (matches max_tasks=10)
 os.environ["INSPECT_MAX_CONNECTIONS"] = "10"
 
-from compare_results import format_delta_pct
+from compare_results import format_delta_pct, extract_metrics, generate_markdown_table
 
 
 def _get_uv_binary() -> str:
