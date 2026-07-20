@@ -37,8 +37,6 @@ def measured_generate() -> Solver:
 
         state = await generate(state)
 
-        duration = time.time() - start_time
-
         usage_after = sample_model_usage().get(str(state.model))
         after_input = usage_after.input_tokens if usage_after else 0
         after_cr = usage_after.input_tokens_cache_read or 0 if usage_after else 0
@@ -47,6 +45,12 @@ def measured_generate() -> Solver:
         after_cached = after_cr + after_cw
         after_output = usage_after.output_tokens if usage_after else 0
 
+        # Redefine inference_duration_seconds to measure pure working time of successful model call
+        working_time = None
+        if hasattr(state, "output") and getattr(state.output, "call", None) and getattr(state.output.call, "time", None):
+            working_time = state.output.call.time
+
+        duration = working_time if working_time is not None else (time.time() - start_time)
         state.metadata["inference_duration_seconds"] = duration
         state.metadata["inference_input_tokens"] = (
             after_total_input - before_total_input

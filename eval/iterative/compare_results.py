@@ -99,8 +99,21 @@ def extract_metrics(json_path: str, label_name: str = "") -> Dict[str, Any]:
 
     for sample in samples:
         meta = sample.get("metadata", {})
-        if "inference_duration_seconds" in meta:
-            durations.append(meta["inference_duration_seconds"])
+        
+        # Redefined inference_duration_seconds: extract pure model working_time excluding retries
+        sample_duration = None
+        events = sample.get("events", [])
+        model_events = [e for e in events if e.get("event") == "model"]
+        if model_events:
+            m = model_events[0]
+            sample_duration = m.get("working_time") or m.get("time") or (m.get("call", {}).get("time") if isinstance(m.get("call"), dict) else None)
+
+        if sample_duration is None and "inference_duration_seconds" in meta:
+            sample_duration = meta["inference_duration_seconds"]
+
+        if sample_duration is not None:
+            durations.append(sample_duration)
+
         if "inference_input_tokens" in meta:
             input_tokens.append(meta["inference_input_tokens"])
         if "inference_output_tokens" in meta:
