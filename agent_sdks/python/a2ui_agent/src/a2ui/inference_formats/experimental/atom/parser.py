@@ -70,7 +70,7 @@ class AtomParser(Parser):
             compiled_json = compiler.compile(
                 format_content, surface_id=self.surface_id, is_final=is_final
             )
-            return compiled_json if isinstance(compiled_json, list) else [compiled_json]
+            return [compiled_json]
         except Exception as e:
             raise A2uiCompilationError(
                 message=str(e),
