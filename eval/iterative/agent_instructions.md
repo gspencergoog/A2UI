@@ -108,13 +108,14 @@ To save the historical run context for future analysis and allow the orchestrato
 
 ---
 
-## Verification, History Synchronization & Merging
+## Verification, History Synchronization & Two-Tiered Merging
 
-1. **Synchronizing Multi-Worktree History**: If multiple agents ran concurrently in parallel worktrees (`../worktrees/`), collect all history runs into the main history and rebuild `history_summary.md`:
+1. **Tier 1: Subagent Fast Inner Loop (Validation Subset)**: Subagents execute rapid hypothesis iterations using the fast validation subset. When a run meets decision rules (`KEEP`), the subagent archives the run and commits its branch as a **Milestone Candidate**.
+2. **Synchronizing Multi-Worktree History**: Collect history across parallel agent worktrees into main history:
    ```bash
    uv run python eval/iterative/sync_history.py
    ```
-2. **Mandatory Full Suite Check for Kept Milestone Runs**: Whenever an iteration run is kept (`KEEP`) and shows accuracy gains on the validation subset, the agent **MUST** execute a full verification across all evaluation samples before finalizing the milestone:
+3. **Tier 2: Outer-Loop Milestone Full Suite Check**: Before merging a Milestone Candidate branch into `main`, execute full suite verification across all evaluation samples:
    ```bash
    uv run python eval/iterative/optimize_format.py --format <format> --model <model> --full
    ```
