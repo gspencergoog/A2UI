@@ -30,8 +30,20 @@ if SCRIPT_DIR not in sys.path:
 from optimize_format import regenerate_master_index
 
 
+def _get_max_run_id(history_dir: str) -> int:
+    """Finds the maximum integer run ID existing in history_dir."""
+    max_id = 0
+    if os.path.exists(history_dir):
+        for entry in os.scandir(history_dir):
+            if entry.is_dir() and entry.name.startswith("run_"):
+                parts = entry.name.split("_")
+                if len(parts) >= 2 and parts[1].isdigit():
+                    max_id = max(max_id, int(parts[1]))
+    return max_id
+
+
 def sync_worktree_history(target_worktrees: Optional[List[str]] = None) -> List[str]:
-    """Scans target worktrees and syncs missing history run folders into main history."""
+    """Scans target worktrees and syncs missing history run folders into main history with zero collisions."""
     main_history_dir = os.path.join(SCRIPT_DIR, "history")
     os.makedirs(main_history_dir, exist_ok=True)
 
@@ -46,17 +58,45 @@ def sync_worktree_history(target_worktrees: Optional[List[str]] = None) -> List[
                     target_worktrees.append(entry.path)
 
     copied_runs = []
+    current_max_id = _get_max_run_id(main_history_dir)
+
     for wt in target_worktrees:
         wt_history = os.path.join(wt, "eval", "iterative", "history")
         if not os.path.exists(wt_history):
             continue
 
-        for entry in os.scandir(wt_history):
+        for entry in sorted(os.scandir(wt_history), key=lambda e: e.name):
             if entry.is_dir() and entry.name.startswith("run_"):
-                dest_dir = os.path.join(main_history_dir, entry.name)
-                if not os.path.exists(dest_dir):
-                    shutil.copytree(entry.path, dest_dir)
-                    copied_runs.append(entry.name)
+                # Exact folder match check (already synced)
+                exact_dest = os.path.join(main_history_dir, entry.name)
+                if os.path.exists(exact_dest):
+                    continue
+
+                parts = entry.name.split("_")
+                run_id_num = int(parts[1]) if (len(parts) >= 2 and parts[1].isdigit()) else None
+
+                # Check if this run_ID is already occupied by a different folder in main_history
+                id_occupied = False
+                if run_id_num is not None:
+                    for existing in os.scandir(main_history_dir):
+                        if existing.is_dir() and existing.name.startswith(f"run_{run_id_num:03d}_"):
+                            id_occupied = True
+                            break
+
+                if id_occupied:
+                    # Re-index incoming folder with next available max_id
+                    current_max_id += 1
+                    new_id_str = f"{current_max_id:03d}"
+                    parts[1] = new_id_str
+                    new_name = "_".join(parts)
+                    dest_dir = os.path.join(main_history_dir, new_name)
+                else:
+                    dest_dir = exact_dest
+                    if run_id_num is not None and run_id_num > current_max_id:
+                        current_max_id = run_id_num
+
+                shutil.copytree(entry.path, dest_dir)
+                copied_runs.append(os.path.basename(dest_dir))
 
     # Rebuild master index
     regenerate_master_index(main_history_dir)
