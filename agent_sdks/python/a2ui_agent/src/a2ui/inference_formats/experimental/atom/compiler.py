@@ -78,18 +78,18 @@ class SExprParser:
             return None
 
         tok = self.tokens[self.pos]
-        if tok == "(":
+        if tok in ("(", "[", "{"):
+            closing = ")" if tok == "(" else ("]" if tok == "[" else "}")
             self.pos += 1
             elements = []
-            while self.pos < len(self.tokens) and self.tokens[self.pos] != ")":
+            while self.pos < len(self.tokens) and self.tokens[self.pos] != closing:
                 sub = self._parse_expr()
                 if sub is not None:
                     elements.append(sub)
-            if self.pos < len(self.tokens) and self.tokens[self.pos] == ")":
+            if self.pos < len(self.tokens) and self.tokens[self.pos] == closing:
                 self.pos += 1
-            # Auto-healing: If ')' is missing at EOF, return elements cleanly
             return elements
-        elif tok == ")":
+        elif tok in (")", "]", "}"):
             self.pos += 1
             return None
         else:
@@ -212,6 +212,21 @@ class AtomCompiler:
             },
         }
 
+    def _clean_data_value(self, val: Any) -> Any:
+        if isinstance(val, list):
+            if not val:
+                return []
+            if len(val) >= 2 and len(val) % 2 == 0 and all(isinstance(val[i], str) and val[i].startswith(":") for i in range(0, len(val), 2)):
+                res = {}
+                i = 0
+                while i < len(val) - 1:
+                    key = str(val[i])[1:]
+                    res[key] = self._clean_data_value(val[i + 1])
+                    i += 2
+                return res
+            return [self._clean_data_value(item) for item in val]
+        return val
+
     def _parse_data_node(self, expr: List[Any], data_model: Dict[str, Any]) -> None:
         """Parses (data $/path/key val ...) into data_model structure."""
         head = str(expr[0])
@@ -225,7 +240,7 @@ class AtomCompiler:
             pairs.append((str(expr[1]), expr[2]))
 
         for k, v in pairs:
-            clean_path = k[2:] if k.startswith("$/") else k
+            clean_path = k[2:] if k.startswith("$/") else (k[1:] if k.startswith("$") else k)
             clean_path = clean_path.lstrip("/")
             if not clean_path:
                 continue
@@ -235,7 +250,7 @@ class AtomCompiler:
                 if p not in curr or not isinstance(curr[p], dict):
                     curr[p] = {}
                 curr = curr[p]
-            curr[parts[-1]] = v
+            curr[parts[-1]] = self._clean_data_value(v)
 
     def _compile_component(
         self,
