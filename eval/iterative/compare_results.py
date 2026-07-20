@@ -58,7 +58,7 @@ def resolve_results_file(target_path: str) -> str:
     raise FileNotFoundError(f"Could not find valid results.json or .eval file in: '{target_path}'")
 
 
-def extract_metrics(json_path: str, label_name: str = "", use_median: bool = False) -> Dict[str, Any]:
+def extract_metrics(json_path: str, label_name: str = "", use_median: bool = True) -> Dict[str, Any]:
     """Extracts summary and per-sample metadata metrics from results JSON data."""
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -216,7 +216,7 @@ def format_delta_pct(val: float, base_val: float, is_percentage_points: bool = F
 def generate_markdown_table(
     baseline_metrics: Dict[str, Any],
     comparison_metrics_list: List[Dict[str, Any]],
-    use_median: bool = False,
+    use_median: bool = True,
 ) -> str:
     """Renders a GFM comparison markdown table."""
     lines = []
@@ -230,10 +230,9 @@ def generate_markdown_table(
         "Samples",
         "Schema Acc (Delta)",
         "Quality Score (Delta)",
-        "Wall Latency (Delta)",
+        "Parallel Wall Latency (Delta)",
         f"Sample Working Time ({stat_name})",
-        f"Est. Reasoning Time ({stat_name})",
-        f"Est. Code Time ({stat_name})",
+        f"Non-reasoning Output Time ({stat_name})",
         f"{stat_name} Input Tok (Delta)",
         f"{stat_name} Reasoning Tok (Delta)",
         f"{stat_name} Code Output Tok (Delta)",
@@ -248,14 +247,13 @@ def generate_markdown_table(
     b_quality_str = f"{b['quality_acc']*100:.1f}%" if b['quality_acc'] is not None else "N/A"
     b_wall_str = f"{b['wall_clock_per_sample']:.2f}s" if b['wall_clock_per_sample'] > 0 else "N/A"
     b_lat_str = f"{b['avg_duration']:.2f}s"
-    b_rtime_str = f"{b.get('est_reasoning_time', 0):.2f}s"
     b_ctime_str = f"{b.get('est_code_time', 0):.2f}s"
     b_inp_str = f"{b['avg_input_tokens']:,.0f}"
     b_rtok_str = f"{b.get('avg_reasoning_tokens', 0):,.0f}"
     b_out_str = f"{b['avg_output_tokens']:,.0f}"
 
     lines.append(
-        f"| **Baseline**: `{b['name']}` | {b['sample_count']} | {b_schema_str} | {b_quality_str} | {b_wall_str} | {b_lat_str} | {b_rtime_str} | {b_ctime_str} | {b_inp_str} | {b_rtok_str} | {b_out_str} |"
+        f"| **Baseline**: `{b['name']}` | {b['sample_count']} | {b_schema_str} | {b_quality_str} | {b_wall_str} | {b_lat_str} | {b_ctime_str} | {b_inp_str} | {b_rtok_str} | {b_out_str} |"
     )
 
     # Format comparison rows
@@ -279,7 +277,7 @@ def generate_markdown_table(
         else:
             quality_cell = "N/A"
 
-        # Wall Latency
+        # Parallel Wall Latency
         if c["wall_clock_per_sample"] > 0:
             c_wall_val = f"{c['wall_clock_per_sample']:.2f}s"
             d_wall = format_delta_pct(c["wall_clock_per_sample"], b["wall_clock_per_sample"])
@@ -292,12 +290,7 @@ def generate_markdown_table(
         d_lat = format_delta_pct(c["avg_duration"], b["avg_duration"])
         latency_cell = f"{c_lat_val} ({d_lat})"
 
-        # Reasoning Time
-        c_rtime_val = f"{c.get('est_reasoning_time', 0):.2f}s"
-        d_rtime = format_delta_pct(c.get('est_reasoning_time', 0), b.get('est_reasoning_time', 0))
-        rtime_cell = f"{c_rtime_val} ({d_rtime})"
-
-        # Code Time
+        # Non-reasoning Output Time
         c_ctime_val = f"{c.get('est_code_time', 0):.2f}s"
         d_ctime = format_delta_pct(c.get('est_code_time', 0), b.get('est_code_time', 0))
         ctime_cell = f"{c_ctime_val} ({d_ctime})"
@@ -318,7 +311,7 @@ def generate_markdown_table(
         out_cell = f"{c_out_val} ({d_out})"
 
         lines.append(
-            f"| {name_str} | {samples_str} | {schema_cell} | {quality_cell} | {wall_cell} | {latency_cell} | {rtime_cell} | {ctime_cell} | {inp_cell} | {rtok_cell} | {out_cell} |"
+            f"| {name_str} | {samples_str} | {schema_cell} | {quality_cell} | {wall_cell} | {latency_cell} | {ctime_cell} | {inp_cell} | {rtok_cell} | {out_cell} |"
         )
 
     lines.append("")
@@ -327,10 +320,9 @@ def generate_markdown_table(
     lines.append("- **Samples**: Total number of evaluation sample prompts executed in the run.")
     lines.append("- **Schema Acc (Delta)**: Percentage of outputs passing strict compiler compilation and schema validation (`a2ui_scorer`), with point diff vs baseline.")
     lines.append("- **Quality Score (Delta)**: LLM-graded semantic intent accuracy score (`measured_model_graded_qa`), with point diff vs baseline.")
-    lines.append("- **Wall Latency (Delta)**: Total wall-clock run duration divided by sample count `(completed_at - started_at) / samples`, measuring parallel batch throughput.")
+    lines.append("- **Parallel Wall Latency (Delta)**: Total wall-clock run duration divided by sample count `(completed_at - started_at) / samples`, measuring parallel batch throughput under concurrency.")
     lines.append("- **Sample Working Time (Delta)**: Sample pure HTTP execution duration (`working_time`), excluding API rate-limit backoffs and task queue wait times.")
-    lines.append("- **Est. Reasoning Time (Delta)**: Estimated time spent during model internal reasoning, calculated as `Working Time × (Reasoning Tokens / Total Generated Tokens)`.")
-    lines.append("- **Est. Code Time (Delta)**: Estimated time spent emitting final code output, calculated as `Working Time × (Code Output Tokens / Total Generated Tokens)`.")
+    lines.append("- **Non-reasoning Output Time (Delta)**: Estimated time spent emitting final code output, calculated as `Working Time × (Code Output Tokens / Total Generated Tokens)`.")
     lines.append("- **Input Tok (Delta)**: Prompt input tokens sent per sample, including system instructions and catalog schema definitions.")
     lines.append("- **Reasoning Tok (Delta)**: Internal thinking/reasoning tokens (`thoughtsTokenCount`) generated by the model per sample.")
     lines.append("- **Code Output Tok (Delta)**: Final code output tokens (`candidatesTokenCount`) generated by the model per sample.")
@@ -356,9 +348,9 @@ def main():
         help="One or more target results directories or json files to compare against baseline",
     )
     parser.add_argument(
-        "--median",
+        "--average",
         action="store_true",
-        help="Compute and display sample medians instead of averages for latency and token metrics",
+        help="Compute and display sample averages instead of default medians for latency and token metrics",
     )
     parser.add_argument(
         "--output",
@@ -369,12 +361,14 @@ def main():
 
     args = parser.parse_args()
 
+    use_median = not args.average
+
     # Load baseline
     baseline_json = resolve_results_file(args.baseline)
     baseline_metrics = extract_metrics(
         baseline_json,
         label_name=os.path.basename(os.path.normpath(args.baseline)),
-        use_median=args.median,
+        use_median=use_median,
     )
 
     # Load comparison runs
@@ -382,10 +376,10 @@ def main():
     for r_dir in args.results_dirs:
         res_json = resolve_results_file(r_dir)
         label = os.path.basename(os.path.normpath(r_dir))
-        m = extract_metrics(res_json, label_name=label, use_median=args.median)
+        m = extract_metrics(res_json, label_name=label, use_median=use_median)
         comp_metrics_list.append(m)
 
-    table_md = generate_markdown_table(baseline_metrics, comp_metrics_list, use_median=args.median)
+    table_md = generate_markdown_table(baseline_metrics, comp_metrics_list, use_median=use_median)
     print(table_md)
 
     if args.output:
