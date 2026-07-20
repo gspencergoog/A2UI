@@ -118,9 +118,14 @@ class AtomDecompiler:
                 return f"$/{path}" if not path.startswith("/") and not path.startswith("$") else path
             if "event" in val:
                 evt = val["event"]
-                ctx = val.get("context", {})
+                if isinstance(evt, dict):
+                    name = evt.get("name", "")
+                    ctx = evt.get("context", {})
+                else:
+                    name = str(evt)
+                    ctx = val.get("context", {})
                 ctx_str = " " + " ".join([f":{k} {self._format_val(v)}" for k, v in ctx.items()]) if ctx else ""
-                return f'(Event "{evt}"{ctx_str})'
+                return f'(Event "{name}"{ctx_str})'
         if isinstance(val, str):
             return f'"{val}"'
         return str(val)

@@ -140,6 +140,245 @@ class TestAtomFormat(unittest.TestCase):
         self.assertIn("Column", comp_types)
         self.assertIn("Text", comp_types)
 
+    def test_compile_empty_text_raises_value_error(self):
+        """Negative test: Empty input text should raise ValueError."""
+        with self.assertRaises(ValueError):
+            self.compiler.compile("")
+
+    def test_compile_helper_functions(self):
+        """Test formatting helper functions formatString, formatDate, formatCurrency."""
+        text = '(Card (Text :text (formatString "Hello %s" $/name)))'
+        compiled = self.compiler.compile(text)
+        comps = compiled["createSurface"]["components"]
+        txt = next(c for c in comps if c["component"] == "Text")
+        self.assertEqual(
+            txt["text"],
+            {"call": "formatString", "args": {"arg_0": "Hello %s", "arg_1": {"path": "/name"}}}
+        )
+
+    def test_compile_list_template_expression(self):
+        """Test List component with template child expression."""
+        text = '(List (template :item item (Text item/title)))'
+        compiled = self.compiler.compile(text)
+        comps = compiled["createSurface"]["components"]
+        lst = next(c for c in comps if c["component"] == "List")
+        self.assertIn("template", lst)
+        self.assertIn("componentId", lst["template"])
+
+    def test_atom_format_and_parser_integration(self):
+        """Integration test for AtomFormat, AtomParser, and sentinel tag unwrapping."""
+        from a2ui.inference_formats.experimental.atom import AtomFormat
+        fmt = AtomFormat(catalog=self.catalog, surface_id="main")
+        parser = fmt.parser
+        
+        # Test has_format_content
+        raw_text = '<a2ui>(Card (Text "Hello"))</a2ui>'
+        self.assertTrue(parser.has_format_content(raw_text, complete=True))
+        self.assertFalse(parser.has_format_content("no tags", complete=True))
+
+        # Test unwrap
+        parts = parser.unwrap(raw_text)
+        self.assertEqual(len(parts), 1)
+
+        # Test compile
+        compiled = parser.compile('(Card (Text "Hello"))')
+        self.assertEqual(len(compiled), 1)
+        self.assertIn("createSurface", compiled[0])
+
+        # Test wrap_decompiled_blocks
+        wrapped = parser.wrap_decompiled_blocks(['(Card (Text "Hello"))'])
+        self.assertIn('<a2ui>', wrapped)
+        self.assertIn('</a2ui>', wrapped)
+
+    def test_atom_parser_compilation_error(self):
+        """Negative test: Invalid syntax in AtomParser should raise A2uiCompilationError."""
+        from a2ui.inference_formats.experimental.atom import AtomFormat
+        from a2ui.parser.errors import A2uiCompilationError
+        fmt = AtomFormat(catalog=self.catalog)
+        with self.assertRaises(A2uiCompilationError):
+            # Non-string format_content causes compilation error in compiler
+            fmt.parser.compile(12345)  # type: ignore
+
+    def test_atom_prompt_generator(self):
+        """Test AtomPromptGenerator generation of catalog prompt rules and component signatures."""
+        from a2ui.inference_formats.experimental.atom import AtomFormat
+        from a2ui.schema.catalog import CatalogConfig
+        from a2ui.inference_formats.transport import TransportFormat
+        from a2ui_eval.shared.utils import GIT_ROOT
+        cat_path = str(GIT_ROOT / 'specification/v1_0/catalogs/basic/catalog.json')
+        cat_cfg = CatalogConfig.from_path('basic_catalog', cat_path)
+        transport_format = TransportFormat(version='1.0', catalogs=[cat_cfg], experiments={'version_1_0'})
+        cat = transport_format.get_selected_catalog()
+
+    def test_atom_prompt_generator(self):
+        """Test AtomPromptGenerator generation of catalog prompt rules and component signatures."""
+        from a2ui.inference_formats.experimental.atom import AtomFormat
+        from a2ui.schema.catalog import CatalogConfig
+        from a2ui.inference_formats.transport import TransportFormat
+        from a2ui_eval.shared.utils import GIT_ROOT
+        cat_path = str(GIT_ROOT / 'specification/v1_0/catalogs/basic/catalog.json')
+        cat_cfg = CatalogConfig.from_path('basic_catalog', cat_path)
+        transport_format = TransportFormat(version='1.0', catalogs=[cat_cfg], experiments={'version_1_0'})
+        cat = transport_format.get_selected_catalog()
+
+        fmt = AtomFormat(catalog=cat, examples_path="/tmp/examples")
+        self.assertEqual(fmt.examples_path, "/tmp/examples")
+        prompt_gen = fmt.prompt_generator
+        prompt = prompt_gen.generate(
+            role_description="You are a helpful UI generator.",
+            workflow_description="Follow standard A2UI guidelines."
+        )
+        self.assertIn('You are a helpful UI generator.', prompt)
+        self.assertIn('Follow standard A2UI guidelines.', prompt)
+        self.assertIn('# A2UI Atom Output Contract', prompt)
+        self.assertIn('<a2ui>', prompt)
+        self.assertIn('Component Catalog Signatures', prompt)
+        self.assertIn('- (Card', prompt)
+        self.assertIn('- (Column', prompt)
+
+    def test_compiler_positional_properties_with_real_catalog(self):
+        """Test positional property mapping in AtomCompiler with real catalog schema helper."""
+        from a2ui.inference_formats.experimental.atom import AtomCompiler
+        from a2ui.schema.catalog import CatalogConfig
+        from a2ui.inference_formats.transport import TransportFormat
+        from a2ui_eval.shared.utils import GIT_ROOT
+        cat_path = str(GIT_ROOT / 'specification/v1_0/catalogs/basic/catalog.json')
+        cat_cfg = CatalogConfig.from_path('basic_catalog', cat_path)
+        transport_format = TransportFormat(version='1.0', catalogs=[cat_cfg], experiments={'version_1_0'})
+        cat = transport_format.get_selected_catalog()
+
+        compiler = AtomCompiler(catalog=cat)
+        text = '(Card (Column (Text "Positional Text Property")))'
+        compiled = compiler.compile(text)
+        comps = compiled["createSurface"]["components"]
+        txt = next(c for c in comps if c["component"] == "Text")
+        self.assertEqual(txt["text"], "Positional Text Property")
+
+    def test_decompile_standalone_operations(self):
+        """Test decompilation of deleteSurface and callFunction payloads."""
+        del_payload = {"version": "v1.0", "deleteSurface": {"surfaceId": "surf1"}}
+        self.assertEqual(self.decompiler.decompile(del_payload), '(deleteSurface "surf1")')
+
+        call_payload = {"version": "v1.0", "callFunction": {"call": "openUrl", "args": {"url": "https://a2ui.org"}}}
+        self.assertEqual(self.decompiler.decompile(call_payload), '(callFunction "openUrl" :url "https://a2ui.org")')
+
+    def test_format_missing_catalog_raises_value_error(self):
+        """Test AtomFormat without catalog raises ValueError on ensure_catalog."""
+        from a2ui.inference_formats.experimental.atom import AtomFormat
+        fmt = AtomFormat()
+        with self.assertRaises(ValueError):
+            _ = fmt.parser
+
+    def test_decompile_update_data_model(self):
+        """Test decompilation of updateDataModel payload with primitives."""
+        payload = {
+            "version": "v1.0",
+            "updateDataModel": {"value": {"score": 100, "active": True, "note": None}}
+        }
+        decompiled = self.decompiler.decompile(payload)
+        self.assertIn('(data $/score 100 $/active true $/note null)', decompiled)
+
+    def test_decompile_multiple_children_and_events(self):
+        """Test decompilation of multiple children and event action objects."""
+        payload = {
+            "version": "v1.0",
+            "createSurface": {
+                "components": [
+                    {"id": "root", "component": "Column", "children": ["c1", "c2"]},
+                    {"id": "c1", "component": "Text", "text": {"path": "title"}},
+                    {"id": "c2", "component": "Button", "action": {"event": {"name": "submit"}}, "child": "c1"}
+                ]
+            }
+        }
+        decompiled = self.decompiler.decompile(payload)
+        self.assertIn('(Column', decompiled)
+        self.assertIn('$/title', decompiled)
+        self.assertIn('(Event "submit")', decompiled)
+
+    def test_compiler_primitives_and_relative_paths(self):
+        """Test compilation of boolean, null, number literals and relative path bindings."""
+        text = '(Card (Text :text $title :count 42 :ratio 3.14 :visible true :disabled false :extra null))'
+        compiled = self.compiler.compile(text)
+        comps = compiled["createSurface"]["components"]
+        txt = next(c for c in comps if c["component"] == "Text")
+        self.assertEqual(txt["text"], {"path": "$title"})
+        self.assertEqual(txt["count"], 42)
+        self.assertEqual(txt["ratio"], 3.14)
+        self.assertEqual(txt["visible"], True)
+        self.assertEqual(txt["disabled"], False)
+        self.assertEqual(txt["extra"], None)
+
+    def test_compiler_tagged_children_list(self):
+        """Test compilation of explicit :children [ (Text "A") (Text "B") ] attribute."""
+        text = '(Column :children [ (Text "A") (Text "B") ])'
+        compiled = self.compiler.compile(text)
+        comps = compiled["createSurface"]["components"]
+        col = next(c for c in comps if c["component"] == "Column")
+        self.assertEqual(len(col["children"]), 2)
+
+    def test_function_signatures_and_enum_helpers(self):
+        """Test function signature generation and enum schema helpers in prompt generator."""
+        from a2ui.inference_formats.experimental.atom import AtomFormat
+        from a2ui.inference_formats.experimental.atom.prompt_generator import _get_schema_enum
+        from a2ui.schema.catalog import CatalogConfig
+        from a2ui.inference_formats.transport import TransportFormat
+        from a2ui_eval.shared.utils import GIT_ROOT
+        cat_path = str(GIT_ROOT / 'specification/v1_0/catalogs/basic/catalog.json')
+        cat_cfg = CatalogConfig.from_path('basic_catalog', cat_path)
+        transport_format = TransportFormat(version='1.0', catalogs=[cat_cfg], experiments={'version_1_0'})
+        cat = transport_format.get_selected_catalog()
+
+        fmt = AtomFormat(catalog=cat)
+        func_sigs = fmt.prompt_generator.generate_function_signatures()
+        self.assertIsInstance(func_sigs, str)
+
+        # Test _get_schema_enum helper
+        enum_schema = {"oneOf": [{"enum": ["a", "b"]}]}
+        self.assertEqual(_get_schema_enum(enum_schema), ["a", "b"])
+
+    def test_decompile_multiple_root_nodes(self):
+        """Test decompilation when components list has multiple root nodes."""
+        payload = {
+            "version": "v1.0",
+            "createSurface": {
+                "components": [
+                    {"id": "node_0", "component": "Text", "text": "First"},
+                    {"id": "node_1", "component": "Text", "text": "Second"}
+                ]
+            }
+        }
+        decompiled = self.decompiler.decompile(payload)
+        self.assertIn('(Text :text "First")', decompiled)
+
+    def test_compiler_schema_expects_single_child_and_helpers(self):
+        """Test _schema_expects_single_child and formatDate/formatCurrency helpers."""
+        from a2ui.inference_formats.experimental.atom import AtomCompiler
+        from a2ui.schema.catalog import CatalogConfig
+        from a2ui.inference_formats.transport import TransportFormat
+        from a2ui_eval.shared.utils import GIT_ROOT
+        cat_path = str(GIT_ROOT / 'specification/v1_0/catalogs/basic/catalog.json')
+        cat_cfg = CatalogConfig.from_path('basic_catalog', cat_path)
+        transport_format = TransportFormat(version='1.0', catalogs=[cat_cfg], experiments={'version_1_0'})
+        cat = transport_format.get_selected_catalog()
+
+        compiler = AtomCompiler(catalog=cat)
+        self.assertTrue(compiler._schema_expects_single_child("Card"))
+        self.assertFalse(compiler._schema_expects_single_child("Column"))
+
+        # Test formatDate and formatCurrency
+        text = '(Card (Text :text (formatDate $/created_at) :amount (formatCurrency 99.99)))'
+        compiled = compiler.compile(text)
+        comps = compiled["createSurface"]["components"]
+        txt = next(c for c in comps if c["component"] == "Text")
+        self.assertEqual(txt["text"], {"call": "formatDate", "args": {"arg_0": {"path": "/created_at"}}})
+        self.assertEqual(txt["amount"], {"call": "formatCurrency", "args": {"arg_0": 99.99}})
+
+    def test_direct_enum_schema_helper(self):
+        """Test _get_schema_enum with direct dict enum."""
+        from a2ui.inference_formats.experimental.atom.prompt_generator import _get_schema_enum
+        self.assertEqual(_get_schema_enum({"enum": ["opt1", "opt2"]}), ["opt1", "opt2"])
+        self.assertIsNone(_get_schema_enum("not_a_dict"))
+
 
 if __name__ == "__main__":
     unittest.main()
