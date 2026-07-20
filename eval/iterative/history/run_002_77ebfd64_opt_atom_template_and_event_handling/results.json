@@ -1,0 +1,17 @@
+{
+  "summary": {
+    "total_samples": 6,
+    "overall_pass": 6,
+    "overall_pass_rate": 100.0,
+    "schema_pass": 5,
+    "schema_pass_rate": 83.3
+  },
+  "samples": [
+    {"prompt_id": "dogBreedGenerator", "schema_pass": true, "llm_grade": "C"},
+    {"prompt_id": "loginForm", "schema_pass": true, "llm_grade": "C"},
+    {"prompt_id": "settingsPage", "schema_pass": true, "llm_grade": "C"},
+    {"prompt_id": "productGallery", "schema_pass": true, "llm_grade": "C"},
+    {"prompt_id": "productGalleryData", "schema_pass": true, "llm_grade": "C"},
+    {"prompt_id": "updateDataModel", "schema_pass": false, "llm_grade": "C"}
+  ]
+}

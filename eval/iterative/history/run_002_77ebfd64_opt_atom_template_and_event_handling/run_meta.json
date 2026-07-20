@@ -1,0 +1,13 @@
+{
+  "run_id": "run_002_77ebfd64_opt_atom_template_and_event_handling",
+  "commit_sha": "77ebfd64",
+  "format": "atom",
+  "model": "google/gemini-3.5-flash",
+  "timestamp": "2026-07-20T22:51:24Z",
+  "metrics": {
+    "pytest_pass": true,
+    "overall_pass_rate": 100.0,
+    "schema_pass_rate": 83.3,
+    "inference_duration": 9.57
+  }
+}
