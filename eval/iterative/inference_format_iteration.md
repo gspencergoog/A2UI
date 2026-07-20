@@ -94,13 +94,15 @@ uv run python eval/iterative/compare_results.py --baseline eval/baselines/<forma
 
 ### Evaluation & Decision Criteria:
 1. **Pytest Conformance Status**: Must be `PASS`.
-2. **Correctness Guardrails**: `Schema Acc` and `Quality Score` must be $\ge$ Baseline.
-3. **Efficiency Optimization Metrics**:
-   - `Median Code Output Tok`: Direct measure of format verbosity. Primary optimization target.
-   - `Non-reasoning Output Time`: Estimated time spent streaming output code. Shrinks with code token reduction.
-   - `Median Input Tok`: Prompt instructions size. Lower input tokens prevent API throttling.
-   - `Parallel Wall Latency`: Concurrency throughput across 10 tasks.
-4. **Failure Breakdown**: Categorized details for every failing sample (Parser failures vs LLM Intent failures).
+2. **Correctness Guardrail**: `Schema Acc` and `Quality Score` must be $\ge$ Baseline.
+3. **Efficiency Regression Caps (REVERT Trigger)**:
+   - **Code Output Tokens**: Must NOT increase by **> 5%** vs baseline.
+   - **Streaming Output Latency**: Must NOT increase by **> 10%** vs baseline.
+   - **Reasoning Tokens**: Must NOT increase by **> 15%** vs baseline.
+4. **Composite Score $S_{\text{opt}}$**:
+   - $S_{\text{opt}} = 0.50 \times \text{SchemaAcc} + 0.30 \times \text{QualityScore} - 0.15 \times \left(\frac{\text{CodeTok}}{\text{BaseCodeTok}}\right) - 0.05 \times \left(\frac{\text{ReasonTok}}{\text{BaseReasonTok}}\right)$
+   - Keep change only if $S_{\text{opt}}(\text{Current}) > S_{\text{opt}}(\text{Baseline})$.
+5. **Failure Breakdown**: Categorized details for every failing sample (Parser failures vs LLM Intent failures).
 
 ---
 

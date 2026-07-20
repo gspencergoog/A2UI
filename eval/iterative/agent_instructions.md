@@ -68,13 +68,21 @@ Analyze the generated Markdown table and Metric Definitions Key:
    - `Parallel Wall Latency (Delta)`: Batch wall-clock throughput under 10 concurrent tasks.
 
 ### Step 5: Progression or Rollback Decision
-Evaluate your iteration against these 3 decision rules:
+Evaluate your iteration against these 4 decision rules:
+
 1. **Rule 1 (Correctness Guardrail - Non-negotiable)**: `Schema Acc` and `Quality Score` **MUST NOT** regress below Baseline.
    - *If Accuracy Degrades* $\rightarrow$ You **MUST** immediately roll back the changes (`git reset --hard HEAD`).
-2. **Rule 2 (Code Footprint)**: Did `Median Code Output Tok` decrease without degrading accuracy?
-   - *If YES* $\rightarrow$ **KEEP CHANGE** (The format is demonstrably more compact).
-3. **Rule 3 (Prompt Overhead)**: Did `Median Input Tok` decrease without degrading accuracy?
-   - *If YES* $\rightarrow$ **KEEP CHANGE** (The prompt instructions are more concise).
+
+2. **Rule 2 (Efficiency Regression Caps - Non-negotiable)**: Even if accuracy remains equal or 100%, you **MUST REVERT** if:
+   - `Median Code Output Tok` increases by **> 5%** vs baseline/previous run.
+   - `Non-reasoning Output Time` (streaming latency) increases by **> 10%** vs baseline/previous run.
+   - `Median Reasoning Tok` increases by **> 15%** vs baseline/previous run (prevents prompt instruction search space ambiguity).
+
+3. **Rule 3 (Composite Optimization Score $S_{\text{opt}}$)**:
+   - Check `Score (S_opt)` in the comparison table:
+     $$S_{\text{opt}} = 0.50 \times \text{SchemaAcc} + 0.30 \times \text{QualityScore} - 0.15 \times \left(\frac{\text{CodeTok}}{\text{BaseCodeTok}}\right) - 0.05 \times \left(\frac{\text{ReasonTok}}{\text{BaseReasonTok}}\right)$$
+   - *If $S_{\text{opt}}(\text{Current}) > S_{\text{opt}}(\text{Baseline})$* $\rightarrow$ **KEEP CHANGE**.
+   - *If $S_{\text{opt}}(\text{Current}) \le S_{\text{opt}}(\text{Baseline})$* $\rightarrow$ **REVERT CHANGE** (`git reset --hard HEAD`).
 
 ### Step 6: Archive Iteration Run
 To save the historical run context for future analysis and allow the orchestrator to automatically maintain the summary index:

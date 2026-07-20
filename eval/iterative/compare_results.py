@@ -237,6 +237,22 @@ def format_delta_pct(val: float, base_val: float, is_percentage_points: bool = F
     return f"{sign}{pct_change:.1f}%"
 
 
+def compute_s_opt(m: Dict[str, Any], b: Dict[str, Any]) -> float:
+    """Computes Composite Optimization Score S_opt."""
+    schema_acc = m.get("schema_acc") or 0.0
+    quality_acc = m.get("quality_acc") or 0.0
+    code_tok = m.get("avg_output_tokens") or 1.0
+    base_code_tok = b.get("avg_output_tokens") or 1.0
+    reason_tok = m.get("avg_reasoning_tokens") or 1.0
+    base_reason_tok = b.get("avg_reasoning_tokens") or 1.0
+
+    code_ratio = code_tok / max(base_code_tok, 1.0)
+    reason_ratio = reason_tok / max(base_reason_tok, 1.0)
+
+    s_opt = (0.50 * schema_acc) + (0.30 * quality_acc) - (0.15 * code_ratio) - (0.05 * reason_ratio)
+    return round(s_opt, 3)
+
+
 def generate_markdown_table(
     baseline_metrics: Dict[str, Any],
     comparison_metrics_list: List[Dict[str, Any]],
@@ -252,6 +268,7 @@ def generate_markdown_table(
     headers = [
         "Run / Results Directory",
         "Samples",
+        "Score (S_opt)",
         "Schema Acc (Delta)",
         "Quality Score (Delta)",
         "Parallel Wall Latency (Delta)",
@@ -267,6 +284,8 @@ def generate_markdown_table(
 
     # Format baseline row
     b = baseline_metrics
+    b_s_opt = compute_s_opt(b, b)
+    b_s_opt_str = f"**{b_s_opt:+.3f}**"
     b_schema_str = f"{b['schema_acc']*100:.1f}%" if b['schema_acc'] is not None else "N/A"
     b_quality_str = f"{b['quality_acc']*100:.1f}%" if b['quality_acc'] is not None else "N/A"
     b_wall_str = f"{b['wall_clock_per_sample']:.2f}s" if b['wall_clock_per_sample'] > 0 else "N/A"
@@ -277,13 +296,18 @@ def generate_markdown_table(
     b_out_str = f"{b['avg_output_tokens']:,.0f}"
 
     lines.append(
-        f"| **Baseline**: `{b['name']}` | {b['sample_count']} | {b_schema_str} | {b_quality_str} | {b_wall_str} | {b_lat_str} | {b_ctime_str} | {b_inp_str} | {b_rtok_str} | {b_out_str} |"
+        f"| **Baseline**: `{b['name']}` | {b['sample_count']} | {b_s_opt_str} | {b_schema_str} | {b_quality_str} | {b_wall_str} | {b_lat_str} | {b_ctime_str} | {b_inp_str} | {b_rtok_str} | {b_out_str} |"
     )
 
     # Format comparison rows
     for c in comparison_metrics_list:
         name_str = f"`{c['name']}`"
         samples_str = str(c["sample_count"])
+
+        c_s_opt = compute_s_opt(c, b)
+        d_s_opt = c_s_opt - b_s_opt
+        sign_opt = "+" if d_s_opt > 0 else ""
+        s_opt_str = f"**{c_s_opt:+.3f}** ({sign_opt}{d_s_opt:.3f})"
 
         # Schema Acc
         if c["schema_acc"] is not None:
@@ -335,13 +359,14 @@ def generate_markdown_table(
         out_cell = f"{c_out_val} ({d_out})"
 
         lines.append(
-            f"| {name_str} | {samples_str} | {schema_cell} | {quality_cell} | {wall_cell} | {latency_cell} | {ctime_cell} | {inp_cell} | {rtok_cell} | {out_cell} |"
+            f"| {name_str} | {samples_str} | {s_opt_str} | {schema_cell} | {quality_cell} | {wall_cell} | {latency_cell} | {ctime_cell} | {inp_cell} | {rtok_cell} | {out_cell} |"
         )
 
     lines.append("")
     lines.append("#### Metric Definitions & Derivation Key")
     lines.append("- **Run / Results Directory**: Identifier or directory path of the evaluation run.")
     lines.append("- **Samples**: Total number of evaluation sample prompts executed in the run.")
+    lines.append("- **Score (S_opt)**: Composite Format Score `S_opt = 0.50×SchemaAcc + 0.30×QualityScore - 0.15×(CodeTok/BaseCodeTok) - 0.05×(ReasonTok/BaseReasonTok)`. Higher score indicates superior accuracy and token efficiency.")
     lines.append("- **Schema Acc (Delta)**: Percentage of outputs passing strict compiler compilation and schema validation (`a2ui_scorer`), with point diff vs baseline.")
     lines.append("- **Quality Score (Delta)**: LLM-graded semantic intent accuracy score (`measured_model_graded_qa`), with point diff vs baseline.")
     lines.append("- **Parallel Wall Latency (Delta)**: Total wall-clock run duration divided by sample count `(completed_at - started_at) / samples`, measuring parallel batch throughput under concurrency.")
