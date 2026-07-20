@@ -108,6 +108,22 @@ def extract_metrics(json_path: str, label_name: str = "") -> Dict[str, Any]:
         if "inference_cached_tokens" in meta:
             cached_tokens.append(meta["inference_cached_tokens"])
 
+    # Wall-clock duration calculation from stats
+    stats = data.get("stats", {})
+    started_at_str = stats.get("started_at")
+    completed_at_str = stats.get("completed_at")
+    wall_clock_duration = 0.0
+    if started_at_str and completed_at_str:
+        try:
+            from datetime import datetime
+            t_start = datetime.fromisoformat(started_at_str)
+            t_end = datetime.fromisoformat(completed_at_str)
+            wall_clock_duration = (t_end - t_start).total_seconds()
+        except Exception:
+            wall_clock_duration = 0.0
+
+    wall_clock_per_sample = wall_clock_duration / max(sample_count, 1) if wall_clock_duration > 0 else 0.0
+
     # Fallback stats model usage if sample metadata is empty
     model_usage = data.get("stats", {}).get("model_usage", {})
     primary_usage = next(iter(model_usage.values()), {}) if model_usage else {}
@@ -128,6 +144,8 @@ def extract_metrics(json_path: str, label_name: str = "") -> Dict[str, Any]:
         "schema_acc": schema_acc,
         "quality_acc": quality_acc,
         "avg_duration": avg_duration,
+        "wall_clock_duration": wall_clock_duration,
+        "wall_clock_per_sample": wall_clock_per_sample,
         "avg_input_tokens": avg_input_tokens,
         "avg_output_tokens": avg_output_tokens,
         "avg_cached_tokens": avg_cached_tokens,
@@ -166,7 +184,8 @@ def generate_markdown_table(
         "Samples",
         "Schema Acc (Delta)",
         "Quality Score (Delta)",
-        "Avg Latency (Delta)",
+        "Wall Latency (Delta)",
+        "Sample Latency (Delta)",
         "Avg Input Tokens (Delta)",
         "Avg Output Tokens (Delta)",
     ]
@@ -178,12 +197,13 @@ def generate_markdown_table(
     b = baseline_metrics
     b_schema_str = f"{b['schema_acc']*100:.1f}%" if b['schema_acc'] is not None else "N/A"
     b_quality_str = f"{b['quality_acc']*100:.1f}%" if b['quality_acc'] is not None else "N/A"
+    b_wall_str = f"{b['wall_clock_per_sample']:.2f}s" if b['wall_clock_per_sample'] > 0 else "N/A"
     b_lat_str = f"{b['avg_duration']:.2f}s"
     b_inp_str = f"{b['avg_input_tokens']:,.0f}"
     b_out_str = f"{b['avg_output_tokens']:,.0f}"
 
     lines.append(
-        f"| **Baseline**: `{b['name']}` | {b['sample_count']} | {b_schema_str} | {b_quality_str} | {b_lat_str} | {b_inp_str} | {b_out_str} |"
+        f"| **Baseline**: `{b['name']}` | {b['sample_count']} | {b_schema_str} | {b_quality_str} | {b_wall_str} | {b_lat_str} | {b_inp_str} | {b_out_str} |"
     )
 
     # Format comparison rows
@@ -207,7 +227,15 @@ def generate_markdown_table(
         else:
             quality_cell = "N/A"
 
-        # Latency
+        # Wall Latency
+        if c["wall_clock_per_sample"] > 0:
+            c_wall_val = f"{c['wall_clock_per_sample']:.2f}s"
+            d_wall = format_delta_pct(c["wall_clock_per_sample"], b["wall_clock_per_sample"])
+            wall_cell = f"{c_wall_val} ({d_wall})"
+        else:
+            wall_cell = "N/A"
+
+        # Sample Latency
         c_lat_val = f"{c['avg_duration']:.2f}s"
         d_lat = format_delta_pct(c["avg_duration"], b["avg_duration"])
         latency_cell = f"{c_lat_val} ({d_lat})"
@@ -223,7 +251,7 @@ def generate_markdown_table(
         out_cell = f"{c_out_val} ({d_out})"
 
         lines.append(
-            f"| {name_str} | {samples_str} | {schema_cell} | {quality_cell} | {latency_cell} | {inp_cell} | {out_cell} |"
+            f"| {name_str} | {samples_str} | {schema_cell} | {quality_cell} | {wall_cell} | {latency_cell} | {inp_cell} | {out_cell} |"
         )
 
     lines.append("")
