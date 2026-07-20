@@ -101,6 +101,45 @@ class TestAtomFormat(unittest.TestCase):
         self.assertIn('(Card', decompiled_text)
         self.assertIn('(Text :text "Hello")', decompiled_text)
 
+    def test_regression_data_model_brackets_and_empty_arrays(self):
+        """Regression test: (data $/rating [] $/likes [] $/comments "") must compile empty arrays cleanly."""
+        text_data_only = '(data $/rating [] $/likes [] $/comments "")'
+        compiled_data = self.compiler.compile(text_data_only)
+        self.assertIn("updateDataModel", compiled_data)
+        self.assertEqual(
+            compiled_data["updateDataModel"]["value"],
+            {"rating": [], "likes": [], "comments": ""}
+        )
+
+        text_with_card = '(data $/rating [] $/likes [] $/comments "") (Card (Text "Hello"))'
+        compiled_surface = self.compiler.compile(text_with_card)
+        self.assertIn("createSurface", compiled_surface)
+        self.assertEqual(
+            compiled_surface["createSurface"]["dataModel"],
+            {"rating": [], "likes": [], "comments": ""}
+        )
+
+    def test_regression_action_event_object_structure(self):
+        """Regression test: Button action events must emit action: {"event": {"name": "event_name", "context": {...}}}."""
+        text = '(Card (Button :action (Event "generate_dog" :name $/gen/name) (Text "Submit")))'
+        compiled = self.compiler.compile(text)
+        comps = compiled["createSurface"]["components"]
+        btn = next(c for c in comps if c["component"] == "Button")
+        self.assertEqual(
+            btn["action"],
+            {"event": {"name": "generate_dog", "context": {"name": {"path": "/gen/name"}}}}
+        )
+
+    def test_regression_unwrap_create_surface_macro_expression(self):
+        """Regression test: Outer (createSurface "main" ...) macro forms must not create invalid component nodes."""
+        text = '(createSurface "main" (Column (Text "Hello World")))'
+        compiled = self.compiler.compile(text)
+        comps = compiled["createSurface"]["components"]
+        comp_types = [c["component"] for c in comps]
+        self.assertNotIn("createSurface", comp_types)
+        self.assertIn("Column", comp_types)
+        self.assertIn("Text", comp_types)
+
 
 if __name__ == "__main__":
     unittest.main()
