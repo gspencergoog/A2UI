@@ -24,8 +24,8 @@ import subprocess
 import sys
 from typing import Any, Dict, List, Optional
 
-# Ensure rate limiter connections limit
-os.environ["INSPECT_MAX_CONNECTIONS"] = "50"
+# Ensure rate limiter connections limit (matches max_tasks=10)
+os.environ["INSPECT_MAX_CONNECTIONS"] = "10"
 
 
 def run_unit_tests() -> Dict[str, Any]:

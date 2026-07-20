@@ -35,6 +35,7 @@ For each iteration, perform the following steps:
    uv run pytest agent_sdks/python/a2ui_agent/tests/
    ```
 3. If unit tests fail, classify the failure:
+   - **Prompt-Only Regression**: If only prompt/template files were modified and unit tests fail, it is a prompt regression. You **MUST** immediately revert the prompt modification.
    - **Parser/Compiler Regression**: A change broke existing valid compiler behavior. You **must** fix the compiler code or revert the change.
    - **Format Capability Evolution**: The compiler was deliberately modified to support new/updated syntax, causing old tests to fail. You **must** update the unit tests under `agent_sdks/python/a2ui_agent/tests/{format}/` to match and cover the new capability.
 
