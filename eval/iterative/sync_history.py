@@ -65,6 +65,15 @@ def sync_worktree_history(
     copied_runs = []
     current_max_id = _get_max_run_id(main_history_dir)
 
+    # Pre-cache existing history folder names and occupied run IDs
+    existing_dirs = {e.name for e in os.scandir(main_history_dir) if e.is_dir()}
+    occupied_ids = set()
+    for d_name in existing_dirs:
+        if d_name.startswith("run_"):
+            d_parts = d_name.split("_")
+            if len(d_parts) >= 2 and d_parts[1].isdigit():
+                occupied_ids.add(int(d_parts[1]))
+
     for wt in target_worktrees:
         wt_history = os.path.join(wt, "eval", "iterative", "history")
         if not os.path.exists(wt_history):
@@ -74,7 +83,7 @@ def sync_worktree_history(
             if entry.is_dir() and entry.name.startswith("run_"):
                 # Exact folder match check (already synced)
                 exact_dest = os.path.join(main_history_dir, entry.name)
-                if os.path.exists(exact_dest):
+                if entry.name in existing_dirs:
                     continue
 
                 parts = entry.name.split("_")
@@ -82,30 +91,9 @@ def sync_worktree_history(
                     int(parts[1]) if (len(parts) >= 2 and parts[1].isdigit()) else None
                 )
 
-                # Check if folder with matching slug suffix was already synced under a re-indexed ID
-                slug_suffix = "_" + "_".join(parts[2:]) if len(parts) >= 3 else None
-                already_synced = False
-                if slug_suffix:
-                    for existing in os.scandir(main_history_dir):
-                        if existing.is_dir() and existing.name.endswith(slug_suffix):
-                            already_synced = True
-                            break
-                if already_synced:
-                    continue
-
-                # Check if this run_ID is already occupied by a different folder in main_history
-                id_occupied = False
-                if run_id_num is not None:
-                    for existing in os.scandir(main_history_dir):
-                        if existing.is_dir() and existing.name.startswith("run_"):
-                            ex_parts = existing.name.split("_")
-                            if (
-                                len(ex_parts) >= 2
-                                and ex_parts[1].isdigit()
-                                and int(ex_parts[1]) == run_id_num
-                            ):
-                                id_occupied = True
-                                break
+                id_occupied = (
+                    run_id_num in occupied_ids if run_id_num is not None else False
+                )
 
                 if id_occupied:
                     # Re-index incoming folder with next available max_id
@@ -121,7 +109,11 @@ def sync_worktree_history(
 
                 try:
                     shutil.copytree(entry.path, dest_dir)
-                    copied_runs.append(os.path.basename(dest_dir))
+                    bname = os.path.basename(dest_dir)
+                    copied_runs.append(bname)
+                    existing_dirs.add(bname)
+                    if run_id_num is not None:
+                        occupied_ids.add(run_id_num)
                 except FileExistsError:
                     pass
                 except Exception:

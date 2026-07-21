@@ -20,6 +20,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -144,6 +145,10 @@ def archive_run(
         json.dump(meta_payload, f, indent=2)
 
     # 5. Synchronize master index
+    s_dir = str(script_dir)
+    if s_dir not in sys.path:
+        sys.path.insert(0, s_dir)
+
     try:
         from sync_history import sync_worktree_history  # type: ignore[import-not-found]
 

@@ -137,8 +137,8 @@ def regenerate_master_index(iterative_dir: str) -> None:
                 "notes": notes,
             })
 
-    # Sort runs chronologically by directory name
-    runs.sort(key=lambda r: r["dir_name"])
+    # Sort runs chronologically by integer run ID
+    runs.sort(key=lambda r: int(r["id"]) if r["id"].isdigit() else 0)
 
     table = []
     table.append("# Optimization Run History")
@@ -337,7 +337,10 @@ def main(argv: Optional[List[str]] = None) -> None:
     if args.save_baseline:
         metrics_ext = extract_metrics_from_log(current_log_data)
         samples_dict = {}
-        for s in current_log_data.get("samples", []):
+        samples_list = current_log_data.get("samples") or []
+        if isinstance(samples_list, dict):
+            samples_list = list(samples_list.values())
+        for s in samples_list:
             s_meta = s.get("metadata", {})
             s_scores = s.get("scores", {})
             s_id = s_meta.get("name") or str(s.get("id"))
