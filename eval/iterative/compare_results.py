@@ -95,7 +95,7 @@ def extract_metrics(
     if not name or name in (".", ".."):
         name = os.path.basename(json_path)
 
-    eval_spec = data.get("eval", {})
+    eval_spec = data.get("eval") or {}
     task_name = eval_spec.get("task", "unknown")
 
     if isinstance(data.get("samples"), dict):
@@ -255,10 +255,12 @@ def extract_metrics(
         val_schema = None
         val_quality = None
         if isinstance(s_scores, dict):
-            if "a2ui_scorer" in s_scores:
-                val_schema = s_scores["a2ui_scorer"].get("value")
-            if "measured_model_graded_qa" in s_scores:
-                val_quality = s_scores["measured_model_graded_qa"].get("value")
+            a2ui_sc = s_scores.get("a2ui_scorer")
+            if isinstance(a2ui_sc, dict):
+                val_schema = a2ui_sc.get("value")
+            qa_sc = s_scores.get("measured_model_graded_qa")
+            if isinstance(qa_sc, dict):
+                val_quality = qa_sc.get("value")
         elif isinstance(s_scores, list):
             for sc in s_scores:
                 if isinstance(sc, dict):
@@ -342,7 +344,7 @@ def extract_metrics(
             cached_tokens.append(meta["inference_cached_tokens"])
 
     # Wall-clock duration calculation from stats
-    stats = data.get("stats", {})
+    stats = data.get("stats") or {}
     started_at_str = stats.get("started_at")
     completed_at_str = stats.get("completed_at")
     wall_clock_duration = 0.0
@@ -361,7 +363,7 @@ def extract_metrics(
     )
 
     # Fallback stats model usage if sample metadata is empty
-    model_usage: Dict[str, Any] = data.get("stats", {}).get("model_usage", {})
+    model_usage: Dict[str, Any] = (data.get("stats") or {}).get("model_usage") or {}
     primary_usage: Dict[str, Any] = (
         next(iter(model_usage.values()), {}) if model_usage else {}
     )
@@ -596,8 +598,8 @@ def generate_markdown_table(
             wall_cell = "N/A"
 
         # Sample Latency
-        c_dur = c.get("avg_duration", c.get("avg_latency_seconds", 0.0))
-        b_dur = b.get("avg_duration", b.get("avg_latency_seconds", 0.0))
+        c_dur = c.get("avg_duration") or c.get("avg_latency_seconds") or 0.0
+        b_dur = b.get("avg_duration") or b.get("avg_latency_seconds") or 0.0
         c_lat_val = f"{c_dur:.2f}s"
         d_lat = format_delta_pct(c_dur, b_dur)
         latency_cell = f"{c_lat_val} ({d_lat})"

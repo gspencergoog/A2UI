@@ -69,14 +69,12 @@ def extract_metrics_from_log(log_data: Dict[str, Any]) -> Dict[str, Any]:
 
     for s in scores:
         if isinstance(s, dict):
+            m_dict = s.get("metrics") or {}
+            acc_dict = m_dict.get("accuracy") or {}
             if s.get("name") == "a2ui_scorer":
-                algo_acc = float(
-                    s.get("metrics", {}).get("accuracy", {}).get("value", 0.0)
-                )
+                algo_acc = float(acc_dict.get("value") or 0.0)
             elif s.get("name") == "measured_model_graded_qa":
-                overall_acc = float(
-                    s.get("metrics", {}).get("accuracy", {}).get("value", 0.0)
-                )
+                overall_acc = float(acc_dict.get("value") or 0.0)
 
     samples = log_data.get("samples") or []
     if isinstance(samples, dict):

@@ -66,7 +66,10 @@ def sync_worktree_history(
         if os.path.exists(parent_dir):
             for entry in os.scandir(parent_dir):
                 if entry.is_dir() and entry.name != "worktrees":
-                    target_worktrees.append(entry.path)
+                    if os.path.exists(
+                        os.path.join(entry.path, "eval", "iterative", "history")
+                    ):
+                        target_worktrees.append(entry.path)
 
     copied_runs = []
     current_max_id = _get_max_run_id(main_history_dir)
