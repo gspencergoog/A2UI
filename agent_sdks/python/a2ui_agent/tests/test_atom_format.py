@@ -153,7 +153,7 @@ class TestAtomFormat(unittest.TestCase):
         txt = next(c for c in comps if c["component"] == "Text")
         self.assertEqual(
             txt["text"],
-            {"call": "formatString", "args": {"arg_0": "Hello %s", "arg_1": {"path": "/name"}}}
+            {"call": "formatString", "args": {"value": "Hello %s", "arg_1": {"path": "/name"}}}
         )
 
     def test_compile_list_template_expression(self):
@@ -370,8 +370,8 @@ class TestAtomFormat(unittest.TestCase):
         compiled = compiler.compile(text)
         comps = compiled["createSurface"]["components"]
         txt = next(c for c in comps if c["component"] == "Text")
-        self.assertEqual(txt["text"], {"call": "formatDate", "args": {"arg_0": {"path": "/created_at"}}})
-        self.assertEqual(txt["amount"], {"call": "formatCurrency", "args": {"arg_0": 99.99}})
+        self.assertEqual(txt["text"], {"call": "formatDate", "args": {"value": {"path": "/created_at"}}})
+        self.assertEqual(txt["amount"], {"call": "formatCurrency", "args": {"value": 99.99}})
 
     def test_direct_enum_schema_helper(self):
         """Test _get_schema_enum with direct dict enum."""

@@ -198,15 +198,13 @@ class AtomCompiler:
         """Determines if a string is a valid component type name."""
         if not name or not isinstance(name, str):
             return False
-        # Filter out common English prose words starting with uppercase
-        if name in ("Component", "NYC", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "This", "The", "A", "An", "For", "With", "Both", "Although", "Note", "Here", "Inside", "Generate", "Create", "Update", "Delete", "createSurface", "updateComponents", "updateDataModel", "deleteSurface", "actionResponse", "callFunction", "a2ui", "data", "dataModel", "set!"):
+        if name in ("data", "dataModel", "set!", "Event", "template", "deleteSurface", "callFunction", "a2ui"):
             return False
         comp_props = self.schema_helper.get_component_properties(name)
         if comp_props:
             return True
-        if name[0].isupper() and name.isalnum() and not name.islower():
-            return True
-        return False
+        available = self.schema_helper.get_available_components()
+        return name in available
 
     def _extract_data_list(self, data_model: dict, path: str) -> list:
         parts = [p for p in path.lstrip("/").split("/") if p]
@@ -369,7 +367,7 @@ class AtomCompiler:
             val = clean_list
             if not val:
                 return []
-            if len(val) >= 2 and len(val) % 2 == 0 and all(isinstance(val[i], str) for i in range(0, len(val), 2)):
+            if len(val) >= 2 and len(val) % 2 == 0 and all(isinstance(val[i], str) and val[i].startswith(":") for i in range(0, len(val), 2)):
                 res = {}
                 i = 0
                 while i < len(val) - 1:
@@ -447,6 +445,9 @@ class AtomCompiler:
         if data_model is None:
             data_model = {}
         comp_type = str(expr[0]).strip("`").strip("'")
+        if comp_type in ("data", "dataModel", "set!"):
+            self._parse_data_node(expr, data_model)
+            return ""
         comp_id = "root" if is_root and not any(c.get("id") == "root" for c in components) else self._next_id()
         comp_dict: Dict[str, Any] = {"id": comp_id, "component": comp_type}
 
@@ -689,13 +690,25 @@ class AtomCompiler:
             if isinstance(val[0], str) and val[0] in ("openUrl", "callFunction"):
                 fn_name = val[0]
                 fn_args = {}
-                i = 1
-                while i < len(val) - 1:
-                    k = str(val[i]).lstrip(":")
-                    if k in ("0", "arg_0") and fn_name == "openUrl":
-                        k = "url"
-                    fn_args[k] = self._resolve_val(val[i+1], components)
-                    i += 2
+                if len(val) == 2 and isinstance(val[1], str) and not val[1].startswith(":"):
+                    k = "url" if fn_name == "openUrl" else "function"
+                    fn_args[k] = self._resolve_val(val[1], components)
+                else:
+                    i = 1
+                    while i < len(val):
+                        item = val[i]
+                        if isinstance(item, str) and item.startswith(":") and i + 1 < len(val):
+                            k = item.lstrip(":")
+                            if k in ("0", "arg_0") and fn_name == "openUrl":
+                                k = "url"
+                            fn_args[k] = self._resolve_val(val[i+1], components)
+                            i += 2
+                        elif not (isinstance(item, str) and item.startswith(":")):
+                            k = "url" if (fn_name == "openUrl" and "url" not in fn_args) else f"arg_{i-1}"
+                            fn_args[k] = self._resolve_val(item, components)
+                            i += 1
+                        else:
+                            i += 1
                 return {"functionCall": {"call": fn_name, "args": fn_args}}
             if isinstance(val[0], str) and val[0].lower() == "event" and len(val) >= 2:
                 evt_name = str(val[1])
@@ -720,7 +733,8 @@ class AtomCompiler:
                         else:
                             i += 1
                     else:
-                        fn_args[f"arg_{pos}"] = self._resolve_val(item, components)
+                        arg_key = "value" if (pos == 0 and fn_name in ("required", "regex", "formatString", "formatDate", "formatCurrency", "not")) else f"arg_{pos}"
+                        fn_args[arg_key] = self._resolve_val(item, components)
                         pos += 1
                         i += 1
                 return {"call": fn_name, "args": fn_args}
@@ -896,7 +910,10 @@ class AtomCompiler:
                     else:
                         i += 1
                 if title or child_id:
-                    tabs_list.append({"title": title, "child": child_id})
+                    tab_obj = {"title": title}
+                    if child_id:
+                        tab_obj["child"] = child_id
+                    tabs_list.append(tab_obj)
         return tabs_list
 
     def _schema_expects_single_child(self, comp_type: str) -> bool:
