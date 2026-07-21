@@ -55,8 +55,8 @@ def resolve_results_file(target_path: str) -> str:
                 pass
 
         # Search for .eval files inside directory
-        eval_files = glob.glob(os.path.join(target_path, "*.eval")) + glob.glob(
-            os.path.join(target_path, "**/*.eval"), recursive=True
+        eval_files = glob.glob(
+            os.path.join(target_path, "**", "*.eval"), recursive=True
         )
         if eval_files:
             uv_bin = shutil.which("uv") or "uv"
@@ -208,12 +208,13 @@ def extract_metrics(
             "sample_ids": set(),
         }
 
-    samples = data.get("samples", [])
+    samples = data.get("samples") or []
     filtered_samples = []
     extracted_sample_ids = set()
 
     for s in samples:
-        name_id = str(s.get("metadata", {}).get("name") or "")
+        s_meta = s.get("metadata") or {}
+        name_id = str(s_meta.get("name") or "")
         raw_id = str(s.get("id") or "")
         s_id = name_id or raw_id
         extracted_sample_ids.add(s_id)
@@ -260,12 +261,12 @@ def extract_metrics(
     reasoning_tokens = []
 
     for sample in active_samples:
-        meta = sample.get("metadata", {})
+        meta = sample.get("metadata") or {}
 
         # Redefined inference_duration_seconds: extract pure model working_time excluding retries
         sample_duration = None
         sample_reasoning = None
-        events = sample.get("events", [])
+        events = sample.get("events") or []
         model_events = [
             e
             for e in events
@@ -480,8 +481,16 @@ def generate_markdown_table(
     b = baseline_metrics
     b_s_opt = compute_s_opt(b, b)
     b_s_opt_str = f"**{b_s_opt:+.3f}**"
-    b_s_acc = b.get("schema_acc", b.get("schema_accuracy"))
-    b_q_acc = b.get("quality_acc", b.get("quality_accuracy"))
+    b_s_acc = (
+        b.get("schema_acc")
+        if b.get("schema_acc") is not None
+        else b.get("schema_accuracy")
+    )
+    b_q_acc = (
+        b.get("quality_acc")
+        if b.get("quality_acc") is not None
+        else b.get("quality_accuracy")
+    )
     b_schema_str = f"{b_s_acc*100:.1f}%" if b_s_acc is not None else "N/A"
     b_quality_str = f"{b_q_acc*100:.1f}%" if b_q_acc is not None else "N/A"
     b_wall_val = b.get("wall_clock_per_sample", 0)
@@ -513,8 +522,16 @@ def generate_markdown_table(
         s_opt_str = f"**{c_s_opt:+.3f}** ({sign_opt}{d_s_opt:.3f})"
 
         # Schema Acc
-        c_s_acc = c.get("schema_acc", c.get("schema_accuracy"))
-        b_s_acc = b.get("schema_acc", b.get("schema_accuracy", 0.0))
+        c_s_acc = (
+            c.get("schema_acc")
+            if c.get("schema_acc") is not None
+            else c.get("schema_accuracy")
+        )
+        b_s_acc = (
+            b.get("schema_acc")
+            if b.get("schema_acc") is not None
+            else b.get("schema_accuracy", 0.0)
+        )
         if c_s_acc is not None:
             c_schema_val = f"{c_s_acc*100:.1f}%"
             d_schema = format_delta_pct(c_s_acc, b_s_acc, is_percentage_points=True)

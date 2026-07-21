@@ -36,7 +36,7 @@ def extract_metrics_from_log(log_data: Dict[str, Any]) -> Dict[str, Any]:
                 s.get("metrics", {}).get("accuracy", {}).get("value", 0.0)
             )
 
-    samples = log_data.get("samples", [])
+    samples = log_data.get("samples") or []
     if isinstance(samples, dict):
         samples = list(samples.values())
 
@@ -46,11 +46,11 @@ def extract_metrics_from_log(log_data: Dict[str, Any]) -> Dict[str, Any]:
     reasoning_toks: List[float] = []
 
     for sample in samples:
-        meta = sample.get("metadata", {})
+        meta = sample.get("metadata") or {}
         s_duration = None
         s_reasoning = None
 
-        events = sample.get("events", [])
+        events = sample.get("events") or []
         model_events = [
             e
             for e in events
@@ -249,11 +249,11 @@ def generate_optimization_report(
     report.append("")
 
     failures = []
-    curr_samples = log_data.get("samples", [])
+    curr_samples = log_data.get("samples") or []
     if isinstance(curr_samples, dict):
         curr_samples = list(curr_samples.values())
     for sample in curr_samples:
-        s_scores = sample.get("scores", {})
+        s_scores = sample.get("scores") or {}
         algo_passed = s_scores.get("a2ui_scorer", {}).get("value") == 1.0
         judging_val = s_scores.get("measured_model_graded_qa", {}).get("value", "N/A")
 
@@ -267,9 +267,8 @@ def generate_optimization_report(
         report.append("🎉 *All tests passed successfully!*")
     else:
         for sample, algo_passed, judging_val in failures:
-            name = (
-                sample.get("metadata", {}).get("name") or f"Sample {sample.get('id')}"
-            )
+            s_meta = sample.get("metadata") or {}
+            name = s_meta.get("name") or f"Sample {sample.get('id')}"
             report.append(f"### ❌ Sample: `{name}`")
             report.append(
                 f"- **Algorithmic Schema**: `{'PASS' if algo_passed else 'FAIL'}`"
@@ -280,7 +279,7 @@ def generate_optimization_report(
             report.append("")
 
             output_content = ""
-            for event in sample.get("events", []):
+            for event in sample.get("events") or []:
                 if isinstance(event, dict) and event.get("event") == "model":
                     out_obj = event.get("output")
                     if isinstance(out_obj, dict):
