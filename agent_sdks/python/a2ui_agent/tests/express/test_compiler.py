@@ -676,6 +676,15 @@ root = Text("Hello")"""
         self.assertEqual(self.helper.get_property_type("Button", "action"), "Action")
         self.assertIsNone(self.helper.get_property_type("Unknown", "prop"))
 
+    def test_string_literal_action_auto_wrapping(self):
+        """Verifies that plain string literal action names are auto-wrapped into call dicts."""
+        compiler = ExpressCompiler(self.catalog)
+        dsl = 'root = Button("Submit", _, "submitForm")'
+        envelope = compiler.compile(dsl)
+        comps = envelope["createSurface"]["components"]
+        btn = next(c for c in comps if c["id"] == "root")
+        self.assertEqual(btn["action"], {"call": "submitForm", "args": {}})
+
 
 if __name__ == "__main__":
     unittest.main()
