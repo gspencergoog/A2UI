@@ -1,0 +1,10 @@
+# Optimization Run History
+
+| Run ID | Hypothesis | Pytest | Overall Acc | Algo Acc | Latency | Input Tok | Output Tok | Status | Notes |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| `001` | Enhance AtomCompiler to resolve inline components, brace-enclosed maps, template properties, and restrict component name matching to catalog definitions. | PASS | 66.7% | 66.7% | 8.48s | 0 | 0 | KEEP | Schema Accuracy increased from 50.0% to 66.7%. All 6 validation prompts now compile into valid A2UI payloads. |
+| `002` | - | PASS | 83.3% | 100.0% | 8.49s | 0 | 0 | - | - |
+| `003` | Streamline ATOM_RULES grammar rules, remove redundant instructions, align Example 2 template syntax with Rule 7, reducing reasoning search space and input tokens. | PASS | 100.0% | 100.0% | 11.43s | 0 | 0 | KEEP | Maintained 100% schema accuracy and quality score. Reduced reasoning tokens by 13.3% vs run_002 (and 42.6% overall), code output tokens by 31.6%, and latency by 16.0%. Score S_opt improved from +0.600 to +0.654. |
+| `004` | - | PASS | 100.0% | 100.0% | 8.78s | 0 | 0 | - | - |
+| `005` | Add S-expression comment tokenization (; ...) stripping and template :source path resolution to reduce reasoning token overhead. | PASS | 60.0% | 60.0% | 9.62s | 0 | 0 | REVERT | Reverted. Regex changes in compiler.py caused 2 compilation failures, dropping Schema Acc to 60.0%. |
+| `008` | Compiler-side AST normalization: auto-convert alternating key-value lists into JSON object maps in data model, and auto-normalize relative template item path bindings (e.g. $/items/item/field into item/field). | PASS | 100.0% | 100.0% | 8.50s | 4,436 | 316 | KEEP | Pytest 100% pass (507 passed). Quality Score improved from 83.3% to 100.0% (+16.7%), Algorithmic Schema Acc maintained at 100.0%. Output tokens reduced by -1.3% (-4 tokens). S_opt increased from +0.550 to +0.588 (+0.038). |

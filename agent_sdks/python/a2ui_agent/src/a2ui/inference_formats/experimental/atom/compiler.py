@@ -367,7 +367,28 @@ class AtomCompiler:
             val = clean_list
             if not val:
                 return []
-            if len(val) >= 2 and len(val) % 2 == 0 and all(isinstance(val[i], str) and val[i].startswith(":") for i in range(0, len(val), 2)):
+            is_kv_list = (
+                len(val) >= 2
+                and len(val) % 2 == 0
+                and all(
+                    isinstance(val[k], str)
+                    and not self._is_component_type(val[k])
+                    and val[k] not in ("data", "dataModel", "set!", "template", "a2ui", "Event")
+                    for k in range(0, len(val), 2)
+                )
+            )
+            is_pair_list = (
+                len(val) >= 1
+                and all(
+                    isinstance(item, (list, tuple))
+                    and len(item) == 2
+                    and isinstance(item[0], str)
+                    and not self._is_component_type(item[0])
+                    for item in val
+                )
+            )
+
+            if is_kv_list:
                 res = {}
                 i = 0
                 while i < len(val) - 1:
@@ -378,6 +399,13 @@ class AtomCompiler:
                     res[key] = self._clean_data_value(val[i + 1])
                     i += 2
                 return res
+            elif is_pair_list:
+                res = {}
+                for item in val:
+                    key = str(item[0]).lstrip(":")
+                    res[key] = self._clean_data_value(item[1])
+                return res
+
             return [self._clean_data_value(item) for item in val]
         if isinstance(val, str):
             val_clean = val.strip()
@@ -425,11 +453,15 @@ class AtomCompiler:
         if isinstance(val, dict) and "path" in val:
             val = val["path"]
         if isinstance(val, str):
+            if "/item/" in val:
+                val = "item/" + val.split("/item/", 1)[1]
+            elif val.startswith("/item/"):
+                val = val[1:]
             if val.startswith("$/"):
                 return val[1:]
             elif val.startswith("$"):
                 return val[1:] if val.startswith("$/") else ("/" + val[1:] if not val[1:].startswith("/") else val[1:])
-            elif not val.startswith("/"):
+            elif not val.startswith("/") and not val.startswith("item/"):
                 return "/" + val
             return val
         return "/items"
@@ -741,11 +773,22 @@ class AtomCompiler:
             return [self._resolve_val(item, components) for item in val]
         if isinstance(val, str):
             if val.startswith("$/"):
-                return {"path": val[1:]}
+                path_str = val[1:]
             elif val.startswith("$") and len(val) > 1 and val[1].isalpha():
-                return {"path": "/" + val[1:]}
+                path_str = "/" + val[1:]
             elif val.startswith("/") and not val.startswith("//") and len(val) > 1 and val[1].isalpha():
-                return {"path": val}
+                path_str = val
+            elif val.startswith("item/") or (not val.startswith("http://") and not val.startswith("https://") and not val.startswith("file://") and "/" in val and val.split("/")[0] in ("item", "items", "data", "model", "product", "user")):
+                path_str = "/" + val if not val.startswith("/") else val
+            else:
+                path_str = None
+
+            if path_str:
+                if "/item/" in path_str:
+                    path_str = "item/" + path_str.split("/item/", 1)[1]
+                elif path_str.startswith("/item/"):
+                    path_str = path_str[1:]
+                return {"path": path_str}
         if isinstance(val, list) and val:
             head = str(val[0])
             if head == "Event":
