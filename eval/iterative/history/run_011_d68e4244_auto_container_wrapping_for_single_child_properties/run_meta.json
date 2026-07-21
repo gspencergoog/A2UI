@@ -1,0 +1,5 @@
+{
+  "hypothesis": "Auto-wrap multiple child components in an implicit container (Column) when assigned to a component whose schema requires a single child property.",
+  "notes": "Reverted. Maintained 100% Quality Score and 100% Algorithmic Schema Pass Rate, but S_opt regressed slightly (+0.596 vs +0.600 baseline) due to a +5.4% increase in output code tokens (304 vs 289).",
+  "status": "Backtracked"
+}

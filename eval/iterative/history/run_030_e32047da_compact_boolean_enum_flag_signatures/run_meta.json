@@ -1,0 +1,5 @@
+{
+  "hypothesis": "Compact catalog schema parameter formatting for boolean/enum flags in dynamic prompt generation.",
+  "notes": "Pytest 100% pass. Schema Acc regressed to 83.3% (-16.7%) and Quality Score regressed to 83.3% (-16.7%) because omitting description lines for short enums/booleans created search space ambiguity in multi-attribute components. Score S_opt dropped from +0.600 to +0.435 (-0.165). Reverted per Rule 1, Rule 2, and Rule 3.",
+  "status": "Backtracked"
+}
