@@ -60,11 +60,23 @@ class AtomDecompiler:
                 # Find root component (first node not referenced as a child, or node_0)
                 all_children = set()
                 for c in components:
-                    if "child" in c:
+                    if "child" in c and isinstance(c["child"], str):
                         all_children.add(c["child"])
                     if "children" in c:
-                        all_children.update(c["children"])
-                
+                        if isinstance(c["children"], list):
+                            all_children.update(c["children"])
+                        elif isinstance(c["children"], dict) and "componentId" in c["children"]:
+                            all_children.add(c["children"]["componentId"])
+                    for pk, pv in c.items():
+                        if pk in ("id", "component"):
+                            continue
+                        if isinstance(pv, dict) and "componentId" in pv:
+                            all_children.add(pv["componentId"])
+                        elif isinstance(pv, list):
+                            for elem in pv:
+                                if isinstance(elem, str) and elem in comp_map:
+                                    all_children.add(elem)
+
                 root_id = components[0]["id"]
                 for c in components:
                     if c["id"] not in all_children:
@@ -91,7 +103,13 @@ class AtomDecompiler:
         for k, v in comp.items():
             if k in ("id", "component"):
                 continue
-            if isinstance(v, str) and v in comp_map:
+            if isinstance(v, dict) and "componentId" in v:
+                tmpl_child_id = v["componentId"]
+                path_val = v.get("path", "")
+                items_arg = f':items $/{path_val.lstrip("/")}' if path_val else ""
+                decomp_child = self._decompile_component(tmpl_child_id, comp_map, indent + 1)
+                child_nodes.append(f"{pad}  (template {items_arg}\n{decomp_child})".strip())
+            elif isinstance(v, str) and v in comp_map:
                 # Single child reference
                 decomp_child = self._decompile_component(v, comp_map, indent + 1)
                 if k in ("child", "content", "trigger"):

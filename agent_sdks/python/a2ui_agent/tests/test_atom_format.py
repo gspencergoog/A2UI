@@ -301,7 +301,7 @@ class TestAtomFormat(unittest.TestCase):
         compiled = self.compiler.compile(text)
         comps = compiled["createSurface"]["components"]
         txt = next(c for c in comps if c["component"] == "Text")
-        self.assertEqual(txt["text"], {"path": "$title"})
+        self.assertEqual(txt["text"], {"path": "/title"})
         self.assertEqual(txt["count"], 42)
         self.assertEqual(txt["ratio"], 3.14)
         self.assertEqual(txt["visible"], True)
@@ -488,6 +488,72 @@ class TestAtomFormat(unittest.TestCase):
         self.assertIn("(CustomSlotCardY", decompiled)
         self.assertIn("(CustomContainerX", decompiled)
         self.assertIn('(CustomWidgetZ :label_text "Hello Synthetic"', decompiled)
+
+    def test_compile_child_list_template_property_assignment(self):
+        """Test standard v1.0 Catalog List component dynamic template assignment to children property."""
+        from a2ui.schema.catalog import CatalogConfig
+        from a2ui.inference_formats.transport import TransportFormat
+        from a2ui_eval.shared.utils import GIT_ROOT
+        cat_path = str(GIT_ROOT / 'specification/v1_0/catalogs/basic/catalog.json')
+        cat_cfg = CatalogConfig.from_path('basic_catalog', cat_path)
+        transport_format = TransportFormat(version='1.0', catalogs=[cat_cfg], experiments={'version_1_0'})
+        cat = transport_format.get_selected_catalog()
+
+        compiler = AtomCompiler(catalog=cat)
+        text = '(List :items $/products :template (template item (Card (Text "Item"))))'
+        compiled = compiler.compile(text)
+
+        comps = compiled["createSurface"]["components"]
+        lst = next(c for c in comps if c["component"] == "List")
+        self.assertIn("children", lst)
+        self.assertIsInstance(lst["children"], dict)
+        self.assertIn("componentId", lst["children"])
+        self.assertEqual(lst["children"]["path"], "/products")
+        self.assertNotIn("items", lst)
+        self.assertNotIn("template", lst)
+
+    def test_synthetic_catalog_child_list_template_assignment(self):
+        """Test catalog-agnostic ChildList template assignment with custom non-standard property name 'sub_nodes'."""
+        from a2ui.schema.catalog import A2uiCatalog
+        synthetic_components = {
+            "CustomContainerX": {
+                "type": "object",
+                "properties": {
+                    "component": {"const": "CustomContainerX"},
+                    "sub_nodes": {"$ref": "https://a2ui.org/specification/v1_0/common_types.json#/$defs/ChildList"},
+                },
+                "required": ["component", "sub_nodes"]
+            },
+            "CustomWidgetZ": {
+                "type": "object",
+                "properties": {
+                    "component": {"const": "CustomWidgetZ"},
+                    "label_text": {"type": "string"},
+                },
+                "required": ["component"]
+            }
+        }
+        cat = A2uiCatalog(
+            version="1.0",
+            name="custom_fuzzed_catalog",
+            s2c_schema={},
+            common_types_schema={},
+            catalog_schema={
+                "catalogId": "https://a2ui.org/custom_fuzzed_catalog",
+                "components": synthetic_components,
+            },
+        )
+        compiler = AtomCompiler(catalog=cat)
+        atom_src = '(CustomContainerX :items $/catalog_items (template (CustomWidgetZ :label_text $/title)))'
+        compiled = compiler.compile(atom_src)
+
+        comps = compiled["createSurface"]["components"]
+        container = next(c for c in comps if c["component"] == "CustomContainerX")
+        self.assertIn("sub_nodes", container)
+        self.assertIsInstance(container["sub_nodes"], dict)
+        self.assertEqual(container["sub_nodes"]["path"], "/catalog_items")
+        self.assertNotIn("items", container)
+        self.assertNotIn("template", container)
 
 
 if __name__ == "__main__":
