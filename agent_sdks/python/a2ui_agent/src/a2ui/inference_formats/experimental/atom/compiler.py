@@ -693,12 +693,21 @@ class AtomCompiler:
                 comp_dict["items"] = {"path": norm_path}
         elif children:
             single_child_prop = self.schema_helper.get_single_child_property(comp_type)
-            if target_child_list_key:
+            if len(children) == 1 and single_child_prop and "children" not in prop_keys:
+                comp_dict[single_child_prop] = children[0]
+            elif target_child_list_key:
                 comp_dict[target_child_list_key] = children
             elif len(children) == 1 and single_child_prop:
                 comp_dict[single_child_prop] = children[0]
             else:
                 comp_dict["children"] = children
+
+        for slot_k in ("child", "content", "trigger", "header", "footer", "leading", "trailing"):
+            if slot_k in comp_dict and isinstance(comp_dict[slot_k], list):
+                if len(comp_dict[slot_k]) == 1:
+                    comp_dict[slot_k] = comp_dict[slot_k][0]
+                elif not comp_dict[slot_k]:
+                    del comp_dict[slot_k]
 
         if prop_keys:
             for invalid_k in ("items", "template", "displayStyle", "options", "center", "zoom", "pins", "latitude", "longitude"):
