@@ -62,6 +62,12 @@ def sync_worktree_history(
                 if entry.is_dir():
                     target_worktrees.append(entry.path)
 
+        # Also search direct sibling directories under parent_dir
+        if os.path.exists(parent_dir):
+            for entry in os.scandir(parent_dir):
+                if entry.is_dir() and entry.name != "worktrees":
+                    target_worktrees.append(entry.path)
+
     copied_runs = []
     current_max_id = _get_max_run_id(main_history_dir)
 

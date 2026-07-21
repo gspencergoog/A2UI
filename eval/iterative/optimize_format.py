@@ -306,7 +306,9 @@ def main(argv: Optional[List[str]] = None) -> None:
         ]
 
     # 3. Run Evals
-    temp_log_dir = os.path.join(eval_root, "logs", "temp_optimization")
+    temp_log_dir = os.path.join(
+        eval_root, "logs", f"temp_optimization_{args.format}_{os.getpid()}"
+    )
     if os.path.exists(temp_log_dir):
         shutil.rmtree(temp_log_dir)
     os.makedirs(temp_log_dir, exist_ok=True)
@@ -344,20 +346,52 @@ def main(argv: Optional[List[str]] = None) -> None:
         if isinstance(samples_list, dict):
             samples_list = list(samples_list.values())
         for s in samples_list:
-            s_meta = s.get("metadata", {})
-            s_scores = s.get("scores", {})
+            s_meta = s.get("metadata") or {}
+            s_scores = s.get("scores") or {}
             s_id = s_meta.get("name") or str(s.get("id"))
-            algo_passed = s_scores.get("a2ui_scorer", {}).get("value") == 1.0
+            algo_passed = (
+                s_scores.get("a2ui_scorer", {}).get("value") == 1.0
+                if isinstance(s_scores, dict)
+                else False
+            )
             quality_passed = (
                 s_scores.get("measured_model_graded_qa", {}).get("value") == "C"
+                if isinstance(s_scores, dict)
+                else False
             )
+
+            s_dur = None
+            s_reas = None
+            for e in s.get("events") or []:
+                if (
+                    isinstance(e, dict)
+                    and e.get("event") == "model"
+                    and e.get("working_time") is not None
+                ):
+                    s_dur = e.get("working_time")
+                    call_res = (
+                        e.get("call", {}).get("response", {})
+                        if isinstance(e.get("call"), dict)
+                        else {}
+                    )
+                    if isinstance(call_res, dict):
+                        usage_meta = call_res.get("usageMetadata")
+                        if isinstance(usage_meta, dict):
+                            s_reas = usage_meta.get("thoughtsTokenCount")
+                    break
+
+            if s_dur is None:
+                s_dur = s_meta.get("inference_duration_seconds", 0.0)
+            if s_reas is None:
+                s_reas = s_meta.get("inference_reasoning_tokens", 0)
+
             samples_dict[s_id] = {
                 "schema_acc": 1.0 if algo_passed else 0.0,
                 "quality_acc": 1.0 if quality_passed else 0.0,
                 "code_tokens": s_meta.get("inference_output_tokens", 0),
-                "reasoning_tokens": s_meta.get("inference_reasoning_tokens", 0),
+                "reasoning_tokens": s_reas,
                 "input_tokens": s_meta.get("inference_input_tokens", 0),
-                "latency_seconds": s_meta.get("inference_duration_seconds", 0.0),
+                "latency_seconds": s_dur,
             }
 
         meta_base = {

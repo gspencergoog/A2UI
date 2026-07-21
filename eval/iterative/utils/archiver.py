@@ -83,7 +83,11 @@ def archive_run(
 
     # 4. Extract metrics & write run_meta.json
     temp_dir = log_dir or str(script_dir.parent / "logs" / "temp_optimization")
-    eval_logs = glob.glob(os.path.join(temp_dir, "*.eval"))
+    eval_logs = sorted(
+        glob.glob(os.path.join(temp_dir, "*.eval")),
+        key=lambda f: os.path.getmtime(f) if os.path.exists(f) else 0.0,
+        reverse=True,
+    )
 
     metrics_extracted: Dict[str, Any] = {}
     if eval_logs:

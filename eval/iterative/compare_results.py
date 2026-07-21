@@ -226,8 +226,11 @@ def extract_metrics(
             continue
         filtered_samples.append(s)
 
-    sample_count = len(filtered_samples) if filtered_samples else len(samples)
-    active_samples = filtered_samples if filtered_samples else samples
+    if filter_sample_ids is not None:
+        active_samples = filtered_samples
+    else:
+        active_samples = samples
+    sample_count = len(active_samples)
 
     # Calculate schema and quality accuracy over active samples
     schema_passes = 0
@@ -421,12 +424,20 @@ def compute_s_opt(m: Dict[str, Any], b: Dict[str, Any]) -> float:
     """Computes Composite Optimization Score S_opt."""
     schema_acc = m.get("schema_acc") or 0.0
     quality_acc = m.get("quality_acc") or 0.0
-    code_tok = m.get("avg_output_tokens") or 1.0
-    base_code_tok = b.get("avg_output_tokens") or 1.0
-    reason_tok = m.get("avg_reasoning_tokens") or 1.0
-    base_reason_tok = b.get("avg_reasoning_tokens") or 1.0
-    input_tok = m.get("avg_input_tokens") or 1.0
-    base_input_tok = b.get("avg_input_tokens") or 1.0
+    code_tok = m["avg_output_tokens"] if m.get("avg_output_tokens") is not None else 0.0
+    base_code_tok = (
+        b["avg_output_tokens"] if b.get("avg_output_tokens") is not None else 0.0
+    )
+    reason_tok = (
+        m["avg_reasoning_tokens"] if m.get("avg_reasoning_tokens") is not None else 0.0
+    )
+    base_reason_tok = (
+        b["avg_reasoning_tokens"] if b.get("avg_reasoning_tokens") is not None else 0.0
+    )
+    input_tok = m["avg_input_tokens"] if m.get("avg_input_tokens") is not None else 0.0
+    base_input_tok = (
+        b["avg_input_tokens"] if b.get("avg_input_tokens") is not None else 0.0
+    )
 
     code_ratio = code_tok / max(base_code_tok, 1.0)
     reason_ratio = reason_tok / max(base_reason_tok, 1.0)
