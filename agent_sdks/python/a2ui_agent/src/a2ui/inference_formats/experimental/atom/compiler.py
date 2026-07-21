@@ -964,7 +964,14 @@ class AtomCompiler:
         return val
 
     def _compile_event(self, expr: List[Any]) -> Dict[str, Any]:
-        event_name = str(expr[1]) if len(expr) > 1 else ""
+        event_name = ""
+        if len(expr) > 1 and not str(expr[1]).startswith(":"):
+            event_name = str(expr[1]).strip("`").strip("'")
+        else:
+            for idx in range(1, len(expr) - 1):
+                if str(expr[idx]) in (":name", ":action", ":event") and idx + 1 < len(expr):
+                    event_name = str(expr[idx + 1]).strip("`").strip("'")
+                    break
         context = {}
         i = 2
         pos_idx = 0
