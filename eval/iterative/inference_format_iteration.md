@@ -73,7 +73,7 @@ Even if accuracy remains equal or 100%, an iteration **MUST BE REVERTED** if any
 To provide a single quantitative objective metric for LLMs and human reviewers to compare candidate runs:
 
 \[
-S_{\text{opt}} = 0.50 \times \text{SchemaAcc} + 0.30 \times \text{QualityScore} - 0.15 \times \left(\frac{\text{CodeTok}}{\text{BaseCodeTok}}\right) - 0.05 \times \left(\frac{\text{ReasonTok}}{\text{BaseReasonTok}}\right)
+S_{\text{opt}} = 0.50 \times \text{SchemaAcc} + 0.30 \times \text{QualityScore} - 0.15 \times \left(\frac{\text{CodeTok}}{\text{BaseCodeTok}}\right) - 0.05 \times \left(\frac{\text{ReasonTok}}{\text{BaseReasonTok}}\right) - 0.03 \times \left(\frac{\text{InputTok}}{\text{BaseInputTok}}\right)
 \]
 
 * **Decision Formula**:

@@ -245,11 +245,14 @@ def compute_s_opt(m: Dict[str, Any], b: Dict[str, Any]) -> float:
     base_code_tok = b.get("avg_output_tokens") or 1.0
     reason_tok = m.get("avg_reasoning_tokens") or 1.0
     base_reason_tok = b.get("avg_reasoning_tokens") or 1.0
+    input_tok = m.get("avg_input_tokens") or 1.0
+    base_input_tok = b.get("avg_input_tokens") or 1.0
 
     code_ratio = code_tok / max(base_code_tok, 1.0)
     reason_ratio = reason_tok / max(base_reason_tok, 1.0)
+    input_ratio = input_tok / max(base_input_tok, 1.0)
 
-    s_opt = (0.50 * schema_acc) + (0.30 * quality_acc) - (0.15 * code_ratio) - (0.05 * reason_ratio)
+    s_opt = (0.50 * schema_acc) + (0.30 * quality_acc) - (0.15 * code_ratio) - (0.05 * reason_ratio) - (0.03 * input_ratio)
     return round(s_opt, 3)
 
 
@@ -366,7 +369,7 @@ def generate_markdown_table(
     lines.append("#### Metric Definitions & Derivation Key")
     lines.append("- **Run / Results Directory**: Identifier or directory path of the evaluation run.")
     lines.append("- **Samples**: Total number of evaluation sample prompts executed in the run.")
-    lines.append("- **Score (S_opt)**: Composite Format Score `S_opt = 0.50×SchemaAcc + 0.30×QualityScore - 0.15×(CodeTok/BaseCodeTok) - 0.05×(ReasonTok/BaseReasonTok)`. Higher score indicates superior accuracy and token efficiency.")
+    lines.append("- **Score (S_opt)**: Composite Format Score `S_opt = 0.50×SchemaAcc + 0.30×QualityScore - 0.15×(CodeTok/BaseCodeTok) - 0.05×(ReasonTok/BaseReasonTok) - 0.03×(InputTok/BaseInputTok)`. Higher score indicates superior accuracy and token efficiency.")
     lines.append("- **Schema Acc (Delta)**: Percentage of outputs passing strict compiler compilation and schema validation (`a2ui_scorer`), with point diff vs baseline.")
     lines.append("- **Quality Score (Delta)**: LLM-graded semantic intent accuracy score (`measured_model_graded_qa`), with point diff vs baseline.")
     lines.append("- **Parallel Wall Latency (Delta)**: Total wall-clock run duration divided by sample count `(completed_at - started_at) / samples`, measuring parallel batch throughput under concurrency.")
