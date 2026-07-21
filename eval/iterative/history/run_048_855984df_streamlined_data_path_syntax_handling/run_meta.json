@@ -1,0 +1,5 @@
+{
+  "hypothesis": "Streamlined data path syntax handling in _resolve_val.",
+  "notes": "Pytest 100% pass (507 passed). Reasoning tokens reduced (-6.0%). However, Code Output Tokens increased (+9.0%), dropping score S_opt from +0.570 to +0.560 (-0.010). Reverted per Rule 3.",
+  "status": "Backtracked"
+}
