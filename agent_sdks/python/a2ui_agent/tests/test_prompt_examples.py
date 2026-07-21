@@ -62,6 +62,11 @@ class TestPromptExamplesValidity:
                     "Button": {"properties": {"text": {"type": "string"}, "onPress": {"type": "object"}}},
                     "Tabs": {"properties": {"items": {"type": "array"}, "content": {"type": "array"}}},
                     "List": {"properties": {"items": {"type": "array"}, "template": {"type": "object"}}},
+                    "ContainerComponent": {"properties": {"children": {"type": "array"}}},
+                    "ChildComponent": {"properties": {"title": {"type": "string"}}},
+                    "InputComponent": {"properties": {"label": {"type": "string"}, "value": {"type": "string"}}},
+                    "ActionComponent": {"properties": {"label": {"type": "string"}, "onPress": {"type": "object"}}},
+                    "ListComponent": {"properties": {"items": {"type": "array"}, "template": {"type": "object"}}},
                 }
             },
         )

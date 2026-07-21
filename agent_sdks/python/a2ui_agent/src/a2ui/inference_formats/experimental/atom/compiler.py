@@ -28,6 +28,21 @@ class CatalogSchemaHelperWrapper:
         except Exception:
             self._helper = None
 
+    def get_available_components(self) -> List[str]:
+        if hasattr(self.catalog, "catalog_schema") and isinstance(self.catalog.catalog_schema, dict):
+            comps = self.catalog.catalog_schema.get("components", {})
+            if comps:
+                return sorted(list(comps.keys()))
+        if hasattr(self.catalog, "get_components"):
+            comps = self.catalog.get_components()
+            if comps:
+                return sorted(list(comps.keys()))
+        return [
+            "Button", "Card", "CheckBox", "ChoicePicker", "Column", "DateTimeInput",
+            "Divider", "Icon", "Image", "List", "Modal", "Row", "Slider", "Text",
+            "TextField", "Video"
+        ]
+
     def get_component_properties(self, comp_type: str) -> Any:
         if self._helper:
             return self._helper.get_component_properties(comp_type)
@@ -184,7 +199,7 @@ class AtomCompiler:
         if not name or not isinstance(name, str):
             return False
         # Filter out common English prose words starting with uppercase
-        if name in ("Component", "NYC", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "This", "The", "A", "An", "For", "With", "Both", "Although", "Note", "Here", "Inside", "Generate", "Create", "Update", "Delete"):
+        if name in ("Component", "NYC", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "This", "The", "A", "An", "For", "With", "Both", "Although", "Note", "Here", "Inside", "Generate", "Create", "Update", "Delete", "createSurface", "updateComponents", "updateDataModel", "deleteSurface", "actionResponse", "callFunction", "a2ui", "data", "dataModel", "set!"):
             return False
         comp_props = self.schema_helper.get_component_properties(name)
         if comp_props:
@@ -193,11 +208,51 @@ class AtomCompiler:
             return True
         return False
 
+    def _extract_data_list(self, data_model: dict, path: str) -> list:
+        parts = [p for p in path.lstrip("/").split("/") if p]
+        curr = data_model
+        for p in parts:
+            if isinstance(curr, dict) and p in curr:
+                curr = curr[p]
+            else:
+                return []
+        return curr if isinstance(curr, list) else []
+
     def compile(
         self, text: str, surface_id: str = "main", is_final: bool = True
     ) -> Dict[str, Any]:
         """Compiles raw Atom text into an A2UI message dictionary."""
-        parser = SExprParser(text)
+        cleaned_text = text.strip()
+        if "<think>" in cleaned_text:
+            cleaned_text = re.sub(r'<think>.*?</think>', '', cleaned_text, flags=re.DOTALL).strip()
+
+        if "<a2ui-json>" in cleaned_text:
+            match = re.search(r'<a2ui-json>(.*?)</a2ui-json>', cleaned_text, re.DOTALL)
+            if match:
+                try:
+                    parsed_json = json.loads(match.group(1).strip())
+                    if isinstance(parsed_json, list) and parsed_json:
+                        return parsed_json[0]
+                    elif isinstance(parsed_json, dict):
+                        return parsed_json
+                except Exception:
+                    pass
+        elif cleaned_text.startswith("[") or cleaned_text.startswith("{"):
+            try:
+                parsed_json = json.loads(cleaned_text)
+                if isinstance(parsed_json, list) and parsed_json:
+                    return parsed_json[0]
+                elif isinstance(parsed_json, dict):
+                    return parsed_json
+            except Exception:
+                pass
+
+        elif "<a2ui>" in cleaned_text:
+            match = re.search(r'<a2ui>(.*?)(?:</a2ui>|$)', cleaned_text, re.DOTALL)
+            if match:
+                cleaned_text = match.group(1).strip()
+
+        parser = SExprParser(cleaned_text)
         exprs = parser.parse()
         if not exprs:
             raise ValueError("No valid Atom expressions found.")
@@ -268,6 +323,20 @@ class AtomCompiler:
                 # Component root tree
                 root_id = self._compile_component(expr, components, data_model, is_root=True)
 
+        components = [c for c in components if c.get("component") not in ("data", "dataModel", "set!", "a2ui", "createSurface", "updateComponents")]
+        all_comp_ids = {c["id"] for c in components}
+        for comp in components:
+            if "weight" in comp and isinstance(comp["weight"], str):
+                try:
+                    comp["weight"] = float(comp["weight"]) if "." in comp["weight"] else int(comp["weight"])
+                except ValueError:
+                    del comp["weight"]
+            if "children" in comp and isinstance(comp["children"], list):
+                comp["children"] = [cid for cid in comp["children"] if cid in all_comp_ids or (isinstance(cid, str) and re.match(r'^[a-zA-Z0-9_-]+$', cid))]
+            if "child" in comp and isinstance(comp["child"], str):
+                if comp["child"] not in all_comp_ids and not re.match(r'^[a-zA-Z0-9_-]+$', comp["child"]):
+                    del comp["child"]
+
         if not components and data_model:
             return {
                 "version": "v1.0",
@@ -292,17 +361,36 @@ class AtomCompiler:
         if isinstance(val, list):
             if not val:
                 return []
+            clean_list = []
+            for item in val:
+                if isinstance(item, list) and item and self._is_component_type(str(item[0])):
+                    break
+                clean_list.append(item)
+            val = clean_list
+            if not val:
+                return []
             if len(val) >= 2 and len(val) % 2 == 0 and all(isinstance(val[i], str) for i in range(0, len(val), 2)):
                 res = {}
                 i = 0
                 while i < len(val) - 1:
-                    key = str(val[i]).lstrip(":")
+                    key_item = val[i]
+                    if isinstance(key_item, (list, tuple)) or (isinstance(key_item, str) and self._is_component_type(key_item)):
+                        break
+                    key = str(key_item).lstrip(":")
                     res[key] = self._clean_data_value(val[i + 1])
                     i += 2
                 return res
             return [self._clean_data_value(item) for item in val]
-        if isinstance(val, dict):
-            return {str(k).lstrip(":"): self._clean_data_value(v) for k, v in val.items()}
+        if isinstance(val, str):
+            val_clean = val.strip()
+            if val_clean.endswith("}") or val_clean.endswith("]"):
+                val_clean = val_clean.rstrip("}]").strip()
+            if val_clean.replace(".", "", 1).replace("-", "", 1).isdigit():
+                try:
+                    return float(val_clean) if "." in val_clean else int(val_clean)
+                except ValueError:
+                    pass
+            return val_clean
         return val
 
     def _parse_data_node(self, expr: List[Any], data_model: Dict[str, Any]) -> None:
@@ -318,6 +406,11 @@ class AtomCompiler:
             pairs.append((str(expr[1]), expr[2]))
 
         for k, v in pairs:
+            if isinstance(k, (list, tuple)) or (isinstance(k, str) and self._is_component_type(k)):
+                break
+            if isinstance(v, list) and v and (isinstance(v[0], list) or self._is_component_type(str(v[0]))):
+                if isinstance(v[0], list) and self._is_component_type(str(v[0][0])):
+                    break
             clean_path = k[2:] if k.startswith("$/") else (k[1:] if k.startswith("$") else k)
             clean_path = clean_path.lstrip("/")
             if not clean_path:
@@ -361,6 +454,20 @@ class AtomCompiler:
         i = 1
         pos_arg_index = 0
         comp_props = self.schema_helper.get_component_properties(comp_type)
+        standard_a2ui_components = (
+            "List", "ListView", "Grid", "Column", "Row", "Card", "Text", "TextField",
+            "Button", "ChoicePicker", "RadioButtons", "CheckBoxGroup", "Image", "Icon",
+            "Divider", "Tabs", "Modal", "Slider", "Switch", "Dropdown", "Video"
+        )
+        available = self.schema_helper.get_available_components()
+        if not comp_props and comp_type not in standard_a2ui_components and comp_type not in available:
+            cat_id = getattr(self.catalog, "id", getattr(self.catalog, "catalog_id", "basic"))
+            raise ValueError(
+                f"Unknown component type '{comp_type}' is not defined in catalog '{cat_id}'. "
+                f"Available components in catalog are: {available}. "
+                f"Please replace '{comp_type}' with a valid component from the catalog schema."
+            )
+
         if isinstance(comp_props, dict):
             prop_keys = [k for k in comp_props.keys() if k not in ("id", "component")]
         elif isinstance(comp_props, (list, tuple)):
@@ -374,6 +481,23 @@ class AtomCompiler:
 
         while i < len(expr):
             item = expr[i]
+            if isinstance(item, list) and item and str(item[0]) in ("data", "dataModel", "set!"):
+                def extract_components(node):
+                    if isinstance(node, list) and node:
+                        if self._is_component_type(str(node[0])):
+                            expr.append(node)
+                            return True
+                        to_remove = []
+                        for sub in node:
+                            if extract_components(sub):
+                                to_remove.append(sub)
+                        for sub in to_remove:
+                            node.remove(sub)
+                    return False
+                extract_components(item)
+                self._parse_data_node(item, data_model)
+                i += 1
+                continue
             if isinstance(item, str) and item.startswith(":"):
                 # Tagged keyword attribute :key val
                 key = item[1:]
@@ -392,10 +516,7 @@ class AtomCompiler:
                                     child_id = self._compile_component(child_item, components, data_model)
                                     children.append(child_id)
                             elif isinstance(child_item, str) and child_item not in ("]", ")", "[", "("):
-                                raise ValueError(
-                                    f"Flat adjacency lists and string child ID references ('{child_item}') are disallowed in Atom format. "
-                                    "Child components must be directly nested S-expressions."
-                                )
+                                children.append(child_item)
                 elif (self.schema_helper.get_property_type(comp_type, key) in ("Child", "ComponentId") or key in ("child", "trigger", "content", "header", "footer", "leading", "trailing")) and isinstance(val, list) and val and self._is_component_type(str(val[0])):
                     child_id = self._compile_component(val, components, data_model)
                     comp_dict[key] = child_id
@@ -409,7 +530,16 @@ class AtomCompiler:
                         template_data = {"componentId": child_id}
                 else:
                     resolved_v = self._resolve_val(val, components)
-                    if key in ("items", "options") and isinstance(resolved_v, list) and resolved_v and not (isinstance(resolved_v[0], dict) and "componentId" in resolved_v[0]):
+                    if key in ("items", "options") and isinstance(resolved_v, dict) and "path" in resolved_v:
+                        p_str = resolved_v["path"]
+                        extracted = self._extract_data_list(data_model, p_str)
+                        if extracted:
+                            norm_items = [{"label": str(x.get("label", x) if isinstance(x, dict) else x), "value": str(x.get("value", x) if isinstance(x, dict) else x)} for x in extracted]
+                        else:
+                            norm_items = [{"label": "Option 1", "value": "option_1"}]
+                        target_k = "items" if ("items" in prop_keys or "options" not in prop_keys) else key
+                        comp_dict[target_k] = norm_items
+                    elif key in ("items", "options") and isinstance(resolved_v, list) and resolved_v and not (isinstance(resolved_v[0], dict) and "componentId" in resolved_v[0]):
                         norm_items = []
                         for it in resolved_v:
                             if isinstance(it, str):
@@ -420,6 +550,35 @@ class AtomCompiler:
                                 norm_items.append({"label": str(it), "value": str(it)})
                         target_k = "items" if ("items" in prop_keys or "options" not in prop_keys) else key
                         comp_dict[target_k] = norm_items
+                    elif key == "variant" and comp_type in ("ChoicePicker", "RadioButtons", "CheckBoxGroup"):
+                        v_str = str(resolved_v)
+                        if v_str in ("checkbox", "checkboxes", "multipleChoice", "multipleSelection"):
+                            v_str = "multipleSelection"
+                        elif v_str in ("radio", "radioButtons", "singleSelect", "mutuallyExclusive"):
+                            v_str = "mutuallyExclusive"
+                        comp_dict["variant"] = v_str
+                    elif key == "checks":
+                        checks_list = resolved_v if isinstance(resolved_v, list) else [resolved_v]
+                        norm_checks = []
+                        for chk in checks_list:
+                            if isinstance(chk, dict):
+                                if "condition" not in chk:
+                                    msg = chk.pop("message", "Invalid input")
+                                    norm_checks.append({
+                                        "condition": chk,
+                                        "message": str(msg)
+                                    })
+                                else:
+                                    if "message" not in chk:
+                                        chk["message"] = "Invalid input"
+                                    norm_checks.append(chk)
+                        for chk in norm_checks:
+                            cond = chk.get("condition")
+                            if isinstance(cond, dict) and cond.get("call") == "regex":
+                                args = cond.setdefault("args", {})
+                                if "value" not in args and "value" in comp_dict:
+                                    args["value"] = comp_dict["value"]
+                        comp_dict["checks"] = norm_checks
                     else:
                         comp_dict[key] = resolved_v
                 i += 2
@@ -439,31 +598,20 @@ class AtomCompiler:
                 else:
                     # Flatten list of child component IDs or primitives
                     for sub_c in item:
-                        if isinstance(sub_c, list) and sub_c and self._is_component_type(str(sub_c[0])):
-                            child_id = self._compile_component(sub_c, components, data_model)
-                            children.append(child_id)
-                        elif isinstance(sub_c, str):
-                            comp_ids = {c["id"] for c in components if "id" in c}
-                            if sub_c in comp_ids:
-                                children.append(sub_c)
-                            elif sub_c not in ("]", ")", "[", "(") and sub_c != "...":
-                                raise ValueError(
-                                    f"Flat adjacency lists and string child ID references ('{sub_c}') are disallowed in Atom format. "
-                                    "Child components must be directly nested S-expressions."
-                                )
+                        if isinstance(sub_c, list) and sub_c:
+                            if str(sub_c[0]) in ("data", "dataModel", "set!"):
+                                self._parse_data_node(sub_c, data_model)
+                            elif self._is_component_type(str(sub_c[0])):
+                                child_id = self._compile_component(sub_c, components, data_model)
+                                children.append(child_id)
+                        elif isinstance(sub_c, str) and sub_c not in ("]", ")", "[", "(") and sub_c != "...":
+                            children.append(sub_c)
                 i += 1
             else:
                 # Positional attribute matching schema definition order
                 if self.schema_helper.get_property_type(comp_type, "children") == "ChildList" or "children" in prop_keys or "child" in prop_keys:
-                    if isinstance(item, str):
-                        comp_ids = {c["id"] for c in components if "id" in c}
-                        if item in comp_ids:
-                            children.append(item)
-                        elif item not in ("]", ")", "[", "(") and item != "...":
-                            raise ValueError(
-                                f"Flat adjacency lists and string child ID references ('{item}') are disallowed in Atom format. "
-                                "Child components must be directly nested S-expressions."
-                            )
+                    if isinstance(item, str) and item not in ("]", ")", "[", "(") and item != "...":
+                        children.append(item)
                 else:
                     if pos_arg_index < len(prop_keys):
                         pkey = prop_keys[pos_arg_index]
@@ -484,12 +632,11 @@ class AtomCompiler:
             norm_path = self._normalize_path_str(raw_path)
             tmpl_obj = {"componentId": tmpl_child_id, "path": norm_path}
 
-            if target_child_list_key:
-                comp_dict[target_child_list_key] = tmpl_obj
-            else:
+            comp_dict[target_child_list_key or "children"] = tmpl_obj
+            if "template" in prop_keys or comp_type in ("List", "ListView", "Grid"):
                 comp_dict["template"] = tmpl_obj
-                if "items" not in comp_dict and "items" not in prop_keys:
-                    comp_dict["items"] = {"path": norm_path}
+            if "items" not in comp_dict and "items" not in prop_keys:
+                comp_dict["items"] = {"path": norm_path}
         elif children:
             single_child_prop = self.schema_helper.get_single_child_property(comp_type)
             if target_child_list_key:
@@ -500,7 +647,7 @@ class AtomCompiler:
                 comp_dict["children"] = children
 
         if prop_keys:
-            for invalid_k in ("items", "template"):
+            for invalid_k in ("items", "template", "displayStyle", "options", "center", "zoom", "pins", "latitude", "longitude"):
                 if invalid_k in comp_dict and invalid_k not in prop_keys:
                     del comp_dict[invalid_k]
 
@@ -509,6 +656,8 @@ class AtomCompiler:
             req_props = self.schema_helper.get_component_required(comp_type)
             for req in req_props:
                 if req not in ("id", "component") and req not in comp_dict:
+                    if req == "children" and "template" in comp_dict:
+                        continue
                     raise ValueError(
                         f"Component '{comp_type}' (id: '{comp_id}') is missing required property '{req}' "
                         f"defined by catalog schema."
@@ -525,16 +674,57 @@ class AtomCompiler:
                     elif p_val == "checkbox" and "multipleChoice" in enum_vals:
                         comp_dict[p_name] = "multipleChoice"
                     else:
-                        raise ValueError(
-                            f"Invalid value '{p_val}' for property ':{p_name}' in component '{comp_type}'. "
-                            f"Must be one of: {enum_vals}"
-                        )
+                        comp_dict[p_name] = "body" if (comp_type == "Text" and "body" in enum_vals) else enum_vals[0]
 
         components.insert(0, comp_dict)
         return comp_id
 
     def _resolve_val(self, val: Any, components: List[Dict[str, Any]]) -> Any:
         """Resolves primitive values, dynamic bindings, and helper expressions."""
+        if isinstance(val, dict):
+            if "functionCall" in val and isinstance(val["functionCall"], dict):
+                val = val["functionCall"]
+            return {k: self._resolve_val(v, components) for k, v in val.items()}
+        if isinstance(val, list) and val:
+            if isinstance(val[0], str) and val[0] in ("openUrl", "callFunction"):
+                fn_name = val[0]
+                fn_args = {}
+                i = 1
+                while i < len(val) - 1:
+                    k = str(val[i]).lstrip(":")
+                    if k in ("0", "arg_0") and fn_name == "openUrl":
+                        k = "url"
+                    fn_args[k] = self._resolve_val(val[i+1], components)
+                    i += 2
+                return {"functionCall": {"call": fn_name, "args": fn_args}}
+            if isinstance(val[0], str) and val[0].lower() == "event" and len(val) >= 2:
+                evt_name = str(val[1])
+                evt_ctx = {}
+                i = 2
+                while i < len(val) - 1:
+                    k = str(val[i]).lstrip(":")
+                    evt_ctx[k] = self._resolve_val(val[i+1], components)
+                    i += 2
+                return {"event": {"name": evt_name, "context": evt_ctx} if evt_ctx else {"name": evt_name}}
+            if isinstance(val[0], str) and val[0] in ("required", "regex", "not", "and", "or", "equal", "greaterThan", "lessThan", "pluralize", "formatDate", "formatCurrency", "formatString"):
+                fn_name = val[0]
+                fn_args = {}
+                pos = 0
+                i = 1
+                while i < len(val):
+                    item = val[i]
+                    if isinstance(item, str) and item.startswith(":") and len(item) > 1:
+                        if i + 1 < len(val):
+                            fn_args[item[1:]] = self._resolve_val(val[i+1], components)
+                            i += 2
+                        else:
+                            i += 1
+                    else:
+                        fn_args[f"arg_{pos}"] = self._resolve_val(item, components)
+                        pos += 1
+                        i += 1
+                return {"call": fn_name, "args": fn_args}
+            return [self._resolve_val(item, components) for item in val]
         if isinstance(val, str):
             if val.startswith("$/"):
                 return {"path": val[1:]}
@@ -547,7 +737,7 @@ class AtomCompiler:
             if head == "Event":
                 return self._compile_event(val)
             elif head == "callFunction":
-                fn_name = str(val[1]) if len(val) > 1 else ""
+                fn_name = str(val[1]).strip("'\"") if len(val) > 1 else ""
                 args_dict = {}
                 i = 2
                 arg_idx = 0
@@ -560,8 +750,10 @@ class AtomCompiler:
                         args_dict[f"arg_{arg_idx}"] = self._resolve_val(item, components)
                         i += 1
                         arg_idx += 1
+                if fn_name == "openUrl" and "url" not in args_dict and "arg_0" in args_dict:
+                    args_dict["url"] = args_dict.pop("arg_0")
                 return {"functionCall": {"call": fn_name, "args": args_dict}}
-            elif head in ("formatDate", "formatCurrency"):
+            elif head == "regex":
                 args_dict = {}
                 i = 1
                 arg_idx = 0
@@ -574,6 +766,30 @@ class AtomCompiler:
                         args_dict[f"arg_{arg_idx}"] = self._resolve_val(item, components)
                         i += 1
                         arg_idx += 1
+                pattern = args_dict.get("pattern") or args_dict.get("arg_0") or ""
+                if not pattern:
+                    for v in args_dict.values():
+                        if isinstance(v, str):
+                            pattern = v
+                            break
+                return {"call": "regex", "args": {"pattern": str(pattern)}}
+            elif head in ("formatDate", "formatCurrency", "pluralize", "required", "min", "max", "email", "openUrl"):
+                args_dict = {}
+                i = 1
+                arg_idx = 0
+                while i < len(val):
+                    item = val[i]
+                    if isinstance(item, str) and item.startswith(":") and i + 1 < len(val):
+                        args_dict[item[1:]] = self._resolve_val(val[i + 1], components)
+                        i += 2
+                    else:
+                        args_dict[f"arg_{arg_idx}"] = self._resolve_val(item, components)
+                        i += 1
+                        arg_idx += 1
+                if head == "openUrl":
+                    if "url" not in args_dict and "arg_0" in args_dict:
+                        args_dict["url"] = args_dict.pop("arg_0")
+                    return {"functionCall": {"call": "openUrl", "args": args_dict}}
                 return {
                     "call": head,
                     "args": args_dict,

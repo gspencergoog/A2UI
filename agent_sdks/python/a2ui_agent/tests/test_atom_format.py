@@ -379,17 +379,13 @@ class TestAtomFormat(unittest.TestCase):
         self.assertEqual(_get_schema_enum({"enum": ["opt1", "opt2"]}), ["opt1", "opt2"])
         self.assertIsNone(_get_schema_enum("not_a_dict"))
 
-    def test_reject_adjacency_list_string_child_ids(self):
-        """Negative test: Disallow string child ID references and flat adjacency lists."""
-        # Flat positional string ID in Column
-        text_positional_string_id = '(Column "node_1")'
-        with self.assertRaises(ValueError):
-            self.compiler.compile(text_positional_string_id)
-
-        # Flat tagged :children ["node_1"] string list in Column
+    def test_accept_adjacency_list_string_child_ids(self):
+        """Fault-tolerance test: Allow string child ID references in Column."""
         text_tagged_string_id = '(Column :children ["node_1"])'
-        with self.assertRaises(ValueError):
-            self.compiler.compile(text_tagged_string_id)
+        compiled = self.compiler.compile(text_tagged_string_id)
+        comps = compiled["createSurface"]["components"]
+        col = next(c for c in comps if c["component"] == "Column")
+        self.assertEqual(col["children"], ["node_1"])
 
     def test_complex_deeply_nested_tree(self):
         """Positive test: Verify 6+ level deeply nested tree compilation and schema integrity."""
@@ -422,6 +418,13 @@ class TestAtomFormat(unittest.TestCase):
             btn["action"],
             {"event": {"name": "submit", "context": {"name": {"path": "/user/name"}}}}
         )
+
+    def test_unknown_component_type_raises_value_error(self):
+        """Negative test: Ensure unknown component types raise a descriptive ValueError instead of substituting UI."""
+        with self.assertRaises(ValueError) as ctx:
+            self.compiler.compile('(UnknownCustomComponent (Text "Label"))')
+        self.assertIn("Unknown component type 'UnknownCustomComponent'", str(ctx.exception))
+        self.assertIn("Available components in catalog are:", str(ctx.exception))
 
 
     def test_fuzzed_synthetic_catalog_agnosticism(self):
