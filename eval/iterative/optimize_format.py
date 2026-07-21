@@ -99,7 +99,9 @@ def regenerate_master_index(iterative_dir: str) -> None:
             latency = "-"
             input_tokens = "-"
             output_tokens = "-"
-            pytest_status = "PASS"  # Assumed if evaluation ran
+            pytest_status = meta_data.get("pytest") or (
+                "FAIL" if "Pytest FAIL" in str(notes) else "PASS"
+            )
 
             if meta_metrics:
                 overall_acc = f"{(meta_metrics.get('quality_acc') or 0.0) * 100:.1f}%"

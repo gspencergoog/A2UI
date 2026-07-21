@@ -55,8 +55,10 @@ def resolve_results_file(target_path: str) -> str:
                 pass
 
         # Search for .eval files inside directory
-        eval_files = glob.glob(
-            os.path.join(target_path, "**", "*.eval"), recursive=True
+        eval_files = sorted(
+            glob.glob(os.path.join(target_path, "**", "*.eval"), recursive=True),
+            key=lambda f: os.path.getmtime(f) if os.path.exists(f) else 0.0,
+            reverse=True,
         )
         if eval_files:
             uv_bin = shutil.which("uv") or "uv"
@@ -213,6 +215,8 @@ def extract_metrics(
         }
 
     samples = data.get("samples") or []
+    if isinstance(samples, dict):
+        samples = list(samples.values())
     filtered_samples = []
     extracted_sample_ids = set()
 

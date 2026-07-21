@@ -57,6 +57,12 @@ def archive_run(
     history_dir.mkdir(parents=True, exist_ok=True)
     workspace_root = str(script_dir.parent.parent)
 
+    # Pre-sync sibling worktree histories to avoid ID collisions
+    try:
+        sync_worktree_history(skip_index_regen=True)
+    except Exception:
+        pass
+
     # 1. Determine next run ID index
     max_id = 0
     for entry in history_dir.iterdir():
@@ -84,9 +90,12 @@ def archive_run(
     # 4. Extract metrics & write run_meta.json
     temp_dir = log_dir
     if not temp_dir or not os.path.exists(temp_dir):
-        # Match any temp_optimization* log directory under logs/
         logs_parent = script_dir.parent / "logs"
         matching_dirs = sorted(
+            glob.glob(str(logs_parent / f"temp_optimization_{format_name}*")),
+            key=lambda d: os.path.getmtime(d) if os.path.exists(d) else 0.0,
+            reverse=True,
+        ) or sorted(
             glob.glob(str(logs_parent / "temp_optimization*")),
             key=lambda d: os.path.getmtime(d) if os.path.exists(d) else 0.0,
             reverse=True,

@@ -284,8 +284,22 @@ def generate_optimization_report(
         curr_samples = list(curr_samples.values())
     for sample in curr_samples:
         s_scores = sample.get("scores") or {}
-        algo_passed = s_scores.get("a2ui_scorer", {}).get("value") == 1.0
-        judging_val = s_scores.get("measured_model_graded_qa", {}).get("value", "N/A")
+        algo_passed = False
+        judging_val = "N/A"
+        if isinstance(s_scores, dict):
+            a2ui_sc = s_scores.get("a2ui_scorer") or {}
+            if isinstance(a2ui_sc, dict):
+                algo_passed = a2ui_sc.get("value") == 1.0
+            qa_sc = s_scores.get("measured_model_graded_qa") or {}
+            if isinstance(qa_sc, dict):
+                judging_val = qa_sc.get("value", "N/A")
+        elif isinstance(s_scores, list):
+            for sc in s_scores:
+                if isinstance(sc, dict):
+                    if sc.get("name") == "a2ui_scorer":
+                        algo_passed = sc.get("value") == 1.0
+                    elif sc.get("name") == "measured_model_graded_qa":
+                        judging_val = sc.get("value", "N/A")
 
         if not algo_passed or judging_val != "C":
             failures.append((sample, algo_passed, judging_val))
