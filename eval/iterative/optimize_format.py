@@ -101,8 +101,13 @@ def regenerate_master_index(iterative_dir: str) -> None:
             output_tokens = "-"
             pytest_status = "PASS"  # Assumed if evaluation ran
 
-            results_parsed = False
-            if os.path.exists(results_path):
+            if meta_metrics:
+                overall_acc = f"{(meta_metrics.get('quality_acc') or 0.0) * 100:.1f}%"
+                algo_acc = f"{(meta_metrics.get('schema_acc') or 0.0) * 100:.1f}%"
+                latency = f"{(meta_metrics.get('latency_seconds_median') or 0.0):.2f}s"
+                input_tokens = f"{(meta_metrics.get('input_tokens_median') or 0.0):.0f}"
+                output_tokens = f"{(meta_metrics.get('code_tokens_median') or 0.0):.0f}"
+            elif os.path.exists(results_path):
                 try:
                     with open(results_path, "r", encoding="utf-8") as f:
                         log_data = json.load(f)
@@ -112,16 +117,8 @@ def regenerate_master_index(iterative_dir: str) -> None:
                         latency = f"{metrics['avg_latency_seconds']:.2f}s"
                         input_tokens = f"{metrics['avg_input_tokens']:.0f}"
                         output_tokens = f"{metrics['avg_output_tokens']:.0f}"
-                        results_parsed = True
                 except Exception:
                     pass
-
-            if not results_parsed and meta_metrics:
-                overall_acc = f"{meta_metrics.get('quality_acc', 0.0) * 100:.1f}%"
-                algo_acc = f"{meta_metrics.get('schema_acc', 0.0) * 100:.1f}%"
-                latency = f"{meta_metrics.get('latency_seconds_median', 0.0):.2f}s"
-                input_tokens = f"{meta_metrics.get('input_tokens_median', 0.0):.0f}"
-                output_tokens = f"{meta_metrics.get('code_tokens_median', 0.0):.0f}"
 
             runs.append({
                 "dir_name": entry.name,
@@ -327,7 +324,11 @@ def main(argv: Optional[List[str]] = None) -> None:
         sys.exit(1)
 
     # 4. Locate log file
-    log_files = glob.glob(os.path.join(temp_log_dir, "*.eval"))
+    log_files = sorted(
+        glob.glob(os.path.join(temp_log_dir, "*.eval")),
+        key=lambda f: os.path.getmtime(f) if os.path.exists(f) else 0.0,
+        reverse=True,
+    )
     if not log_files:
         print("Error: No eval logs found.")
         sys.exit(1)

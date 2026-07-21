@@ -15,6 +15,7 @@
 """Quick-compiler and decompiler CLI utility tools for testing inference formats."""
 
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any, Dict
@@ -74,7 +75,11 @@ def test_decompile_payload(format_name: str, json_str_or_dict: Any) -> str:
 
     payload: Dict[str, Any]
     if isinstance(json_str_or_dict, str):
-        payload = json.loads(json_str_or_dict)
+        if os.path.isfile(json_str_or_dict):
+            with open(json_str_or_dict, "r", encoding="utf-8") as f:
+                payload = json.load(f)
+        else:
+            payload = json.loads(json_str_or_dict)
     else:
         payload = json_str_or_dict
 

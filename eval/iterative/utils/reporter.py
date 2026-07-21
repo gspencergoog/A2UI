@@ -67,8 +67,9 @@ def extract_metrics_from_log(log_data: Dict[str, Any]) -> Dict[str, Any]:
                 else {}
             )
             if isinstance(call_res, dict):
-                usage_meta = call_res.get("usageMetadata", {})
-                s_reasoning = usage_meta.get("thoughtsTokenCount")
+                usage_meta = call_res.get("usageMetadata")
+                if isinstance(usage_meta, dict):
+                    s_reasoning = usage_meta.get("thoughtsTokenCount")
 
         if s_duration is None:
             if "evaluation_duration_seconds" in meta:

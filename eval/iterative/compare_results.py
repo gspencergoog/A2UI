@@ -174,9 +174,10 @@ def extract_metrics(
 
     if "metrics" in data and not data.get("samples"):
         m = data["metrics"]
-        med_lat = float(m.get("latency_seconds_median", 0.0))
-        med_c = float(m.get("code_tokens_median", 0.0))
-        med_r = float(m.get("reasoning_tokens_median", 0.0))
+        med_lat = float(m.get("latency_seconds_median") or 0.0)
+        med_c = float(m.get("code_tokens_median") or 0.0)
+        med_r = float(m.get("reasoning_tokens_median") or 0.0)
+        med_in = float(m.get("input_tokens_median") or 0.0)
         total_gen = med_r + med_c
         r_frac = med_r / max(total_gen, 1.0)
         est_r = med_lat * r_frac
@@ -184,19 +185,19 @@ def extract_metrics(
         return {
             "name": name,
             "task_name": task_name,
-            "total_samples": m.get("total_samples", 0),
-            "sample_count": m.get("total_samples", 0),
-            "schema_acc": m.get("schema_acc", 0.0),
-            "schema_accuracy": m.get("schema_acc", 0.0),
-            "algo_accuracy": m.get("schema_acc", 0.0),
-            "quality_acc": m.get("quality_acc", 0.0),
-            "quality_accuracy": m.get("quality_acc", 0.0),
-            "overall_accuracy": m.get("quality_acc", 0.0),
+            "total_samples": m.get("total_samples") or 0,
+            "sample_count": m.get("total_samples") or 0,
+            "schema_acc": float(m.get("schema_acc") or 0.0),
+            "schema_accuracy": float(m.get("schema_acc") or 0.0),
+            "algo_accuracy": float(m.get("schema_acc") or 0.0),
+            "quality_acc": float(m.get("quality_acc") or 0.0),
+            "quality_accuracy": float(m.get("quality_acc") or 0.0),
+            "overall_accuracy": float(m.get("quality_acc") or 0.0),
             "avg_duration": med_lat,
             "avg_latency_seconds": med_lat,
             "median_latency_seconds": med_lat,
-            "avg_input_tokens": m.get("input_tokens_median", 0.0),
-            "median_input_tokens": m.get("input_tokens_median", 0.0),
+            "avg_input_tokens": med_in,
+            "median_input_tokens": med_in,
             "avg_output_tokens": med_c,
             "median_output_tokens": med_c,
             "avg_reasoning_tokens": med_r,
@@ -234,7 +235,7 @@ def extract_metrics(
     total_quality = 0
 
     for s in active_samples:
-        s_scores = s.get("scores", {})
+        s_scores = s.get("scores") or {}
         if "a2ui_scorer" in s_scores:
             val = s_scores["a2ui_scorer"].get("value")
             if val is not None:
@@ -288,8 +289,9 @@ def extract_metrics(
                 else {}
             )
             if isinstance(call_res, dict):
-                usage_meta = call_res.get("usageMetadata", {})
-                sample_reasoning = usage_meta.get("thoughtsTokenCount")
+                usage_meta = call_res.get("usageMetadata")
+                if isinstance(usage_meta, dict):
+                    sample_reasoning = usage_meta.get("thoughtsTokenCount")
 
         if sample_duration is None and "inference_duration_seconds" in meta:
             sample_duration = meta["inference_duration_seconds"]
@@ -695,9 +697,7 @@ def main(argv: Optional[List[str]] = None) -> None:
         baseline_json,
         label_name=os.path.basename(os.path.normpath(args.baseline)),
         use_median=use_median,
-        filter_sample_ids=target_sample_ids
-        if (target_sample_ids and len(target_sample_ids) < 50)
-        else None,
+        filter_sample_ids=target_sample_ids if target_sample_ids else None,
     )
 
     table_md = generate_markdown_table(
