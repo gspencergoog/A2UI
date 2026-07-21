@@ -1,0 +1,5 @@
+{
+  "hypothesis": "Dynamic action event name alias resolution in _compile_event.",
+  "notes": "Pytest 100% pass (507 passed). Algorithmic Schema Acc 100.0%, Quality Score 100.0%. Code output tokens reduced (-4.7%), Non-reasoning output time reduced (-5.3%), Reasoning tokens reduced (-0.7%). Score S_opt increased from +0.570 to +0.577 (+0.007). Kept.",
+  "status": "Kept"
+}
