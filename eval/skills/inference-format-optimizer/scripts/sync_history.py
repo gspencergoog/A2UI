@@ -68,19 +68,18 @@ def sync_worktree_history(
         A list of folder names for newly synchronized history runs.
     """
     skill_dir = os.path.dirname(SCRIPT_DIR) if os.path.basename(SCRIPT_DIR) == "scripts" else SCRIPT_DIR
+    parents = list(Path(skill_dir).parents)
+    detected_root = None
+    for p in [Path(skill_dir)] + parents:
+        if (p / "specification").exists() and (p / "agent_sdks").exists():
+            detected_root = str(p)
+            break
+    workspace_root = detected_root or skill_dir
+
     if custom_history_dir:
         main_history_dir = custom_history_dir
     else:
-        parents = list(Path(skill_dir).parents)
-        detected_root = None
-        for p in [Path(skill_dir)] + parents:
-            if (p / "specification").exists() and (p / "agent_sdks").exists():
-                detected_root = str(p)
-                break
-        if detected_root:
-            main_history_dir = os.path.join(detected_root, "eval", "history")
-        else:
-            main_history_dir = os.path.join(skill_dir, "history")
+        main_history_dir = os.path.join(workspace_root, "eval", "history")
     os.makedirs(main_history_dir, exist_ok=True)
 
     if not target_worktrees:
