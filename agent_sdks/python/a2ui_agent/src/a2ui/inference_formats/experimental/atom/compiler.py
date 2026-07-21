@@ -690,7 +690,8 @@ class AtomCompiler:
                 i += 1
             else:
                 # Positional attribute matching schema definition order
-                if self.schema_helper.get_property_type(comp_type, "children") == "ChildList" or "children" in prop_keys or "child" in prop_keys:
+                single_child_p = self.schema_helper.get_single_child_property(comp_type)
+                if child_list_prop or single_child_p or self.schema_helper.get_property_type(comp_type, "children") == "ChildList" or "children" in prop_keys or "child" in prop_keys:
                     if isinstance(item, str) and item not in ("]", ")", "[", "(") and item != "...":
                         children.append(self._auto_wrap_text_child(item, components, data_model))
                 else:
