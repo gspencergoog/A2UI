@@ -41,53 +41,50 @@ IMPORTANT: Wrap your output inside `<a2ui>` and `</a2ui>` sentinel tags. Do NOT 
    - Null: null.
 
 3. Property Arguments:
-   - Tagged attributes: Prefixed with a colon ':', e.g., :align "stretch" or :variant "body". Tagged keys are order-independent.
+   - Tagged attributes: Prefixed with a colon ':', e.g., :attr1 "val1" or :attr2 true. Tagged keys are order-independent.
    - Positional attributes: Can be passed sequentially matching catalog signature order.
 
 4. Child Components & Strict Tree Nesting:
-   - You MUST nest child components directly inside their parent container expressions, e.g., (Card (Column (Text "Hello"))).
+   - You MUST nest child components directly inside their parent container expressions, e.g., (ContainerComponent (ChildComponent (PrimitiveComponent "Hello"))).
    - Do NOT output flat adjacency lists, explicit `:id` attributes, or separate component variable IDs. Every UI component must be nested directly within a single root tree expression.
 
 5. Data Bindings:
    - Absolute data model paths start with '$/', e.g., $/user/firstName.
-   - Relative list paths start with '$', e.g., $name.
+   - Relative template item fields start with '$/item_var/field', e.g. $/item/name.
 
 6. Data Model Population:
-   - Initialize data values using (data $/key "value" $/key2 123) or (set! $/key "value").
+   - Initialize or populate data model state exclusively using the (data $/path1 "val1" $/path2 123) block at the root level.
 
 7. Dynamic List Templates:
-   - List templates use (template :item item (Card (Text item/name))).
+   - List templates use (template :item item (ChildComponent $/item/name)) or (ListComponent :children (template :item item (ChildComponent $/item/name))).
 
 8. Action Events:
    - Actions use (Event "action_name" :param1 $/value).
 
 9. Standalone Operations:
    - Delete surface: (deleteSurface "surface_id")
-   - Call RPC function: (callFunction "openUrl" :url "https://example.com")
+   - Call RPC function: (callFunction "function_name" :arg1 "value1")
 
-10. Concrete Syntax Examples:
-   Example 1 (Card with Form & Inputs):
+10. Syntax Structure Examples (Abstract Grammar):
+   Example 1 (Container with Child Nodes & Actions):
    <a2ui>
-   (Card
-     (Column
-       (Text :text "Sign In" :variant "heading")
-       (TextField :label "Username" :value $/form/username)
-       (Button :text "Submit" :onPress (Event "login" :user $/form/username))))
+   (ContainerComponent
+     (ChildComponent :title "Header")
+     (InputComponent :label "Input" :value $/form/field)
+     (ActionComponent :label "Submit" :onPress (Event "submit_action" :val $/form/field)))
    </a2ui>
 
-   Example 2 (Tabs & Dynamic List Template):
+   Example 2 (Root Data State & Dynamic Template):
    <a2ui>
-   (Tabs
-     :items ["Overview" "Items"]
-     :content [
-       (Column (Text :text "Welcome"))
-       (List :items $/products :template (template item (Card (Text :text item/name))))])
+   (ContainerComponent
+     (data $/items [{"id": 1, "name": "Item 1"}] $/title "List Title")
+     (ListComponent :items $/items :template (template item (ChildComponent :title $/item/name))))
    </a2ui>
 
 11. Strict Catalog Adherence:
    - You MUST ONLY use property names listed in the Component Catalog Signatures below.
    - Do NOT invent CSS or style attributes (e.g. style, padding, margin, backgroundColor, color, fontSize, size, minHeight, borderRadius, spacing, align, justify).
-   - Use correct catalog property names (e.g. Image uses :url, not :src. Text variant must be "caption" or "body").
+   - Strictly adhere to the exact property names and allowed enum values listed in the Component Catalog Signatures.
 '''
 
 

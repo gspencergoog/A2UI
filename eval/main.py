@@ -24,6 +24,9 @@ from a2ui_eval.strategies import STRATEGIES
 os.environ["INSPECT_MAX_CONNECTIONS"] = "50"
 
 
+from inspect_ai.dataset import MemoryDataset
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run A2UI evaluations")
     parser.add_argument(
@@ -85,6 +88,12 @@ def main() -> None:
             " elemental, atom). Can be comma-separated or specified multiple times."
         ),
     )
+    parser.add_argument(
+        "--prompt",
+        type=str,
+        action="append",
+        help="Target specific sample prompt names to evaluate",
+    )
     args = parser.parse_args()
 
     model = "google/gemini-3.1-flash-lite" if args.sanity else args.model
@@ -108,14 +117,16 @@ def main() -> None:
                 f"Unknown evaluation strategy: {strat}. Valid choices:"
                 f" {', '.join(STRATEGIES.keys())}"
             )
-        if strat in ["express", "elemental", "atom"]:
-            tasks.append(
-                a2ui_v1_0_eval(strategy=strat, grading_model=args.grading_model)
-            )
-        else:
-            tasks.append(
-                a2ui_v0_9_1_eval(strategy=strat, grading_model=args.grading_model)
-            )
+        task_func = a2ui_v1_0_eval if strat in ["express", "elemental", "atom"] else a2ui_v0_9_1_eval
+        task_obj = task_func(strategy=strat, grading_model=args.grading_model)
+        if args.prompt:
+            prompt_list = [p.lower() for p in args.prompt]
+            filtered = [
+                s for s in task_obj.dataset
+                if any(p in str(s.metadata.get("name", "")).lower() or p in str(s.input).lower() for p in prompt_list)
+            ]
+            task_obj.dataset = MemoryDataset(samples=filtered, name=task_obj.dataset.name)
+        tasks.append(task_obj)
 
     eval_set_kwargs = {
         "tasks": tasks,

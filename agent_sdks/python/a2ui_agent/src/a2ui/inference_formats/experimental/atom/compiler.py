@@ -22,17 +22,30 @@ from a2ui.schema.catalog import A2uiCatalog
 class CatalogSchemaHelperWrapper:
     def __init__(self, catalog: Any):
         self.catalog = catalog
+        try:
+            from a2ui.inference_formats.experimental.express.schema_helper import CatalogSchemaHelper
+            self._helper = CatalogSchemaHelper(self.catalog)
+        except Exception:
+            self._helper = None
 
-    def get_component_properties(self, comp_type: str) -> Dict[str, Any]:
+    def get_component_properties(self, comp_type: str) -> Any:
+        if self._helper:
+            return self._helper.get_component_properties(comp_type)
         if hasattr(self.catalog, "get_components"):
             comps = self.catalog.get_components()
             if comp_type in comps:
                 return comps[comp_type].get("properties", {})
-        try:
-            from a2ui.inference_formats.experimental.express.schema_helper import CatalogSchemaHelper
-            return CatalogSchemaHelper(self.catalog).get_component_properties(comp_type)
-        except Exception:
-            return {}
+        return {}
+
+    def get_component_required(self, comp_type: str) -> list[str]:
+        if self._helper:
+            return self._helper.get_component_required(comp_type)
+        return []
+
+    def get_property_type(self, comp_type: str, prop_name: str) -> Optional[str]:
+        if self._helper:
+            return self._helper.get_property_type(comp_type, prop_name)
+        return None
 
 
 class SExprParser:
@@ -44,12 +57,14 @@ class SExprParser:
         self.pos = 0
 
     def _tokenize(self, text: str) -> List[str]:
-        """Tokenizes S-expression string handling parens, brackets, quotes, keywords, and paths."""
+        """Tokenizes S-expression string handling parens, brackets, quotes, keywords, comments, and paths."""
         token_spec = [
+            ("COMMENT", r';[^\n]*'),
             ("STRING", r'"(?:\\.|[^"\\])*"'),
             ("LPAREN", r'[(\[]'),
             ("RPAREN", r'[\])]'),
-            ("KEYWORD", r':\w+'),
+            ("KEYWORD_VAL", r':\w+=[^\s()":\[\],]+'),
+            ("KEYWORD", r':\w+:?'),
             ("PATH", r'\$/?[\w/]+'),
             ("SYMBOL", r'[^\s()":\[\],]+'),
             ("SKIP", r'[,\s]+'),
@@ -59,9 +74,16 @@ class SExprParser:
         for mo in re.finditer(tok_regex, text):
             kind = mo.lastgroup
             value = mo.group()
-            if kind == "SKIP":
+            if kind in ("SKIP", "COMMENT"):
                 continue
-            tokens.append(value)
+            if kind == "KEYWORD_VAL":
+                k, v = value.split("=", 1)
+                tokens.append(k)
+                tokens.append(v)
+            elif kind == "KEYWORD":
+                tokens.append(value.rstrip(":"))
+            else:
+                tokens.append(value)
         return tokens
 
     def parse(self) -> List[Any]:
@@ -130,12 +152,15 @@ class AtomCompiler:
         """Determines if a string is a valid component type name."""
         if not name or not isinstance(name, str):
             return False
-        if name in ("Card", "Column", "Row", "Text", "Image", "Icon", "Button", "List", "TextField", "ChoicePicker", "Divider", "Container", "Page"):
-            return True
-        if name[0].isupper():
-            return True
+        # Filter out common English prose words starting with uppercase
+        if name in ("Component", "NYC", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "This", "The", "A", "An", "For", "With", "Both", "Although", "Note", "Here", "Inside", "Generate", "Create", "Update", "Delete"):
+            return False
         comp_props = self.schema_helper.get_component_properties(name)
-        return bool(comp_props)
+        if comp_props:
+            return True
+        if name[0].isupper() and name.isalnum() and not name.islower():
+            return True
+        return False
 
     def compile(
         self, text: str, surface_id: str = "main", is_final: bool = True
@@ -182,12 +207,32 @@ class AtomCompiler:
                     },
                 }
             elif head in ("createSurface", "surface"):
-                for sub in expr[1:]:
-                    if isinstance(sub, list) and sub:
-                        if str(sub[0]) in ("data", "set!"):
-                            self._parse_data_node(sub, data_model)
-                        elif self._is_component_type(str(sub[0])):
-                            self._compile_component(sub, components, data_model, is_root=True)
+                i = 1
+                while i < len(expr):
+                    item = expr[i]
+                    if isinstance(item, str) and item.startswith(":"):
+                        val = expr[i + 1] if i + 1 < len(expr) else None
+                        if item in (":id", ":surfaceId") and val:
+                            surface_id = str(val)
+                        elif item == ":data" and isinstance(val, list):
+                            self._parse_data_node(val, data_model)
+                        elif item in (":root", ":child", ":children", ":component") and isinstance(val, list):
+                            if self._is_component_type(str(val[0])):
+                                self._compile_component(val, components, data_model, is_root=True)
+                            else:
+                                for sub_elem in val:
+                                    if isinstance(sub_elem, list) and sub_elem and self._is_component_type(str(sub_elem[0])):
+                                        self._compile_component(sub_elem, components, data_model, is_root=True)
+                        i += 2
+                    elif isinstance(item, list) and item:
+                        if str(item[0]) in ("data", "set!"):
+                            self._parse_data_node(item, data_model)
+                        elif self._is_component_type(str(item[0])):
+                            self._compile_component(item, components, data_model, is_root=True)
+                        i += 1
+                    elif isinstance(item, str):
+                        surface_id = item
+                        i += 1
             else:
                 # Component root tree
                 root_id = self._compile_component(expr, components, data_model, is_root=True)
@@ -216,15 +261,17 @@ class AtomCompiler:
         if isinstance(val, list):
             if not val:
                 return []
-            if len(val) >= 2 and len(val) % 2 == 0 and all(isinstance(val[i], str) and val[i].startswith(":") for i in range(0, len(val), 2)):
+            if len(val) >= 2 and len(val) % 2 == 0 and all(isinstance(val[i], str) for i in range(0, len(val), 2)):
                 res = {}
                 i = 0
                 while i < len(val) - 1:
-                    key = str(val[i])[1:]
+                    key = str(val[i]).lstrip(":")
                     res[key] = self._clean_data_value(val[i + 1])
                     i += 2
                 return res
             return [self._clean_data_value(item) for item in val]
+        if isinstance(val, dict):
+            return {str(k).lstrip(":"): self._clean_data_value(v) for k, v in val.items()}
         return val
 
     def _parse_data_node(self, expr: List[Any], data_model: Dict[str, Any]) -> None:
@@ -262,8 +309,8 @@ class AtomCompiler:
         """Recursively processes S-expression component nodes into flat JSON adjacency list."""
         if data_model is None:
             data_model = {}
-        comp_type = str(expr[0])
-        comp_id = "root" if is_root else self._next_id()
+        comp_type = str(expr[0]).strip("`").strip("'")
+        comp_id = "root" if is_root and not any(c.get("id") == "root" for c in components) else self._next_id()
         comp_dict: Dict[str, Any] = {"id": comp_id, "component": comp_type}
 
         children: List[str] = []
@@ -283,19 +330,42 @@ class AtomCompiler:
                 # Tagged keyword attribute :key val
                 key = item[1:]
                 val = expr[i + 1] if i + 1 < len(expr) else None
-                if key == "children" and isinstance(val, list):
-                    for child_item in val:
-                        if isinstance(child_item, list):
-                            child_id = self._compile_component(child_item, components, data_model)
-                            children.append(child_id)
-                        elif isinstance(child_item, str) and child_item not in ("]", ")", "[", "("):
-                            raise ValueError(
-                                f"Flat adjacency lists and string child ID references ('{child_item}') are disallowed in Atom format. "
-                                "Child components must be directly nested S-expressions."
-                            )
-                elif key == "child" and isinstance(val, list):
+                if (key == "children" or self.schema_helper.get_property_type(comp_type, key) == "ChildList") and isinstance(val, list):
+                    if val and str(val[0]) == "template":
+                        tmpl_data = self._compile_template(val, components)
+                        if "items_path" in tmpl_data:
+                            comp_dict["items"] = tmpl_data.pop("items_path")
+                        comp_dict["template"] = tmpl_data
+                    else:
+                        for child_item in val:
+                            if isinstance(child_item, list):
+                                if child_item and str(child_item[0]) == "template":
+                                    tmpl_data = self._compile_template(child_item, components)
+                                    if "items_path" in tmpl_data:
+                                        comp_dict["items"] = tmpl_data.pop("items_path")
+                                    comp_dict["template"] = tmpl_data
+                                else:
+                                    child_id = self._compile_component(child_item, components, data_model)
+                                    children.append(child_id)
+                            elif isinstance(child_item, str) and child_item not in ("]", ")", "[", "("):
+                                raise ValueError(
+                                    f"Flat adjacency lists and string child ID references ('{child_item}') are disallowed in Atom format. "
+                                    "Child components must be directly nested S-expressions."
+                                )
+                elif (self.schema_helper.get_property_type(comp_type, key) in ("Child", "ComponentId") or key in ("child", "trigger", "content", "header", "footer", "leading", "trailing")) and isinstance(val, list) and val and self._is_component_type(str(val[0])):
                     child_id = self._compile_component(val, components, data_model)
-                    comp_dict["child"] = child_id
+                    comp_dict[key] = child_id
+                elif key == "tabs" and isinstance(val, list):
+                    comp_dict["tabs"] = self._compile_tabs(val, components, data_model)
+                elif key in ("template", "itemTemplate") and isinstance(val, list):
+                    if val and str(val[0]) == "template":
+                        tmpl_data = self._compile_template(val, components)
+                    else:
+                        child_id = self._compile_component(val, components, data_model)
+                        tmpl_data = {"componentId": child_id}
+                    if "items_path" in tmpl_data:
+                        comp_dict["items"] = tmpl_data.pop("items_path")
+                    comp_dict["template"] = tmpl_data
                 else:
                     comp_dict[key] = self._resolve_val(val, components)
                 i += 2
@@ -308,7 +378,10 @@ class AtomCompiler:
                     comp_dict["action"] = self._compile_event(item)
                 elif item and str(item[0]) == "template":
                     # Inline template
-                    comp_dict["template"] = self._compile_template(item, components)
+                    tmpl_data = self._compile_template(item, components)
+                    if "items_path" in tmpl_data:
+                        comp_dict["items"] = tmpl_data.pop("items_path")
+                    comp_dict["template"] = tmpl_data
                 elif item and self._is_component_type(str(item[0])):
                     child_id = self._compile_component(item, components, data_model)
                     children.append(child_id)
@@ -319,6 +392,8 @@ class AtomCompiler:
                             child_id = self._compile_component(sub_c, components, data_model)
                             children.append(child_id)
                         elif isinstance(sub_c, str) and sub_c not in ("]", ")", "[", "("):
+                            if sub_c == "..." or sub_c.startswith("node_") or sub_c.startswith("child"):
+                                continue
                             raise ValueError(
                                 f"Flat adjacency lists and string child ID references ('{sub_c}') are disallowed in Atom format. "
                                 "Child components must be directly nested S-expressions."
@@ -326,7 +401,7 @@ class AtomCompiler:
                 i += 1
             else:
                 # Positional attribute matching schema definition order
-                if comp_type in ("Column", "Row", "List", "Container", "Page"):
+                if self.schema_helper.get_property_type(comp_type, "children") == "ChildList" or "children" in prop_keys or "child" in prop_keys:
                     if isinstance(item, str) and item not in ("]", ")", "[", "("):
                         raise ValueError(
                             f"Flat adjacency lists and string child ID references ('{item}') are disallowed in Atom format. "
@@ -345,6 +420,35 @@ class AtomCompiler:
             else:
                 comp_dict["children"] = children
 
+        if "template" in comp_dict and "items" not in comp_dict:
+            found_path = None
+            for k, v in data_model.items():
+                if isinstance(v, list):
+                    found_path = f"/{k}"
+                    break
+            comp_dict["items"] = {"path": found_path if found_path else "/items"}
+
+        # Strict schema validation: required properties and enum constraints
+        if hasattr(self.schema_helper, "get_component_required"):
+            req_props = self.schema_helper.get_component_required(comp_type)
+            for req in req_props:
+                if req not in ("id", "component") and req not in comp_dict:
+                    raise ValueError(
+                        f"Component '{comp_type}' (id: '{comp_id}') is missing required property '{req}' "
+                        f"defined by catalog schema."
+                    )
+
+        if hasattr(self.schema_helper, "_helper") and self.schema_helper._helper:
+            for p_name, p_val in comp_dict.items():
+                if p_name in ("id", "component", "children", "child"):
+                    continue
+                enum_vals = self.schema_helper._helper.get_property_enum(comp_type, p_name)
+                if enum_vals and isinstance(p_val, str) and p_val not in enum_vals:
+                    raise ValueError(
+                        f"Invalid value '{p_val}' for property ':{p_name}' in component '{comp_type}'. "
+                        f"Must be one of: {enum_vals}"
+                    )
+
         components.insert(0, comp_dict)
         return comp_id
 
@@ -355,14 +459,30 @@ class AtomCompiler:
                 return {"path": val[1:]}
             elif val.startswith("$"):
                 return {"path": val}
+            elif val.startswith("/"):
+                return {"path": val}
+            elif "/" in val and not val.startswith("http") and not val.startswith("https"):
+                return {"path": f"/{val}" if not val.startswith("/") else val}
         if isinstance(val, list) and val:
             head = str(val[0])
             if head == "Event":
                 return self._compile_event(val)
             elif head in ("formatDate", "formatString", "formatCurrency"):
+                args_dict = {}
+                i = 1
+                arg_idx = 0
+                while i < len(val):
+                    item = val[i]
+                    if isinstance(item, str) and item.startswith(":") and i + 1 < len(val):
+                        args_dict[item[1:]] = self._resolve_val(val[i + 1], components)
+                        i += 2
+                    else:
+                        args_dict[f"arg_{arg_idx}"] = self._resolve_val(item, components)
+                        i += 1
+                        arg_idx += 1
                 return {
                     "call": head,
-                    "args": {f"arg_{k}": self._resolve_val(v, components) for k, v in enumerate(val[1:])},
+                    "args": args_dict,
                 }
         return val
 
@@ -382,12 +502,53 @@ class AtomCompiler:
         return {"event": ev_obj}
 
     def _compile_template(self, expr: List[Any], components: List[Dict[str, Any]]) -> Dict[str, Any]:
-        # (template :item item_var child_expr)
         template_child_id = ""
-        for item in expr[1:]:
-            if isinstance(item, list):
+        items_path = None
+        i = 1
+        while i < len(expr):
+            item = expr[i]
+            if isinstance(item, str) and item.startswith(":") and i + 1 < len(expr):
+                if item in (":items", ":dataset", ":data", ":source", ":path"):
+                    items_path = self._resolve_val(expr[i + 1], components)
+                i += 2
+            elif isinstance(item, list):
                 template_child_id = self._compile_component(item, components)
-        return {"componentId": template_child_id}
+                i += 1
+            else:
+                i += 1
+        res: Dict[str, Any] = {"componentId": template_child_id}
+        if items_path:
+            res["items_path"] = items_path
+        return res
+
+    def _compile_tabs(self, val: List[Any], components: List[Dict[str, Any]], data_model: Dict[str, Any]) -> List[Dict[str, Any]]:
+        tabs_list = []
+        for item in val:
+            if isinstance(item, list):
+                title = ""
+                child_id = ""
+                i = 0
+                while i < len(item):
+                    elem = item[i]
+                    if isinstance(elem, str) and elem.startswith(":"):
+                        k = elem[1:]
+                        v = item[i + 1] if i + 1 < len(item) else None
+                        if k in ("title", "label") and isinstance(v, str):
+                            title = v
+                        elif k in ("content", "child", "component") and isinstance(v, list):
+                            child_id = self._compile_component(v, components, data_model)
+                        i += 2
+                    elif isinstance(elem, str):
+                        title = elem
+                        i += 1
+                    elif isinstance(elem, list):
+                        child_id = self._compile_component(elem, components, data_model)
+                        i += 1
+                    else:
+                        i += 1
+                if title or child_id:
+                    tabs_list.append({"title": title, "child": child_id})
+        return tabs_list
 
     def _schema_expects_single_child(self, comp_type: str) -> bool:
         props = self.schema_helper.get_component_properties(comp_type)

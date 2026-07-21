@@ -424,5 +424,71 @@ class TestAtomFormat(unittest.TestCase):
         )
 
 
+    def test_fuzzed_synthetic_catalog_agnosticism(self):
+        """Verify 100% catalog agnosticism using a fuzzed synthetic catalog with non-standard names."""
+        from a2ui.inference_formats.experimental.atom import AtomCompiler, AtomDecompiler
+        from a2ui.schema.catalog import CatalogConfig, A2uiCatalog
+        from a2ui.core.catalog import Catalog
+
+        # Synthetic catalog definitions with non-standard names
+        synthetic_components = {
+            "CustomContainerX": {
+                "type": "object",
+                "properties": {
+                    "component": {"const": "CustomContainerX"},
+                    "sub_nodes": {"$ref": "https://a2ui.org/specification/v1_0/common_types.json#/$defs/ChildList"},
+                },
+                "required": ["component"]
+            },
+            "CustomSlotCardY": {
+                "type": "object",
+                "properties": {
+                    "component": {"const": "CustomSlotCardY"},
+                    "slot_node": {"$ref": "https://a2ui.org/specification/v1_0/common_types.json#/$defs/Child"},
+                },
+                "required": ["component"]
+            },
+            "CustomWidgetZ": {
+                "type": "object",
+                "properties": {
+                    "component": {"const": "CustomWidgetZ"},
+                    "label_text": {"$ref": "https://a2ui.org/specification/v1_0/common_types.json#/$defs/DynamicString"},
+                    "press_handler": {"$ref": "https://a2ui.org/specification/v1_0/common_types.json#/$defs/Action"},
+                },
+                "required": ["component", "label_text"]
+            }
+        }
+        
+        cat = A2uiCatalog(
+            version="1.0",
+            name="custom_fuzzed_catalog",
+            s2c_schema={},
+            common_types_schema={},
+            catalog_schema={
+                "catalogId": "https://a2ui.org/custom_fuzzed_catalog",
+                "components": synthetic_components,
+            },
+        )
+        compiler = AtomCompiler(catalog=cat)
+        decompiler = AtomDecompiler(catalog=cat)
+
+        # 1. Compile S-expression with synthetic components & non-standard property names
+        atom_src = '(CustomSlotCardY :slot_node (CustomContainerX :sub_nodes [(CustomWidgetZ :label_text "Hello Synthetic" :press_handler (Event "on_synthetic_click" :data $/user/id))]))'
+        compiled = compiler.compile(atom_src)
+        
+        self.assertIn("createSurface", compiled)
+        comps = compiled["createSurface"]["components"]
+        comp_types = [c["component"] for c in comps]
+        self.assertIn("CustomSlotCardY", comp_types)
+        self.assertIn("CustomContainerX", comp_types)
+        self.assertIn("CustomWidgetZ", comp_types)
+
+        # 2. Decompile back to S-expression and verify round-trip integrity
+        decompiled = decompiler.decompile(compiled)
+        self.assertIn("(CustomSlotCardY", decompiled)
+        self.assertIn("(CustomContainerX", decompiled)
+        self.assertIn('(CustomWidgetZ :label_text "Hello Synthetic"', decompiled)
+
+
 if __name__ == "__main__":
     unittest.main()

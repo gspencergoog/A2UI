@@ -86,20 +86,30 @@ class AtomDecompiler:
         pad = "  " * indent
 
         props = []
+        child_nodes = []
+
         for k, v in comp.items():
-            if k in ("id", "component", "child", "children"):
+            if k in ("id", "component"):
                 continue
-            props.append(f':{k} {self._format_val(v)}')
+            if isinstance(v, str) and v in comp_map:
+                # Single child reference
+                decomp_child = self._decompile_component(v, comp_map, indent + 1)
+                if k in ("child", "content", "trigger"):
+                    child_nodes.append(decomp_child)
+                else:
+                    props.append(f':{k} {decomp_child.strip()}')
+            elif isinstance(v, list) and v and all(isinstance(elem, str) and elem in comp_map for elem in v):
+                # Child list reference
+                sub_children = [self._decompile_component(elem, comp_map, indent + 1) for elem in v]
+                if k == "children":
+                    child_nodes.extend(sub_children)
+                else:
+                    joined_nodes = "\n".join(sub_children)
+                    props.append(f':{k} [\n{joined_nodes}\n{pad}]')
+            else:
+                props.append(f':{k} {self._format_val(v)}')
 
         props_str = " " + " ".join(props) if props else ""
-
-        # Decompile children
-        child_nodes = []
-        if "child" in comp:
-            child_nodes.append(self._decompile_component(comp["child"], comp_map, indent + 1))
-        elif "children" in comp:
-            for child_id in comp["children"]:
-                child_nodes.append(self._decompile_component(child_id, comp_map, indent + 1))
 
         if not child_nodes:
             return f"{pad}({comp_type}{props_str})"
