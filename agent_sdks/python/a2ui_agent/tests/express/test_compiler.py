@@ -337,6 +337,16 @@ $/breeds = [{"url": "https://example.com/poodle.jpg"}]"""
         )
         self.assertEqual(text_comp["text"], {"path": ""})
 
+        # 8b. Verify dot-notation data path normalization
+        dot_dsl = """root = Text($/user.name)"""
+        dot_envelope = compiler.compile(dot_dsl)
+        dot_comp = next(
+            c
+            for c in dot_envelope["createSurface"]["components"]
+            if c["id"] == "root"
+        )
+        self.assertEqual(dot_comp["text"], {"path": "/user/name"})
+
         # 9. Verify nested check compilation and active value path injection
         nested_check_dsl = """root = TextField("Label", $/form/email, "placeholder", "shortText", ?and([?required, ?email]))"""
         nested_check_envelope = compiler.compile(nested_check_dsl)

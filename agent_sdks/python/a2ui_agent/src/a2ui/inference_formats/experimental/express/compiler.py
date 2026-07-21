@@ -33,6 +33,7 @@ from .constants import SurfaceOperation
 
 def _set_nested_path(d: dict, path_str: str, val: Any) -> None:
     """Populates a nested dictionary path from a JSON pointer-like string."""
+    path_str = path_str.replace(".", "/")
     if path_str.startswith("$/"):
         clean_path = path_str[2:]
     elif path_str.startswith("$"):
@@ -521,6 +522,14 @@ class ExpressCompiler:
         """
         if isinstance(val, dict):
             if "path" in val:
+                path_val = val["path"]
+                if isinstance(path_val, str):
+                    path_val = path_val.replace(".", "/")
+                    if path_val.startswith("$/"):
+                        path_val = path_val[1:]
+                    elif path_val.startswith("$"):
+                        path_val = path_val[1:]
+                    return {**val, "path": path_val}
                 return val
             if "variable" in val:
                 ref_name = val["variable"]
