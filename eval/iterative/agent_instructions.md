@@ -71,7 +71,7 @@ Analyze the generated Markdown table and Metric Definitions Key:
 Evaluate your iteration against these 4 decision rules:
 
 1. **Rule 1 (Correctness Guardrail - Non-negotiable)**: `Schema Acc` and `Quality Score` **MUST NOT** regress below Baseline.
-   - *If Accuracy Degrades* $\rightarrow$ You **MUST** immediately roll back the changes (`git reset --hard HEAD`).
+   - *If Accuracy Degrades* $\rightarrow$ You **MUST** immediately roll back the changes using `uv run python eval/iterative/optimize_format.py --format <format> --revert`.
 
 2. **Rule 2 (Efficiency Regression Caps - Non-negotiable)**: Even if accuracy remains equal or 100%, you **MUST REVERT** if:
    - `Median Code Output Tok` increases by **> 5%** vs baseline/previous run.
@@ -82,7 +82,7 @@ Evaluate your iteration against these 4 decision rules:
    - Check `Score (S_opt)` in the comparison table:
      $$S_{\text{opt}} = 0.50 \times \text{SchemaAcc} + 0.30 \times \text{QualityScore} - 0.15 \times \left(\frac{\text{CodeTok}}{\text{BaseCodeTok}}\right) - 0.05 \times \left(\frac{\text{ReasonTok}}{\text{BaseReasonTok}}\right)$$
    - *If $S_{\text{opt}}(\text{Current}) > S_{\text{opt}}(\text{Baseline})$* $\rightarrow$ **KEEP CHANGE**.
-   - *If $S_{\text{opt}}(\text{Current}) \le S_{\text{opt}}(\text{Baseline})$* $\rightarrow$ **REVERT CHANGE** (`git reset --hard HEAD`).
+   - *If $S_{\text{opt}}(\text{Current}) \le S_{\text{opt}}(\text{Baseline})$* $\rightarrow$ **REVERT CHANGE** (`uv run python eval/iterative/optimize_format.py --format <format> --revert`).
 
 ### Step 6: Archive Iteration Run
 To save the historical run context for future analysis and allow the orchestrator to automatically maintain the summary index:
