@@ -1013,18 +1013,34 @@ class AtomCompiler:
     def _compile_template(self, expr: List[Any], components: List[Dict[str, Any]]) -> Dict[str, Any]:
         template_child_id = ""
         items_path = None
+        item_var = None
         i = 1
         while i < len(expr):
             item = expr[i]
             if isinstance(item, str) and item.startswith(":") and i + 1 < len(expr):
                 if item in (":items", ":dataset", ":data", ":source", ":path"):
                     items_path = self._resolve_val(expr[i + 1], components)
+                elif item in (":item", ":var", ":itemVar"):
+                    item_var = str(expr[i + 1]).lstrip("$").strip("/")
                 i += 2
             elif isinstance(item, list):
                 template_child_id = self._compile_component(item, components)
                 i += 1
+            elif isinstance(item, str) and item not in ("]", ")", "[", "(") and not item.startswith(":"):
+                item_var = item.lstrip("$").strip("/")
+                i += 1
             else:
                 i += 1
+
+        if item_var and item_var != "item":
+            for c in components:
+                for k, v in list(c.items()):
+                    if isinstance(v, dict) and "path" in v and isinstance(v["path"], str):
+                        p = v["path"]
+                        if f"/{item_var}/" in p or p.startswith(f"{item_var}/") or p.startswith(f"/{item_var}/"):
+                            sub_path = p.split(f"{item_var}/", 1)[-1]
+                            v["path"] = f"item/{sub_path}"
+
         res: Dict[str, Any] = {"componentId": template_child_id}
         if items_path:
             res["items_path"] = items_path
