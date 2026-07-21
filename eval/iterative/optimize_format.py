@@ -101,6 +101,7 @@ def regenerate_master_index(iterative_dir: str) -> None:
             output_tokens = "-"
             pytest_status = "PASS"  # Assumed if evaluation ran
 
+            results_parsed = False
             if os.path.exists(results_path):
                 try:
                     with open(results_path, "r", encoding="utf-8") as f:
@@ -111,9 +112,11 @@ def regenerate_master_index(iterative_dir: str) -> None:
                         latency = f"{metrics['avg_latency_seconds']:.2f}s"
                         input_tokens = f"{metrics['avg_input_tokens']:.0f}"
                         output_tokens = f"{metrics['avg_output_tokens']:.0f}"
+                        results_parsed = True
                 except Exception:
                     pass
-            elif meta_metrics:
+
+            if not results_parsed and meta_metrics:
                 overall_acc = f"{meta_metrics.get('quality_acc', 0.0) * 100:.1f}%"
                 algo_acc = f"{meta_metrics.get('schema_acc', 0.0) * 100:.1f}%"
                 latency = f"{meta_metrics.get('latency_seconds_median', 0.0):.2f}s"

@@ -84,7 +84,7 @@ def run_evaluation(
 def load_log_data(log_path: str) -> Dict[str, Any]:
     """Runs inspect log dump and parses the JSON."""
     dump_cmd = [_get_uv_binary(), "run", "inspect", "log", "dump", log_path]
-    output = subprocess.check_output(dump_cmd, text=True)
+    output = subprocess.check_output(dump_cmd, text=True, encoding="utf-8")
     return json.loads(output)
 
 

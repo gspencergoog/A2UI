@@ -92,6 +92,28 @@ def archive_run(
         except Exception:
             pass
 
+    if not metrics_extracted and os.path.exists(os.path.join(temp_dir, "results.json")):
+        try:
+            with open(
+                os.path.join(temp_dir, "results.json"), "r", encoding="utf-8"
+            ) as f:
+                log_data = json.load(f)
+                metrics_extracted = extract_metrics_from_log(log_data)
+        except Exception:
+            pass
+
+    if not metrics_extracted and os.path.exists(
+        os.path.join(temp_dir, "run_meta.json")
+    ):
+        try:
+            with open(
+                os.path.join(temp_dir, "run_meta.json"), "r", encoding="utf-8"
+            ) as f:
+                meta_json = json.load(f)
+                metrics_extracted = meta_json.get("metrics", {})
+        except Exception:
+            pass
+
     meta_payload = {
         "format": format_name,
         "hypothesis": hypothesis,

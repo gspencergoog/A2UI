@@ -54,7 +54,9 @@ def extract_metrics_from_log(log_data: Dict[str, Any]) -> Dict[str, Any]:
         model_events = [
             e
             for e in events
-            if e.get("event") == "model" and e.get("working_time") is not None
+            if isinstance(e, dict)
+            and e.get("event") == "model"
+            and e.get("working_time") is not None
         ]
         if model_events:
             m = model_events[0]
@@ -165,11 +167,17 @@ def generate_optimization_report(
         base_pytest = "PASS"
         base_metrics = extract_metrics_from_log(baseline_data)
 
-        base_overall = f"{base_metrics['overall_accuracy'] * 100:.1f}%"
-        base_algo = f"{base_metrics['algo_accuracy'] * 100:.1f}%"
-        base_latency = f"{base_metrics['avg_latency_seconds']:.2f}s"
-        base_input = f"{base_metrics['avg_input_tokens']:.0f}"
-        base_output = f"{base_metrics['avg_output_tokens']:.0f}"
+        base_overall_val = float(base_metrics.get("overall_accuracy") or 0.0)
+        base_algo_val = float(base_metrics.get("algo_accuracy") or 0.0)
+        base_lat_val = float(base_metrics.get("avg_latency_seconds") or 0.0)
+        base_in_val = float(base_metrics.get("avg_input_tokens") or 0.0)
+        base_out_val = float(base_metrics.get("avg_output_tokens") or 0.0)
+
+        base_overall = f"{base_overall_val * 100:.1f}%"
+        base_algo = f"{base_algo_val * 100:.1f}%"
+        base_latency = f"{base_lat_val:.2f}s"
+        base_input = f"{base_in_val:.0f}"
+        base_output = f"{base_out_val:.0f}"
 
         diff_overall = format_delta_pct(
             metrics["overall_accuracy"],

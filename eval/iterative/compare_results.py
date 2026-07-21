@@ -31,9 +31,7 @@ def resolve_results_file(target_path: str) -> str:
         if target_path.endswith(".json"):
             return target_path
         elif target_path.endswith(".eval"):
-            uv_bin = (
-                shutil.which("uv") or "/usr/local/google/home/gspencer/.local/bin/uv"
-            )
+            uv_bin = shutil.which("uv") or "uv"
             dump_cmd = [uv_bin, "run", "inspect", "log", "dump", target_path]
             data = json.loads(subprocess.check_output(dump_cmd, text=True))
             temp_json = target_path + ".json"
@@ -94,7 +92,7 @@ def extract_metrics(
     eval_spec = data.get("eval", {})
     task_name = eval_spec.get("task", "unknown")
 
-    if "metrics" in data and isinstance(data.get("samples"), dict):
+    if isinstance(data.get("samples"), dict):
         samples_dict = data["samples"]
         matching_samples = {}
         if filter_sample_ids:
@@ -104,7 +102,7 @@ def extract_metrics(
         else:
             matching_samples = samples_dict
 
-        if matching_samples:
+        if matching_samples or filter_sample_ids:
             import statistics
 
             s_accs = [

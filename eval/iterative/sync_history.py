@@ -122,6 +122,8 @@ def sync_worktree_history(
                 try:
                     shutil.copytree(entry.path, dest_dir)
                     copied_runs.append(os.path.basename(dest_dir))
+                except FileExistsError:
+                    pass
                 except Exception:
                     if os.path.exists(dest_dir):
                         shutil.rmtree(dest_dir)
