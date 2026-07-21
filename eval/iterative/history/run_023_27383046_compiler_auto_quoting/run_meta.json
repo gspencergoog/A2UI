@@ -1,0 +1,5 @@
+{
+  "hypothesis": "Compiler auto-quoting of unquoted single-word alphanumeric string literals for string/enum properties in AtomCompiler.",
+  "notes": "Pytest 100% pass, 100.0% Schema Acc, 100.0% Quality Score. However, Code Output Tokens increased slightly from 264 to 276 (+4.4%) and Reasoning Tokens increased from 5,168 to 5,660 (+9.5%), resulting in S_opt dropping from +0.600 to +0.589 (-0.011). Reverted per Rule 3.",
+  "status": "Backtracked"
+}
