@@ -24,6 +24,11 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
 
+SCRIPT_DIR = Path(__file__).resolve().parent.parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from sync_history import sync_worktree_history  # type: ignore[import-not-found]
 from utils.runner import load_log_data, get_git_diff  # type: ignore[import-not-found]
 from utils.reporter import extract_metrics_from_log  # type: ignore[import-not-found]
 

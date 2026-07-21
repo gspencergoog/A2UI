@@ -82,6 +82,7 @@ def regenerate_master_index(iterative_dir: str) -> None:
             notes = "-"
             status = "-"
 
+            meta_data: Dict[str, Any] = {}
             meta_metrics = None
             if os.path.exists(meta_path):
                 try:

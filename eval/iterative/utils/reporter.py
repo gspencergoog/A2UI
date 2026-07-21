@@ -49,8 +49,8 @@ def extract_metrics_from_log(log_data: Dict[str, Any]) -> Dict[str, Any]:
             "total_samples": tot_samp,
         }
 
-    results = log_data.get("results", {})
-    scores = results.get("scores", [])
+    results = log_data.get("results") or {}
+    scores = results.get("scores") or []
 
     algo_acc = 0.0
     overall_acc = 0.0
@@ -338,9 +338,14 @@ def generate_optimization_report(
             report.append("")
 
             if not algo_passed:
-                a2ui_sc = (
-                    s_scores.get("a2ui_scorer") if isinstance(s_scores, dict) else {}
-                )
+                a2ui_sc = {}
+                if isinstance(s_scores, dict):
+                    a2ui_sc = s_scores.get("a2ui_scorer") or {}
+                elif isinstance(s_scores, list):
+                    for sc in s_scores:
+                        if isinstance(sc, dict) and sc.get("name") == "a2ui_scorer":
+                            a2ui_sc = sc
+                            break
                 expl = (
                     a2ui_sc.get("explanation") if isinstance(a2ui_sc, dict) else "N/A"
                 )
@@ -349,11 +354,17 @@ def generate_optimization_report(
                 report.append("")
 
             if judging_val != "C":
-                qa_sc = (
-                    s_scores.get("measured_model_graded_qa")
-                    if isinstance(s_scores, dict)
-                    else {}
-                )
+                qa_sc = {}
+                if isinstance(s_scores, dict):
+                    qa_sc = s_scores.get("measured_model_graded_qa") or {}
+                elif isinstance(s_scores, list):
+                    for sc in s_scores:
+                        if (
+                            isinstance(sc, dict)
+                            and sc.get("name") == "measured_model_graded_qa"
+                        ):
+                            qa_sc = sc
+                            break
                 expl = qa_sc.get("explanation") if isinstance(qa_sc, dict) else "N/A"
                 report.append("- **LLM Judge Explanation**:")
                 report.append("  > " + str(expl or "N/A").replace("\n", "\n  > "))

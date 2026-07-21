@@ -130,6 +130,8 @@ def sync_worktree_history(
 
     # Rebuild master index if requested
     if not skip_index_regen:
+        from optimize_format import regenerate_master_index  # type: ignore[import-not-found]
+
         regenerate_master_index(SCRIPT_DIR)
     return copied_runs
 
