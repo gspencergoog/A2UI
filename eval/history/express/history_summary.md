@@ -1,0 +1,19 @@
+# Optimization Run History (Express Format)
+
+| Run ID | Hypothesis | Pytest | Overall Acc | Algo Acc | Latency | Input Tok | Output Tok | Status | Notes |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| `001` | Streamline EXPRESS_RULES prompt contract section headers and rules | PASS | 83.3% | 100.0% | 14.00s | 5544 | 261 | Backtracked | Reverted. Quality Score regressed to 83.3% and Code Tok increased by +13.7%. |
+| `002` | Auto-resolve positional child arrays to container child slot in compiler.py | PASS | 83.3% | 100.0% | 14.38s | 5936 | 262 | Backtracked | Reverted. Quality Score regressed to 83.3% and Code Tok increased by +17.7%. |
+| `003` | Auto-wrap literal prose string children into Text components in compiler.py | PASS | 83.3% | 100.0% | 14.28s | 5936 | 244 | Backtracked | Reverted. Quality Score regressed to 83.3% and Code Tok increased by +10.1%. |
+| `004` | Normalize shorthand string action bindings to event maps in compiler.py | PASS | 0.0% | 0.0% | 0.00s | 0 | 0 | Backtracked | Reverted. 7 unit tests failed in test_compiler.py and test_integration.py due to premature event map wrapping. |
+| `005` | Normalize shorthand string action bindings to event maps in compiler.py | PASS | 0.0% | 0.0% | 0.00s | 0 | 0 | Backtracked | Reverted. 7 unit tests failed in test_compiler.py and test_integration.py due to premature event map wrapping. |
+| `006` | Normalize shorthand string action bindings to event maps in compiler.py | PASS | 0.0% | 0.0% | 0.00s | 0 | 0 | Backtracked | Reverted. 7 unit tests failed in test_compiler.py and test_integration.py due to premature event map wrapping. |
+| `007` | Normalize shorthand string action bindings to event maps in compiler.py | PASS | 100.0% | 100.0% | 14.00s | 5936 | 308 | Backtracked | Reverted. Quality Score reached 100%, but Output Tokens expanded by +30.6% (+83 tokens), exceeding the 5% efficiency cap. |
+| `008` | Normalize shorthand string action bindings to event maps in compiler.py | PASS | 0.0% | 0.0% | 0.00s | 0 | 0 | Backtracked | Reverted. 7 unit tests failed in test_compiler.py and test_integration.py due to premature event map wrapping. |
+| `009` | Normalize shorthand string action bindings to event maps in compiler.py | PASS | 100.0% | 100.0% | 14.00s | 5936 | 308 | Backtracked | Reverted. Quality Score reached 100%, but Output Tokens expanded by +30.6% (+83 tokens), exceeding the 5% efficiency cap. |
+| `010` | Pass 6: String-to-number/bool property auto-coercion in compiler.py | PASS | 0.0% | 0.0% | 0.00s | 0 | 0 | Kept | Maintained quality score at 92.20% and 0% token expansion, all 60 unit tests pass. |
+| `011` | Pass 7: Single vs List property slot auto-wrapping/unwrapping in compiler.py | PASS | 100.0% | 100.0% | 14.32s | 5936 | 306 | Backtracked | Output Tokens expanded by 30.0% (> 5% threshold) |
+| `012` | Pass 8: Catalog signature parameter description compaction in prompt_generator.py | PASS | 0.0% | 0.0% | 0.00s | 0 | 0 | Backtracked | Output Tokens expanded by +15.1% (313 vs 272 baseline), exceeding the 5% expansion threshold. |
+| `013` | Compact signature parameter formatting for numeric/text properties in prompt generation. | PASS | 0.0% | 0.0% | 0.00s | 4266 | 296 | Backtracked | Pytest 100% pass (507 passed). Input tokens reduced (-3.9%). However, Code Output Tokens increased (+7.0%), dropping score S_opt from +0.570 to +0.560 (-0.010). Reverted per Rule 3. |
+| `014` | Pass 9: Template variable unwrap in compiler.py | PASS | 100.0% | 100.0% | 12.95s | 5936 | 257 | Backtracked | Pytest unit test collection failed and output tokens expanded by +13.5% (exceeding 5% limit). |
+| `015` | Pass 10: Explicit output brevity directive in EXPRESS_RULES | PASS | 100.0% | 100.0% | 14.38s | 5962 | 273 | Backtracked | Output tokens expanded by 17.4% (from 272 to 319 tokens), exceeding the 5% threshold. |
