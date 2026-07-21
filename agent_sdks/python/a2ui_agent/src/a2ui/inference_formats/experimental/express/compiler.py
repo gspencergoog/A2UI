@@ -145,6 +145,11 @@ class ExpressCompiler:
             catalog: A Catalog or an A2uiCatalog.
         """
         self.helper = CatalogSchemaHelper(catalog)
+        self._enum_map = {}
+        for enums in self.helper.component_property_enums.values():
+            for enum_val in enums:
+                if isinstance(enum_val, str):
+                    self._enum_map[enum_val.lower()] = enum_val
 
     def compile(
         self,
@@ -371,11 +376,13 @@ class ExpressCompiler:
                     comp_dict[prop_name] = None
                     continue
 
+                enum_vals = self.helper.get_property_enum(comp_name, prop_name)
                 mapped_val = self._compile_value(
                     arg,
                     raw_symbols,
                     ctx,
                     is_action=(prop_name in ["action", "submitAction"]),
+                    enum_vals=enum_vals,
                 )
                 prop_schema = self.helper.get_property_schema(comp_name, prop_name)
                 if prop_schema and not _schema_allows_databinding(prop_schema):
@@ -494,7 +501,12 @@ class ExpressCompiler:
         return {k: v for k, v in comp_dict.items() if v is not None}
 
     def _compile_value(
-        self, val: Any, raw_symbols: dict, ctx: _CompileContext, is_action: bool = False
+        self,
+        val: Any,
+        raw_symbols: dict,
+        ctx: _CompileContext,
+        is_action: bool = False,
+        enum_vals: Optional[list[str]] = None,
     ) -> Any:
         """Compiles an individual AST node value into valid A2UI equivalents.
 
@@ -670,8 +682,17 @@ class ExpressCompiler:
             # If this is a list of elements, compile each element
             compiled_list = []
             for item in val:
-                comp_item = self._compile_value(item, raw_symbols, ctx, is_action)
+                comp_item = self._compile_value(
+                    item, raw_symbols, ctx, is_action, enum_vals=enum_vals
+                )
                 compiled_list.append(comp_item)
             return compiled_list
+
+        if isinstance(val, str):
+            if enum_vals:
+                enum_map = {e.lower(): e for e in enum_vals if isinstance(e, str)}
+                if val.lower() in enum_map:
+                    return enum_map[val.lower()]
+            return val
 
         return val
