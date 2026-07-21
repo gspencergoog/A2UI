@@ -26,7 +26,18 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 
 def resolve_results_file(target_path: str) -> str:
-    """Resolves results.json from a directory, .eval file, or direct json file path."""
+    """Resolves the results JSON file path from a directory, `.eval` file, or JSON file.
+
+    Args:
+        target_path: The filesystem path to a target directory, `.eval` log file,
+            or `results.json` file.
+
+    Returns:
+        The absolute path to the resolved results JSON file.
+
+    Raises:
+        FileNotFoundError: If no valid results file or `.eval` log exists at the target path.
+    """
     if os.path.isfile(target_path):
         if target_path.endswith(".json"):
             return target_path
@@ -86,7 +97,17 @@ def extract_metrics(
     use_median: bool = True,
     filter_sample_ids: Optional[Set[str]] = None,
 ) -> Dict[str, Any]:
-    """Extracts summary and per-sample metadata metrics from results JSON data."""
+    """Extracts summary and per-sample metrics from an evaluation results JSON file.
+
+    Args:
+        json_path: The filesystem path to the results JSON file.
+        label_name: Optional display label for the run.
+        use_median: Whether to compute median metrics instead of mean averages.
+        filter_sample_ids: Optional set of sample IDs to restrict metric calculation.
+
+    Returns:
+        A dictionary containing aggregated accuracy, latency, and token metrics.
+    """
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -430,7 +451,17 @@ def extract_metrics(
 def format_delta_pct(
     val: float, base_val: float, is_percentage_points: bool = False
 ) -> str:
-    """Formats percentage change or point diff against baseline."""
+    """Formats percentage change or point difference against a baseline value.
+
+    Args:
+        val: The current metric value.
+        base_val: The baseline metric value.
+        is_percentage_points: Whether to calculate absolute percentage point difference
+            instead of relative percentage change.
+
+    Returns:
+        A formatted string with leading sign (e.g., "+5.0%" or "-12.3%").
+    """
     if base_val is None or val is None:
         return "-"
 
@@ -448,7 +479,15 @@ def format_delta_pct(
 
 
 def compute_s_opt(m: Dict[str, Any], b: Dict[str, Any]) -> float:
-    """Computes Composite Optimization Score S_opt."""
+    """Computes the composite optimization score S_opt for a run against a baseline.
+
+    Args:
+        m: The dictionary of current run metrics.
+        b: The dictionary of baseline run metrics.
+
+    Returns:
+        The composite optimization score rounded to three decimal places.
+    """
     schema_acc = m.get("schema_acc") or 0.0
     quality_acc = m.get("quality_acc") or 0.0
     code_tok = m["avg_output_tokens"] if m.get("avg_output_tokens") is not None else 0.0
@@ -485,7 +524,16 @@ def generate_markdown_table(
     comparison_metrics_list: List[Dict[str, Any]],
     use_median: bool = True,
 ) -> str:
-    """Renders a GFM comparison markdown table."""
+    """Renders a GitHub Flavored Markdown comparison table for evaluation runs.
+
+    Args:
+        baseline_metrics: The extracted baseline metrics dictionary.
+        comparison_metrics_list: The list of comparison run metric dictionaries.
+        use_median: Whether metrics represent medians instead of mean averages.
+
+    Returns:
+        The formatted markdown table string.
+    """
     lines = []
     stat_title = "Median" if use_median else "Average"
     lines.append(
@@ -698,6 +746,11 @@ def generate_markdown_table(
 
 
 def main(argv: Optional[List[str]] = None) -> None:
+    """Executes the CLI entrypoint for comparing evaluation results against a baseline.
+
+    Args:
+        argv: Optional command-line argument list.
+    """
     parser = argparse.ArgumentParser(
         description="Compare A2UI evaluation results against a baseline directory."
     )

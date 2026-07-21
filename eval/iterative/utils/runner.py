@@ -22,11 +22,20 @@ from typing import Any, Dict, List, Optional
 
 
 def _get_uv_binary() -> str:
+    """Resolves the system path to the `uv` executable.
+
+    Returns:
+        The absolute path or executable name string for `uv`.
+    """
     return shutil.which("uv") or "uv"
 
 
 def run_unit_tests() -> Dict[str, Any]:
-    """Runs pytest unit tests for the python SDK."""
+    """Runs pytest unit tests for the Python SDK package.
+
+    Returns:
+        A dictionary containing success boolean, stdout, stderr, and returncode.
+    """
     print("Running pytest unit tests...")
     script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     eval_root = os.path.dirname(script_dir)
@@ -52,7 +61,18 @@ def run_evaluation(
     sanity: bool,
     log_dir: str,
 ) -> bool:
-    """Runs the main evaluation framework for the target format strategy."""
+    """Runs the evaluation framework for a target format strategy.
+
+    Args:
+        format_name: The name of the target inference format strategy.
+        model: The evaluation model identifier.
+        prompts: Optional list of prompt names to filter evaluation.
+        sanity: Whether to execute a quick two-sample sanity run.
+        log_dir: The target output directory path for evaluation logs.
+
+    Returns:
+        Whether the evaluation command completed successfully.
+    """
     print(f"Running evaluation for strategy '{format_name}' using model '{model}'...")
     script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     eval_root = os.path.dirname(script_dir)
@@ -84,14 +104,28 @@ def run_evaluation(
 
 
 def load_log_data(log_path: str) -> Dict[str, Any]:
-    """Runs inspect log dump and parses the JSON."""
+    """Dumps and parses an Inspect AI evaluation log file into a dictionary.
+
+    Args:
+        log_path: The filesystem path to the `.eval` log file.
+
+    Returns:
+        The parsed JSON log dictionary.
+    """
     dump_cmd = [_get_uv_binary(), "run", "inspect", "log", "dump", log_path]
     output = subprocess.check_output(dump_cmd, text=True, encoding="utf-8")
     return json.loads(output)
 
 
 def get_git_diff(workspace_root: str) -> str:
-    """Retrieves git diff of active modifications under agent_sdks/."""
+    """Retrieves the git diff patch for active changes under `agent_sdks/`.
+
+    Args:
+        workspace_root: The filesystem path to the git workspace root.
+
+    Returns:
+        The git diff string for `agent_sdks/`, or an empty string if unchanged.
+    """
     cmd = ["git", "diff", "HEAD", "--", "agent_sdks/"]
     try:
         result = subprocess.run(

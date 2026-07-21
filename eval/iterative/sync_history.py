@@ -33,7 +33,14 @@ from optimize_format import (  # type: ignore[import-not-found]
 
 
 def _get_max_run_id(history_dir: str) -> int:
-    """Finds the maximum integer run ID existing in history_dir."""
+    """Finds the maximum integer run ID existing in the target history directory.
+
+    Args:
+        history_dir: The filesystem path to the history directory.
+
+    Returns:
+        The highest integer run ID found, or 0 if no numeric run IDs exist.
+    """
     max_id = 0
     if os.path.exists(history_dir):
         for entry in os.scandir(history_dir):
@@ -48,7 +55,15 @@ def sync_worktree_history(
     target_worktrees: Optional[List[str]] = None,
     skip_index_regen: bool = False,
 ) -> List[str]:
-    """Scans target worktrees and syncs missing history run folders into main history with zero collisions."""
+    """Synchronizes archived run directories from sibling worktrees into main history.
+
+    Args:
+        target_worktrees: Optional list of target worktree filesystem paths to scan.
+        skip_index_regen: Whether to skip master index regeneration after syncing.
+
+    Returns:
+        A list of folder names for newly synchronized history runs.
+    """
     main_history_dir = os.path.join(SCRIPT_DIR, "history")
     os.makedirs(main_history_dir, exist_ok=True)
 
@@ -140,6 +155,11 @@ def sync_worktree_history(
 
 
 def main(argv: Optional[List[str]] = None) -> None:
+    """Executes the CLI entrypoint for synchronizing worktree history runs.
+
+    Args:
+        argv: Optional command-line argument list.
+    """
     parser = argparse.ArgumentParser(
         description=(
             "Sync history run directories from parallel worktrees into main history."

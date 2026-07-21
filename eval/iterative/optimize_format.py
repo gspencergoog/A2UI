@@ -46,7 +46,11 @@ from utils.reporter import (  # type: ignore[import-not-found]
 
 
 def regenerate_master_index(iterative_dir: str) -> None:
-    """Scans history/ directory and rebuilds history_summary.md index."""
+    """Scans history directory and rebuilds the `history_summary.md` index table.
+
+    Args:
+        iterative_dir: The filesystem path to the `eval/iterative` directory.
+    """
     if iterative_dir not in sys.path:
         sys.path.insert(0, iterative_dir)
 
@@ -166,6 +170,11 @@ def regenerate_master_index(iterative_dir: str) -> None:
 
 
 def main(argv: Optional[List[str]] = None) -> None:
+    """Executes the orchestrator CLI for running and analyzing format optimizations.
+
+    Args:
+        argv: Optional command-line argument list.
+    """
     parser = argparse.ArgumentParser(
         description="Algorithmic orchestrator for format optimization loop."
     )

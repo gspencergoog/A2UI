@@ -30,6 +30,11 @@ from a2ui.inference_formats.transport import TransportFormat
 
 
 def _load_basic_catalog() -> Any:
+    """Loads and resolves the basic component catalog instance.
+
+    Returns:
+        The loaded catalog instance for basic components.
+    """
     cat_path = str(REPO_ROOT / "specification/v1_0/catalogs/basic/catalog.json")
     cat_cfg = CatalogConfig.from_path("basic", cat_path)
     transport_format = TransportFormat(
@@ -39,7 +44,18 @@ def _load_basic_catalog() -> Any:
 
 
 def test_compile_snippet(format_name: str, snippet: str) -> str:
-    """Compiles an inference format payload snippet into A2UI v1.0 JSON payload."""
+    """Compiles an inference format snippet into an A2UI v1.0 JSON payload string.
+
+    Args:
+        format_name: The target format strategy name (e.g., "atom", "express").
+        snippet: The raw code snippet string to compile.
+
+    Returns:
+        A formatted JSON string representing the compiled surface update.
+
+    Raises:
+        ValueError: If the format strategy name is unsupported.
+    """
     cat = _load_basic_catalog()
     fmt_lower = format_name.lower()
 
@@ -69,7 +85,18 @@ def test_compile_snippet(format_name: str, snippet: str) -> str:
 
 
 def test_decompile_payload(format_name: str, json_str_or_dict: Any) -> str:
-    """Decompiles an A2UI v1.0 JSON payload into format target string."""
+    """Decompiles an A2UI v1.0 JSON surface payload into a target format string.
+
+    Args:
+        format_name: The target format strategy name (e.g., "atom", "express").
+        json_str_or_dict: A JSON file path, JSON string, or payload dictionary.
+
+    Returns:
+        The decompiled target format string representation.
+
+    Raises:
+        ValueError: If the format strategy name is unsupported.
+    """
     cat = _load_basic_catalog()
     fmt_lower = format_name.lower()
 
@@ -107,7 +134,18 @@ def test_decompile_payload(format_name: str, json_str_or_dict: Any) -> str:
 
 
 def test_parse_ast(format_name: str, snippet: str) -> str:
-    """Parses an inference format payload snippet into raw AST node structure representation."""
+    """Parses an inference format snippet into its abstract syntax tree representation.
+
+    Args:
+        format_name: The target format strategy name (e.g., "atom", "express").
+        snippet: The raw code snippet string to parse.
+
+    Returns:
+        A formatted string representation of the parsed AST nodes.
+
+    Raises:
+        ValueError: If the format strategy name is unsupported.
+    """
     cat = _load_basic_catalog()
     fmt_lower = format_name.lower()
     if fmt_lower == "atom":

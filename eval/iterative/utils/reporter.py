@@ -21,7 +21,14 @@ from compare_results import format_delta_pct  # type: ignore[import-not-found]
 
 
 def extract_metrics_from_log(log_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Extracts summary metrics directly from inspect log dict data or run_meta dict."""
+    """Extracts summary metrics from an inspect log dictionary or run metadata dictionary.
+
+    Args:
+        log_data: The dictionary containing evaluation log data or run metadata.
+
+    Returns:
+        A dictionary containing aggregated pass rates, latency, and token counts.
+    """
     if "metrics" in log_data and not log_data.get("results"):
         m = log_data["metrics"]
 
@@ -188,7 +195,19 @@ def generate_optimization_report(
     format_name: str,
     model: str,
 ) -> str:
-    """Generates a detailed markdown report for LLM / Human inspection."""
+    """Generates a detailed markdown report for evaluation run inspection.
+
+    Args:
+        log_data: The current evaluation run log dictionary.
+        pytest_results: The dictionary containing unit test execution results.
+        baseline_data: Optional baseline evaluation log dictionary.
+        git_diff: The active git diff patch string.
+        format_name: The target format strategy name.
+        model: The evaluation model name.
+
+    Returns:
+        The complete markdown report string.
+    """
     metrics = extract_metrics_from_log(log_data)
     pytest_status = "PASS" if pytest_results["success"] else "FAIL"
 

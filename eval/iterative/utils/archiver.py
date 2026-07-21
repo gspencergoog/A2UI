@@ -34,6 +34,14 @@ from utils.reporter import extract_metrics_from_log  # type: ignore[import-not-f
 
 
 def _slugify(text: str) -> str:
+    """Converts arbitrary hypothesis text into a filesystem-friendly slug.
+
+    Args:
+        text: The raw text string to slugify.
+
+    Returns:
+        A cleaned slug string capped at 40 characters.
+    """
     slug = text.lower()
     slug = re.sub(r"[^\w\s-]", "", slug)
     slug = re.sub(r"[\s_-]+", "_", slug).strip("_")
@@ -41,6 +49,14 @@ def _slugify(text: str) -> str:
 
 
 def _get_git_commit_sha(workspace_root: str) -> str:
+    """Retrieves the current short git commit SHA for the workspace.
+
+    Args:
+        workspace_root: The filesystem path to the git workspace root directory.
+
+    Returns:
+        The seven-character short git SHA string, or "0000000" if unavailable.
+    """
     try:
         cmd = ["git", "rev-parse", "--short", "HEAD"]
         res = subprocess.run(cmd, cwd=workspace_root, capture_output=True, text=True)
@@ -56,7 +72,18 @@ def archive_run(
     notes: Optional[str] = None,
     log_dir: Optional[str] = None,
 ) -> str:
-    """Atomically archives current optimization run artifacts into eval/iterative/history/."""
+    """Atomically archives optimization run artifacts into the history directory.
+
+    Args:
+        format_name: The name of the target inference format (e.g., "atom").
+        hypothesis: A short description of the optimization hypothesis tested.
+        status: The decision status of the run (e.g., "Kept" or "Backtracked").
+        notes: Optional qualitative notes or rationale for the decision.
+        log_dir: Optional path to the directory containing evaluation logs.
+
+    Returns:
+        The absolute path to the newly created archive directory.
+    """
     script_dir = Path(__file__).resolve().parent.parent
     history_dir = script_dir / "history"
     history_dir.mkdir(parents=True, exist_ok=True)
