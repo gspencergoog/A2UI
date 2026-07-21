@@ -1,0 +1,5 @@
+{
+  "hypothesis": "Compiler-side dynamic data model path normalization for multi-part update operations.",
+  "notes": "Pytest 100% pass. However, Schema Acc regressed to 83.3% (-16.7%) and Quality Score regressed to 66.7% (-33.3%). Score S_opt dropped to +0.426. Reverted per Rule 1 correctness guardrail and Rule 3.",
+  "status": "Backtracked"
+}
