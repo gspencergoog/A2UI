@@ -59,7 +59,7 @@ def regenerate_master_index(iterative_dir: str) -> None:
             sync_worktree_history,
         )
 
-        sync_worktree_history()
+        sync_worktree_history(skip_index_regen=True)
     except Exception:
         pass
 
@@ -69,7 +69,10 @@ def regenerate_master_index(iterative_dir: str) -> None:
     runs = []
     for entry in os.scandir(history_dir):
         if entry.is_dir() and entry.name.startswith("run_"):
-            run_id = entry.name.split("_")[1]
+            parts = entry.name.split("_")
+            if len(parts) < 2:
+                continue
+            run_id = parts[1]
             report_path = os.path.join(entry.path, "report.md")
             meta_path = os.path.join(entry.path, "run_meta.json")
             results_path = os.path.join(entry.path, "results.json")

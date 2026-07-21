@@ -15,14 +15,17 @@
 """Quick-compiler and decompiler CLI utility tools for testing inference formats."""
 
 import json
+import sys
 from pathlib import Path
 from typing import Any, Dict
 
+REPO_ROOT = Path(__file__).resolve().parents[3]
+SDK_SRC = str(REPO_ROOT / "agent_sdks/python/a2ui_agent/src")
+if SDK_SRC not in sys.path:
+    sys.path.insert(0, SDK_SRC)
+
 from a2ui.schema.catalog import CatalogConfig
 from a2ui.inference_formats.transport import TransportFormat
-
-
-REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
 def _load_basic_catalog() -> Any:

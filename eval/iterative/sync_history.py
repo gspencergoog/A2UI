@@ -1,4 +1,4 @@
-#!/usr/run/env python3
+#!/usr/bin/env python3
 # Copyright 2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,7 +44,10 @@ def _get_max_run_id(history_dir: str) -> int:
     return max_id
 
 
-def sync_worktree_history(target_worktrees: Optional[List[str]] = None) -> List[str]:
+def sync_worktree_history(
+    target_worktrees: Optional[List[str]] = None,
+    skip_index_regen: bool = False,
+) -> List[str]:
     """Scans target worktrees and syncs missing history run folders into main history with zero collisions."""
     main_history_dir = os.path.join(SCRIPT_DIR, "history")
     os.makedirs(main_history_dir, exist_ok=True)
@@ -83,11 +86,15 @@ def sync_worktree_history(target_worktrees: Optional[List[str]] = None) -> List[
                 id_occupied = False
                 if run_id_num is not None:
                     for existing in os.scandir(main_history_dir):
-                        if existing.is_dir() and existing.name.startswith(
-                            f"run_{run_id_num:03d}_"
-                        ):
-                            id_occupied = True
-                            break
+                        if existing.is_dir() and existing.name.startswith("run_"):
+                            ex_parts = existing.name.split("_")
+                            if (
+                                len(ex_parts) >= 2
+                                and ex_parts[1].isdigit()
+                                and int(ex_parts[1]) == run_id_num
+                            ):
+                                id_occupied = True
+                                break
 
                 if id_occupied:
                     # Re-index incoming folder with next available max_id
@@ -109,8 +116,9 @@ def sync_worktree_history(target_worktrees: Optional[List[str]] = None) -> List[
                         shutil.rmtree(dest_dir)
                     raise
 
-    # Rebuild master index
-    regenerate_master_index(main_history_dir)
+    # Rebuild master index if requested
+    if not skip_index_regen:
+        regenerate_master_index(SCRIPT_DIR)
     return copied_runs
 
 

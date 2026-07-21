@@ -37,6 +37,9 @@ def extract_metrics_from_log(log_data: Dict[str, Any]) -> Dict[str, Any]:
             )
 
     samples = log_data.get("samples", [])
+    if isinstance(samples, dict):
+        samples = list(samples.values())
+
     durations: List[float] = []
     input_toks: List[float] = []
     output_toks: List[float] = []
@@ -237,7 +240,10 @@ def generate_optimization_report(
     report.append("")
 
     failures = []
-    for sample in log_data.get("samples", []):
+    curr_samples = log_data.get("samples", [])
+    if isinstance(curr_samples, dict):
+        curr_samples = list(curr_samples.values())
+    for sample in curr_samples:
         s_scores = sample.get("scores", {})
         algo_passed = s_scores.get("a2ui_scorer", {}).get("value") == 1.0
         judging_val = s_scores.get("measured_model_graded_qa", {}).get("value", "N/A")

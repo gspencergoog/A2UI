@@ -61,24 +61,9 @@ def resolve_results_file(target_path: str) -> str:
             os.path.join(target_path, "**/*.eval"), recursive=True
         )
         if eval_files:
-            uv_bin = (
-                shutil.which("uv") or "/usr/local/google/home/gspencer/.local/bin/uv"
-            )
-
-            def _dump_log(f_path: str) -> Dict[str, Any]:
-                dump_cmd = [uv_bin, "run", "inspect", "log", "dump", f_path]
-                return json.loads(subprocess.check_output(dump_cmd, text=True))
-
-            if len(eval_files) > 1:
-                from concurrent.futures import ThreadPoolExecutor
-
-                with ThreadPoolExecutor(
-                    max_workers=min(4, len(eval_files))
-                ) as executor:
-                    all_dumps = list(executor.map(_dump_log, eval_files))
-                    data = all_dumps[0]
-            else:
-                data = _dump_log(eval_files[0])
+            uv_bin = shutil.which("uv") or "uv"
+            dump_cmd = [uv_bin, "run", "inspect", "log", "dump", eval_files[0]]
+            data = json.loads(subprocess.check_output(dump_cmd, text=True))
 
             temp_json = os.path.join(target_path, "results.json")
             with open(temp_json, "w", encoding="utf-8") as f:
@@ -391,13 +376,16 @@ def format_delta_pct(
     val: float, base_val: float, is_percentage_points: bool = False
 ) -> str:
     """Formats percentage change or point diff against baseline."""
-    if base_val == 0.0 or base_val is None or val is None:
+    if base_val is None or val is None:
         return "-"
 
     if is_percentage_points:
         diff = (val - base_val) * 100
         sign = "+" if diff > 0 else ""
         return f"{sign}{diff:.1f}%"
+
+    if base_val == 0.0:
+        return "-"
 
     pct_change = ((val - base_val) / base_val) * 100
     sign = "+" if pct_change > 0 else ""

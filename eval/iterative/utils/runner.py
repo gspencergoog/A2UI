@@ -22,7 +22,7 @@ from typing import Any, Dict, List, Optional
 
 
 def _get_uv_binary() -> str:
-    return shutil.which("uv") or "/usr/local/google/home/gspencer/.local/bin/uv"
+    return shutil.which("uv") or "uv"
 
 
 def run_unit_tests() -> Dict[str, Any]:
