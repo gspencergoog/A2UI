@@ -123,7 +123,7 @@ def sync_worktree_history(
                         occupied_ids.add(assigned_id)
                 except FileExistsError:
                     pass
-                except Exception:
+                except BaseException:
                     if os.path.exists(dest_dir):
                         shutil.rmtree(dest_dir)
                     raise

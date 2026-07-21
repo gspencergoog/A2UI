@@ -33,7 +33,9 @@ def resolve_results_file(target_path: str) -> str:
         elif target_path.endswith(".eval"):
             uv_bin = shutil.which("uv") or "uv"
             dump_cmd = [uv_bin, "run", "inspect", "log", "dump", target_path]
-            data = json.loads(subprocess.check_output(dump_cmd, text=True))
+            data = json.loads(
+                subprocess.check_output(dump_cmd, text=True, encoding="utf-8")
+            )
             temp_json = target_path + ".json"
             with open(temp_json, "w", encoding="utf-8") as f:
                 json.dump(data, f)
@@ -63,7 +65,9 @@ def resolve_results_file(target_path: str) -> str:
         if eval_files:
             uv_bin = shutil.which("uv") or "uv"
             dump_cmd = [uv_bin, "run", "inspect", "log", "dump", eval_files[0]]
-            data = json.loads(subprocess.check_output(dump_cmd, text=True))
+            data = json.loads(
+                subprocess.check_output(dump_cmd, text=True, encoding="utf-8")
+            )
 
             temp_json = os.path.join(target_path, "results.json")
             with open(temp_json, "w", encoding="utf-8") as f:
@@ -248,18 +252,29 @@ def extract_metrics(
 
     for s in active_samples:
         s_scores = s.get("scores") or {}
-        if "a2ui_scorer" in s_scores:
-            val = s_scores["a2ui_scorer"].get("value")
-            if val is not None:
-                total_schema += 1
-                if val == 1.0:
-                    schema_passes += 1
-        if "measured_model_graded_qa" in s_scores:
-            val = s_scores["measured_model_graded_qa"].get("value")
-            if val is not None:
-                total_quality += 1
-                if val == "C":
-                    quality_passes += 1
+        val_schema = None
+        val_quality = None
+        if isinstance(s_scores, dict):
+            if "a2ui_scorer" in s_scores:
+                val_schema = s_scores["a2ui_scorer"].get("value")
+            if "measured_model_graded_qa" in s_scores:
+                val_quality = s_scores["measured_model_graded_qa"].get("value")
+        elif isinstance(s_scores, list):
+            for sc in s_scores:
+                if isinstance(sc, dict):
+                    if sc.get("name") == "a2ui_scorer":
+                        val_schema = sc.get("value")
+                    elif sc.get("name") == "measured_model_graded_qa":
+                        val_quality = sc.get("value")
+
+        if val_schema is not None:
+            total_schema += 1
+            if val_schema == 1.0:
+                schema_passes += 1
+        if val_quality is not None:
+            total_quality += 1
+            if val_quality == "C":
+                quality_passes += 1
 
     schema_acc = (schema_passes / total_schema) if total_schema > 0 else None
     quality_acc = (quality_passes / total_quality) if total_quality > 0 else None

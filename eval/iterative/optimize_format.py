@@ -352,16 +352,26 @@ def main(argv: Optional[List[str]] = None) -> None:
             s_meta = s.get("metadata") or {}
             s_scores = s.get("scores") or {}
             s_id = s_meta.get("name") or str(s.get("id"))
-            algo_passed = (
-                s_scores.get("a2ui_scorer", {}).get("value") == 1.0
-                if isinstance(s_scores, dict)
-                else False
-            )
-            quality_passed = (
-                s_scores.get("measured_model_graded_qa", {}).get("value") == "C"
-                if isinstance(s_scores, dict)
-                else False
-            )
+            algo_passed = False
+            quality_passed = False
+            if isinstance(s_scores, dict):
+                algo_passed = (
+                    s_scores.get("a2ui_scorer", {}).get("value") == 1.0
+                    if isinstance(s_scores.get("a2ui_scorer"), dict)
+                    else False
+                )
+                quality_passed = (
+                    s_scores.get("measured_model_graded_qa", {}).get("value") == "C"
+                    if isinstance(s_scores.get("measured_model_graded_qa"), dict)
+                    else False
+                )
+            elif isinstance(s_scores, list):
+                for sc in s_scores:
+                    if isinstance(sc, dict):
+                        if sc.get("name") == "a2ui_scorer":
+                            algo_passed = sc.get("value") == 1.0
+                        elif sc.get("name") == "measured_model_graded_qa":
+                            quality_passed = sc.get("value") == "C"
 
             s_dur = None
             s_reas = None

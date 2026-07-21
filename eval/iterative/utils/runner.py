@@ -33,7 +33,9 @@ def run_unit_tests() -> Dict[str, Any]:
     workspace_root = os.path.dirname(eval_root)
 
     cmd = [_get_uv_binary(), "run", "pytest", "agent_sdks/python/a2ui_agent/tests/"]
-    result = subprocess.run(cmd, cwd=workspace_root, capture_output=True, text=True)
+    result = subprocess.run(
+        cmd, cwd=workspace_root, capture_output=True, text=True, encoding="utf-8"
+    )
 
     return {
         "success": result.returncode == 0,
@@ -92,7 +94,9 @@ def get_git_diff(workspace_root: str) -> str:
     """Retrieves git diff of active modifications under agent_sdks/."""
     cmd = ["git", "diff", "HEAD", "--", "agent_sdks/"]
     try:
-        result = subprocess.run(cmd, cwd=workspace_root, capture_output=True, text=True)
+        result = subprocess.run(
+            cmd, cwd=workspace_root, capture_output=True, text=True, encoding="utf-8"
+        )
         return result.stdout.strip()
     except Exception:
         return ""

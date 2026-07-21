@@ -24,17 +24,29 @@ def extract_metrics_from_log(log_data: Dict[str, Any]) -> Dict[str, Any]:
     """Extracts summary metrics directly from inspect log dict data or run_meta dict."""
     if "metrics" in log_data and not log_data.get("results"):
         m = log_data["metrics"]
-        med_lat = float(
-            m.get("latency_seconds_median") or m.get("avg_latency_seconds") or 0.0
+
+        def _get_first_not_none(
+            d: Dict[str, Any], keys: List[str], default: float = 0.0
+        ) -> float:
+            for k in keys:
+                val = d.get(k)
+                if val is not None:
+                    return float(val)
+            return default
+
+        med_lat = _get_first_not_none(
+            m, ["latency_seconds_median", "avg_latency_seconds"]
         )
-        med_c = float(m.get("code_tokens_median") or m.get("avg_output_tokens") or 0.0)
-        med_r = float(
-            m.get("reasoning_tokens_median") or m.get("avg_reasoning_tokens") or 0.0
+        med_c = _get_first_not_none(m, ["code_tokens_median", "avg_output_tokens"])
+        med_r = _get_first_not_none(
+            m, ["reasoning_tokens_median", "avg_reasoning_tokens"]
         )
-        med_in = float(m.get("input_tokens_median") or m.get("avg_input_tokens") or 0.0)
-        s_acc = float(m.get("schema_acc") or m.get("algo_accuracy") or 0.0)
-        q_acc = float(m.get("quality_acc") or m.get("overall_accuracy") or 0.0)
-        tot_samp = int(m.get("total_samples") or 0)
+        med_in = _get_first_not_none(m, ["input_tokens_median", "avg_input_tokens"])
+        s_acc = _get_first_not_none(m, ["schema_acc", "algo_accuracy"])
+        q_acc = _get_first_not_none(m, ["quality_acc", "overall_accuracy"])
+        tot_samp = int(
+            m.get("total_samples") if m.get("total_samples") is not None else 0
+        )
         return {
             "algo_accuracy": s_acc,
             "overall_accuracy": q_acc,
