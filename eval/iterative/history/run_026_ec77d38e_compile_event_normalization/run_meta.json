@@ -1,0 +1,5 @@
+{
+  "hypothesis": "Compiler-side dynamic event action parameter normalization for nested event maps and positional arguments.",
+  "notes": "Pytest 100% pass, 100.0% Schema Acc, 100.0% Quality Score. Reduced reasoning tokens by -10.3% (4,636 vs 5,168). However, Code Output Tokens increased by +16.5% (308 vs 264) and non-reasoning output time increased by +21.7%. Score S_opt dropped from +0.600 to +0.580 (-0.020). Reverted per Rule 2 and Rule 3.",
+  "status": "Backtracked"
+}
