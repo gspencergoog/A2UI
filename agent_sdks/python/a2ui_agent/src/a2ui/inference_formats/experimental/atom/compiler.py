@@ -965,13 +965,28 @@ class AtomCompiler:
         event_name = str(expr[1]) if len(expr) > 1 else ""
         context = {}
         i = 2
+        pos_idx = 0
         while i < len(expr):
             item = expr[i]
             if isinstance(item, str) and item.startswith(":") and len(item) > 1:
                 k = item[1:]
                 if i + 1 < len(expr):
                     v = expr[i + 1]
-                    if k not in ("name", "action"):
+                    if k == "context":
+                        if isinstance(v, dict):
+                            for sub_k, sub_v in v.items():
+                                context[sub_k] = sub_v
+                        elif isinstance(v, list):
+                            j = 0
+                            while j < len(v) - 1:
+                                if isinstance(v[j], str) and v[j].startswith(":"):
+                                    context[v[j][1:]] = v[j + 1]
+                                    j += 2
+                                else:
+                                    j += 1
+                        else:
+                            context["value"] = v
+                    elif k not in ("name", "action"):
                         context[k] = v
                     i += 2
                 else:
@@ -982,6 +997,10 @@ class AtomCompiler:
                         context[k] = v
                 i += 1
             else:
+                if isinstance(item, str) and not item.startswith(":") and item not in ("]", ")", "[", "("):
+                    if pos_idx == 0:
+                        context["id"] = item
+                    pos_idx += 1
                 i += 1
         ev_obj: Dict[str, Any] = {"name": event_name}
         resolved_context = {
