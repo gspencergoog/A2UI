@@ -679,15 +679,15 @@ def main(argv: Optional[List[str]] = None) -> None:
 
     # Load comparison runs
     comp_metrics_list = []
-    target_sample_ids = None
+    target_sample_ids: Set[str] = set()
 
     for r_dir in args.results_dirs:
         res_json = resolve_results_file(r_dir)
         label = os.path.basename(os.path.normpath(r_dir))
         m = extract_metrics(res_json, label_name=label, use_median=use_median)
         comp_metrics_list.append(m)
-        if target_sample_ids is None and m.get("sample_ids"):
-            target_sample_ids = m["sample_ids"]
+        if m.get("sample_ids"):
+            target_sample_ids.update(m["sample_ids"])
 
     # Load baseline (filtered to target sample IDs if target is a validation subset)
     baseline_json = resolve_results_file(args.baseline)

@@ -90,7 +90,7 @@ def load_log_data(log_path: str) -> Dict[str, Any]:
 
 def get_git_diff(workspace_root: str) -> str:
     """Retrieves git diff of active modifications under agent_sdks/."""
-    cmd = ["git", "diff", "agent_sdks/"]
+    cmd = ["git", "diff", "HEAD", "--", "agent_sdks/"]
     try:
         result = subprocess.run(cmd, cwd=workspace_root, capture_output=True, text=True)
         return result.stdout.strip()

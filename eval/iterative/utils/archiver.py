@@ -121,21 +121,39 @@ def archive_run(
         "status": status,
         "notes": notes or ("Pytest PASS" if status == "Kept" else "Reverted"),
         "metrics": {
-            "schema_acc": metrics_extracted.get("algo_accuracy", 0.0),
-            "quality_acc": metrics_extracted.get("overall_accuracy", 0.0),
+            "schema_acc": metrics_extracted.get(
+                "algo_accuracy", metrics_extracted.get("schema_acc", 0.0)
+            ),
+            "quality_acc": metrics_extracted.get(
+                "overall_accuracy", metrics_extracted.get("quality_acc", 0.0)
+            ),
             "code_tokens_median": metrics_extracted.get(
-                "median_output_tokens", metrics_extracted.get("avg_output_tokens", 0.0)
+                "median_output_tokens",
+                metrics_extracted.get(
+                    "avg_output_tokens",
+                    metrics_extracted.get("code_tokens_median", 0.0),
+                ),
             ),
             "reasoning_tokens_median": metrics_extracted.get(
                 "median_reasoning_tokens",
-                metrics_extracted.get("avg_reasoning_tokens", 0.0),
+                metrics_extracted.get(
+                    "avg_reasoning_tokens",
+                    metrics_extracted.get("reasoning_tokens_median", 0.0),
+                ),
             ),
             "input_tokens_median": metrics_extracted.get(
-                "median_input_tokens", metrics_extracted.get("avg_input_tokens", 0.0)
+                "median_input_tokens",
+                metrics_extracted.get(
+                    "avg_input_tokens",
+                    metrics_extracted.get("input_tokens_median", 0.0),
+                ),
             ),
             "latency_seconds_median": metrics_extracted.get(
                 "median_latency_seconds",
-                metrics_extracted.get("avg_latency_seconds", 0.0),
+                metrics_extracted.get(
+                    "avg_latency_seconds",
+                    metrics_extracted.get("latency_seconds_median", 0.0),
+                ),
             ),
             "total_samples": metrics_extracted.get("total_samples", 0),
         },

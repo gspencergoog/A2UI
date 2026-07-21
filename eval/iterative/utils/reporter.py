@@ -280,7 +280,7 @@ def generate_optimization_report(
 
             output_content = ""
             for event in sample.get("events", []):
-                if event.get("event") == "model":
+                if isinstance(event, dict) and event.get("event") == "model":
                     out_obj = event.get("output")
                     if isinstance(out_obj, dict):
                         output_content = out_obj.get("completion", "") or ""

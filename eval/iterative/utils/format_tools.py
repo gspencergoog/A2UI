@@ -47,6 +47,8 @@ def test_compile_snippet(format_name: str, snippet: str) -> str:
 
         compiler = AtomCompiler(catalog=cat)
         res = compiler.compile(snippet)
+    elif fmt_lower == "transport":
+        res = json.loads(snippet) if isinstance(snippet, str) else snippet
     elif fmt_lower == "express":
         from a2ui.inference_formats.experimental.express.parser import ExpressParser
 
@@ -81,6 +83,8 @@ def test_decompile_payload(format_name: str, json_str_or_dict: Any) -> str:
 
         decompiler = AtomDecompiler(catalog=cat)
         return decompiler.decompile(payload)
+    elif fmt_lower == "transport":
+        return json.dumps(payload, indent=2)
     elif fmt_lower == "express":
         from a2ui.inference_formats.experimental.express.parser import ExpressParser
 
@@ -107,6 +111,8 @@ def test_parse_ast(format_name: str, snippet: str) -> str:
         parser = SExprParser(snippet)
         ast = parser.parse()
         return json.dumps(ast, indent=2)
+    elif fmt_lower == "transport":
+        return json.dumps(json.loads(snippet), indent=2)
     elif fmt_lower == "express":
         from a2ui.inference_formats.experimental.express.parser import ExpressParser
 

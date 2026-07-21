@@ -112,8 +112,9 @@ def sync_worktree_history(
                     bname = os.path.basename(dest_dir)
                     copied_runs.append(bname)
                     existing_dirs.add(bname)
-                    if run_id_num is not None:
-                        occupied_ids.add(run_id_num)
+                    assigned_id = current_max_id if id_occupied else run_id_num
+                    if assigned_id is not None:
+                        occupied_ids.add(assigned_id)
                 except FileExistsError:
                     pass
                 except Exception:

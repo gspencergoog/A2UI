@@ -152,10 +152,12 @@ def regenerate_master_index(iterative_dir: str) -> None:
     )
 
     for r in runs:
+        clean_hypo = str(r["hypothesis"]).replace("\n", " ").replace("|", "\\|")
+        clean_notes = str(r["notes"]).replace("\n", " ").replace("|", "\\|")
         table.append(
-            f"| `{r['id']}` | {r['hypothesis']} | {r['pytest']} | {r['overall']} |"
+            f"| `{r['id']}` | {clean_hypo} | {r['pytest']} | {r['overall']} |"
             f" {r['algo']} | {r['latency']} | {r['input']} | {r['output']} |"
-            f" {r['status']} | {r['notes']} |"
+            f" {r['status']} | {clean_notes} |"
         )
 
     with open(index_file, "w", encoding="utf-8") as f:
