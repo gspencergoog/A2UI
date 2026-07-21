@@ -81,9 +81,13 @@ def extract_metrics(
     extracted_sample_ids = set()
 
     for s in samples:
-        s_id = str(s.get("metadata", {}).get("name") or s.get("id") or "")
+        name_id = str(s.get("metadata", {}).get("name") or "")
+        raw_id = str(s.get("id") or "")
+        s_id = name_id or raw_id
         extracted_sample_ids.add(s_id)
-        if filter_sample_ids and s_id not in filter_sample_ids:
+        if raw_id:
+            extracted_sample_ids.add(raw_id)
+        if filter_sample_ids and (s_id not in filter_sample_ids and raw_id not in filter_sample_ids):
             continue
         filtered_samples.append(s)
 

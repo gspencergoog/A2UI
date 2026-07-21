@@ -206,6 +206,33 @@ class AtomCompiler:
         available = self.schema_helper.get_available_components()
         return name in available
 
+    def _get_primitive_text_component(self) -> Optional[Tuple[str, str]]:
+        """Dynamically finds a single-string primitive component from catalog schema."""
+        available = self.schema_helper.get_available_components()
+        for comp in available:
+            props = self.schema_helper.get_component_properties(comp)
+            if not props:
+                continue
+            reqs = getattr(self.schema_helper, "get_component_required", lambda c: [])(comp)
+            if len(reqs) == 1 and reqs[0] in ("text", "content", "label", "title", "value"):
+                return (comp, reqs[0])
+            prop_keys = [p for p in props if p not in ("id", "component")]
+            if len(prop_keys) == 1 and prop_keys[0] in ("text", "content", "label", "title", "value"):
+                return (comp, prop_keys[0])
+        return None
+
+    def _auto_wrap_text_child(self, text_val: str, components: List[Dict[str, Any]], data_model: Dict[str, Any]) -> str:
+        """Auto-wraps a raw text string child into a primitive text component dynamically inspected from catalog."""
+        if not text_val or not isinstance(text_val, str):
+            return text_val
+        if any(c.get("id") == text_val for c in components):
+            return text_val
+        text_info = self._get_primitive_text_component()
+        if text_info:
+            comp_name, text_prop = text_info
+            return self._compile_component([comp_name, f":{text_prop}", text_val], components, data_model)
+        return text_val
+
     def _extract_data_list(self, data_model: dict, path: str) -> list:
         parts = [p for p in path.lstrip("/").split("/") if p]
         curr = data_model
@@ -530,7 +557,7 @@ class AtomCompiler:
                                 elif str(sub_w[0]) == "template":
                                     template_data = self._compile_template(sub_w, components)
                             elif isinstance(sub_w, str) and sub_w not in ("]", ")", "[", "("):
-                                children.append(sub_w)
+                                children.append(self._auto_wrap_text_child(sub_w, components, data_model))
                         i += 1
                         continue
                 if str(item[0]) in ("data", "dataModel", "set!"):
@@ -568,7 +595,7 @@ class AtomCompiler:
                                     child_id = self._compile_component(child_item, components, data_model)
                                     children.append(child_id)
                             elif isinstance(child_item, str) and child_item not in ("]", ")", "[", "("):
-                                children.append(child_item)
+                                children.append(self._auto_wrap_text_child(child_item, components, data_model))
                 elif (self.schema_helper.get_property_type(comp_type, key) in ("Child", "ComponentId") or key in ("child", "trigger", "content", "header", "footer", "leading", "trailing")) and isinstance(val, list) and val and self._is_component_type(str(val[0])):
                     child_id = self._compile_component(val, components, data_model)
                     comp_dict[key] = child_id
@@ -659,13 +686,13 @@ class AtomCompiler:
                                 child_id = self._compile_component(sub_c, components, data_model)
                                 children.append(child_id)
                         elif isinstance(sub_c, str) and sub_c not in ("]", ")", "[", "(") and sub_c != "...":
-                            children.append(sub_c)
+                            children.append(self._auto_wrap_text_child(sub_c, components, data_model))
                 i += 1
             else:
                 # Positional attribute matching schema definition order
                 if self.schema_helper.get_property_type(comp_type, "children") == "ChildList" or "children" in prop_keys or "child" in prop_keys:
                     if isinstance(item, str) and item not in ("]", ")", "[", "(") and item != "...":
-                        children.append(item)
+                        children.append(self._auto_wrap_text_child(item, components, data_model))
                 else:
                     if pos_arg_index < len(prop_keys):
                         pkey = prop_keys[pos_arg_index]
