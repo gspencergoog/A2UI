@@ -108,7 +108,7 @@ def extract_metrics(
         else:
             matching_samples = samples_dict
 
-        if matching_samples or filter_sample_ids:
+        if matching_samples:
             import statistics
 
             s_accs = [

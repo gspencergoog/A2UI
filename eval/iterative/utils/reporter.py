@@ -70,11 +70,16 @@ def extract_metrics_from_log(log_data: Dict[str, Any]) -> Dict[str, Any]:
     for s in scores:
         if isinstance(s, dict):
             m_dict = s.get("metrics") or {}
-            acc_dict = m_dict.get("accuracy") or {}
+            acc_obj = m_dict.get("accuracy")
+            acc_val = (
+                acc_obj.get("value")
+                if isinstance(acc_obj, dict)
+                else acc_obj
+            )
             if s.get("name") == "a2ui_scorer":
-                algo_acc = float(acc_dict.get("value") or 0.0)
+                algo_acc = float(acc_val or 0.0)
             elif s.get("name") == "measured_model_graded_qa":
-                overall_acc = float(acc_dict.get("value") or 0.0)
+                overall_acc = float(acc_val or 0.0)
 
     samples = log_data.get("samples") or []
     if isinstance(samples, dict):
@@ -311,7 +316,7 @@ def generate_optimization_report(
                     elif sc.get("name") == "measured_model_graded_qa":
                         judging_val = sc.get("value", "N/A")
 
-        if not algo_passed or judging_val != "C":
+        if not algo_passed or (judging_val != "N/A" and judging_val != "C"):
             failures.append((sample, algo_passed, judging_val))
 
     report.append(

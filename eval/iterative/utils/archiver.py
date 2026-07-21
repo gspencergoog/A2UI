@@ -118,25 +118,22 @@ def archive_run(
     )
 
     metrics_extracted: Dict[str, Any] = {}
-    if eval_logs:
-        try:
-            log_data = load_log_data(eval_logs[0])
-            metrics_extracted = extract_metrics_from_log(log_data)
-        except Exception:
-            pass
-
     results_json_src = os.path.join(temp_dir, "results.json")
     if os.path.exists(results_json_src):
         try:
             shutil.copy(results_json_src, target_dir / "results.json")
-        except Exception:
-            pass
-
-    if not metrics_extracted and os.path.exists(results_json_src):
-        try:
             with open(results_json_src, "r", encoding="utf-8") as f:
                 log_data = json.load(f)
                 metrics_extracted = extract_metrics_from_log(log_data)
+        except Exception:
+            pass
+
+    if not metrics_extracted and eval_logs:
+        try:
+            log_data = load_log_data(eval_logs[0])
+            metrics_extracted = extract_metrics_from_log(log_data)
+            with open(target_dir / "results.json", "w", encoding="utf-8") as f:
+                json.dump(log_data, f, indent=2)
         except Exception:
             pass
 
