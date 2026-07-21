@@ -771,8 +771,13 @@ class AtomCompiler:
                 while i < len(val):
                     item = val[i]
                     if isinstance(item, str) and item.startswith(":") and len(item) > 1:
+                        k_name = item[1:]
                         if i + 1 < len(val):
-                            evt_ctx[item[1:]] = self._resolve_val(val[i+1], components)
+                            v_val = self._resolve_val(val[i+1], components)
+                            if k_name in ("val", "data") and "value" not in evt_ctx:
+                                k_name = "value"
+                            if k_name not in ("name", "action") or v_val != evt_name:
+                                evt_ctx[k_name] = v_val
                             i += 2
                         else:
                             i += 1
