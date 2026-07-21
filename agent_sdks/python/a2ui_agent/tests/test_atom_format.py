@@ -230,7 +230,7 @@ class TestAtomFormat(unittest.TestCase):
         )
         self.assertIn('You are a helpful UI generator.', prompt)
         self.assertIn('Follow standard A2UI guidelines.', prompt)
-        self.assertIn('# A2UI Atom Output Contract', prompt)
+        self.assertIn('Output the user interface using compact A2UI Atom S-Expression notation.', prompt)
         self.assertIn('<a2ui>', prompt)
         self.assertIn('Component Catalog Signatures', prompt)
         self.assertIn('- (Card', prompt)

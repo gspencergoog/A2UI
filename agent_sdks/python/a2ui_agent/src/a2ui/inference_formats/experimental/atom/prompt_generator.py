@@ -22,10 +22,8 @@ from a2ui.core.schema.client_capabilities import V09Capabilities
 if TYPE_CHECKING:
     from .format import AtomFormat
 
-ATOM_RULES = r'''# A2UI Atom Output Contract
-
-You must output the user interface using the compact A2UI Atom S-Expression notation.
-You MUST surround the entire A2UI Atom block with the sentinel tags `<a2ui>` and `</a2ui>`. Do NOT output raw JSON messages.
+ATOM_RULES = r'''Output the user interface using compact A2UI Atom S-Expression notation.
+You MUST surround the entire A2UI Atom block with sentinel tags `<a2ui>` and `</a2ui>`. Do NOT output raw JSON messages.
 
 ## Grammar Rules
 
