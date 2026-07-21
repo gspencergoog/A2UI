@@ -648,11 +648,13 @@ class AtomCompiler:
                     child_id = self._compile_component(item, components, data_model)
                     children.append(child_id)
                 else:
-                    # Flatten list of child component IDs or primitives
+                    # Flatten list of child component IDs, templates, or primitives
                     for sub_c in item:
                         if isinstance(sub_c, list) and sub_c:
                             if str(sub_c[0]) in ("data", "dataModel", "set!"):
                                 self._parse_data_node(sub_c, data_model)
+                            elif str(sub_c[0]) == "template":
+                                template_data = self._compile_template(sub_c, components)
                             elif self._is_component_type(str(sub_c[0])):
                                 child_id = self._compile_component(sub_c, components, data_model)
                                 children.append(child_id)
