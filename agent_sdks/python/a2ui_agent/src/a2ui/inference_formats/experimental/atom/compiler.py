@@ -225,12 +225,13 @@ class AtomCompiler:
         """Auto-wraps a raw text string child into a primitive text component dynamically inspected from catalog."""
         if not text_val or not isinstance(text_val, str):
             return text_val
-        if any(c.get("id") == text_val for c in components):
-            return text_val
+        text_str = text_val.strip()
+        if any(c.get("id") == text_str for c in components):
+            return text_str
         text_info = self._get_primitive_text_component()
         if text_info:
             comp_name, text_prop = text_info
-            return self._compile_component([comp_name, f":{text_prop}", text_val], components, data_model)
+            return self._compile_component([comp_name, f":{text_prop}", text_str], components, data_model)
         return text_val
 
     def _extract_data_list(self, data_model: dict, path: str) -> list:
