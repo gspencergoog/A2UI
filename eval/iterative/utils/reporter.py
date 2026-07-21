@@ -21,7 +21,34 @@ from compare_results import format_delta_pct  # type: ignore[import-not-found]
 
 
 def extract_metrics_from_log(log_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Extracts summary metrics directly from inspect log dict data."""
+    """Extracts summary metrics directly from inspect log dict data or run_meta dict."""
+    if "metrics" in log_data and not log_data.get("results"):
+        m = log_data["metrics"]
+        med_lat = float(
+            m.get("latency_seconds_median") or m.get("avg_latency_seconds") or 0.0
+        )
+        med_c = float(m.get("code_tokens_median") or m.get("avg_output_tokens") or 0.0)
+        med_r = float(
+            m.get("reasoning_tokens_median") or m.get("avg_reasoning_tokens") or 0.0
+        )
+        med_in = float(m.get("input_tokens_median") or m.get("avg_input_tokens") or 0.0)
+        s_acc = float(m.get("schema_acc") or m.get("algo_accuracy") or 0.0)
+        q_acc = float(m.get("quality_acc") or m.get("overall_accuracy") or 0.0)
+        tot_samp = int(m.get("total_samples") or 0)
+        return {
+            "algo_accuracy": s_acc,
+            "overall_accuracy": q_acc,
+            "avg_latency_seconds": med_lat,
+            "median_latency_seconds": med_lat,
+            "avg_input_tokens": med_in,
+            "median_input_tokens": med_in,
+            "avg_output_tokens": med_c,
+            "median_output_tokens": med_c,
+            "avg_reasoning_tokens": med_r,
+            "median_reasoning_tokens": med_r,
+            "total_samples": tot_samp,
+        }
+
     results = log_data.get("results", {})
     scores = results.get("scores", [])
 
@@ -29,12 +56,15 @@ def extract_metrics_from_log(log_data: Dict[str, Any]) -> Dict[str, Any]:
     overall_acc = 0.0
 
     for s in scores:
-        if s.get("name") == "a2ui_scorer":
-            algo_acc = float(s.get("metrics", {}).get("accuracy", {}).get("value", 0.0))
-        elif s.get("name") == "measured_model_graded_qa":
-            overall_acc = float(
-                s.get("metrics", {}).get("accuracy", {}).get("value", 0.0)
-            )
+        if isinstance(s, dict):
+            if s.get("name") == "a2ui_scorer":
+                algo_acc = float(
+                    s.get("metrics", {}).get("accuracy", {}).get("value", 0.0)
+                )
+            elif s.get("name") == "measured_model_graded_qa":
+                overall_acc = float(
+                    s.get("metrics", {}).get("accuracy", {}).get("value", 0.0)
+                )
 
     samples = log_data.get("samples") or []
     if isinstance(samples, dict):

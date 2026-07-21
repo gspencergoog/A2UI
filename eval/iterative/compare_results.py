@@ -106,11 +106,15 @@ def extract_metrics(
             import statistics
 
             s_accs = [
-                s.get("schema_acc", 1.0 if s.get("schema_passed") else 0.0)
+                s["schema_acc"]
+                if s.get("schema_acc") is not None
+                else (1.0 if s.get("schema_passed") else 0.0)
                 for s in matching_samples.values()
             ]
             q_accs = [
-                s.get("quality_acc", 1.0 if s.get("quality_passed") else 0.0)
+                s["quality_acc"]
+                if s.get("quality_acc") is not None
+                else (1.0 if s.get("quality_passed") else 0.0)
                 for s in matching_samples.values()
             ]
             c_toks = [
@@ -273,7 +277,9 @@ def extract_metrics(
         model_events = [
             e
             for e in events
-            if e.get("event") == "model" and e.get("working_time") is not None
+            if isinstance(e, dict)
+            and e.get("event") == "model"
+            and e.get("working_time") is not None
         ]
         if model_events:
             m = model_events[0]

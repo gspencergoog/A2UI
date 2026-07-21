@@ -82,7 +82,21 @@ def archive_run(
         shutil.copy(report_src, target_dir / "report.md")
 
     # 4. Extract metrics & write run_meta.json
-    temp_dir = log_dir or str(script_dir.parent / "logs" / "temp_optimization")
+    temp_dir = log_dir
+    if not temp_dir or not os.path.exists(temp_dir):
+        # Match any temp_optimization* log directory under logs/
+        logs_parent = script_dir.parent / "logs"
+        matching_dirs = sorted(
+            glob.glob(str(logs_parent / "temp_optimization*")),
+            key=lambda d: os.path.getmtime(d) if os.path.exists(d) else 0.0,
+            reverse=True,
+        )
+        temp_dir = (
+            matching_dirs[0]
+            if matching_dirs
+            else str(logs_parent / "temp_optimization")
+        )
+
     eval_logs = sorted(
         glob.glob(os.path.join(temp_dir, "*.eval")),
         key=lambda f: os.path.getmtime(f) if os.path.exists(f) else 0.0,
@@ -97,11 +111,16 @@ def archive_run(
         except Exception:
             pass
 
-    if not metrics_extracted and os.path.exists(os.path.join(temp_dir, "results.json")):
+    results_json_src = os.path.join(temp_dir, "results.json")
+    if os.path.exists(results_json_src):
         try:
-            with open(
-                os.path.join(temp_dir, "results.json"), "r", encoding="utf-8"
-            ) as f:
+            shutil.copy(results_json_src, target_dir / "results.json")
+        except Exception:
+            pass
+
+    if not metrics_extracted and os.path.exists(results_json_src):
+        try:
+            with open(results_json_src, "r", encoding="utf-8") as f:
                 log_data = json.load(f)
                 metrics_extracted = extract_metrics_from_log(log_data)
         except Exception:
