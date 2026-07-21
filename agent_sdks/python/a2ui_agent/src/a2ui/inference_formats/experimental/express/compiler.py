@@ -408,12 +408,15 @@ class ExpressCompiler:
                     if isinstance(mapped_val, list) and _schema_expects_option_objects(
                         prop_schema
                     ):
-                        mapped_val = [
-                            {"label": opt, "value": opt}
-                            if isinstance(opt, str)
-                            else opt
-                            for opt in mapped_val
-                        ]
+                        new_mapped = []
+                        for opt in mapped_val:
+                            if isinstance(opt, str):
+                                new_mapped.append({"label": opt, "value": opt})
+                            elif isinstance(opt, (list, tuple)) and len(opt) == 2:
+                                new_mapped.append({"label": opt[0], "value": opt[1]})
+                            else:
+                                new_mapped.append(opt)
+                        mapped_val = new_mapped
                 enum_vals = self.helper.get_property_enum(comp_name, prop_name)
                 if enum_vals and isinstance(mapped_val, str):
                     if mapped_val not in enum_vals:
