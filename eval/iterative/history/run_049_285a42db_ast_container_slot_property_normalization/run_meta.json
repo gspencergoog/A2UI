@@ -1,0 +1,5 @@
+{
+  "hypothesis": "AST container slot property normalization in _compile_component.",
+  "notes": "Pytest 100% pass (507 passed). However, Algorithmic Schema Acc regressed from 100.0% to 66.7% (-33.3%). Reverted per Rule 1 correctness guardrail.",
+  "status": "Backtracked"
+}
