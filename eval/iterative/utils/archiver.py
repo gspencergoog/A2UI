@@ -125,7 +125,7 @@ def archive_run(
     try:
         from sync_history import sync_worktree_history  # type: ignore[import-not-found]
 
-        sync_worktree_history()
+        sync_worktree_history(skip_index_regen=True)
     except Exception:
         pass
 

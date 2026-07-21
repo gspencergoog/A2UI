@@ -82,6 +82,17 @@ def sync_worktree_history(
                     int(parts[1]) if (len(parts) >= 2 and parts[1].isdigit()) else None
                 )
 
+                # Check if folder with matching slug suffix was already synced under a re-indexed ID
+                slug_suffix = "_" + "_".join(parts[2:]) if len(parts) >= 3 else None
+                already_synced = False
+                if slug_suffix:
+                    for existing in os.scandir(main_history_dir):
+                        if existing.is_dir() and existing.name.endswith(slug_suffix):
+                            already_synced = True
+                            break
+                if already_synced:
+                    continue
+
                 # Check if this run_ID is already occupied by a different folder in main_history
                 id_occupied = False
                 if run_id_num is not None:

@@ -118,22 +118,22 @@ def extract_metrics(
             c_toks = [
                 s["code_tokens"]
                 for s in matching_samples.values()
-                if s.get("code_tokens")
+                if s.get("code_tokens") is not None
             ]
             r_toks = [
                 s["reasoning_tokens"]
                 for s in matching_samples.values()
-                if s.get("reasoning_tokens")
+                if s.get("reasoning_tokens") is not None
             ]
             i_toks = [
                 s["input_tokens"]
                 for s in matching_samples.values()
-                if s.get("input_tokens")
+                if s.get("input_tokens") is not None
             ]
             lats = [
                 s["latency_seconds"]
                 for s in matching_samples.values()
-                if s.get("latency_seconds")
+                if s.get("latency_seconds") is not None
             ]
 
             s_acc = sum(s_accs) / len(s_accs) if s_accs else 0.0
@@ -143,16 +143,23 @@ def extract_metrics(
             med_i = float(statistics.median(i_toks)) if i_toks else 0.0
             med_lat = float(statistics.median(lats)) if lats else 0.0
 
+            total_gen = med_r + med_c
+            r_frac = med_r / max(total_gen, 1.0)
+            est_r = med_lat * r_frac
+            est_c = med_lat * (1.0 - r_frac)
+
             return {
                 "name": name,
                 "task_name": task_name,
                 "total_samples": len(matching_samples),
+                "sample_count": len(matching_samples),
                 "schema_acc": s_acc,
                 "schema_accuracy": s_acc,
                 "algo_accuracy": s_acc,
                 "quality_acc": q_acc,
                 "quality_accuracy": q_acc,
                 "overall_accuracy": q_acc,
+                "avg_duration": med_lat,
                 "avg_latency_seconds": med_lat,
                 "median_latency_seconds": med_lat,
                 "avg_input_tokens": med_i,
@@ -161,27 +168,44 @@ def extract_metrics(
                 "median_output_tokens": med_c,
                 "avg_reasoning_tokens": med_r,
                 "median_reasoning_tokens": med_r,
+                "est_reasoning_time": est_r,
+                "est_code_time": est_c,
+                "wall_clock_per_sample": 0.0,
                 "sample_ids": set(matching_samples.keys()),
             }
 
     if "metrics" in data and not data.get("samples"):
         m = data["metrics"]
+        med_lat = float(m.get("latency_seconds_median", 0.0))
+        med_c = float(m.get("code_tokens_median", 0.0))
+        med_r = float(m.get("reasoning_tokens_median", 0.0))
+        total_gen = med_r + med_c
+        r_frac = med_r / max(total_gen, 1.0)
+        est_r = med_lat * r_frac
+        est_c = med_lat * (1.0 - r_frac)
         return {
             "name": name,
             "task_name": task_name,
             "total_samples": m.get("total_samples", 0),
+            "sample_count": m.get("total_samples", 0),
+            "schema_acc": m.get("schema_acc", 0.0),
             "schema_accuracy": m.get("schema_acc", 0.0),
             "algo_accuracy": m.get("schema_acc", 0.0),
+            "quality_acc": m.get("quality_acc", 0.0),
             "quality_accuracy": m.get("quality_acc", 0.0),
             "overall_accuracy": m.get("quality_acc", 0.0),
-            "avg_latency_seconds": m.get("latency_seconds_median", 0.0),
-            "median_latency_seconds": m.get("latency_seconds_median", 0.0),
+            "avg_duration": med_lat,
+            "avg_latency_seconds": med_lat,
+            "median_latency_seconds": med_lat,
             "avg_input_tokens": m.get("input_tokens_median", 0.0),
             "median_input_tokens": m.get("input_tokens_median", 0.0),
-            "avg_output_tokens": m.get("code_tokens_median", 0.0),
-            "median_output_tokens": m.get("code_tokens_median", 0.0),
-            "avg_reasoning_tokens": m.get("reasoning_tokens_median", 0.0),
-            "median_reasoning_tokens": m.get("reasoning_tokens_median", 0.0),
+            "avg_output_tokens": med_c,
+            "median_output_tokens": med_c,
+            "avg_reasoning_tokens": med_r,
+            "median_reasoning_tokens": med_r,
+            "est_reasoning_time": est_r,
+            "est_code_time": est_c,
+            "wall_clock_per_sample": 0.0,
             "sample_ids": set(),
         }
 
@@ -462,8 +486,9 @@ def generate_markdown_table(
     b_quality_str = f"{b_q_acc*100:.1f}%" if b_q_acc is not None else "N/A"
     b_wall_val = b.get("wall_clock_per_sample", 0)
     b_wall_str = f"{b_wall_val:.2f}s" if b_wall_val > 0 else "N/A"
-    b_lat_str = f"{b.get('avg_duration', 0):.2f}s"
-    b_ctime_str = f"{b.get('est_code_time', 0):.2f}s"
+    b_lat_val = b.get("avg_duration") or b.get("avg_latency_seconds", 0.0)
+    b_lat_str = f"{b_lat_val:.2f}s"
+    b_ctime_str = f"{b.get('est_code_time', 0.0):.2f}s"
     b_inp_str = f"{b.get('avg_input_tokens', 0):,.0f}"
     b_rtok_str = f"{b.get('avg_reasoning_tokens', 0):,.0f}"
     b_out_str = f"{b.get('avg_output_tokens', 0):,.0f}"

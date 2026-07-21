@@ -273,7 +273,9 @@ def generate_optimization_report(
             output_content = ""
             for event in sample.get("events", []):
                 if event.get("event") == "model":
-                    output_content = event.get("output", {}).get("completion", "")
+                    out_obj = event.get("output")
+                    if isinstance(out_obj, dict):
+                        output_content = out_obj.get("completion", "") or ""
                     break
 
             report.append("- **Raw Model Output**:")
@@ -284,15 +286,25 @@ def generate_optimization_report(
             report.append("")
 
             if not algo_passed:
-                expl = s_scores.get("a2ui_scorer", {}).get("explanation")
+                a2ui_sc = (
+                    s_scores.get("a2ui_scorer") if isinstance(s_scores, dict) else {}
+                )
+                expl = (
+                    a2ui_sc.get("explanation") if isinstance(a2ui_sc, dict) else "N/A"
+                )
                 report.append("- **Algorithmic Failure Explanation**:")
-                report.append("  > " + str(expl).replace("\n", "\n  > "))
+                report.append("  > " + str(expl or "N/A").replace("\n", "\n  > "))
                 report.append("")
 
             if judging_val != "C":
-                expl = s_scores.get("measured_model_graded_qa", {}).get("explanation")
+                qa_sc = (
+                    s_scores.get("measured_model_graded_qa")
+                    if isinstance(s_scores, dict)
+                    else {}
+                )
+                expl = qa_sc.get("explanation") if isinstance(qa_sc, dict) else "N/A"
                 report.append("- **LLM Judge Explanation**:")
-                report.append("  > " + str(expl).replace("\n", "\n  > "))
+                report.append("  > " + str(expl or "N/A").replace("\n", "\n  > "))
                 report.append("")
 
     return "\n".join(report)
