@@ -1,0 +1,5 @@
+{
+  "hypothesis": "Truncate property descriptions ONLY for redundant single-property primitive components in prompt signatures, while keeping descriptions for complex multi-enum components.",
+  "notes": "Pytest 100% pass. Schema Acc 100%, Quality Score 100%. Code output tokens reduced from 289 to 256 (-11.4%). However, reasoning tokens increased from 5,061 to 5,914 (+16.8%, exceeding 15% cap) and non-reasoning time increased (+42.8%). Reverted per Rule 2 efficiency cap.",
+  "status": "Backtracked"
+}
