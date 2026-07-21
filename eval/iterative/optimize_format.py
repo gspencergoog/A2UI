@@ -47,6 +47,9 @@ from utils.reporter import (  # type: ignore[import-not-found]
 
 def regenerate_master_index(iterative_dir: str) -> None:
     """Scans history/ directory and rebuilds history_summary.md index."""
+    if iterative_dir not in sys.path:
+        sys.path.insert(0, iterative_dir)
+
     history_dir = os.path.join(iterative_dir, "history")
     index_file = os.path.join(iterative_dir, "history_summary.md")
 

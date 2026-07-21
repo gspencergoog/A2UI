@@ -64,8 +64,22 @@ def resolve_results_file(target_path: str) -> str:
             uv_bin = (
                 shutil.which("uv") or "/usr/local/google/home/gspencer/.local/bin/uv"
             )
-            dump_cmd = [uv_bin, "run", "inspect", "log", "dump", eval_files[0]]
-            data = json.loads(subprocess.check_output(dump_cmd, text=True))
+
+            def _dump_log(f_path: str) -> Dict[str, Any]:
+                dump_cmd = [uv_bin, "run", "inspect", "log", "dump", f_path]
+                return json.loads(subprocess.check_output(dump_cmd, text=True))
+
+            if len(eval_files) > 1:
+                from concurrent.futures import ThreadPoolExecutor
+
+                with ThreadPoolExecutor(
+                    max_workers=min(4, len(eval_files))
+                ) as executor:
+                    all_dumps = list(executor.map(_dump_log, eval_files))
+                    data = all_dumps[0]
+            else:
+                data = _dump_log(eval_files[0])
+
             temp_json = os.path.join(target_path, "results.json")
             with open(temp_json, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
