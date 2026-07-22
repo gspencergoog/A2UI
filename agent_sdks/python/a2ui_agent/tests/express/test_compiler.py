@@ -720,6 +720,18 @@ valueField = TEXTFIELD("Deal Value", $/form/value)"""
         val_comp = next(c for c in components if c["id"] == "valueField")
         self.assertEqual(val_comp["component"], "TextField")
 
+    def test_boolean_string_auto_coercion(self):
+        """Verifies auto-coercion of boolean strings ('true'/'false') into boolean primitives."""
+        compiler = ExpressCompiler(self.catalog)
+        ctx = compiler._compile_value("true", {}, None)
+        self.assertIs(ctx, True)
+        ctx_false = compiler._compile_value("false", {}, None)
+        self.assertIs(ctx_false, False)
+        ctx_upper = compiler._compile_value("True", {}, None)
+        self.assertIs(ctx_upper, True)
+        ctx_lower = compiler._compile_value("False", {}, None)
+        self.assertIs(ctx_lower, False)
+
 
 if __name__ == "__main__":
     unittest.main()

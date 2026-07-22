@@ -25,3 +25,4 @@
 | `021` | Pass 23: Data path slash preprocessing for relative references in compiler.py | PASS | 100.0% | 100.0% | 14.62s | 5936 | 271 | Kept | Pytest PASS |
 | `022` | Pass 25: Component constructor case-insensitive matching in compiler.py | PASS | 100.0% | 100.0% | 14.94s | 5936 | 313 | Kept | Pytest passed 63/63. Overall evaluation pass rate 100.0%. |
 | `023` | Pass 25: Component constructor case-insensitive matching in compiler.py | PASS | 100.0% | 100.0% | 14.94s | 5936 | 313 | Kept | Pytest passed 63/63. Overall evaluation pass rate 100.0%. |
+| `024` | Pass 26: Boolean string auto-coercion in compiler.py | PASS | 100.0% | 100.0% | 27.83s | 5936 | 284 | Kept | Pytest PASS |

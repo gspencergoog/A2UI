@@ -725,6 +725,8 @@ class ExpressCompiler:
                 elif path_val.startswith("$"):
                     path_val = path_val[1:]
                 return {"path": path_val}
+            if val.lower() in ("true", "false"):
+                return val.lower() == "true"
             if enum_vals:
                 enum_map = {e.lower(): e for e in enum_vals if isinstance(e, str)}
                 if val.lower() in enum_map:
