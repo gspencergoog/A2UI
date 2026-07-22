@@ -26,3 +26,4 @@
 | `022` | Pass 25: Component constructor case-insensitive matching in compiler.py | PASS | 100.0% | 100.0% | 14.94s | 5936 | 313 | Kept | Pytest passed 63/63. Overall evaluation pass rate 100.0%. |
 | `023` | Pass 25: Component constructor case-insensitive matching in compiler.py | PASS | 100.0% | 100.0% | 14.94s | 5936 | 313 | Kept | Pytest passed 63/63. Overall evaluation pass rate 100.0%. |
 | `024` | Pass 26: Boolean string auto-coercion in compiler.py | PASS | 100.0% | 100.0% | 27.83s | 5936 | 284 | Kept | Pytest PASS |
+| `025` | Pass 27: Auto-wrap single component ID strings in list properties in compiler.py | PASS | 0.0% | 0.0% | 0.00s | 0 | 0 | Backtracked | Reverted |
