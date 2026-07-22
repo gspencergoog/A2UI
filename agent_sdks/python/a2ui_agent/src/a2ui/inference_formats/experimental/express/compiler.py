@@ -146,6 +146,7 @@ class ExpressCompiler:
             catalog: A Catalog or an A2uiCatalog.
         """
         self.helper = CatalogSchemaHelper(catalog)
+        self._comp_map = {name.lower(): name for name in self.helper.components}
         self._enum_map = {}
         for enums in self.helper.component_property_enums.values():
             for enum_val in enums:
@@ -347,8 +348,12 @@ class ExpressCompiler:
         args = ast["args"]
 
         if comp_name not in self.helper.components:
-            # Not a component, could be a standalone action/helper; skip writing as component
-            return None
+            matched_name = self._comp_map.get(comp_name.lower())
+            if matched_name:
+                comp_name = matched_name
+            else:
+                # Not a component, could be a standalone action/helper; skip writing as component
+                return None
 
         properties = self.helper.get_component_properties(comp_name)
         comp_dict = {"id": var_name, "component": comp_name}
@@ -540,7 +545,10 @@ class ExpressCompiler:
                     symbol_val = raw_symbols[ref_name]
                     if (
                         isinstance(symbol_val, dict)
-                        and symbol_val.get("call") in self.helper.components
+                        and (
+                            symbol_val.get("call") in self.helper.components
+                            or symbol_val.get("call", "").lower() in self._comp_map
+                        )
                     ):
                         return ref_name
                     return self._compile_value(symbol_val, raw_symbols, ctx, is_action)
@@ -596,7 +604,12 @@ class ExpressCompiler:
                 fn_args = val["args"]
 
                 # Is it an inline component constructor?
-                if fn_name in self.helper.components:
+                fn_comp_name = (
+                    fn_name
+                    if fn_name in self.helper.components
+                    else self._comp_map.get(fn_name.lower())
+                )
+                if fn_comp_name:
                     ctx.inline_counter += 1
                     inline_id = f"_inline_{ctx.inline_counter}"
                     compiled_inline = self._compile_ast_node(

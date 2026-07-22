@@ -701,6 +701,25 @@ field3 = TextField("Val", "$/form/val")"""
         self.assertEqual(f2["value"], {"path": "name"})
         self.assertEqual(f3["value"], {"path": "/form/val"})
 
+    def test_case_insensitive_component_matching(self):
+        """Verifies case-insensitive component constructor matching (e.g. column, COLUMN -> Column)."""
+        compiler = ExpressCompiler(self.catalog)
+        dsl = """root = column([repField, valueField])
+repField = textfield("Representative", $/form/rep)
+valueField = TEXTFIELD("Deal Value", $/form/value)"""
+        envelope = compiler.compile(dsl)
+        components = envelope["createSurface"]["components"]
+        self.assertEqual(len(components), 3)
+
+        root_comp = next(c for c in components if c["id"] == "root")
+        self.assertEqual(root_comp["component"], "Column")
+
+        rep_comp = next(c for c in components if c["id"] == "repField")
+        self.assertEqual(rep_comp["component"], "TextField")
+
+        val_comp = next(c for c in components if c["id"] == "valueField")
+        self.assertEqual(val_comp["component"], "TextField")
+
 
 if __name__ == "__main__":
     unittest.main()
