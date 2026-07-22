@@ -732,6 +732,43 @@ valueField = TEXTFIELD("Deal Value", $/form/value)"""
         ctx_lower = compiler._compile_value("False", {}, None)
         self.assertIs(ctx_lower, False)
 
+    def test_case_insensitive_enum_coercion(self):
+        """Verifies case-insensitive enum choice coercion (e.g. 'center' -> 'center', 'PRIMARY' -> 'primary')."""
+        compiler = ExpressCompiler(self.catalog)
+        dsl = """root = Button("Click Me", "PRIMARY", "onClick")"""
+        envelope = compiler.compile(dsl)
+        comps = envelope["createSurface"]["components"]
+        btn = next(c for c in comps if c["id"] == "root")
+        self.assertEqual(btn["variant"], "primary")
+
+    def test_choice_option_object_auto_normalization(self):
+        """Verifies auto-normalization of string list options into option objects with label and value."""
+        compiler = ExpressCompiler(self.catalog)
+        dsl = """root = ChoicePicker("Select Option", "mutuallyExclusive", ["Option 1", "Option 2"])"""
+        envelope = compiler.compile(dsl)
+        comps = envelope["createSurface"]["components"]
+        picker = next(c for c in comps if c["id"] == "root")
+        self.assertEqual(
+            picker["options"],
+            [
+                {"label": "Option 1", "value": "Option 1"},
+                {"label": "Option 2", "value": "Option 2"},
+            ],
+        )
+
+    def test_schema_driven_action_detection(self):
+        """Verifies that schema-driven action detection correctly identifies Action properties in custom catalog schemas."""
+        from a2ui.inference_formats.experimental.express.compiler import _is_action_property_schema
+
+        action_schema = {"$ref": "common_types.json#/definitions/Action"}
+        non_action_schema = {"type": "string"}
+        oneof_action_schema = {"oneOf": [{"type": "null"}, {"$ref": "common_types.json#/definitions/Action"}]}
+
+        self.assertTrue(_is_action_property_schema(action_schema))
+        self.assertFalse(_is_action_property_schema(non_action_schema))
+        self.assertTrue(_is_action_property_schema(oneof_action_schema))
+
 
 if __name__ == "__main__":
     unittest.main()
+

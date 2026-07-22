@@ -105,6 +105,29 @@ def _schema_expects_option_objects(schema: Any) -> bool:
     return False
 
 
+def _is_action_property_schema(schema: Any) -> bool:
+    """Recursively checks if a property's schema allows an Action (event / functionCall)."""
+    if not isinstance(schema, dict):
+        return False
+    if "$ref" in schema:
+        ref = schema["$ref"]
+        if isinstance(ref, str) and ("Action" in ref or "Event" in ref or "FunctionCall" in ref):
+            return True
+    if "properties" in schema:
+        props = schema["properties"]
+        if "event" in props or "functionCall" in props:
+            return True
+    if "items" in schema:
+        if _is_action_property_schema(schema["items"]):
+            return True
+    for key in ["allOf", "oneOf", "anyOf"]:
+        if key in schema and isinstance(schema[key], list):
+            for sub in schema[key]:
+                if _is_action_property_schema(sub):
+                    return True
+    return False
+
+
 def _is_check_expression(val: Any) -> bool:
     """Checks if a parsed AST value represents a validation check expression."""
     if isinstance(val, dict) and "check" in val:
@@ -382,12 +405,14 @@ class ExpressCompiler:
                     comp_dict[prop_name] = None
                     continue
 
+                prop_schema = self.helper.get_property_schema(comp_name, prop_name)
+                is_action_field = _is_action_property_schema(prop_schema) if prop_schema else (prop_name in ["action", "submitAction"])
                 enum_vals = self.helper.get_property_enum(comp_name, prop_name)
                 mapped_val = self._compile_value(
                     arg,
                     raw_symbols,
                     ctx,
-                    is_action=(prop_name in ["action", "submitAction"]),
+                    is_action=is_action_field,
                     enum_vals=enum_vals,
                 )
                 prop_schema = self.helper.get_property_schema(comp_name, prop_name)
