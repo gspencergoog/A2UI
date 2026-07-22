@@ -217,12 +217,14 @@ def generate_optimization_report(
     base_latency = "-"
     base_input = "-"
     base_output = "-"
+    base_reasoning = "-"
 
     diff_overall = ""
     diff_algo = ""
     diff_latency = ""
     diff_input = ""
     diff_output = ""
+    diff_reasoning = ""
 
     if baseline_data:
         base_pytest = "PASS"
@@ -233,12 +235,14 @@ def generate_optimization_report(
         base_lat_val = float(base_metrics.get("avg_latency_seconds") or 0.0)
         base_in_val = float(base_metrics.get("avg_input_tokens") or 0.0)
         base_out_val = float(base_metrics.get("avg_output_tokens") or 0.0)
+        base_reas_val = float(base_metrics.get("avg_reasoning_tokens") or 0.0)
 
         base_overall = f"{base_overall_val * 100:.1f}%"
         base_algo = f"{base_algo_val * 100:.1f}%"
         base_latency = f"{base_lat_val:.2f}s"
         base_input = f"{base_in_val:.0f}"
         base_output = f"{base_out_val:.0f}"
+        base_reasoning = f"{base_reas_val:.0f}"
 
         diff_overall = format_delta_pct(
             metrics["overall_accuracy"],
@@ -258,6 +262,9 @@ def generate_optimization_report(
         )
         diff_output = format_delta_pct(
             metrics["avg_output_tokens"], base_metrics["avg_output_tokens"]
+        )
+        diff_reasoning = format_delta_pct(
+            metrics["avg_reasoning_tokens"], base_metrics["avg_reasoning_tokens"]
         )
 
     report = []
@@ -288,6 +295,10 @@ def generate_optimization_report(
     report.append(
         f"| **Avg Output Tokens** | {base_output} |"
         f" {metrics['avg_output_tokens']:.0f} | {diff_output} |"
+    )
+    report.append(
+        f"| **Avg Reasoning Tokens** | {base_reasoning} |"
+        f" {metrics['avg_reasoning_tokens']:.0f} | {diff_reasoning} |"
     )
     report.append("")
 

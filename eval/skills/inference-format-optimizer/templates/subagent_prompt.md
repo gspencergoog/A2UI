@@ -2,7 +2,6 @@ You are tasked with executing Optimization Pass {{PASS_NUM}} on the {{FORMAT}} i
 Directory: {{WORKTREE_PATH}}
 
 Task instructions:
-
 1. Edit file: {{TARGET_FILE}}
    Hypothesis: {{HYPOTHESIS}}
 

@@ -28,6 +28,12 @@ def _get_uv_binary() -> str:
     Returns:
         The absolute path or executable name string for `uv`.
     """
+    user_uv = os.path.expanduser("~/.local/bin/uv")
+    if os.path.exists(user_uv):
+        return user_uv
+    cargo_uv = os.path.expanduser("~/.cargo/bin/uv")
+    if os.path.exists(cargo_uv):
+        return cargo_uv
     return shutil.which("uv") or "uv"
 
 
@@ -38,32 +44,24 @@ def run_unit_tests() -> Dict[str, Any]:
         A dictionary containing success boolean, stdout, stderr, and returncode.
     """
     print("Running pytest unit tests...")
-    script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    eval_root = os.path.dirname(script_dir)
-    workspace_root = os.path.dirname(eval_root)
+    curr = os.path.dirname(os.path.abspath(__file__))
+    while curr and not (os.path.exists(os.path.join(curr, "agent_sdks")) and os.path.exists(os.path.join(curr, "eval"))):
+        parent = os.path.dirname(curr)
+        if parent == curr:
+            break
+        curr = parent
+    workspace_root = curr
 
-    cmd = [
-        sys.executable,
-        "-m",
-        "pytest",
-        "agent_sdks/python/a2ui_agent/tests/express/",
-    ]
+    cmd = [sys.executable, "-m", "pytest", "agent_sdks/python/a2ui_agent/tests/express/"]
     env = dict(os.environ)
     pythonpath_dirs = [
         os.path.join(workspace_root, "agent_sdks/python/a2ui_agent/src"),
         os.path.join(workspace_root, "agent_sdks/python/a2ui_core/src"),
     ]
-    env["PYTHONPATH"] = ":".join(pythonpath_dirs) + (
-        ":" + env["PYTHONPATH"] if "PYTHONPATH" in env else ""
-    )
+    env["PYTHONPATH"] = ":".join(pythonpath_dirs) + (":" + env["PYTHONPATH"] if "PYTHONPATH" in env else "")
 
     result = subprocess.run(
-        cmd,
-        cwd=workspace_root,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        env=env,
+        cmd, cwd=workspace_root, capture_output=True, text=True, encoding="utf-8", env=env
     )
 
     return {
@@ -94,8 +92,13 @@ def run_evaluation(
         Whether the evaluation command completed successfully.
     """
     print(f"Running evaluation for strategy '{format_name}' using model '{model}'...")
-    script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    eval_root = os.path.dirname(script_dir)
+    curr = os.path.dirname(os.path.abspath(__file__))
+    while curr and not os.path.exists(os.path.join(curr, "main.py")):
+        parent = os.path.dirname(curr)
+        if parent == curr:
+            break
+        curr = parent
+    eval_root = curr
 
     strategy_name = "direct" if format_name == "transport" else format_name
     cmd = [

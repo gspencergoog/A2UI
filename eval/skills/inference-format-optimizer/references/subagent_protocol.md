@@ -60,7 +60,6 @@ Each subagent MUST execute the following 5-step sequence inside its worktree:
 ## 4. Parent Subagent Lifecycle Management
 
 Once a subagent reports completion of its pass:
-
-1. **Incorporate Results**: Record the pass metrics in the run log and git commit the kept changes if applicable.
+1. **Incorporate & Commit Results**: If the pass is KEPT, copy modified source files and unit tests into the main working branch and IMMEDIATELY commit them (`git commit -m "feat(<format>): Pass <N> <summary>"`). Also stage and commit updated history run logs and summary tables.
 2. **Terminate Subagent**: Call `manage_subagents(Action="kill", ConversationIds=[...])` for completed subagent IDs to prevent background resource accumulation.
 3. **Clean Worktree**: Remove the temporary pass worktree (`git worktree remove --force ...`) and branch (`git branch -D ...`).

@@ -2,11 +2,11 @@
   "format": "express",
   "metrics": {
     "schema_acc": 0.9803921568627451,
-    "quality_acc": 0.9215686274509803,
-    "code_tokens_median": 272.0,
-    "reasoning_tokens_median": 0.0,
+    "quality_acc": 0.9509803921568627,
+    "code_tokens_median": 276.0,
+    "reasoning_tokens_median": 1795.0,
     "input_tokens_median": 5940.0,
-    "latency_seconds_median": 41.82077503204346,
+    "latency_seconds_median": 12.793130152858794,
     "total_samples": 51
   },
   "samples": {
@@ -14,409 +14,409 @@
       "schema_acc": 1.0,
       "quality_acc": 1.0,
       "code_tokens": 21,
-      "reasoning_tokens": 0,
+      "reasoning_tokens": 213,
       "input_tokens": 5840,
-      "latency_seconds": 11.641945600509644
+      "latency_seconds": 4.779033060884103
     },
     "dogBreedGenerator": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 760,
-      "reasoning_tokens": 0,
+      "code_tokens": 611,
+      "reasoning_tokens": 3161,
       "input_tokens": 6013,
-      "latency_seconds": 108.52482509613037
+      "latency_seconds": 19.502890792908147
     },
     "loginForm": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 194,
-      "reasoning_tokens": 0,
+      "code_tokens": 202,
+      "reasoning_tokens": 2614,
       "input_tokens": 5931,
-      "latency_seconds": 22.443254470825195
+      "latency_seconds": 16.48532934184186
     },
     "productGallery": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 306,
-      "reasoning_tokens": 0,
+      "code_tokens": 276,
+      "reasoning_tokens": 2334,
       "input_tokens": 5981,
-      "latency_seconds": 30.532230377197266
+      "latency_seconds": 14.900933881988749
     },
     "productGalleryData": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 344,
-      "reasoning_tokens": 0,
+      "code_tokens": 501,
+      "reasoning_tokens": 2842,
       "input_tokens": 5933,
-      "latency_seconds": 30.388280630111694
+      "latency_seconds": 16.270439833868295
     },
     "settingsPage": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 313,
-      "reasoning_tokens": 0,
+      "code_tokens": 324,
+      "reasoning_tokens": 2167,
       "input_tokens": 5940,
-      "latency_seconds": 31.27827215194702
+      "latency_seconds": 14.387838237918913
     },
     "updateDataModel": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 194,
-      "reasoning_tokens": 0,
+      "code_tokens": 215,
+      "reasoning_tokens": 1644,
       "input_tokens": 5908,
-      "latency_seconds": 17.369168043136597
+      "latency_seconds": 12.989176603965461
     },
     "animalKingdomExplorer": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 2026,
-      "reasoning_tokens": 0,
+      "code_tokens": 2063,
+      "reasoning_tokens": 5064,
       "input_tokens": 6423,
-      "latency_seconds": 35.849865436553955
+      "latency_seconds": 28.985737890936434
     },
     "recipeCard": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 257,
-      "reasoning_tokens": 0,
+      "code_tokens": 293,
+      "reasoning_tokens": 1886,
       "input_tokens": 5985,
-      "latency_seconds": 11.021355628967285
+      "latency_seconds": 12.782456937013194
     },
     "musicPlayer": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 254,
-      "reasoning_tokens": 0,
+      "code_tokens": 252,
+      "reasoning_tokens": 1724,
       "input_tokens": 5945,
-      "latency_seconds": 12.57589077949524
+      "latency_seconds": 12.368267617886886
     },
     "weatherForecast": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 435,
-      "reasoning_tokens": 0,
+      "code_tokens": 534,
+      "reasoning_tokens": 3661,
       "input_tokens": 5948,
-      "latency_seconds": 76.62105202674866
+      "latency_seconds": 20.558055439963937
     },
     "surveyForm": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 276,
-      "reasoning_tokens": 0,
+      "code_tokens": 270,
+      "reasoning_tokens": 1308,
       "input_tokens": 5943,
-      "latency_seconds": 22.161176204681396
+      "latency_seconds": 10.041237449040636
     },
     "flightBooker": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 305,
-      "reasoning_tokens": 0,
+      "code_tokens": 313,
+      "reasoning_tokens": 1889,
       "input_tokens": 5940,
-      "latency_seconds": 12.335017681121826
+      "latency_seconds": 12.793130152858794
     },
     "dashboard": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 186,
-      "reasoning_tokens": 0,
+      "code_tokens": 197,
+      "reasoning_tokens": 1445,
       "input_tokens": 5923,
-      "latency_seconds": 15.048831701278687
+      "latency_seconds": 11.070294791134074
     },
     "contactCard": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 217,
-      "reasoning_tokens": 0,
+      "code_tokens": 216,
+      "reasoning_tokens": 3217,
       "input_tokens": 5959,
-      "latency_seconds": 80.55786800384521
+      "latency_seconds": 17.33723836694844
     },
     "calendarEventCreator": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 211,
-      "reasoning_tokens": 0,
+      "code_tokens": 230,
+      "reasoning_tokens": 2049,
       "input_tokens": 5942,
-      "latency_seconds": 101.5791962146759
+      "latency_seconds": 12.701399393146858
     },
     "checkoutPage": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 429,
-      "reasoning_tokens": 0,
+      "code_tokens": 331,
+      "reasoning_tokens": 3370,
       "input_tokens": 5926,
-      "latency_seconds": 30.497315645217896
+      "latency_seconds": 17.848155291052535
     },
     "socialMediaPost": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 325,
-      "reasoning_tokens": 0,
+      "code_tokens": 339,
+      "reasoning_tokens": 1622,
       "input_tokens": 5942,
-      "latency_seconds": 22.020836353302002
+      "latency_seconds": 11.556219775928184
     },
     "eCommerceProductPage": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 576,
-      "reasoning_tokens": 0,
+      "code_tokens": 629,
+      "reasoning_tokens": 1892,
       "input_tokens": 6048,
-      "latency_seconds": 19.50010085105896
+      "latency_seconds": 13.356061209924519
     },
     "interactiveDashboard": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 394,
-      "reasoning_tokens": 0,
+      "code_tokens": 375,
+      "reasoning_tokens": 2054,
       "input_tokens": 6067,
-      "latency_seconds": 15.070674896240234
+      "latency_seconds": 12.985360068036243
     },
     "travelItinerary": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 962,
-      "reasoning_tokens": 0,
+      "code_tokens": 752,
+      "reasoning_tokens": 2074,
       "input_tokens": 6104,
-      "latency_seconds": 38.54619073867798
+      "latency_seconds": 16.163356913020834
     },
     "kanbanBoard": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 209,
-      "reasoning_tokens": 0,
+      "code_tokens": 241,
+      "reasoning_tokens": 1341,
       "input_tokens": 5964,
-      "latency_seconds": 30.330217361450195
+      "latency_seconds": 10.81487017404288
     },
     "videoCallInterface": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 162,
-      "reasoning_tokens": 0,
+      "code_tokens": 184,
+      "reasoning_tokens": 1175,
       "input_tokens": 5914,
-      "latency_seconds": 31.052772045135498
+      "latency_seconds": 9.292760994983837
     },
     "fileBrowser": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 160,
-      "reasoning_tokens": 0,
+      "code_tokens": 161,
+      "reasoning_tokens": 877,
       "input_tokens": 5901,
-      "latency_seconds": 74.13248753547668
+      "latency_seconds": 7.652746690902859
     },
     "chatRoom": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 249,
-      "reasoning_tokens": 0,
+      "code_tokens": 244,
+      "reasoning_tokens": 1407,
       "input_tokens": 5923,
-      "latency_seconds": 74.18199515342712
+      "latency_seconds": 10.157537355087698
     },
     "fitnessTracker": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 272,
-      "reasoning_tokens": 0,
+      "code_tokens": 315,
+      "reasoning_tokens": 1867,
       "input_tokens": 5985,
-      "latency_seconds": 68.99536561965942
+      "latency_seconds": 13.39150702697225
     },
     "smartHome": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 170,
-      "reasoning_tokens": 0,
+      "code_tokens": 194,
+      "reasoning_tokens": 1310,
       "input_tokens": 5958,
-      "latency_seconds": 41.86295986175537
+      "latency_seconds": 11.78908174810931
     },
     "restaurantMenu": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 347,
-      "reasoning_tokens": 0,
+      "code_tokens": 345,
+      "reasoning_tokens": 1352,
       "input_tokens": 5979,
-      "latency_seconds": 61.733779430389404
+      "latency_seconds": 10.840968166012317
     },
     "newsAggregator": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 316,
-      "reasoning_tokens": 0,
+      "code_tokens": 353,
+      "reasoning_tokens": 1773,
       "input_tokens": 5951,
-      "latency_seconds": 63.37973642349243
+      "latency_seconds": 14.236110678175464
     },
     "photoEditor": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 252,
-      "reasoning_tokens": 0,
+      "code_tokens": 239,
+      "reasoning_tokens": 1795,
       "input_tokens": 5884,
-      "latency_seconds": 61.823269844055176
+      "latency_seconds": 12.2448638479691
     },
     "triviaQuiz": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 180,
-      "reasoning_tokens": 0,
+      "code_tokens": 171,
+      "reasoning_tokens": 1648,
       "input_tokens": 5897,
-      "latency_seconds": 41.71115803718567
+      "latency_seconds": 11.508286562981084
     },
     "simpleCalculator": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 628,
-      "reasoning_tokens": 0,
+      "code_tokens": 790,
+      "reasoning_tokens": 3644,
       "input_tokens": 5988,
-      "latency_seconds": 72.63551497459412
+      "latency_seconds": 21.437579300953075
     },
     "jobApplication": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 375,
-      "reasoning_tokens": 0,
+      "code_tokens": 350,
+      "reasoning_tokens": 2322,
       "input_tokens": 5900,
-      "latency_seconds": 41.939087867736816
+      "latency_seconds": 14.913263568188995
     },
     "courseSyllabus": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 202,
-      "reasoning_tokens": 0,
+      "code_tokens": 198,
+      "reasoning_tokens": 1515,
       "input_tokens": 5918,
-      "latency_seconds": 41.556758403778076
+      "latency_seconds": 12.10947981593199
     },
     "stockWatchlist": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 201,
-      "reasoning_tokens": 0,
+      "code_tokens": 246,
+      "reasoning_tokens": 1236,
       "input_tokens": 5965,
-      "latency_seconds": 41.43150210380554
+      "latency_seconds": 11.304426968097687
     },
     "podcastEpisode": {
       "schema_acc": 1.0,
-      "quality_acc": 1.0,
-      "code_tokens": 260,
-      "reasoning_tokens": 0,
+      "quality_acc": 0.0,
+      "code_tokens": 268,
+      "reasoning_tokens": 1834,
       "input_tokens": 5961,
-      "latency_seconds": 42.05053472518921
+      "latency_seconds": 12.99947641394101
     },
     "hotelSearchResults": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 389,
-      "reasoning_tokens": 0,
+      "code_tokens": 445,
+      "reasoning_tokens": 2729,
       "input_tokens": 5956,
-      "latency_seconds": 61.84852600097656
+      "latency_seconds": 17.103456777054816
     },
     "notificationCenter": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 192,
-      "reasoning_tokens": 0,
+      "code_tokens": 199,
+      "reasoning_tokens": 1539,
       "input_tokens": 5883,
-      "latency_seconds": 41.598334074020386
+      "latency_seconds": 11.977990546962246
     },
     "nestedDataBinding": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 355,
-      "reasoning_tokens": 0,
+      "code_tokens": 293,
+      "reasoning_tokens": 1521,
       "input_tokens": 6108,
-      "latency_seconds": 69.46237778663635
+      "latency_seconds": 12.505259696161374
     },
     "profileEditor": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 320,
-      "reasoning_tokens": 0,
+      "code_tokens": 401,
+      "reasoning_tokens": 1992,
       "input_tokens": 5895,
-      "latency_seconds": 41.701568365097046
+      "latency_seconds": 14.044305054005235
     },
     "cinemaSeatSelection": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 488,
-      "reasoning_tokens": 0,
+      "code_tokens": 576,
+      "reasoning_tokens": 2986,
       "input_tokens": 5921,
-      "latency_seconds": 66.44166994094849
+      "latency_seconds": 17.363967143930495
     },
     "flashcardApp": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 189,
-      "reasoning_tokens": 0,
+      "code_tokens": 195,
+      "reasoning_tokens": 1271,
       "input_tokens": 5914,
-      "latency_seconds": 62.85351490974426
+      "latency_seconds": 11.75747600896284
     },
     "clientSideValidation": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 141,
-      "reasoning_tokens": 0,
+      "code_tokens": 140,
+      "reasoning_tokens": 1618,
       "input_tokens": 5908,
-      "latency_seconds": 41.82077503204346
+      "latency_seconds": 11.255759210092947
     },
     "standardFunctions": {
       "schema_acc": 1.0,
-      "quality_acc": 0.0,
-      "code_tokens": 74,
-      "reasoning_tokens": 0,
+      "quality_acc": 1.0,
+      "code_tokens": 56,
+      "reasoning_tokens": 1801,
       "input_tokens": 5931,
-      "latency_seconds": 61.5872528553009
+      "latency_seconds": 12.506979391910136
     },
     "openUrlAction": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 42,
-      "reasoning_tokens": 0,
+      "code_tokens": 51,
+      "reasoning_tokens": 1029,
       "input_tokens": 5890,
-      "latency_seconds": 57.64132833480835
+      "latency_seconds": 9.645815499825403
     },
     "nestedLayoutRecursive": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 74,
-      "reasoning_tokens": 0,
+      "code_tokens": 58,
+      "reasoning_tokens": 876,
       "input_tokens": 5944,
-      "latency_seconds": 58.31126356124878
+      "latency_seconds": 7.387694534147158
     },
     "contextAwareUI": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 790,
-      "reasoning_tokens": 0,
+      "code_tokens": 736,
+      "reasoning_tokens": 4213,
       "input_tokens": 5872,
-      "latency_seconds": 74.908931016922
+      "latency_seconds": 22.783721576211974
     },
     "customYamlKeysTest": {
       "schema_acc": 1.0,
-      "quality_acc": 0.0,
-      "code_tokens": 474,
-      "reasoning_tokens": 0,
+      "quality_acc": 1.0,
+      "code_tokens": 418,
+      "reasoning_tokens": 1525,
       "input_tokens": 5806,
-      "latency_seconds": 25.772279739379883
+      "latency_seconds": 14.506847535958514
     },
     "mcpAppProxy": {
       "schema_acc": 1.0,
       "quality_acc": 1.0,
-      "code_tokens": 2319,
-      "reasoning_tokens": 0,
-      "input_tokens": 3437,
-      "latency_seconds": 86.2038242816925
+      "code_tokens": 2382,
+      "reasoning_tokens": 75,
+      "input_tokens": 3291,
+      "latency_seconds": 2.340216390090063
     },
     "restaurantFinder": {
       "schema_acc": 1.0,
       "quality_acc": 0.0,
-      "code_tokens": 1489,
-      "reasoning_tokens": 0,
+      "code_tokens": 1031,
+      "reasoning_tokens": 5553,
       "input_tokens": 5874,
-      "latency_seconds": 49.74785804748535
+      "latency_seconds": 33.34925324912183
     },
     "rizzCharts": {
       "schema_acc": 0.0,
       "quality_acc": 0.0,
-      "code_tokens": 33,
-      "reasoning_tokens": 0,
+      "code_tokens": 20,
+      "reasoning_tokens": 454,
       "input_tokens": 3909,
-      "latency_seconds": 92.69720268249512
+      "latency_seconds": 15.791830654023215
     }
   }
 }

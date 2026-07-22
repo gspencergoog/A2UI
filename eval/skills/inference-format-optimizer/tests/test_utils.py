@@ -23,14 +23,11 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
-SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+EVAL_ITERATIVE_DIR = REPO_ROOT / "eval/iterative"
 
-if str(SCRIPTS_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS_DIR))
-
-if "utils" in sys.modules and not hasattr(sys.modules["utils"], "format_tools"):
-    del sys.modules["utils"]
+if str(EVAL_ITERATIVE_DIR) not in sys.path:
+    sys.path.insert(0, str(EVAL_ITERATIVE_DIR))
 
 from utils import format_tools
 from utils.archiver import _get_git_commit_sha, _slugify, archive_run
