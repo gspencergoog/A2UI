@@ -701,6 +701,17 @@ class ExpressCompiler:
             return compiled_list
 
         if isinstance(val, str):
+            if val == "$" or (
+                val.startswith("$")
+                and len(val) > 1
+                and (val[1].isalpha() or val[1] in ("/", "_"))
+            ):
+                path_val = val.replace(".", "/")
+                if path_val.startswith("$/"):
+                    path_val = path_val[1:]
+                elif path_val.startswith("$"):
+                    path_val = path_val[1:]
+                return {"path": path_val}
             if enum_vals:
                 enum_map = {e.lower(): e for e in enum_vals if isinstance(e, str)}
                 if val.lower() in enum_map:

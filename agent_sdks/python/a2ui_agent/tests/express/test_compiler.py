@@ -685,6 +685,22 @@ root = Text("Hello")"""
         btn = next(c for c in comps if c["id"] == "root")
         self.assertEqual(btn["action"], {"call": "submitForm", "args": {}})
 
+    def test_quoted_data_path_string_literal_normalization(self):
+        """Verifies that string literals starting with '$' compile to data binding objects consistently."""
+        compiler = ExpressCompiler(self.catalog)
+        dsl = """root = Column([field1, field2, field3])
+field1 = TextField("Rep", "$user")
+field2 = TextField("Name", "$name")
+field3 = TextField("Val", "$/form/val")"""
+        envelope = compiler.compile(dsl)
+        comps = envelope["createSurface"]["components"]
+        f1 = next(c for c in comps if c["id"] == "field1")
+        f2 = next(c for c in comps if c["id"] == "field2")
+        f3 = next(c for c in comps if c["id"] == "field3")
+        self.assertEqual(f1["value"], {"path": "user"})
+        self.assertEqual(f2["value"], {"path": "name"})
+        self.assertEqual(f3["value"], {"path": "/form/val"})
+
 
 if __name__ == "__main__":
     unittest.main()
