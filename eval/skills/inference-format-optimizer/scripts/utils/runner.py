@@ -42,16 +42,28 @@ def run_unit_tests() -> Dict[str, Any]:
     eval_root = os.path.dirname(script_dir)
     workspace_root = os.path.dirname(eval_root)
 
-    cmd = [sys.executable, "-m", "pytest", "agent_sdks/python/a2ui_agent/tests/express/"]
+    cmd = [
+        sys.executable,
+        "-m",
+        "pytest",
+        "agent_sdks/python/a2ui_agent/tests/express/",
+    ]
     env = dict(os.environ)
     pythonpath_dirs = [
         os.path.join(workspace_root, "agent_sdks/python/a2ui_agent/src"),
         os.path.join(workspace_root, "agent_sdks/python/a2ui_core/src"),
     ]
-    env["PYTHONPATH"] = ":".join(pythonpath_dirs) + (":" + env["PYTHONPATH"] if "PYTHONPATH" in env else "")
+    env["PYTHONPATH"] = ":".join(pythonpath_dirs) + (
+        ":" + env["PYTHONPATH"] if "PYTHONPATH" in env else ""
+    )
 
     result = subprocess.run(
-        cmd, cwd=workspace_root, capture_output=True, text=True, encoding="utf-8", env=env
+        cmd,
+        cwd=workspace_root,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        env=env,
     )
 
     return {

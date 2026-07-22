@@ -67,7 +67,11 @@ def sync_worktree_history(
     Returns:
         A list of folder names for newly synchronized history runs.
     """
-    skill_dir = os.path.dirname(SCRIPT_DIR) if os.path.basename(SCRIPT_DIR) == "scripts" else SCRIPT_DIR
+    skill_dir = (
+        os.path.dirname(SCRIPT_DIR)
+        if os.path.basename(SCRIPT_DIR) == "scripts"
+        else SCRIPT_DIR
+    )
     parents = list(Path(skill_dir).parents)
     detected_root = None
     for p in [Path(skill_dir)] + parents:
@@ -101,7 +105,9 @@ def sync_worktree_history(
     for wt in target_worktrees:
         wt_history = os.path.join(wt, "eval", "history")
         if not os.path.exists(wt_history):
-            wt_history = os.path.join(wt, "eval", "skills", "inference-format-optimizer", "history")
+            wt_history = os.path.join(
+                wt, "eval", "skills", "inference-format-optimizer", "history"
+            )
         if not os.path.exists(wt_history):
             wt_history = os.path.join(wt, "eval", "iterative", "history")
         if not os.path.exists(wt_history):
@@ -199,7 +205,10 @@ def main(argv: Optional[List[str]] = None) -> None:
         "--history-dir",
         type=str,
         default=None,
-        help="Custom main history directory path (defaults to <workspace_root>/eval/history)",
+        help=(
+            "Custom main history directory path (defaults to"
+            " <workspace_root>/eval/history)"
+        ),
     )
 
     args = parser.parse_args(argv)
