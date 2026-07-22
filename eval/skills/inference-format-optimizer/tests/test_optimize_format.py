@@ -17,15 +17,16 @@
 import json
 import os
 import sys
+from pathlib import Path
 from typing import Any, Dict
 from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 
-# Add iterative directory to path to import optimize_format
-sys.path.append(
-    os.path.abspath(os.path.join(os.path.dirname(__file__), "../iterative"))
-)
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
+
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
 
 from optimize_format import (  # type: ignore[import-not-found]
     extract_metrics_from_log,

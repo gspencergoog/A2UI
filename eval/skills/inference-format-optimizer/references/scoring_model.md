@@ -29,9 +29,10 @@ An iteration **MUST BE REVERTED** if any of the following efficiency caps are ex
 The composite score $S_{\text{opt}}$ balances accuracy gains against token and latency overheads:
 
 \[
-S_{\text{opt}} = 0.50 \cdot \text{SchemaAcc} + 0.30 \cdot \text{QualityScore} - 0.15 \cdot \left(\frac{\text{CodeTok}}{\text{BaseCodeTok}}\right) - 0.05 \cdot \left(\frac{\text{ReasonTok}}{\text{BaseReasonTok}}\right) - 0.03 \cdot \left(\frac{\text{InputTok}}{\text{BaseInputTok}}\right)
+S\_{\text{opt}} = 0.50 \cdot \text{SchemaAcc} + 0.30 \cdot \text{QualityScore} - 0.15 \cdot \left(\frac{\text{CodeTok}}{\text{BaseCodeTok}}\right) - 0.05 \cdot \left(\frac{\text{ReasonTok}}{\text{BaseReasonTok}}\right) - 0.03 \cdot \left(\frac{\text{InputTok}}{\text{BaseInputTok}}\right)
 \]
 
 ### Decision Rule:
+
 - If $S_{\text{opt}}(\text{Current}) > S_{\text{opt}}(\text{Baseline})$ $\rightarrow$ **KEEP CHANGE** (`--status KEEP`)
 - If $S_{\text{opt}}(\text{Current}) \le S_{\text{opt}}(\text{Baseline})$ $\rightarrow$ **REVERT CHANGE** (`--status REVERT`)

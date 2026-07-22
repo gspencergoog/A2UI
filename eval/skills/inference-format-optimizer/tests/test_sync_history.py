@@ -23,11 +23,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-EVAL_ITERATIVE_DIR = REPO_ROOT / "eval/iterative"
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
 
-if str(EVAL_ITERATIVE_DIR) not in sys.path:
-    sys.path.insert(0, str(EVAL_ITERATIVE_DIR))
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
 
 from sync_history import _get_max_run_id, main, sync_worktree_history
 
@@ -66,13 +65,13 @@ class TestSyncHistory(unittest.TestCase):
     def test_sync_worktree_history_collision_reindex(self):
         temp_dir = tempfile.mkdtemp()
         try:
-            main_history = os.path.join(temp_dir, "history", "atom")
+            main_history = os.path.join(temp_dir, "eval", "history", "atom")
             os.makedirs(
                 os.path.join(main_history, "run_005_existing_main"), exist_ok=True
             )
 
             wt_dir = os.path.join(temp_dir, "worktree_2")
-            wt_history = os.path.join(wt_dir, "eval", "iterative", "history")
+            wt_history = os.path.join(wt_dir, "eval", "history")
             run_dir = os.path.join(wt_history, "run_005_incoming_colliding")
             os.makedirs(run_dir, exist_ok=True)
             with open(os.path.join(run_dir, "run_meta.json"), "w") as f:

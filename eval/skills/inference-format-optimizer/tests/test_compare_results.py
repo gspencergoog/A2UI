@@ -23,11 +23,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-EVAL_ITERATIVE_DIR = REPO_ROOT / "eval/iterative"
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
 
-if str(EVAL_ITERATIVE_DIR) not in sys.path:
-    sys.path.insert(0, str(EVAL_ITERATIVE_DIR))
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
 
 from compare_results import (
     compute_s_opt,
