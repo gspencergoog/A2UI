@@ -28,3 +28,4 @@
 | `024` | Pass 26: Boolean string auto-coercion in compiler.py | PASS | 100.0% | 100.0% | 27.83s | 5936 | 284 | Kept | Pytest PASS |
 | `025` | Pass 27: Auto-wrap single component ID strings in list properties in compiler.py | PASS | 0.0% | 0.0% | 0.00s | 0 | 0 | Backtracked | Reverted |
 | `026` | Pass 28: Auto-omit empty event context maps in compiler.py | PASS | 0.0% | 0.0% | 0.00s | 0 | 0 | Backtracked | Reverted |
+| `027` | Pass 29: String to number auto-coercion in compiler.py | PASS | 0.0% | 0.0% | 0.00s | 0 | 0 | Backtracked | Reverted |
