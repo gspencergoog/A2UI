@@ -1,0 +1,19 @@
+{
+  "eval_set_id": "6ZP6xyb3EzAzwSNBNCaEgg",
+  "tasks": [
+    {
+      "name": "a2ui_v1_0_eval",
+      "task_id": "nXpB6sZohVsmQgnyUD8nuj",
+      "task_file": "eval/tasks.py",
+      "task_args": {
+        "grading_model": "google/gemini-3.5-flash",
+        "strategy": "express"
+      },
+      "model": "google/gemini-3.5-flash",
+      "model_args": {
+        "reasoning_tokens": 500
+      },
+      "sequence": 0
+    }
+  ]
+}

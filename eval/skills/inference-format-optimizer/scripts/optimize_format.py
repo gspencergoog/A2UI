@@ -16,10 +16,12 @@
 """Orchestration script to run and analyze inference format optimizations."""
 
 import argparse
+import collections
 import glob
 import json
 import os
 import shutil
+import statistics
 import subprocess
 import sys
 from typing import Any, Dict, List, Optional
@@ -337,6 +339,12 @@ def main(argv: Optional[List[str]] = None) -> None:
         default=None,
         help="Thinking budget constraint for reasoning models",
     )
+    parser.add_argument(
+        "--epochs",
+        type=int,
+        default=1,
+        help="Number of evaluation repetitions/epochs to execute per sample",
+    )
     args = parser.parse_args(argv)
 
     if args.compile:
@@ -424,6 +432,7 @@ def main(argv: Optional[List[str]] = None) -> None:
         sanity=args.sanity,
         log_dir=temp_log_dir,
         thinking_budget=args.thinking_budget,
+        epochs=args.epochs,
     )
 
     if not eval_success:
@@ -446,7 +455,7 @@ def main(argv: Optional[List[str]] = None) -> None:
     # Save as baseline if requested
     if args.save_baseline:
         metrics_ext = extract_metrics_from_log(current_log_data)
-        samples_dict = {}
+        samples_raw = collections.defaultdict(list)
         samples_list = current_log_data.get("samples") or []
         if isinstance(samples_list, dict):
             samples_list = list(samples_list.values())
@@ -500,14 +509,48 @@ def main(argv: Optional[List[str]] = None) -> None:
             if s_reas is None:
                 s_reas = s_meta.get("inference_reasoning_tokens", 0)
 
-            samples_dict[s_id] = {
+            samples_raw[s_id].append({
                 "schema_acc": 1.0 if algo_passed else 0.0,
                 "quality_acc": 1.0 if quality_passed else 0.0,
                 "code_tokens": s_meta.get("inference_output_tokens", 0),
                 "reasoning_tokens": s_reas,
                 "input_tokens": s_meta.get("inference_input_tokens", 0),
                 "latency_seconds": s_dur,
-            }
+            })
+
+        samples_dict = {}
+        for s_id, ep_list in samples_raw.items():
+            if len(ep_list) == 1:
+                samples_dict[s_id] = ep_list[0]
+            else:
+                schema_accs = [e["schema_acc"] for e in ep_list]
+                quality_accs = [e["quality_acc"] for e in ep_list]
+                code_toks = [e["code_tokens"] for e in ep_list]
+                reas_toks = [e["reasoning_tokens"] for e in ep_list]
+                in_toks = [e["input_tokens"] for e in ep_list]
+                lats = [e["latency_seconds"] for e in ep_list]
+
+                def _m(lst): return float(statistics.mean(lst)) if lst else 0.0
+                def _med(lst): return float(statistics.median(lst)) if lst else 0.0
+                def _sem(lst): return float(statistics.stdev(lst))/(len(lst)**0.5) if len(lst) > 1 else 0.0
+
+                samples_dict[s_id] = {
+                    "schema_acc": _m(schema_accs),
+                    "quality_acc": _m(quality_accs),
+                    "code_tokens": _med(code_toks),
+                    "code_tokens_mean": _m(code_toks),
+                    "code_tokens_sem": _sem(code_toks),
+                    "reasoning_tokens": _med(reas_toks),
+                    "reasoning_tokens_mean": _m(reas_toks),
+                    "reasoning_tokens_sem": _sem(reas_toks),
+                    "input_tokens": _med(in_toks),
+                    "input_tokens_mean": _m(in_toks),
+                    "input_tokens_sem": _sem(in_toks),
+                    "latency_seconds": _med(lats),
+                    "latency_seconds_mean": _m(lats),
+                    "latency_seconds_sem": _sem(lats),
+                    "epochs": len(ep_list),
+                }
 
         meta_base = {
             "format": args.format,
@@ -517,17 +560,26 @@ def main(argv: Optional[List[str]] = None) -> None:
                 "code_tokens_median": metrics_ext.get(
                     "median_output_tokens", metrics_ext.get("avg_output_tokens", 0.0)
                 ),
+                "code_tokens_mean": metrics_ext.get("avg_output_tokens", 0.0),
+                "code_tokens_sem": metrics_ext.get("output_tokens_sem", 0.0),
                 "reasoning_tokens_median": metrics_ext.get(
                     "median_reasoning_tokens",
                     metrics_ext.get("avg_reasoning_tokens", 0.0),
                 ),
+                "reasoning_tokens_mean": metrics_ext.get("avg_reasoning_tokens", 0.0),
+                "reasoning_tokens_sem": metrics_ext.get("reasoning_tokens_sem", 0.0),
                 "input_tokens_median": metrics_ext.get(
                     "median_input_tokens", metrics_ext.get("avg_input_tokens", 0.0)
                 ),
+                "input_tokens_mean": metrics_ext.get("avg_input_tokens", 0.0),
+                "input_tokens_sem": metrics_ext.get("input_tokens_sem", 0.0),
                 "latency_seconds_median": metrics_ext.get(
                     "median_latency_seconds",
                     metrics_ext.get("avg_latency_seconds", 0.0),
                 ),
+                "latency_seconds_mean": metrics_ext.get("avg_latency_seconds", 0.0),
+                "latency_seconds_sem": metrics_ext.get("latency_seconds_sem", 0.0),
+                "epochs": args.epochs,
                 "total_samples": metrics_ext.get("total_samples", 0),
             },
             "samples": samples_dict,

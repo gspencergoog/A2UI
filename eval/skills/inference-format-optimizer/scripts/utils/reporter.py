@@ -160,29 +160,39 @@ def extract_metrics_from_log(log_data: Dict[str, Any]) -> Dict[str, Any]:
         if s_output is not None:
             output_toks.append(float(s_output))
 
-    avg_latency = float(statistics.mean(durations)) if durations else 0.0
-    med_latency = float(statistics.median(durations)) if durations else 0.0
+    def _calc_stats(data: List[float]) -> Dict[str, float]:
+        if not data:
+            return {"mean": 0.0, "median": 0.0, "std": 0.0, "sem": 0.0}
+        mean = float(statistics.mean(data))
+        median = float(statistics.median(data))
+        std = float(statistics.stdev(data)) if len(data) > 1 else 0.0
+        sem = std / (len(data) ** 0.5) if len(data) > 0 else 0.0
+        return {"mean": mean, "median": median, "std": std, "sem": sem}
 
-    avg_input = float(statistics.mean(input_toks)) if input_toks else 0.0
-    med_input = float(statistics.median(input_toks)) if input_toks else 0.0
-
-    avg_output = float(statistics.mean(output_toks)) if output_toks else 0.0
-    med_output = float(statistics.median(output_toks)) if output_toks else 0.0
-
-    avg_reasoning = float(statistics.mean(reasoning_toks)) if reasoning_toks else 0.0
-    med_reasoning = float(statistics.median(reasoning_toks)) if reasoning_toks else 0.0
+    lat_stats = _calc_stats(durations)
+    in_stats = _calc_stats(input_toks)
+    out_stats = _calc_stats(output_toks)
+    reas_stats = _calc_stats(reasoning_toks)
 
     return {
         "overall_accuracy": overall_acc,
         "algo_accuracy": algo_acc,
-        "avg_latency_seconds": avg_latency,
-        "median_latency_seconds": med_latency,
-        "avg_input_tokens": avg_input,
-        "median_input_tokens": med_input,
-        "avg_output_tokens": avg_output,
-        "median_output_tokens": med_output,
-        "avg_reasoning_tokens": avg_reasoning,
-        "median_reasoning_tokens": med_reasoning,
+        "avg_latency_seconds": lat_stats["mean"],
+        "median_latency_seconds": lat_stats["median"],
+        "latency_seconds_std": lat_stats["std"],
+        "latency_seconds_sem": lat_stats["sem"],
+        "avg_input_tokens": in_stats["mean"],
+        "median_input_tokens": in_stats["median"],
+        "input_tokens_std": in_stats["std"],
+        "input_tokens_sem": in_stats["sem"],
+        "avg_output_tokens": out_stats["mean"],
+        "median_output_tokens": out_stats["median"],
+        "output_tokens_std": out_stats["std"],
+        "output_tokens_sem": out_stats["sem"],
+        "avg_reasoning_tokens": reas_stats["mean"],
+        "median_reasoning_tokens": reas_stats["median"],
+        "reasoning_tokens_std": reas_stats["std"],
+        "reasoning_tokens_sem": reas_stats["sem"],
         "total_samples": len(samples),
     }
 

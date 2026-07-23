@@ -94,12 +94,19 @@ def main() -> None:
         action="append",
         help="Target specific sample prompt names to evaluate",
     )
+    parser.add_argument(
+        "--epochs",
+        type=int,
+        default=None,
+        help="Number of epochs/repetitions to run for each evaluation sample",
+    )
     args = parser.parse_args()
 
     model = "google/gemini-3.1-flash-lite" if args.sanity else args.model
     limit = 2 if args.sanity else args.limit
     retry_attempts = 0 if args.sanity else args.max_retries
     sample_shuffle = None if args.sanity else args.sample_shuffle
+    epochs = None if args.sanity else args.epochs
 
     # Parse and validate strategies
     selected_strategies = []
@@ -148,6 +155,8 @@ def main() -> None:
         "sample_shuffle": sample_shuffle,
         "working_limit": 180,
     }
+    if epochs is not None:
+        eval_set_kwargs["epochs"] = epochs
     if args.thinking_budget is not None:
         eval_set_kwargs["reasoning_tokens"] = args.thinking_budget
     if args.temperature is not None:

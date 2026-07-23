@@ -267,6 +267,58 @@ class TestRunnerAndReporter(unittest.TestCase):
         self.assertEqual(metrics["overall_accuracy"], 1.0)
         self.assertEqual(metrics["algo_accuracy"], 1.0)
 
+    def test_extract_metrics_multi_epoch(self):
+        log_data = {
+            "results": {
+                "scores": [
+                    {"name": "a2ui_scorer", "metrics": {"accuracy": {"value": 1.0}}},
+                    {
+                        "name": "measured_model_graded_qa",
+                        "metrics": {"accuracy": {"value": 1.0}},
+                    },
+                ]
+            },
+            "samples": [
+                {
+                    "id": 1,
+                    "epoch": i + 1,
+                    "metadata": {
+                        "name": "loginForm",
+                        "inference_duration_seconds": dur,
+                        "inference_input_tokens": 100,
+                        "inference_output_tokens": tok,
+                        "inference_reasoning_tokens": 50,
+                    },
+                    "events": [{
+                        "event": "model",
+                        "working_time": dur,
+                        "call": {"response": {"usageMetadata": {"thoughtsTokenCount": 50}}},
+                    }],
+                }
+                for i, (dur, tok) in enumerate([
+                    (10.0, 100), (12.0, 120), (11.0, 110), (13.0, 130), (14.0, 140)
+                ])
+            ],
+        }
+        metrics = extract_metrics_from_log(log_data)
+        self.assertEqual(metrics["avg_latency_seconds"], 12.0)
+        self.assertEqual(metrics["median_latency_seconds"], 12.0)
+        self.assertAlmostEqual(metrics["latency_seconds_std"], 1.5811388, places=4)
+        self.assertAlmostEqual(metrics["latency_seconds_sem"], 0.7071067, places=4)
+        self.assertEqual(metrics["avg_output_tokens"], 120.0)
+        self.assertEqual(metrics["median_output_tokens"], 120.0)
+
+    @patch("subprocess.run")
+    def test_run_evaluation_with_epochs(self, mock_run):
+        mock_run.return_value = MagicMock(returncode=0)
+        res = run_evaluation(
+            "express", "google/gemini-3.5-flash", ["loginForm"], False, "/tmp/logs", epochs=5
+        )
+        self.assertTrue(res)
+        called_cmd = mock_run.call_args[0][0]
+        self.assertIn("--epochs", called_cmd)
+        self.assertIn("5", called_cmd)
+
     def test_generate_optimization_report_with_failures(self):
         log_data = {
             "results": {
