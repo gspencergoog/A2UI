@@ -146,6 +146,7 @@ def main() -> None:
         "retry_attempts": retry_attempts,
         "limit": limit,
         "sample_shuffle": sample_shuffle,
+        "working_limit": 180,
     }
     if args.thinking_budget is not None:
         eval_set_kwargs["reasoning_tokens"] = args.thinking_budget
