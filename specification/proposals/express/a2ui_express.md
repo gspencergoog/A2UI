@@ -1,19 +1,45 @@
 # A2UI Express technical specification
 
-A2UI Express is a compact, model-optimized declarative syntax designed for dynamic generative user interfaces. It acts as an intermediate, highly compressed representation that on-device large language models generate to describe user interfaces. A host-side compiler parses this syntax and compiles it into standard A2UI v1.0 wire protocol payloads.
+A2UI Express is a compact declarative syntax designed for generative user interfaces. It provides a compressed notation for on-device large language models to output interface layouts. A host compiler parses this syntax and converts it into standard A2UI v1.0 wire protocol messages.
 
 ## Core design goals
 
-The design of A2UI Express focuses on four main requirements:
+A2UI Express targets four main requirements:
 
-- Token footprint reduction. Generative models spend excessive output tokens when producing verbose JSON structures. A2UI Express removes structural keys, brackets, and repeated quotes, reducing output tokens by 55% to 70% compared to native A2UI wire payloads.
-- On-device model optimization. Small local models, such as Gemma 4 E2B and E4B, operate with limited context windows and reasoning budgets. The syntax uses clean positional signatures that fit into prompt contracts without consuming excessive context.
-- Streaming compatibility. The line-oriented grammar allows the client host to parse and build the component hierarchy line-by-line, enabling progressive rendering of the interface before the model finishes its output.
-- Protocol alignment. A2UI Express preserves full semantic compatibility with standard A2UI v1.0, supporting data bindings, client validation rules, and local event handling.
+- **Token reduction**: Removes structural keys, brackets, and quotes. This reduces output token count by 55% to 70% compared to native A2UI wire payloads.
+- **On-device model optimization**: Fits positional component signatures into small model context windows, reducing context overhead for models like Gemma 4.
+- **Streaming compatibility**: Enables line-by-line parsing and layout construction. The host client renders the interface progressively while the model generates output.
+- **Protocol alignment**: Preserves compatibility with standard A2UI v1.0, supporting data bindings, client validation rules, and local events.
+
+### Format comparison
+
+| Characteristic | Native A2UI v1.0 JSON | A2UI Express | A2UI Atom | A2UI Elemental |
+| :--- | :--- | :--- | :--- | :--- |
+| **Primary Structure** | Verbose JSON envelopes | Line-oriented assignments | Lisp S-expressions | HTML5 Web Components |
+| **Token Reduction** | Baseline (0%) | 55% to 70% reduction | 60% to 75% reduction | 40% to 60% reduction |
+| **Schema Mapping** | Named JSON keys | Positional schema mapping | Positional & tagged keys | Named HTML attributes |
+| **Streaming Unit** | Full payload or chunked JSON | Single statement line | Open parenthesis `(` | HTML DOM element |
+| **Error Recovery** | Strict JSON schema validation | Line isolation & auto-inlining | Auto-closing parentheses | XML-tolerant DOM repair |
+
+## System prompt output contract
+
+Models receive system instructions wrapped in `<a2ui>` and `</a2ui>` sentinel tags. The prompt contract specifies nine rules:
+
+1. **Variable Assignment**: Assign every component to a variable on its own line (`var_name = ComponentName(arg1, arg2, ...)`). Do not pass component constructors inline as arguments.
+2. **Root Entry Point**: Assign the top component to the reserved variable `root`. For data-only updates without UI layouts, output data path assignments (such as `$/user/name = "Alice"`) without a `root` variable.
+3. **Data Bindings**:
+   - Absolute data paths: `$/user/firstName`
+   - Relative template paths: `$firstName` (or `$` for the item itself)
+4. **Logic and Validation**: Prefix client validation checks with `?` (for example, `?required` or `?regex("^[0-9]{5}$", "Invalid code")`).
+5. **Action Events**: Define actions using `Event("name", {context_map})` or function calls like `openUrl("https://example.com")`. If an action property is required but unspecified, pass `Event("click")`.
+6. **Data Model Population**: Assign values to absolute data paths (such as `$/user/name = "Alice"`). Values can be primitives, arrays, or maps.
+7. **Template Lists**: Declare list templates using `_template($/path/to/list, itemTemplate)`. Define `itemTemplate` on its own line.
+8. **Surface Deletion**: Output `deleteSurface("surface-id")` to remove a surface.
+9. **Static Properties**: Pass static values or arrays to properties marked `(static only)`. Do not use path bindings (prefixed by `$`) for static properties.
 
 ## Syntax and grammar
 
-A2UI Express layout blocks must be enclosed inside the `<a2ui>` and `</a2ui>` sentinel tags to cleanly separate the user interface DSL from any accompanying conversational text:
+Enclose A2UI Express blocks in `<a2ui>` and `</a2ui>` sentinel tags:
 
 ```
 <a2ui>
@@ -21,66 +47,73 @@ variable_name = ComponentName(argument1, argument2, ...)
 </a2ui>
 ```
 
-Every instruction in A2UI Express is a variable assignment statement. Statements are separated by newlines, and a single assignment can format-span multiple lines:
-
-```
-variable_name = ComponentName(argument1, argument2, ...)
-```
-
-The syntax rules define how types, structures, data paths, and validation actions are expressed.
+Each instruction is an assignment statement or standalone expression. Separate statements using newlines or semicolons (`;`). The parser supports and skips line comments (`#`, `//`) and block comments (`/* ... */`).
 
 ### Variable declarations
 
-Every component definition is assigned to a unique variable identifier. The compiler uses these variables to resolve parent-child hierarchies. A reserved variable named `root` acts as the primary entry point for the interface tree.
+Assign every component definition to a unique variable identifier. The compiler uses these variables to build parent-child component trees. The reserved variable `root` defines the primary entry point.
 
-To support multi-lingual models while ensuring syntax safety for future extensions (such as math or conditional expressions), all variable identifiers MUST conform to the Unicode Identifier standard ([UAX #31](https://www.unicode.org/reports/tr31/)):
+Variable identifiers must conform to the [UAX #31](https://www.unicode.org/reports/tr31/) Unicode Identifier standard:
 
-- An identifier must start with a Unicode letter or an underscore `_`.
-- Subsequent characters must be Unicode letters, digits (`0-9`), or underscores `_`.
+- An identifier must start with a letter or an underscore `_`.
+- Subsequent characters must be letters, digits (`0-9`), or underscores `_`.
 
-To eliminate syntax errors from complex bracket structures and enable line-oriented streaming compilation, A2UI Express prohibits inline component nesting. Component constructor calls (e.g., `Text(...)`, `Column(...)`) can **only** appear on the right-hand side of a variable assignment (`var = ComponentName(...)`). They **cannot** be passed directly as positional arguments to other components. Instead, you must declare them separately and reference their variable names.
+The syntax prohibits inline component nesting in prompt rules to simplify line parsing. Component constructors must appear on the right side of an assignment (`var = ComponentName(...)`). If a model outputs inline constructors, the host compiler automatically converts them into internal variables (`_inline_1`, `_inline_2`).
 
-### Core primitive types
+The compiler matches component names case-insensitively against the loaded catalog (for example, `column(...)` maps to `Column`).
 
-The syntax supports three literal primitive types:
+### Core primitive types and coercions
 
-- **Strings** are represented in two formats:
-  - **Standard Strings**: Enclosed in single double quotes (e.g., `"Enter your name"`) or triple double quotes (e.g., `"""Line 1\nLine 2"""`). Standard strings support common escape sequences: `\n` (newline), `\t` (tab), `\\` (backslash), and `\"` (double quote). Embedded newlines are allowed.
-  - **Raw Strings**: Prefaced by `r` (e.g., `r"^[a-zA-Z]+$"` or `r"""Raw multi-line content"""`). In raw strings, no escape sequences are processed, and backslashes are interpreted as literal characters. This is particularly useful for validation regex patterns containing backslashes. Embedded newlines are allowed.
-- **Numbers** are written as plain integers or decimals, for example `42` or `3.14` or `-1`.
-- **Booleans** are represented by `true` or `false`.
-- **Null values** are represented by `null`.
+The syntax supports four primitive literal types and four automatic compiler coercions:
 
-Omitted or skipped arguments are not represented by a literal type; instead, they are handled via syntax rules (see [Schema-driven key mapping](#schema-driven-key-mapping)).
+- **Strings**:
+  - **Standard Strings**: Enclosed in quotes (`"Enter name"`) or triple quotes (`"""Line 1\nLine 2"""`). Standard strings support escape sequences (`\n`, `\t`, `\\`, `\"`) and embedded newlines.
+  - **Raw Strings**: Prefaced by `r` (`r"^[a-zA-Z]+$"` or `r"""Raw text"""`). Raw strings disable escape processing. Use raw strings for regex patterns with backslashes.
+- **Numbers**: Plain integers or decimals (such as `42`, `3.14`, or `-1`).
+- **Booleans**: Literal `true` or `false`. String booleans (such as `"true"` or `"false"`) automatically convert to booleans during compilation.
+- **Null values**: Represented by `null`.
 
-### Structural lists
+#### Auto-coercions and normalization
 
-Arrays are represented using square brackets, for example `[component1, component2]`. The compiler maps these arrays to child container slots in the target catalog components.
+- **Enum Choices**: Enum values match case-insensitively against catalog definitions (`'CENTER'` converts to `'center'`).
+- **Option Objects**: Choice component options convert strings or pairs automatically. For example, `"Option A"` converts to `{"label": "Option A", "value": "Option A"}`. A pair `["Label", "val"]` converts to `{"label": "Label", "value": "val"}`.
 
-If a component property expects a dynamic list template (such as the `children` slot of a `List` component), it uses the compiler-reserved `_template(path, templateComponent)` helper:
+### Structural lists and maps
+
+- **Lists**: Represent component or primitive arrays using square brackets (`[icon, title]`). The compiler maps array elements to child slots.
+- **Map Literals**: Represent key-value dictionaries using curly braces (`{title: "Overview", child: contentCol}`). Map keys are literal string identifiers.
+
+To declare template lists, use the `_template(path, templateComponent)` helper:
 
 ```
 breedList = List(_template($/breeds, breedTemplate), "horizontal")
 ```
 
-The helper starts with an underscore `_` to clearly distinguish it from components in custom catalogs and prevent naming conflicts.
+The first argument to `_template` must be a data path (prefixed by `$`). The second argument is the variable name of the item template component.
 
 ### Data binding and reactive paths
 
-To connect component properties to the application data model, properties accept bound paths prefixed with the `$` symbol:
+Prefix data model paths with the `$` symbol:
 
-- Absolute paths start with a forward slash after the prefix, for example `$/user/email`. These paths resolve from the root of the shared data model.
-- Relative paths omit the slash, for example `$lastName`. These resolve within list iteration contexts.
+- **Absolute paths**: Start with a slash after the prefix (`$/user/email` or `$/user.email`). They resolve from the data model root.
+- **Relative paths**: Omit the slash (`$lastName` or `$.lastName`). They resolve within template iteration contexts.
+- **Item self reference**: A single `$` represents the current item in a template loop.
+
+The compiler converts dot path separators (`.`) to JSON Pointer slashes (`/`).
+
+### Static property validation
+
+Properties marked `(static only)` in catalog signatures require static values or arrays. The compiler rejects path references (`$`) on static properties and raises a `ValueError`.
 
 ### Data model population
 
-To populate or initialize values within the shared data model directly from the generated output, A2UI Express supports data model assignments. A statement with a left-hand side that represents an absolute data path will populate that path in the surface's `dataModel`:
+To set values in the shared data model, assign values to absolute data paths:
 
 ```
 $/path/to/key = value_expression
 ```
 
-Where `value_expression` is any valid literal primitive, array, or map. For example:
+The value can be a primitive, array, or map:
 
 ```
 $/icon = "check"
@@ -88,9 +121,9 @@ $/title = "Enable notification"
 $/user = {firstName: "Alice", age: 30}
 ```
 
-The compiler resolves these statements and generates the structured `dataModel` JSON object at the root of the `createSurface` payload.
+The compiler adds these entries to the `dataModel` object in `createSurface` messages.
 
-If an A2UI Express block contains only data path assignments and omits the reserved `root` component variable entirely, the compiler produces a standalone `updateDataModel` protocol message instead of a `createSurface` layout payload:
+If a block contains only data path assignments without a `root` variable, the compiler outputs an `updateDataModel` message:
 
 ```json
 {
@@ -100,36 +133,45 @@ If an A2UI Express block contains only data path assignments and omits the reser
     "path": "/",
     "value": {
       "icon": "check",
-      "title": "Enable notification"
+      "title": "Enable notification",
+      "user": {
+        "firstName": "Alice",
+        "age": 30
+      }
     }
   }
 }
 ```
 
-### Nested function calls and actions
+### Actions and function calls
 
-To support catalog flexibility and avoid hardcoding specific formatting or action helpers, A2UI Express uses standard nested function call syntax.
+A2UI Express uses function calls for catalog utilities and actions:
 
-- Client functions are written as `<FunctionName>(<args>)`, matching the exact function names registered in the loaded catalog.
-- If the client catalog contains a text formatting helper (such as `formatString`), it is called explicitly: `welcomeText = Text(formatString("Welcome, ${/user/firstName}!"))`. This prevents failures if a client catalog uses a different naming convention for interpolation.
-- Local actions use this same signature to trigger behaviors, for example `openUrl("https://example.com")`. The compiler maps these to standard client function actions.
-- Server events use a reserved `Event` signature to declare backend actions, for example `Event("save_deal", {rep: $/form/rep})`.
+- **Client Functions**: Call catalog functions directly using positional arguments, such as `formatString("Welcome, ${/user/firstName}!")`.
+- **Action Schema Detection**: The compiler checks property schemas to detect Action, Event, or FunctionCall types.
+- **Server Events**: Declare server events using `Event("name", {context_map})`.
+- **String Wrapping**: The compiler converts string action arguments (such as `"click"`) into function call actions: `{"call": "click", "args": {}}`.
 
 ### Validation and logic expressions
 
-Form validation checks are defined using the `?` prefix. If a component expects validation rules, the compiler converts these expressions into standard client-side functions:
+Prefix validation checks with `?`:
 
-- Simple checks are written with the function name, for example `?required`.
-- Parameterized checks accept arguments in parentheses, for example `?regex("^[0-9]{5}$", "Must be a valid zip code")`.
-- Multiple checks are grouped in lists: `[?required, ?email]`.
+- **Simple checks**: Call check functions directly (for example, `?required`).
+- **Parameterized checks**: Pass arguments in parentheses (for example, `?regex("^[0-9]{5}$", "Must be a valid zip code")`).
+- **Multiple checks**: Combine rules in an array (for example, `[?required, ?email]`).
 
-### Standalone operations and function calls
+#### Implicit value binding and custom messages
 
-To execute standalone lifecycle operations or invoke client-side functions directly from the server, A2UI Express supports standalone function call lines without variable assignments:
+- **Implicit Value Binding**: If a check function expects a `value` argument and receives none, the compiler injects the `value` path of the parent input component.
+- **Custom Error Messages**: A string argument not consumed by check schema parameters becomes the `message` property. When omitted, the compiler assigns default message `"{CheckName} check failed"`.
+
+### Standalone operations and RPC calls
+
+Call standalone functions on separate lines without variable assignments:
 
 #### Deleting a surface
 
-When the compiler encounters the standalone `deleteSurface` command, it produces a standard `deleteSurface` lifecycle message:
+The `deleteSurface` command generates a surface deletion message:
 
 ```
 deleteSurface("dashboard-surface-1")
@@ -144,9 +186,9 @@ deleteSurface("dashboard-surface-1")
 }
 ```
 
-#### Executing client-side functions (RPC)
+#### Executing client functions (RPC)
 
-When the compiler encounters any other standalone function call, it resolves the arguments against catalog definitions and produces a standard `callFunction` RPC message with an auto-generated `functionCallId`:
+Other standalone function calls generate a `callFunction` RPC message:
 
 ```
 openUrl("https://example.com")
@@ -167,7 +209,7 @@ openUrl("https://example.com")
 
 ## Compilation pipeline
 
-The compilation runs as part of the inference pipeline. It takes the plain text stream of A2UI Express, processes it, and emits a standard A2UI v1.0 JSON payload to send to the client.
+The compiler processes plain text streams into standard A2UI v1.0 JSON payloads.
 
 ```mermaid
 flowchart TD
@@ -180,67 +222,62 @@ flowchart TD
 
 ### Line parsing and tokenization
 
-The compiler reads the input text line-by-line. It discards empty lines and parses assignments into tokens.
+The compiler reads input lines, strips whitespace, and removes comments. ANTLR4 rules in [`Express.g4`](file:///usr/local/google/home/gspencer/code/a2ui/optimize_express/agent_sdks/python/a2ui_agent/src/a2ui/inference_formats/experimental/express/Express.g4) build an Abstract Syntax Tree (AST).
 
-### Error recovery and micro-refinement loops
+### Error recovery and micro-refinement loop
 
-If the compiler encounters a syntax error or catalog schema mismatch during parsing, it triggers a structured error recovery workflow:
+When the compiler encounters syntax errors or schema violations, it runs an error recovery workflow:
 
-1. Isolation. The compiler flags the invalid line, discards that sub-branch of the AST, and continues parsing the remaining lines to avoid collapsing the user interface.
-2. Agent-side micro-refinement. The agent packages the invalid line, the targeted component signature, and the parser error message into a tiny correction prompt.
-3. Fast model-based correction. This correction prompt is sent to a fast foundation model before converting the A2UI Express syntax to proper A2UI. Because the prompt is small and targets a single line, execution is fast.
-4. Hot swapping. The model returns the corrected statement, which the compiler hot-swaps into the active AST before finalizing the render output.
+1. **Isolation**: The compiler flags invalid statement lines and continues parsing remaining lines to preserve the surrounding UI layout.
+2. **Correction Prompting**: The host constructs a small correction prompt containing the invalid statement line, component signature, and parser error.
+3. **Fast Model Correction**: A low-latency model fixes the statement line.
+4. **AST Hot-Swapping**: The host replaces the invalid statement in the active AST before emitting JSON output.
 
 ### Schema-driven key mapping
 
-Because A2UI Express omits property keys, the compiler relies entirely on the JSON schema of the loaded catalog to map positional arguments.
+The compiler maps positional arguments using the catalog JSON schema:
 
-1. The compiler looks up the component or function name in the catalog schema, discarding structural keys like `component` and `id`.
-2. It reads the declared properties in their strict definition order.
-3. It maps the positional arguments of the A2UI Express statement to these property keys in sequence.
-4. Trailing optional arguments can be omitted from the end of the statement. For example, if a component signature is `Button(child, action?)` where `action` is optional, `Button(label_text)` is compiled with `action` as null/omitted.
-5. Skipped optional arguments (where a subsequent argument must be specified) are represented by an underscore `_` placeholder. For example, if `justify` is optional in `Column(children, justify?, align?)`, `Column([icon, title], _, "center")` maps the array to `children` and `"center"` to `align`, leaving `justify` unspecified.
+1. Look up component or function names in the schema case-insensitively.
+2. Read property definitions in schema order.
+3. Map positional arguments to property keys sequentially.
+4. Omit trailing optional arguments.
+5. Use `_` placeholders for skipped optional arguments.
+6. Remove `null` properties from the finalized JSON output.
 
 ### Adjacency list flattening
 
-Standard A2UI v1.0 requires a flat array of components where nesting is represented by referencing IDs in an adjacency list.
+A2UI v1.0 uses flat component lists with ID references:
 
-1. The compiler traverses the variable references starting at the `root` variable.
-2. It generates a unique, stable string ID for each sub-component variable, replacing variable names with these IDs.
-3. It packages child arrays into standard `ChildList` structures.
-4. It outputs a single flat `components` array.
+1. Traverse component references starting from `root`.
+2. Assign unique IDs to inline components (`_inline_1`) and keep assigned variable names as IDs.
+3. Package child lists and templates into ID reference structures.
+4. Output a single flat `components` array.
 
-### Protocol envelope construction
+### Surface parameters and protocol envelopes
 
-The compiled component list and any extracted default data models are wrapped in a standard A2UI message envelope:
+The compiler receives `surface_id` and `catalog_id` parameters during invocation. If omitted, `surface_id` defaults to `"default_surface"` and `catalog_id` defaults to the catalog's declared URI.
 
-```json
-{
-  "version": "v1.0",
-  "createSurface": {
-    "surfaceId": "surface_id",
-    "catalogId": "catalog_identifier",
-    "components": [],
-    "dataModel": {},
-    "surfaceParams": {}
-  }
-}
-```
+## Decompilation pipeline (JSON-to-Express)
+
+The [`_ExpressDecompiler`](file:///usr/local/google/home/gspencer/code/a2ui/optimize_express/agent_sdks/python/a2ui_agent/src/a2ui/inference_formats/experimental/express/decompiler.py#L99) converts standard A2UI v1.0 JSON envelopes back into compact A2UI Express DSL code:
+
+1. **Message Type Resolution**: Maps `createSurface`, `updateDataModel`, `deleteSurface`, and `callFunction` protocol messages into matching Express syntax blocks.
+2. **Hierarchy Reconstruction**: Reconstructs adjacency list component arrays into line-by-line variable assignments starting with `root`.
+3. **Positional Parameter Mapping**: Strips JSON key names and outputs compact positional arguments matching catalog schema property order.
+4. **String Formatting**: Formats text literals using clean double-quoted, triple-quoted, or raw string syntax (`r"..."`).
 
 ## Compilation example
 
-This section shows an input text stream in A2UI Express and the compiled A2UI v1.0 JSON payload.
+This example shows an input DSL block and its compiled A2UI v1.0 JSON message.
 
 ### Input text stream
-
-The input file defines a notification permission card, using positional arguments and absolute data paths enclosed within the `<a2ui>` and `</a2ui>` sentinel tags:
 
 ```
 <a2ui>
 root = Card(main_column)
-main_column = Column([icon, title, description, actions], _, "center")
+main_column = Column([icon, title, description, actions])
 icon = Icon($/icon)
-title = Text($/title, "h3")
+title = Text($/title)
 description = Text($/description, "body")
 actions = Row([yes_btn, no_btn], "center")
 yes_btn_text = Text("Yes")
@@ -251,8 +288,6 @@ no_btn = Button(no_btn_text, _, Event("decline"))
 ```
 
 ### Compiled A2UI JSON output
-
-The compiler parses the text stream, resolves the parent-child references, maps positional arguments to the catalog schema, and produces the following flat component layout inside the `createSurface` message:
 
 ```json
 {
@@ -269,9 +304,12 @@ The compiler parses the text stream, resolves the parent-child references, maps 
       {
         "id": "main_column",
         "component": "Column",
-        "children": ["icon", "title", "description", "actions"],
-        "justify": null,
-        "align": "center"
+        "children": [
+          "icon",
+          "title",
+          "description",
+          "actions"
+        ]
       },
       {
         "id": "icon",
@@ -285,8 +323,7 @@ The compiler parses the text stream, resolves the parent-child references, maps 
         "component": "Text",
         "text": {
           "path": "/title"
-        },
-        "variant": "h3"
+        }
       },
       {
         "id": "description",
@@ -299,7 +336,10 @@ The compiler parses the text stream, resolves the parent-child references, maps 
       {
         "id": "actions",
         "component": "Row",
-        "children": ["yes_btn", "no_btn"],
+        "children": [
+          "yes_btn",
+          "no_btn"
+        ],
         "justify": "center"
       },
       {
@@ -311,7 +351,6 @@ The compiler parses the text stream, resolves the parent-child references, maps 
         "id": "yes_btn",
         "component": "Button",
         "child": "yes_btn_text",
-        "variant": null,
         "action": {
           "event": {
             "name": "accept",
@@ -328,7 +367,6 @@ The compiler parses the text stream, resolves the parent-child references, maps 
         "id": "no_btn",
         "component": "Button",
         "child": "no_btn_text",
-        "variant": null,
         "action": {
           "event": {
             "name": "decline",
@@ -343,49 +381,30 @@ The compiler parses the text stream, resolves the parent-child references, maps 
 
 ## Ecosystem integration
 
-A2UI Express is completely catalog-agnostic, making sure it integrates into any environment using custom catalogs.
-
-### Catalog-agnostic operation
-
-The compiler does not hold hardcoded assumptions about component names, function signatures, or properties.
-
-- Schema loading. During startup, the host application registers the target catalog's JSON schema (such as a custom enterprise catalog or a specific system catalog).
-- Signature compilation. The prompt generation tools read the registered schema and compile its definitions directly into positional signatures for the model's system prompt.
-- Mapping execution. The parser dynamically maps generated arguments based on the loaded schema structure. If the catalog is replaced entirely, the system adapts without manual updates.
+A2UI Express runs with any JSON catalog schema.
 
 ### Automated catalog-to-prompt utility
 
-To keep the model updated with the latest catalog definitions, a python utility compiles the active JSON schema into plain-text signatures:
+Use [`ExpressPromptGenerator`](file:///usr/local/google/home/gspencer/code/a2ui/optimize_express/agent_sdks/python/a2ui_agent/src/a2ui/inference_formats/experimental/express/prompt_generator.py#L98) to build system prompts and signatures directly from a catalog:
 
-```py
-import json
+```python
+from a2ui.core.catalog import Catalog
+from a2ui.inference_formats.experimental.express.format import ExpressFormat
+from a2ui.inference_formats.experimental.express.prompt_generator import ExpressPromptGenerator
 
-class CatalogSignatureCompiler:
-    def __init__(self, schema_path: str):
-        with open(schema_path, "r") as f:
-            self.catalog = json.load(f)
-        self.components = self.catalog.get("components", {})
+# Load catalog schema
+catalog = Catalog.from_json_file("catalog.json", spec_version="0.9.1")
+express_format = ExpressFormat(catalog=catalog)
+prompt_gen = ExpressPromptGenerator(express_format)
 
-    def compile_to_signatures(self) -> str:
-        signatures = []
-        for name, schema in self.components.items():
-            props = schema.get("properties", {})
-            required = schema.get("required", [])
-            ordered_args = []
-            for prop_name, prop_schema in props.items():
-                if prop_name in ["component", "id"]:
-                    continue
-                is_req = prop_name in required
-                optional_marker = "" if is_req else "?"
-                ordered_args.append(f"{prop_name}{optional_marker}")
-            sig = f"{name}({', '.join(ordered_args)})"
-            signatures.append(sig)
-        return "\n".join(signatures)
+# Generate positional signatures and prompt contract
+signatures = prompt_gen.generate_component_signatures()
+full_system_prompt = prompt_gen.generate_system_prompt()
 ```
 
-### Local performance profiles
+### Local performance and reasoning token profiles
 
-Local execution requires configuring the model's thinking budget based on the complexity of the interface:
+On-device inference latency depends on the configured reasoning token budget:
 
-- Single-view dashboards or basic data tables run best with a reasoning budget of 70 to 140 tokens to guarantee low latency.
-- Interactive forms with nested layout structures require a reasoning budget of 280 to 560 tokens to prevent hierarchy errors and broken bindings.
+- **Simple Views and Dashboards**: Configure a budget of 70 to 140 reasoning tokens for low latency.
+- **Complex Interactive Forms**: Configure a budget of 280 to 560 reasoning tokens to prevent hierarchy errors.
