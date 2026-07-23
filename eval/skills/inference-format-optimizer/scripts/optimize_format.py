@@ -56,7 +56,9 @@ def regenerate_master_index(target_dir: str) -> None:
 
     if os.path.basename(target_dir.rstrip("/")) == "history":
         history_dir = target_dir
-        master_index_file = os.path.join(os.path.dirname(target_dir.rstrip("/")), "history_summary.md")
+        master_index_file = os.path.join(
+            os.path.dirname(target_dir.rstrip("/")), "history_summary.md"
+        )
     else:
         history_dir = os.path.join(target_dir, "history")
         master_index_file = os.path.join(target_dir, "history_summary.md")
@@ -171,8 +173,14 @@ def regenerate_master_index(target_dir: str) -> None:
             fmt_table = [
                 f"# Optimization Run History ({fmt_name.capitalize()} Format)",
                 "",
-                "| Run ID | Hypothesis | Pytest | Overall Acc | Algo Acc | Latency | Input Tok | Output Tok | Status | Notes |",
-                "| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |",
+                (
+                    "| Run ID | Hypothesis | Pytest | Overall Acc | Algo Acc | Latency"
+                    " | Input Tok | Output Tok | Status | Notes |"
+                ),
+                (
+                    "| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |"
+                    " :---: | :--- |"
+                ),
             ]
             for r in fmt_runs:
                 clean_hypo = str(r["hypothesis"]).replace("\n", " ").replace("|", "\\|")
@@ -192,16 +200,22 @@ def regenerate_master_index(target_dir: str) -> None:
     table = [
         "# Master Optimization Run History",
         "",
-        "| Format | Run ID | Hypothesis | Pytest | Overall Acc | Algo Acc | Latency | Input Tok | Output Tok | Status | Notes |",
-        "| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |",
+        (
+            "| Format | Run ID | Hypothesis | Pytest | Overall Acc | Algo Acc | Latency"
+            " | Input Tok | Output Tok | Status | Notes |"
+        ),
+        (
+            "| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |"
+            " :---: | :--- |"
+        ),
     ]
     for r in all_master_runs:
         clean_hypo = str(r["hypothesis"]).replace("\n", " ").replace("|", "\\|")
         clean_notes = str(r["notes"]).replace("\n", " ").replace("|", "\\|")
         table.append(
-            f"| `{r['format']}` | `{r['id']}` | {clean_hypo} | {r['pytest']} | {r['overall']} |"
-            f" {r['algo']} | {r['latency']} | {r['input']} | {r['output']} |"
-            f" {r['status']} | {clean_notes} |"
+            f"| `{r['format']}` | `{r['id']}` | {clean_hypo} | {r['pytest']} |"
+            f" {r['overall']} | {r['algo']} | {r['latency']} | {r['input']} |"
+            f" {r['output']} | {r['status']} | {clean_notes} |"
         )
 
     with open(master_index_file, "w", encoding="utf-8") as f:
@@ -304,7 +318,15 @@ def main(argv: Optional[List[str]] = None) -> None:
         "--history-dir",
         type=str,
         default=None,
-        help="Custom history directory path (defaults to <workspace_root>/eval/history)",
+        help=(
+            "Custom history directory path (defaults to <workspace_root>/eval/history)"
+        ),
+    )
+    parser.add_argument(
+        "--thinking-budget",
+        type=int,
+        default=None,
+        help="Thinking budget constraint for reasoning models",
     )
     args = parser.parse_args(argv)
 
@@ -383,6 +405,7 @@ def main(argv: Optional[List[str]] = None) -> None:
         prompts=selected_prompts,
         sanity=args.sanity,
         log_dir=temp_log_dir,
+        thinking_budget=args.thinking_budget,
     )
 
     if not eval_success:
@@ -557,7 +580,11 @@ def main(argv: Optional[List[str]] = None) -> None:
         json.dump(meta_payload, f, indent=2)
 
     # Rebuild index
-    target_history = args.history_dir if args.history_dir else os.path.join(workspace_root, "eval", "history")
+    target_history = (
+        args.history_dir
+        if args.history_dir
+        else os.path.join(workspace_root, "eval", "history")
+    )
     regenerate_master_index(target_history)
 
     print(f"\nOptimization report written to: {report_dest}")

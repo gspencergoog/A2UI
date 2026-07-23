@@ -45,23 +45,38 @@ def run_unit_tests() -> Dict[str, Any]:
     """
     print("Running pytest unit tests...")
     curr = os.path.dirname(os.path.abspath(__file__))
-    while curr and not (os.path.exists(os.path.join(curr, "agent_sdks")) and os.path.exists(os.path.join(curr, "eval"))):
+    while curr and not (
+        os.path.exists(os.path.join(curr, "agent_sdks"))
+        and os.path.exists(os.path.join(curr, "eval"))
+    ):
         parent = os.path.dirname(curr)
         if parent == curr:
             break
         curr = parent
     workspace_root = curr
 
-    cmd = [sys.executable, "-m", "pytest", "agent_sdks/python/a2ui_agent/tests/express/"]
+    cmd = [
+        sys.executable,
+        "-m",
+        "pytest",
+        "agent_sdks/python/a2ui_agent/tests/express/",
+    ]
     env = dict(os.environ)
     pythonpath_dirs = [
         os.path.join(workspace_root, "agent_sdks/python/a2ui_agent/src"),
         os.path.join(workspace_root, "agent_sdks/python/a2ui_core/src"),
     ]
-    env["PYTHONPATH"] = ":".join(pythonpath_dirs) + (":" + env["PYTHONPATH"] if "PYTHONPATH" in env else "")
+    env["PYTHONPATH"] = ":".join(pythonpath_dirs) + (
+        ":" + env["PYTHONPATH"] if "PYTHONPATH" in env else ""
+    )
 
     result = subprocess.run(
-        cmd, cwd=workspace_root, capture_output=True, text=True, encoding="utf-8", env=env
+        cmd,
+        cwd=workspace_root,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        env=env,
     )
 
     return {
@@ -78,6 +93,7 @@ def run_evaluation(
     prompts: Optional[List[str]],
     sanity: bool,
     log_dir: str,
+    thinking_budget: Optional[int] = None,
 ) -> bool:
     """Runs the evaluation framework for a target format strategy.
 
@@ -87,6 +103,7 @@ def run_evaluation(
         prompts: Optional list of prompt names to filter evaluation.
         sanity: Whether to execute a quick two-sample sanity run.
         log_dir: The target output directory path for evaluation logs.
+        thinking_budget: Optional thinking budget constraint for reasoning models.
 
     Returns:
         Whether the evaluation command completed successfully.
@@ -113,6 +130,9 @@ def run_evaluation(
         "--log-dir",
         log_dir,
     ]
+
+    if thinking_budget is not None:
+        cmd.extend(["--thinking-budget", str(thinking_budget)])
 
     if sanity:
         cmd.append("--sanity")

@@ -147,13 +147,10 @@ def main() -> None:
         "limit": limit,
         "sample_shuffle": sample_shuffle,
     }
-    model_args = {}
     if args.thinking_budget is not None:
-        model_args["reasoning_tokens"] = args.thinking_budget
+        eval_set_kwargs["reasoning_tokens"] = args.thinking_budget
     if args.temperature is not None:
-        model_args["temperature"] = args.temperature
-    if model_args:
-        eval_set_kwargs["model_args"] = model_args
+        eval_set_kwargs["temperature"] = args.temperature
     if args.max_tasks is not None:
         eval_set_kwargs["max_tasks"] = args.max_tasks
     if args.max_samples is not None:

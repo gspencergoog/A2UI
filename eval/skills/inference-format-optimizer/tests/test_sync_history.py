@@ -80,7 +80,10 @@ class TestSyncHistory(unittest.TestCase):
 
             with patch("sync_history.SCRIPT_DIR", temp_dir):
                 with patch("sync_history.regenerate_master_index"):
-                    copied = sync_worktree_history(target_worktrees=[wt_dir], custom_history_dir=os.path.join(temp_dir, "history"))
+                    copied = sync_worktree_history(
+                        target_worktrees=[wt_dir],
+                        custom_history_dir=os.path.join(temp_dir, "history"),
+                    )
                     self.assertTrue(len(copied) == 1)
                     self.assertIn("run_006_", copied[0])
         finally:

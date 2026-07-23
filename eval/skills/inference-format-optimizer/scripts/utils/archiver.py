@@ -90,7 +90,9 @@ def archive_run(
     skill_dir = script_dir.parent
     if custom_history_dir:
         history_base = Path(custom_history_dir)
-        workspace_root = str(skill_dir.parents[2] if len(skill_dir.parents) > 2 else skill_dir)
+        workspace_root = str(
+            skill_dir.parents[2] if len(skill_dir.parents) > 2 else skill_dir
+        )
     else:
         detected_root = None
         for p in [skill_dir] + list(skill_dir.parents):
@@ -102,7 +104,7 @@ def archive_run(
         else:
             history_base = skill_dir / "history"
         workspace_root = str(detected_root or skill_dir)
-    
+
     history_dir = history_base / format_name
     history_dir.mkdir(parents=True, exist_ok=True)
 
