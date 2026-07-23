@@ -341,9 +341,7 @@ $/breeds = [{"url": "https://example.com/poodle.jpg"}]"""
         dot_dsl = """root = Text($/user.name)"""
         dot_envelope = compiler.compile(dot_dsl)
         dot_comp = next(
-            c
-            for c in dot_envelope["createSurface"]["components"]
-            if c["id"] == "root"
+            c for c in dot_envelope["createSurface"]["components"] if c["id"] == "root"
         )
         self.assertEqual(dot_comp["text"], {"path": "/user/name"})
 
@@ -762,7 +760,12 @@ valueField = TEXTFIELD("Deal Value", $/form/value)"""
 
         action_schema = {"$ref": "common_types.json#/definitions/Action"}
         non_action_schema = {"type": "string"}
-        oneof_action_schema = {"oneOf": [{"type": "null"}, {"$ref": "common_types.json#/definitions/Action"}]}
+        oneof_action_schema = {
+            "oneOf": [
+                {"type": "null"},
+                {"$ref": "common_types.json#/definitions/Action"},
+            ]
+        }
 
         self.assertTrue(_is_action_property_schema(action_schema))
         self.assertFalse(_is_action_property_schema(non_action_schema))
@@ -771,4 +774,3 @@ valueField = TEXTFIELD("Deal Value", $/form/value)"""
 
 if __name__ == "__main__":
     unittest.main()
-

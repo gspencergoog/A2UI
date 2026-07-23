@@ -111,7 +111,9 @@ def _is_action_property_schema(schema: Any) -> bool:
         return False
     if "$ref" in schema:
         ref = schema["$ref"]
-        if isinstance(ref, str) and ("Action" in ref or "Event" in ref or "FunctionCall" in ref):
+        if isinstance(ref, str) and (
+            "Action" in ref or "Event" in ref or "FunctionCall" in ref
+        ):
             return True
     if "properties" in schema:
         props = schema["properties"]
@@ -406,7 +408,11 @@ class ExpressCompiler:
                     continue
 
                 prop_schema = self.helper.get_property_schema(comp_name, prop_name)
-                is_action_field = _is_action_property_schema(prop_schema) if prop_schema else (prop_name in ["action", "submitAction"])
+                is_action_field = (
+                    _is_action_property_schema(prop_schema)
+                    if prop_schema
+                    else (prop_name in ["action", "submitAction"])
+                )
                 enum_vals = self.helper.get_property_enum(comp_name, prop_name)
                 mapped_val = self._compile_value(
                     arg,
@@ -568,12 +574,9 @@ class ExpressCompiler:
                 ref_name = val["variable"]
                 if ref_name in raw_symbols:
                     symbol_val = raw_symbols[ref_name]
-                    if (
-                        isinstance(symbol_val, dict)
-                        and (
-                            symbol_val.get("call") in self.helper.components
-                            or symbol_val.get("call", "").lower() in self._comp_map
-                        )
+                    if isinstance(symbol_val, dict) and (
+                        symbol_val.get("call") in self.helper.components
+                        or symbol_val.get("call", "").lower() in self._comp_map
                     ):
                         return ref_name
                     return self._compile_value(symbol_val, raw_symbols, ctx, is_action)
@@ -667,12 +670,16 @@ class ExpressCompiler:
                 # Is it a reserved Event signature?
                 if fn_name == "Event":
                     compiled_event_name = (
-                        self._compile_value(fn_args[0], raw_symbols, ctx, is_action=False)
+                        self._compile_value(
+                            fn_args[0], raw_symbols, ctx, is_action=False
+                        )
                         if len(fn_args) > 0
                         else ""
                     )
                     raw_context = (
-                        self._compile_value(fn_args[1], raw_symbols, ctx, is_action=False)
+                        self._compile_value(
+                            fn_args[1], raw_symbols, ctx, is_action=False
+                        )
                         if len(fn_args) > 1
                         else {}
                     )

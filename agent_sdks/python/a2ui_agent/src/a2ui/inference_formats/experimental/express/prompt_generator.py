@@ -31,7 +31,7 @@ from .schema_helper import CatalogSchemaHelper
 if TYPE_CHECKING:
     from .format import ExpressFormat
 
-EXPRESS_RULES = r'''# A2UI Express Output Contract
+EXPRESS_RULES = r"""# A2UI Express Output Contract
 
 Output the user interface using this DSL wrapped inside `<a2ui>` and `</a2ui>` sentinel tags. Do NOT output raw JSON.
 
@@ -57,7 +57,7 @@ Output the user interface using this DSL wrapped inside `<a2ui>` and `</a2ui>` s
 
 8. Surface deletion: Output deleteSurface("surface-id") to delete a surface.
 
-9. Static properties: Arguments annotated with '(static only)' MUST be defined as literal values or arrays inline (or as a local DSL variable representing a static structure). You CANNOT use a dynamic data binding path (prefixed by $) for these arguments.'''
+9. Static properties: Arguments annotated with '(static only)' MUST be defined as literal values or arrays inline (or as a local DSL variable representing a static structure). You CANNOT use a dynamic data binding path (prefixed by $) for these arguments."""
 
 
 def _schema_allows_databinding(prop_schema: Any) -> bool:
