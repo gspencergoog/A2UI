@@ -137,7 +137,7 @@ RAW_STRING        : [rR] '"' ~[\r\n"]* '"' ;
 STANDARD_STRING   : '"' ( '\\' . | ~'\\' )*? '"' ;
 
 // Data path literal (e.g. '$/user/id')
-PATH : '$' [a-zA-Z0-9_/]* ;
+PATH : '$' [a-zA-Z0-9_/.]* ;
 
 // Validation check identifier (e.g. '?required')
 CHECK : '?' [a-zA-Z_] [a-zA-Z0-9_]* ;

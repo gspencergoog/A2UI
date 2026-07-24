@@ -337,6 +337,14 @@ $/breeds = [{"url": "https://example.com/poodle.jpg"}]"""
         )
         self.assertEqual(text_comp["text"], {"path": ""})
 
+        # 8b. Verify dot-notation data path normalization
+        dot_dsl = """root = Text($/user.name)"""
+        dot_envelope = compiler.compile(dot_dsl)
+        dot_comp = next(
+            c for c in dot_envelope["createSurface"]["components"] if c["id"] == "root"
+        )
+        self.assertEqual(dot_comp["text"], {"path": "/user/name"})
+
         # 9. Verify nested check compilation and active value path injection
         nested_check_dsl = """root = TextField("Label", $/form/email, "placeholder", "shortText", ?and([?required, ?email]))"""
         nested_check_envelope = compiler.compile(nested_check_dsl)
@@ -665,6 +673,103 @@ root = Text("Hello")"""
         )
         self.assertEqual(self.helper.get_property_type("Button", "action"), "Action")
         self.assertIsNone(self.helper.get_property_type("Unknown", "prop"))
+
+    def test_string_literal_action_auto_wrapping(self):
+        """Verifies that plain string literal action names are auto-wrapped into call dicts."""
+        compiler = ExpressCompiler(self.catalog)
+        dsl = 'root = Button("Submit", _, "submitForm")'
+        envelope = compiler.compile(dsl)
+        comps = envelope["createSurface"]["components"]
+        btn = next(c for c in comps if c["id"] == "root")
+        self.assertEqual(btn["action"], {"call": "submitForm", "args": {}})
+
+    def test_quoted_data_path_string_literal_normalization(self):
+        """Verifies that string literals starting with '$' compile to data binding objects consistently."""
+        compiler = ExpressCompiler(self.catalog)
+        dsl = """root = Column([field1, field2, field3])
+field1 = TextField("Rep", "$user")
+field2 = TextField("Name", "$name")
+field3 = TextField("Val", "$/form/val")"""
+        envelope = compiler.compile(dsl)
+        comps = envelope["createSurface"]["components"]
+        f1 = next(c for c in comps if c["id"] == "field1")
+        f2 = next(c for c in comps if c["id"] == "field2")
+        f3 = next(c for c in comps if c["id"] == "field3")
+        self.assertEqual(f1["value"], {"path": "user"})
+        self.assertEqual(f2["value"], {"path": "name"})
+        self.assertEqual(f3["value"], {"path": "/form/val"})
+
+    def test_case_insensitive_component_matching(self):
+        """Verifies case-insensitive component constructor matching (e.g. column, COLUMN -> Column)."""
+        compiler = ExpressCompiler(self.catalog)
+        dsl = """root = column([repField, valueField])
+repField = textfield("Representative", $/form/rep)
+valueField = TEXTFIELD("Deal Value", $/form/value)"""
+        envelope = compiler.compile(dsl)
+        components = envelope["createSurface"]["components"]
+        self.assertEqual(len(components), 3)
+
+        root_comp = next(c for c in components if c["id"] == "root")
+        self.assertEqual(root_comp["component"], "Column")
+
+        rep_comp = next(c for c in components if c["id"] == "repField")
+        self.assertEqual(rep_comp["component"], "TextField")
+
+        val_comp = next(c for c in components if c["id"] == "valueField")
+        self.assertEqual(val_comp["component"], "TextField")
+
+    def test_boolean_string_auto_coercion(self):
+        """Verifies auto-coercion of boolean strings ('true'/'false') into boolean primitives."""
+        compiler = ExpressCompiler(self.catalog)
+        ctx = compiler._compile_value("true", {}, None)
+        self.assertIs(ctx, True)
+        ctx_false = compiler._compile_value("false", {}, None)
+        self.assertIs(ctx_false, False)
+        ctx_upper = compiler._compile_value("True", {}, None)
+        self.assertIs(ctx_upper, True)
+        ctx_lower = compiler._compile_value("False", {}, None)
+        self.assertIs(ctx_lower, False)
+
+    def test_case_insensitive_enum_coercion(self):
+        """Verifies case-insensitive enum choice coercion (e.g. 'center' -> 'center', 'PRIMARY' -> 'primary')."""
+        compiler = ExpressCompiler(self.catalog)
+        dsl = """root = Button("Click Me", "PRIMARY", "onClick")"""
+        envelope = compiler.compile(dsl)
+        comps = envelope["createSurface"]["components"]
+        btn = next(c for c in comps if c["id"] == "root")
+        self.assertEqual(btn["variant"], "primary")
+
+    def test_choice_option_object_auto_normalization(self):
+        """Verifies auto-normalization of string list options into option objects with label and value."""
+        compiler = ExpressCompiler(self.catalog)
+        dsl = """root = ChoicePicker("Select Option", "mutuallyExclusive", ["Option 1", "Option 2"])"""
+        envelope = compiler.compile(dsl)
+        comps = envelope["createSurface"]["components"]
+        picker = next(c for c in comps if c["id"] == "root")
+        self.assertEqual(
+            picker["options"],
+            [
+                {"label": "Option 1", "value": "Option 1"},
+                {"label": "Option 2", "value": "Option 2"},
+            ],
+        )
+
+    def test_schema_driven_action_detection(self):
+        """Verifies that schema-driven action detection correctly identifies Action properties in custom catalog schemas."""
+        from a2ui.inference_formats.experimental.express.compiler import _is_action_property_schema
+
+        action_schema = {"$ref": "common_types.json#/definitions/Action"}
+        non_action_schema = {"type": "string"}
+        oneof_action_schema = {
+            "oneOf": [
+                {"type": "null"},
+                {"$ref": "common_types.json#/definitions/Action"},
+            ]
+        }
+
+        self.assertTrue(_is_action_property_schema(action_schema))
+        self.assertFalse(_is_action_property_schema(non_action_schema))
+        self.assertTrue(_is_action_property_schema(oneof_action_schema))
 
 
 if __name__ == "__main__":

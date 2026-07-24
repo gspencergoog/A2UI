@@ -33,6 +33,7 @@ from .constants import SurfaceOperation
 
 def _set_nested_path(d: dict, path_str: str, val: Any) -> None:
     """Populates a nested dictionary path from a JSON pointer-like string."""
+    path_str = path_str.replace(".", "/")
     if path_str.startswith("$/"):
         clean_path = path_str[2:]
     elif path_str.startswith("$"):
@@ -104,6 +105,31 @@ def _schema_expects_option_objects(schema: Any) -> bool:
     return False
 
 
+def _is_action_property_schema(schema: Any) -> bool:
+    """Recursively checks if a property's schema allows an Action (event / functionCall)."""
+    if not isinstance(schema, dict):
+        return False
+    if "$ref" in schema:
+        ref = schema["$ref"]
+        if isinstance(ref, str) and (
+            "Action" in ref or "Event" in ref or "FunctionCall" in ref
+        ):
+            return True
+    if "properties" in schema:
+        props = schema["properties"]
+        if "event" in props or "functionCall" in props:
+            return True
+    if "items" in schema:
+        if _is_action_property_schema(schema["items"]):
+            return True
+    for key in ["allOf", "oneOf", "anyOf"]:
+        if key in schema and isinstance(schema[key], list):
+            for sub in schema[key]:
+                if _is_action_property_schema(sub):
+                    return True
+    return False
+
+
 def _is_check_expression(val: Any) -> bool:
     """Checks if a parsed AST value represents a validation check expression."""
     if isinstance(val, dict) and "check" in val:
@@ -145,6 +171,12 @@ class ExpressCompiler:
             catalog: A Catalog or an A2uiCatalog.
         """
         self.helper = CatalogSchemaHelper(catalog)
+        self._comp_map = {name.lower(): name for name in self.helper.components}
+        self._enum_map = {}
+        for enums in self.helper.component_property_enums.values():
+            for enum_val in enums:
+                if isinstance(enum_val, str):
+                    self._enum_map[enum_val.lower()] = enum_val
 
     def compile(
         self,
@@ -341,8 +373,12 @@ class ExpressCompiler:
         args = ast["args"]
 
         if comp_name not in self.helper.components:
-            # Not a component, could be a standalone action/helper; skip writing as component
-            return None
+            matched_name = self._comp_map.get(comp_name.lower())
+            if matched_name:
+                comp_name = matched_name
+            else:
+                # Not a component, could be a standalone action/helper; skip writing as component
+                return None
 
         properties = self.helper.get_component_properties(comp_name)
         comp_dict = {"id": var_name, "component": comp_name}
@@ -371,11 +407,19 @@ class ExpressCompiler:
                     comp_dict[prop_name] = None
                     continue
 
+                prop_schema = self.helper.get_property_schema(comp_name, prop_name)
+                is_action_field = (
+                    _is_action_property_schema(prop_schema)
+                    if prop_schema
+                    else (prop_name in ["action", "submitAction"])
+                )
+                enum_vals = self.helper.get_property_enum(comp_name, prop_name)
                 mapped_val = self._compile_value(
                     arg,
                     raw_symbols,
                     ctx,
-                    is_action=(prop_name in ["action", "submitAction"]),
+                    is_action=is_action_field,
+                    enum_vals=enum_vals,
                 )
                 prop_schema = self.helper.get_property_schema(comp_name, prop_name)
                 if prop_schema and not _schema_allows_databinding(prop_schema):
@@ -400,12 +444,15 @@ class ExpressCompiler:
                     if isinstance(mapped_val, list) and _schema_expects_option_objects(
                         prop_schema
                     ):
-                        mapped_val = [
-                            {"label": opt, "value": opt}
-                            if isinstance(opt, str)
-                            else opt
-                            for opt in mapped_val
-                        ]
+                        new_mapped = []
+                        for opt in mapped_val:
+                            if isinstance(opt, str):
+                                new_mapped.append({"label": opt, "value": opt})
+                            elif isinstance(opt, (list, tuple)) and len(opt) == 2:
+                                new_mapped.append({"label": opt[0], "value": opt[1]})
+                            else:
+                                new_mapped.append(opt)
+                        mapped_val = new_mapped
                 enum_vals = self.helper.get_property_enum(comp_name, prop_name)
                 if enum_vals and isinstance(mapped_val, str):
                     if mapped_val not in enum_vals:
@@ -494,7 +541,12 @@ class ExpressCompiler:
         return {k: v for k, v in comp_dict.items() if v is not None}
 
     def _compile_value(
-        self, val: Any, raw_symbols: dict, ctx: _CompileContext, is_action: bool = False
+        self,
+        val: Any,
+        raw_symbols: dict,
+        ctx: _CompileContext,
+        is_action: bool = False,
+        enum_vals: Optional[list[str]] = None,
     ) -> Any:
         """Compiles an individual AST node value into valid A2UI equivalents.
 
@@ -509,14 +561,22 @@ class ExpressCompiler:
         """
         if isinstance(val, dict):
             if "path" in val:
+                path_val = val["path"]
+                if isinstance(path_val, str):
+                    path_val = path_val.replace(".", "/")
+                    if path_val.startswith("$/"):
+                        path_val = path_val[1:]
+                    elif path_val.startswith("$"):
+                        path_val = path_val[1:]
+                    return {**val, "path": path_val}
                 return val
             if "variable" in val:
                 ref_name = val["variable"]
                 if ref_name in raw_symbols:
                     symbol_val = raw_symbols[ref_name]
-                    if (
-                        isinstance(symbol_val, dict)
-                        and symbol_val.get("call") in self.helper.components
+                    if isinstance(symbol_val, dict) and (
+                        symbol_val.get("call") in self.helper.components
+                        or symbol_val.get("call", "").lower() in self._comp_map
                     ):
                         return ref_name
                     return self._compile_value(symbol_val, raw_symbols, ctx, is_action)
@@ -572,7 +632,12 @@ class ExpressCompiler:
                 fn_args = val["args"]
 
                 # Is it an inline component constructor?
-                if fn_name in self.helper.components:
+                fn_comp_name = (
+                    fn_name
+                    if fn_name in self.helper.components
+                    else self._comp_map.get(fn_name.lower())
+                )
+                if fn_comp_name:
                     ctx.inline_counter += 1
                     inline_id = f"_inline_{ctx.inline_counter}"
                     compiled_inline = self._compile_ast_node(
@@ -590,7 +655,7 @@ class ExpressCompiler:
                             " templateComponent."
                         )
                     path_val = self._compile_value(
-                        fn_args[0], raw_symbols, ctx, is_action
+                        fn_args[0], raw_symbols, ctx, is_action=False
                     )
                     if not isinstance(path_val, dict) or "path" not in path_val:
                         raise ValueError(
@@ -598,19 +663,23 @@ class ExpressCompiler:
                             f" binding path (prefixed by $), got: {fn_args[0]}"
                         )
                     comp_id_val = self._compile_value(
-                        fn_args[1], raw_symbols, ctx, is_action
+                        fn_args[1], raw_symbols, ctx, is_action=False
                     )
                     return {"path": path_val["path"], "componentId": comp_id_val}
 
                 # Is it a reserved Event signature?
                 if fn_name == "Event":
                     compiled_event_name = (
-                        self._compile_value(fn_args[0], raw_symbols, ctx, is_action)
+                        self._compile_value(
+                            fn_args[0], raw_symbols, ctx, is_action=False
+                        )
                         if len(fn_args) > 0
                         else ""
                     )
                     raw_context = (
-                        self._compile_value(fn_args[1], raw_symbols, ctx, is_action)
+                        self._compile_value(
+                            fn_args[1], raw_symbols, ctx, is_action=False
+                        )
                         if len(fn_args) > 1
                         else {}
                     )
@@ -637,7 +706,7 @@ class ExpressCompiler:
                             if isinstance(arg, dict) and arg.get("skipped"):
                                 continue
                             val_item = self._compile_value(
-                                arg, raw_symbols, ctx, is_action
+                                arg, raw_symbols, ctx, is_action=False
                             )
                             if val_item is not None:
                                 compiled_args[fn_props[idx]] = val_item
@@ -656,13 +725,13 @@ class ExpressCompiler:
                 return {
                     "call": fn_name,
                     "args": [
-                        self._compile_value(a, raw_symbols, ctx, is_action)
+                        self._compile_value(a, raw_symbols, ctx, is_action=False)
                         for a in fn_args
                     ],
                 }
 
             return {
-                k: self._compile_value(v, raw_symbols, ctx, is_action)
+                k: self._compile_value(v, raw_symbols, ctx, is_action=False)
                 for k, v in val.items()
             }
 
@@ -670,8 +739,32 @@ class ExpressCompiler:
             # If this is a list of elements, compile each element
             compiled_list = []
             for item in val:
-                comp_item = self._compile_value(item, raw_symbols, ctx, is_action)
+                comp_item = self._compile_value(
+                    item, raw_symbols, ctx, is_action=False, enum_vals=enum_vals
+                )
                 compiled_list.append(comp_item)
             return compiled_list
+
+        if isinstance(val, str):
+            if val == "$" or (
+                val.startswith("$")
+                and len(val) > 1
+                and (val[1].isalpha() or val[1] in ("/", "_"))
+            ):
+                path_val = val.replace(".", "/")
+                if path_val.startswith("$/"):
+                    path_val = path_val[1:]
+                elif path_val.startswith("$"):
+                    path_val = path_val[1:]
+                return {"path": path_val}
+            if val.lower() in ("true", "false"):
+                return val.lower() == "true"
+            if enum_vals:
+                enum_map = {e.lower(): e for e in enum_vals if isinstance(e, str)}
+                if val.lower() in enum_map:
+                    return enum_map[val.lower()]
+            if is_action:
+                return {"call": val, "args": {}}
+            return val
 
         return val
