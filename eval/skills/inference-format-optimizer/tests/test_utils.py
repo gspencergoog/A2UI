@@ -292,12 +292,14 @@ class TestRunnerAndReporter(unittest.TestCase):
                     "events": [{
                         "event": "model",
                         "working_time": dur,
-                        "call": {"response": {"usageMetadata": {"thoughtsTokenCount": 50}}},
+                        "call": {
+                            "response": {"usageMetadata": {"thoughtsTokenCount": 50}}
+                        },
                     }],
                 }
-                for i, (dur, tok) in enumerate([
-                    (10.0, 100), (12.0, 120), (11.0, 110), (13.0, 130), (14.0, 140)
-                ])
+                for i, (dur, tok) in enumerate(
+                    [(10.0, 100), (12.0, 120), (11.0, 110), (13.0, 130), (14.0, 140)]
+                )
             ],
         }
         metrics = extract_metrics_from_log(log_data)
@@ -312,7 +314,12 @@ class TestRunnerAndReporter(unittest.TestCase):
     def test_run_evaluation_with_epochs(self, mock_run):
         mock_run.return_value = MagicMock(returncode=0)
         res = run_evaluation(
-            "express", "google/gemini-3.5-flash", ["loginForm"], False, "/tmp/logs", epochs=5
+            "express",
+            "google/gemini-3.5-flash",
+            ["loginForm"],
+            False,
+            "/tmp/logs",
+            epochs=5,
         )
         self.assertTrue(res)
         called_cmd = mock_run.call_args[0][0]

@@ -530,9 +530,18 @@ def main(argv: Optional[List[str]] = None) -> None:
                 in_toks = [e["input_tokens"] for e in ep_list]
                 lats = [e["latency_seconds"] for e in ep_list]
 
-                def _m(lst): return float(statistics.mean(lst)) if lst else 0.0
-                def _med(lst): return float(statistics.median(lst)) if lst else 0.0
-                def _sem(lst): return float(statistics.stdev(lst))/(len(lst)**0.5) if len(lst) > 1 else 0.0
+                def _m(lst):
+                    return float(statistics.mean(lst)) if lst else 0.0
+
+                def _med(lst):
+                    return float(statistics.median(lst)) if lst else 0.0
+
+                def _sem(lst):
+                    return (
+                        float(statistics.stdev(lst)) / (len(lst) ** 0.5)
+                        if len(lst) > 1
+                        else 0.0
+                    )
 
                 samples_dict[s_id] = {
                     "schema_acc": _m(schema_accs),

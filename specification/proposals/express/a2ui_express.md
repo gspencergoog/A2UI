@@ -13,13 +13,13 @@ A2UI Express targets four main requirements:
 
 ### Format comparison
 
-| Characteristic | Native A2UI v1.0 JSON | A2UI Express | A2UI Atom | A2UI Elemental |
-| :--- | :--- | :--- | :--- | :--- |
-| **Primary Structure** | Verbose JSON envelopes | Line-oriented assignments | Lisp S-expressions | HTML5 Web Components |
-| **Token Reduction** | Baseline (0%) | 55% to 70% reduction | 60% to 75% reduction | 40% to 60% reduction |
-| **Schema Mapping** | Named JSON keys | Positional schema mapping | Positional & tagged keys | Named HTML attributes |
-| **Streaming Unit** | Full payload or chunked JSON | Single statement line | Open parenthesis `(` | HTML DOM element |
-| **Error Recovery** | Strict JSON schema validation | Line isolation & auto-inlining | Auto-closing parentheses | XML-tolerant DOM repair |
+| Characteristic        | Native A2UI v1.0 JSON         | A2UI Express                   | A2UI Atom                | A2UI Elemental          |
+| :-------------------- | :---------------------------- | :----------------------------- | :----------------------- | :---------------------- |
+| **Primary Structure** | Verbose JSON envelopes        | Line-oriented assignments      | Lisp S-expressions       | HTML5 Web Components    |
+| **Token Reduction**   | Baseline (0%)                 | 55% to 70% reduction           | 60% to 75% reduction     | 40% to 60% reduction    |
+| **Schema Mapping**    | Named JSON keys               | Positional schema mapping      | Positional & tagged keys | Named HTML attributes   |
+| **Streaming Unit**    | Full payload or chunked JSON  | Single statement line          | Open parenthesis `(`     | HTML DOM element        |
+| **Error Recovery**    | Strict JSON schema validation | Line isolation & auto-inlining | Auto-closing parentheses | XML-tolerant DOM repair |
 
 ## System prompt output contract
 
@@ -304,12 +304,7 @@ no_btn = Button(no_btn_text, _, Event("decline"))
       {
         "id": "main_column",
         "component": "Column",
-        "children": [
-          "icon",
-          "title",
-          "description",
-          "actions"
-        ]
+        "children": ["icon", "title", "description", "actions"]
       },
       {
         "id": "icon",
@@ -336,10 +331,7 @@ no_btn = Button(no_btn_text, _, Event("decline"))
       {
         "id": "actions",
         "component": "Row",
-        "children": [
-          "yes_btn",
-          "no_btn"
-        ],
+        "children": ["yes_btn", "no_btn"],
         "justify": "center"
       },
       {
