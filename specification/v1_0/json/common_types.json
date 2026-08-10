@@ -310,15 +310,6 @@
                   "additionalProperties": {
                     "$ref": "#/$defs/DynamicValue"
                   }
-                },
-                "wantResponse": {
-                  "type": "boolean",
-                  "description": "If true, the renderer expects an actionResponse from the agent.",
-                  "default": false
-                },
-                "responsePath": {
-                  "type": "string",
-                  "description": "Optional JSON Pointer path where the renderer should save the response value in its local data model."
                 }
               },
               "required": ["name"],
@@ -330,7 +321,7 @@
         },
         {
           "type": "object",
-          "description": "Executes a local renderer-side function.",
+          "description": "Executes a renderer or agent-side function.",
           "properties": {
             "functionCall": {
               "$ref": "#/$defs/FunctionCall"
