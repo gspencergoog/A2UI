@@ -573,6 +573,8 @@ To ensure catalog schemas can be translated reliably into alternative, LLM-frien
      - `DynamicValue`
      - `AccessibilityAttributes`
      - `CheckRule`
+     - `ValidationResult`
+     - `ComponentCommon`
      - `Checkable`
      - `Action`
 4. **Component Discriminator Rule:**
