@@ -37,11 +37,11 @@ export const CreateSurfaceMessageSchema = z
       .object({
         surfaceId: z.string().describe('The unique identifier for the UI surface to be rendered.'),
         catalogId: z.string().optional().describe('Default catalog identifier.'),
-        theme: z.any().optional().describe('Theme parameters for the surface.'),
+        theme: z.unknown().optional().describe('Theme parameters for the surface.'),
         sendDataModel: z.boolean().optional().describe('If true, client sends full data model.'),
         components: z.array(ComponentItemSchema).optional().describe('Initial component tree.'),
-        dataModel: z.record(z.any()).optional().describe('Initial data model.'),
-        metadata: z.record(z.any()).optional().describe('Optional surface-level metadata.'),
+        dataModel: z.record(z.unknown()).optional().describe('Initial data model.'),
+        metadata: z.record(z.unknown()).optional().describe('Optional surface-level metadata.'),
       })
       .strict(),
   })
@@ -71,7 +71,7 @@ export const UpdateDataModelMessageSchema = z
           .string()
           .describe('The unique identifier for the UI surface this data model update applies to.'),
         path: z.string().optional().describe('An optional path within the data model.'),
-        value: z.any().describe('The data to be updated in the data model.'),
+        value: z.unknown().describe('The data to be updated in the data model.'),
       })
       .strict(),
   })
@@ -98,7 +98,7 @@ export const CallRendererFunctionMessageSchema = z
           .object({
             call: z.string().describe('Name of the function to invoke.'),
             catalogId: z.string().describe('Catalog ID for the function.'),
-            args: z.record(z.any()).optional().describe('Arguments for the function.'),
+            args: z.record(z.unknown()).optional().describe('Arguments for the function.'),
           })
           .strict(),
       })
@@ -109,7 +109,7 @@ export const CallRendererFunctionMessageSchema = z
 export const FunctionResponsePayloadSchema = z
   .object({
     functionCallId: z.string().describe('Unique function call identifier.'),
-    value: z.any().optional(),
+    value: z.unknown().optional(),
     error: z
       .object({
         code: z.string(),

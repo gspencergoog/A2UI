@@ -23,8 +23,8 @@ export const ActionPayloadSchema = z
     surfaceId: z.string().describe('Surface ID where event originated.'),
     sourceComponentId: z.string().describe('Component ID that triggered event.'),
     timestamp: z.string().datetime().describe('ISO 8601 timestamp.'),
-    context: z.record(z.any()).describe('Action context key-value pairs.'),
-    metadata: z.record(z.any()).optional().describe('Optional action metadata.'),
+    context: z.record(z.unknown()).describe('Action context key-value pairs.'),
+    metadata: z.record(z.unknown()).optional().describe('Optional action metadata.'),
   })
   .strict();
 
@@ -81,7 +81,7 @@ export const CallAgentFunctionMessageSchema = z
           .object({
             call: z.string(),
             catalogId: z.string().optional(),
-            args: z.record(z.any()).optional(),
+            args: z.record(z.unknown()).optional(),
           })
           .strict(),
       })
