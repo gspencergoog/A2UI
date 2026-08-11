@@ -49,10 +49,7 @@ def validate_composition(
         errors.append(
             CompositionValidationError(
                 component_id=root_component_id,
-                message=(
-                    "Surface root component must be of type 'Surface', got"
-                    f" '{root_comp.type}'."
-                ),
+                message=f"Surface root component must be of type 'Surface', got '{root_comp.type}'.",
                 rule="surface_root",
             )
         )
@@ -69,32 +66,46 @@ def validate_composition(
             # Allowed Parents Validation
             if comp.parent_id:
                 parent_comp = comp_map.get(comp.parent_id)
-                if parent_comp and def_item.allowed_parents:
+                if not parent_comp:
+                    errors.append(
+                        CompositionValidationError(
+                            component_id=comp.id,
+                            message=f"Component '{comp.id}' references parent '{comp.parent_id}' which does not exist.",
+                            rule="allowed_parents",
+                        )
+                    )
+                elif def_item.allowed_parents is not None:
                     if parent_comp.type not in def_item.allowed_parents:
                         errors.append(
                             CompositionValidationError(
                                 component_id=comp.id,
                                 message=(
-                                    f"Component '{comp.id}' of type '{comp.type}' is"
-                                    f" not allowed under parent '{parent_comp.id}' of"
-                                    f" type '{parent_comp.type}'."
+                                    f"Component '{comp.id}' of type '{comp.type}' is not allowed under "
+                                    f"parent '{parent_comp.id}' of type '{parent_comp.type}'."
                                 ),
                                 rule="allowed_parents",
                             )
                         )
 
             # Allowed Children Validation
-            if comp.children and def_item.allowed_children:
+            if comp.children and def_item.allowed_children is not None:
                 for child_id in comp.children:
                     child_comp = comp_map.get(child_id)
-                    if child_comp and child_comp.type not in def_item.allowed_children:
+                    if not child_comp:
+                        errors.append(
+                            CompositionValidationError(
+                                component_id=comp.id,
+                                message=f"Container '{comp.id}' references child '{child_id}' which does not exist.",
+                                rule="allowed_children",
+                            )
+                        )
+                    elif child_comp.type not in def_item.allowed_children:
                         errors.append(
                             CompositionValidationError(
                                 component_id=comp.id,
                                 message=(
-                                    f"Container '{comp.id}' of type '{comp.type}' does"
-                                    f" not allow child '{child_comp.id}' of type"
-                                    f" '{child_comp.type}'."
+                                    f"Container '{comp.id}' of type '{comp.type}' does not allow child "
+                                    f"'{child_id}' of type '{child_comp.type}'."
                                 ),
                                 rule="allowed_children",
                             )

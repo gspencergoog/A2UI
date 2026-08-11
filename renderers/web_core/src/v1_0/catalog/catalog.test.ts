@@ -54,37 +54,61 @@ describe('Catalog & Composition Tests (Phase 2)', () => {
     });
   });
 
-  describe('CatalogResolver (Strict 3-step lookup)', () => {
+  describe('CatalogResolver (Strict 3-step lookup & full coverage)', () => {
     const defaultCat = {catalogId: 'default-cat'};
     const msgCat = {catalogId: 'msg-cat'};
     const surfaceCat = {catalogId: 'surface-cat'};
 
-    const resolver = new CatalogResolver({
-      catalogs: {
-        'default-cat': defaultCat,
-        'msg-cat': msgCat,
-        'surface-cat': surfaceCat,
-      },
-      defaultCatalogId: 'default-cat',
+    it('supports Map-based constructor and registerCatalog', () => {
+      const catMap = new Map();
+      catMap.set('default-cat', defaultCat);
+      const resolver = new CatalogResolver({catalogs: catMap, defaultCatalogId: 'default-cat'});
+
+      assert.equal(resolver.hasCatalog('default-cat'), true);
+      assert.equal(resolver.hasCatalog('new-cat'), false);
+
+      resolver.registerCatalog({catalogId: 'new-cat'});
+      assert.equal(resolver.hasCatalog('new-cat'), true);
     });
 
     it('step 1: uses surface override when available', () => {
-      const resolved = resolver.resolveCatalogId('surface-cat', 'msg-cat');
-      assert.equal(resolved, 'surface-cat');
+      const resolver = new CatalogResolver({
+        catalogs: {'default-cat': defaultCat, 'msg-cat': msgCat, 'surface-cat': surfaceCat},
+        defaultCatalogId: 'default-cat',
+      });
+      assert.equal(resolver.resolveCatalogId('surface-cat', 'msg-cat'), 'surface-cat');
+      assert.equal(resolver.resolveCatalog('surface-cat', 'msg-cat'), surfaceCat);
     });
 
     it('step 2: falls back to message-declared catalog', () => {
-      const resolved = resolver.resolveCatalogId(undefined, 'msg-cat');
-      assert.equal(resolved, 'msg-cat');
+      const resolver = new CatalogResolver({
+        catalogs: {'default-cat': defaultCat, 'msg-cat': msgCat},
+        defaultCatalogId: 'default-cat',
+      });
+      assert.equal(resolver.resolveCatalogId(undefined, 'msg-cat'), 'msg-cat');
+      assert.equal(resolver.resolveCatalog(undefined, 'msg-cat'), msgCat);
     });
 
     it('step 3: falls back to default catalog', () => {
-      const resolved = resolver.resolveCatalogId(undefined, undefined);
-      assert.equal(resolved, 'default-cat');
+      const resolver = new CatalogResolver({
+        catalogs: {'default-cat': defaultCat},
+        defaultCatalogId: 'default-cat',
+      });
+      assert.equal(resolver.resolveCatalogId(undefined, undefined), 'default-cat');
+      assert.equal(resolver.resolveCatalog(undefined, undefined), defaultCat);
+    });
+
+    it('returns undefined when resolved catalog is not registered in map', () => {
+      const resolver = new CatalogResolver({
+        catalogs: {'default-cat': defaultCat},
+        defaultCatalogId: 'default-cat',
+      });
+      assert.equal(resolver.resolveCatalogId('unregistered-cat', undefined), 'unregistered-cat');
+      assert.equal(resolver.resolveCatalog('unregistered-cat', undefined), undefined);
     });
   });
 
-  describe('validateComposition (Surface root & parent/child rules)', () => {
+  describe('validateComposition (Edge Cases & Strict Parent/Child Rules)', () => {
     const catalog = {
       catalogId: 'test-cat',
       components: {
@@ -98,6 +122,12 @@ describe('Catalog & Composition Tests (Phase 2)', () => {
         Button: {
           allowedParents: ['Card'],
         },
+        Orphan: {
+          allowedParents: [], // Empty array = ZERO allowed parents
+        },
+        LeafContainer: {
+          allowedChildren: [], // Empty array = ZERO allowed children
+        },
       },
     };
 
@@ -108,33 +138,42 @@ describe('Catalog & Composition Tests (Phase 2)', () => {
       assert.equal(errors[0].rule, 'surface_root');
     });
 
-    it('passes for valid surface root Surface', () => {
-      const validComponents = [
-        {id: 'root', type: 'Surface', children: ['card1']},
-        {id: 'card1', type: 'Card', parentId: 'root', children: ['text1']},
-        {id: 'text1', type: 'Text', parentId: 'card1'},
+    it('enforces allowedParents = [] (disallows any parent)', () => {
+      const comps = [
+        {id: 'root', type: 'Surface', children: ['orphan1']},
+        {id: 'orphan1', type: 'Orphan', parentId: 'root'},
       ];
-      const errors = validateComposition(validComponents, 'root', catalog);
-      assert.equal(errors.length, 0);
-    });
-
-    it('detects invalid parent component constraint', () => {
-      const components = [
-        {id: 'root', type: 'Surface', children: ['btn1']},
-        {id: 'btn1', type: 'Button', parentId: 'root'}, // Button allowed only under Card
-      ];
-      const errors = validateComposition(components, 'root', catalog);
+      const errors = validateComposition(comps, 'root', catalog);
       assert.equal(errors.length, 1);
       assert.equal(errors[0].rule, 'allowed_parents');
     });
 
-    it('detects invalid child component constraint', () => {
-      const components = [
-        {id: 'root', type: 'Surface', children: ['card1']},
-        {id: 'card1', type: 'Card', parentId: 'root', children: ['badChild']},
-        {id: 'badChild', type: 'Image', parentId: 'card1'}, // Card allows Text, Button only
+    it('enforces allowedChildren = [] (disallows any child)', () => {
+      const comps = [
+        {id: 'root', type: 'Surface', children: ['leaf1']},
+        {id: 'leaf1', type: 'LeafContainer', parentId: 'root', children: ['text1']},
+        {id: 'text1', type: 'Text', parentId: 'leaf1'},
       ];
-      const errors = validateComposition(components, 'root', catalog);
+      const errors = validateComposition(comps, 'root', catalog);
+      assert.equal(errors.length, 2); // Triggers allowed_children on leaf1 AND allowed_parents on text1
+    });
+
+    it('reports dangling parent references', () => {
+      const comps = [
+        {id: 'root', type: 'Surface'},
+        {id: 'text1', type: 'Text', parentId: 'non_existent_parent'},
+      ];
+      const errors = validateComposition(comps, 'root', catalog);
+      assert.equal(errors.length, 1);
+      assert.equal(errors[0].rule, 'allowed_parents');
+    });
+
+    it('reports dangling child references', () => {
+      const comps = [
+        {id: 'root', type: 'Surface', children: ['card1']},
+        {id: 'card1', type: 'Card', parentId: 'root', children: ['non_existent_child']},
+      ];
+      const errors = validateComposition(comps, 'root', catalog);
       assert.equal(errors.length, 1);
       assert.equal(errors[0].rule, 'allowed_children');
     });

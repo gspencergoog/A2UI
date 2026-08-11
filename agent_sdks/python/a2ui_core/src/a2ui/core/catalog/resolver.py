@@ -19,14 +19,16 @@ class CatalogResolver:
         default_catalog_id: Optional[str] = None,
     ) -> None:
         """Initializes resolver with optional catalogs dictionary and default ID."""
-        self._catalogs: Dict[str, CatalogDefinition] = (
-            catalogs.copy() if catalogs else {}
-        )
+        self._catalogs: Dict[str, CatalogDefinition] = catalogs.copy() if catalogs else {}
         self._default_catalog_id: Optional[str] = default_catalog_id
 
     def register_catalog(self, catalog: CatalogDefinition) -> None:
         """Registers a catalog definition."""
         self._catalogs[catalog.catalog_id] = catalog
+
+    def has_catalog(self, catalog_id: str) -> bool:
+        """Returns whether a catalog ID is registered."""
+        return catalog_id in self._catalogs
 
     def resolve_catalog_id(
         self,
@@ -35,26 +37,25 @@ class CatalogResolver:
     ) -> Optional[str]:
         """Resolves the effective catalog ID following strict 3-step fallback.
 
-        Step 1: Surface-specific catalog override
-        Step 2: Message-declared catalog
+        Step 1: Surface-specific catalog override (if provided)
+        Step 2: Message-declared catalog (if provided)
         Step 3: Default catalog ID
         """
-        if surface_override_id and surface_override_id in self._catalogs:
+        if surface_override_id:
             return surface_override_id
-        if message_declared_id and message_declared_id in self._catalogs:
+        if message_declared_id:
             return message_declared_id
-        if self._default_catalog_id and self._default_catalog_id in self._catalogs:
-            return self._default_catalog_id
-
-        # Return first non-None match even if not in catalogs map
-        return surface_override_id or message_declared_id or self._default_catalog_id
+        return self._default_catalog_id
 
     def resolve_catalog(
         self,
         surface_override_id: Optional[str] = None,
         message_declared_id: Optional[str] = None,
     ) -> Optional[CatalogDefinition]:
-        """Resolves the CatalogDefinition using 3-step fallback."""
+        """Resolves the CatalogDefinition using 3-step fallback.
+
+        Returns None if the resolved catalogId is not registered in the resolver.
+        """
         catalog_id = self.resolve_catalog_id(surface_override_id, message_declared_id)
         if not catalog_id:
             return None

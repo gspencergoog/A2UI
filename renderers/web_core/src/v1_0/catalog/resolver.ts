@@ -40,27 +40,31 @@ export class CatalogResolver {
   }
 
   /**
+   * Returns whether a catalog ID is registered.
+   */
+  hasCatalog(catalogId: string): boolean {
+    return this.catalogsMap.has(catalogId);
+  }
+
+  /**
    * Resolves the effective catalog ID following the strict 3-step fallback:
-   * 1. Surface-specific catalog override
-   * 2. Message-declared catalog
+   * 1. Surface-specific catalog override (if provided)
+   * 2. Message-declared catalog (if provided)
    * 3. Default catalog ID
    */
   resolveCatalogId(surfaceOverrideId?: string, messageDeclaredId?: string): string | undefined {
-    if (surfaceOverrideId && this.catalogsMap.has(surfaceOverrideId)) {
+    if (surfaceOverrideId) {
       return surfaceOverrideId;
     }
-    if (messageDeclaredId && this.catalogsMap.has(messageDeclaredId)) {
+    if (messageDeclaredId) {
       return messageDeclaredId;
     }
-    if (this.defaultCatalogId && this.catalogsMap.has(this.defaultCatalogId)) {
-      return this.defaultCatalogId;
-    }
-    // Return first match if given, even if not pre-registered in map
-    return surfaceOverrideId || messageDeclaredId || this.defaultCatalogId;
+    return this.defaultCatalogId;
   }
 
   /**
    * Resolves the CatalogDefinition using the 3-step fallback.
+   * Returns undefined if the resolved catalogId is not registered in the resolver.
    */
   resolveCatalog(
     surfaceOverrideId?: string,

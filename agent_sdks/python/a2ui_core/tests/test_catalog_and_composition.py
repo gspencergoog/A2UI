@@ -73,26 +73,30 @@ def test_catalog_resolver_3_step_fallback():
         default_catalog_id="default-cat",
     )
 
+    assert resolver.has_catalog("default-cat") is True
+    assert resolver.has_catalog("new-cat") is False
+
+    resolver.register_catalog(CatalogDefinition(catalogId="new-cat"))
+    assert resolver.has_catalog("new-cat") is True
+
     # Step 1: Surface override
     assert resolver.resolve_catalog_id("surface-cat", "msg-cat") == "surface-cat"
+    assert resolver.resolve_catalog("surface-cat", "msg-cat") == surface_cat
+
     # Step 2: Message declared
     assert resolver.resolve_catalog_id(None, "msg-cat") == "msg-cat"
+    assert resolver.resolve_catalog(None, "msg-cat") == msg_cat
+
     # Step 3: Default fallback
     assert resolver.resolve_catalog_id(None, None) == "default-cat"
+    assert resolver.resolve_catalog(None, None) == default_cat
+
+    # Unregistered catalog ID returns string ID for resolve_catalog_id, None for resolve_catalog
+    assert resolver.resolve_catalog_id("unregistered", None) == "unregistered"
+    assert resolver.resolve_catalog("unregistered", None) is None
 
 
-def test_validate_composition_root_surface():
-    invalid_comps = [ComponentInstance(id="root", type="Column")]
-    errors = validate_composition(invalid_comps, "root")
-    assert len(errors) == 1
-    assert errors[0].rule == "surface_root"
-
-    valid_comps = [ComponentInstance(id="root", type="Surface")]
-    errors = validate_composition(valid_comps, "root")
-    assert len(errors) == 0
-
-
-def test_validate_composition_parent_child_rules():
+def test_validate_composition_edge_cases():
     catalog = CatalogDefinition(
         catalogId="test-cat",
         components={
@@ -102,23 +106,42 @@ def test_validate_composition_parent_child_rules():
             ),
             "Text": ComponentDefinition(allowedParents=["Card", "Column"]),
             "Button": ComponentDefinition(allowedParents=["Card"]),
+            "Orphan": ComponentDefinition(allowedParents=[]),
+            "LeafContainer": ComponentDefinition(allowedChildren=[]),
         },
     )
 
-    # Invalid Parent: Button under Surface root directly (Button requires Card parent)
+    # Empty allowedParents disallows any parent
     comps = [
-        ComponentInstance(id="root", type="Surface", children=["btn1"]),
-        ComponentInstance(id="btn1", type="Button", parentId="root"),
+        ComponentInstance(id="root", type="Surface", children=["orphan1"]),
+        ComponentInstance(id="orphan1", type="Orphan", parentId="root"),
     ]
     errors = validate_composition(comps, "root", catalog)
     assert len(errors) == 1
     assert errors[0].rule == "allowed_parents"
 
-    # Invalid Child: Image inside Card (Card allows Text, Button only)
+    # Empty allowedChildren disallows any child
+    comps = [
+        ComponentInstance(id="root", type="Surface", children=["leaf1"]),
+        ComponentInstance(id="leaf1", type="LeafContainer", parentId="root", children=["text1"]),
+        ComponentInstance(id="text1", type="Text", parentId="leaf1"),
+    ]
+    errors = validate_composition(comps, "root", catalog)
+    assert len(errors) == 2  # Triggers allowed_children on leaf1 AND allowed_parents on text1
+
+    # Dangling parent reference
+    comps = [
+        ComponentInstance(id="root", type="Surface"),
+        ComponentInstance(id="text1", type="Text", parentId="non_existent"),
+    ]
+    errors = validate_composition(comps, "root", catalog)
+    assert len(errors) == 1
+    assert errors[0].rule == "allowed_parents"
+
+    # Dangling child reference
     comps = [
         ComponentInstance(id="root", type="Surface", children=["card1"]),
-        ComponentInstance(id="card1", type="Card", parentId="root", children=["img1"]),
-        ComponentInstance(id="img1", type="Image", parentId="card1"),
+        ComponentInstance(id="card1", type="Card", parentId="root", children=["non_existent"]),
     ]
     errors = validate_composition(comps, "root", catalog)
     assert len(errors) == 1

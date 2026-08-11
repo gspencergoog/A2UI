@@ -59,7 +59,13 @@ export function validateComposition(
       // 2. Allowed Parents Validation
       if (comp.parentId) {
         const parentComp = compMap.get(comp.parentId);
-        if (parentComp && def.allowedParents && def.allowedParents.length > 0) {
+        if (!parentComp) {
+          errors.push({
+            componentId: comp.id,
+            message: `Component '${comp.id}' references parent '${comp.parentId}' which does not exist.`,
+            rule: 'allowed_parents',
+          });
+        } else if (def.allowedParents !== undefined) {
           if (!def.allowedParents.includes(parentComp.type)) {
             errors.push({
               componentId: comp.id,
@@ -71,15 +77,16 @@ export function validateComposition(
       }
 
       // 3. Allowed Children Validation
-      if (
-        comp.children &&
-        comp.children.length > 0 &&
-        def.allowedChildren &&
-        def.allowedChildren.length > 0
-      ) {
+      if (comp.children && comp.children.length > 0 && def.allowedChildren !== undefined) {
         comp.children.forEach(childId => {
           const childComp = compMap.get(childId);
-          if (childComp && !def.allowedChildren!.includes(childComp.type)) {
+          if (!childComp) {
+            errors.push({
+              componentId: comp.id,
+              message: `Container '${comp.id}' references child '${childId}' which does not exist.`,
+              rule: 'allowed_children',
+            });
+          } else if (!def.allowedChildren!.includes(childComp.type)) {
             errors.push({
               componentId: comp.id,
               message: `Container '${comp.id}' of type '${comp.type}' does not allow child '${childComp.id}' of type '${childComp.type}'. Allowed children: [${def.allowedChildren!.join(', ')}].`,
