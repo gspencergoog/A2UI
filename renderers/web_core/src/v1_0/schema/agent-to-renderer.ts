@@ -15,8 +15,7 @@
  */
 
 import {z} from 'zod';
-import {AnyComponentSchema} from '../../v0_9/schema/common-types.js';
-import {SupportedProtocolVersion, SUPPORTED_PROTOCOL_VERSIONS} from './constants.js';
+import {SUPPORTED_PROTOCOL_VERSIONS} from './constants.js';
 
 export const VersionSchema = z.string().refine(
   val => (SUPPORTED_PROTOCOL_VERSIONS as string[]).includes(val),
