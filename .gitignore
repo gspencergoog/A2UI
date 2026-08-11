@@ -142,3 +142,5 @@ Package.resolved
 eval/logs/
 eval/iterative_format_optimizer/logs/
 eval/iterative_format_optimizer/skills/inference-format-optimizer/logs/
+specification/v1_0/test/catalog.json
+specification/v1_0/test/temp_data.json
