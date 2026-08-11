@@ -20,6 +20,7 @@ from ..validating import A2uiValidator, CatalogSchemaValidator, ValidationConfig
 from ..catalog import Catalog
 from ..catalog.catalog import TComponent, TFunction
 from ..schema.constants import (
+    SPEC_VERSION,
     MSG_TYPE_CREATE_SURFACE,
     MSG_TYPE_DELETE_SURFACE,
     MSG_TYPE_UPDATE_COMPONENTS,
@@ -63,17 +64,17 @@ class MessageProcessor:
         self, include_inline_catalogs: bool = False
     ) -> Dict[str, Any]:
         """Aggregates supported catalog schemas into standard A2UI capabilities."""
-        v09_caps: Dict[str, Any] = {
+        caps: Dict[str, Any] = {
             "supportedCatalogIds": [
                 cat_id
                 for c in self.catalogs
                 if (cat_id := getattr(c, "catalog_id", None)) is not None
             ]
         }
-        capabilities: Dict[str, Any] = {"v0.9": v09_caps}
+        capabilities: Dict[str, Any] = {SPEC_VERSION: caps}
         if include_inline_catalogs:
             # In Python core, we can export direct schemas as inline catalogs
-            v09_caps["inlineCatalogs"] = [
+            caps["inlineCatalogs"] = [
                 schema
                 for c in self.catalogs
                 if (schema := getattr(c, "catalog_schema", None)) is not None
@@ -90,7 +91,7 @@ class MessageProcessor:
         if not surfaces:
             return None
 
-        return {"version": "v0.9", "surfaces": surfaces}
+        return {"version": SPEC_VERSION, "surfaces": surfaces}
 
     def _process_message(self, message: Dict[str, Any]) -> None:
         """Dispatches individual message payloads."""

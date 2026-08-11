@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Google LLC
+ * Copyright 2026 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
+export * from './constants.js';
 export * from './common-types.js';
+export * from './agent-to-renderer.js';
+export * from './renderer-to-agent.js';
+export * from './agent-capabilities.js';
+export * from './renderer-capabilities.js';
 export * from './server-to-client.js';
 export * from './client-capabilities.js';
 export * from './client-to-server.js';

@@ -87,9 +87,7 @@ class A2uiValidator:
     ) -> None:
         """Validates the overall A2UI protocol payload structure using Pydantic."""
         details = []
-        expected_version = (
-            config.target_version if config.target_version else SPEC_VERSION
-        )
+        expected_version = config.target_version if config.target_version else "any"
 
         for i, msg in enumerate(messages):
             if not isinstance(msg, dict):

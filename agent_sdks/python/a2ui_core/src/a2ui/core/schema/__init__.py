@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Auto-generated. Do not edit manually.
 from .common_types import (
     StrictBaseModel as StrictBaseModel,
     DataBinding as DataBinding,
@@ -24,7 +23,7 @@ from .common_types import (
     ComponentCommon as ComponentCommon,
 )
 from .constants import *
-from .server_to_client import (
+from .agent_to_renderer import (
     CreateSurfaceMessage as CreateSurfaceMessage,
     CreateSurface as CreateSurface,
     UpdateComponentsMessage as UpdateComponentsMessage,
@@ -33,16 +32,23 @@ from .server_to_client import (
     UpdateDataModel as UpdateDataModel,
     DeleteSurfaceMessage as DeleteSurfaceMessage,
     DeleteSurface as DeleteSurface,
+    CallRendererFunctionMessage as CallRendererFunctionMessage,
+    CallRendererFunction as CallRendererFunction,
+    AgentFunctionResponseMessage as AgentFunctionResponseMessage,
+    FunctionResponsePayload as FunctionResponsePayload,
+    AgentToRendererMessage as AgentToRendererMessage,
+    AgentToRendererMessageListWrapper as AgentToRendererMessageListWrapper,
+    ServerToClientMessage as ServerToClientMessage,
     A2uiMessage as A2uiMessage,
     A2uiMessageListWrapper as A2uiMessageListWrapper,
 )
-from .client_capabilities import (
-    A2uiClientCapabilities as A2uiClientCapabilities,
-    V09Capabilities as V09Capabilities,
-    InlineCatalog as InlineCatalog,
-    FunctionDefinition as FunctionDefinition,
-)
-from .client_to_server import (
+from .renderer_to_agent import (
+    ActionMessage as ActionMessage,
+    CallAgentFunctionMessage as CallAgentFunctionMessage,
+    CallAgentFunction as CallAgentFunction,
+    RendererFunctionResponseMessage as RendererFunctionResponseMessage,
+    ErrorMessage as ErrorMessage,
+    RendererToAgentMessage as RendererToAgentMessage,
     A2uiClientMessage as A2uiClientMessage,
     A2uiClientActionMessage as A2uiClientActionMessage,
     A2uiClientErrorMessage as A2uiClientErrorMessage,
@@ -51,6 +57,20 @@ from .client_to_server import (
     A2uiGenericError as A2uiGenericError,
     A2uiClientError as A2uiClientError,
     A2uiClientDataModel as A2uiClientDataModel,
-    A2uiClientMessageList as A2uiClientMessageList,
     A2uiClientMessageListWrapper as A2uiClientMessageListWrapper,
+    ClientToServerMessage as ClientToServerMessage,
+)
+from .agent_capabilities import (
+    AgentCapabilities as AgentCapabilities,
+    AgentCapabilitiesV1_0 as AgentCapabilitiesV1_0,
+)
+from .renderer_capabilities import (
+    RendererCapabilities as RendererCapabilities,
+    RendererCapabilitiesV1_0 as RendererCapabilitiesV1_0,
+    A2uiClientCapabilities as A2uiClientCapabilities,
+    V09Capabilities as V09Capabilities,
+)
+from .loader import (
+    get_schema_path as get_schema_path,
+    load_schema_json as load_schema_json,
 )

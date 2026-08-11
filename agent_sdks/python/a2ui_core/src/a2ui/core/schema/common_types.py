@@ -47,15 +47,16 @@ class StrictBaseModel(BaseModel):
     @field_validator("version", mode="after", check_fields=False)
     @classmethod
     def validate_version_field(cls, v: Any, info: ValidationInfo) -> Any:
+        from .constants import is_supported_version
+
+        if not is_supported_version(v):
+            raise ValueError(f"UNSUPPORTED_PROTOCOL_VERSION: {v}")
+
         context = info.context or {}
         target_version = context.get("target_version")
-        if target_version is None:
-            from .constants import SPEC_VERSION
-
-            target_version = SPEC_VERSION
-
-        if v != target_version:
-            raise ValueError(f"Input should be '{target_version}'")
+        if target_version is not None and target_version != "any":
+            if v != target_version:
+                raise ValueError(f"Input should be '{target_version}'")
         return v
 
 

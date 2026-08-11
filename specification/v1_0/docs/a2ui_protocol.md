@@ -1040,7 +1040,9 @@ Input components (like `TextField`, `ChoicePicker`) and interactive elements (li
 A `CheckRule` contains a `condition` (which can be a literal boolean, a `DataBinding` path, or a `FunctionCall`) and an optional fallback `message`.
 
 #### 1. Boolean Conditions
+
 When the condition function or data binding returns a `boolean`:
+
 - `true`: The check passes.
 - `false`: The check fails, using the static `message` string (or default fallback) as the error message.
 
@@ -1067,7 +1069,9 @@ When the condition function or data binding returns a `boolean`:
 ```
 
 #### 2. Dynamic ValidationResult Objects
+
 Validation functions can return a dynamic `ValidationResult` object directly to the renderer:
+
 - **`valid`** (`boolean`, required): Whether the check passed.
 - **`code`** (`string`, optional): Machine-readable error code (e.g., `EXPIRED_CARD`, `OUT_OF_RANGE`).
 - **`message`** (`string`, optional): Human-readable error or warning message. If omitted on the return object, the renderer falls back to `CheckRule.message`.
@@ -1075,7 +1079,8 @@ Validation functions can return a dynamic `ValidationResult` object directly to 
 
 Because `ValidationResult` permits additional unconstrained properties, validation functions and specialized components can extend the object with custom domain-specific metadata (such as suggested fix values, field paths, or retry parameters).
 
-*Example Component Definition:*
+_Example Component Definition:_
+
 ```json
 "checks": [
   {
@@ -1089,7 +1094,8 @@ Because `ValidationResult` permits additional unconstrained properties, validati
 ]
 ```
 
-*Example Dynamic `ValidationResult` Returned by `validateCreditCard`:*
+_Example Dynamic `ValidationResult` Returned by `validateCreditCard`:_
+
 ```json
 {
   "valid": false,
