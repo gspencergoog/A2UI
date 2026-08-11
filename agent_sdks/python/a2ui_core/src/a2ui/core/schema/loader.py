@@ -39,4 +39,5 @@ def load_schema_json(schema_name: str, version: str = "v1_0") -> Dict[str, Any]:
     """Loads and returns raw parsed JSON schema dictionary from package assets."""
     path = get_schema_path(schema_name, version)
     with path.open("r", encoding="utf-8") as f:
-        return json.load(f)
+        data: Dict[str, Any] = json.load(f)
+        return data

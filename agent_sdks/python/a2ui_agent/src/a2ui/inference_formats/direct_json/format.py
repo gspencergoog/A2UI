@@ -198,7 +198,8 @@ class DirectJsonFormat(InferenceFormat):
             capabilities = client_ui_capabilities
 
         inline_catalogs = [
-            c.model_dump(by_alias=True) for c in capabilities.inline_catalogs or []
+            c.model_dump(by_alias=True) if hasattr(c, "model_dump") else c
+            for c in capabilities.inline_catalogs or []
         ]
         client_supported_catalog_ids = capabilities.supported_catalog_ids or []
 
