@@ -97,6 +97,8 @@ class DataModel:
             return
 
         # Auto-vivification: traverse and construct intermediate dicts/lists
+        if self._data is None or not isinstance(self._data, (dict, list)):
+            self._data = {}
         current = self._data
         for i, token in enumerate(tokens[:-1]):
             next_token = tokens[i + 1]

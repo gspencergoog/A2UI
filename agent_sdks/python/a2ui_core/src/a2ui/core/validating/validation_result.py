@@ -33,36 +33,45 @@ def normalize_validation_result(
     Returns:
         Canonical ValidationResult instance.
     """
+    rule_code = rule.code if rule else None
+    rule_msg = rule.message if rule else None
+
     if isinstance(raw_result, ValidationResult):
-        return raw_result
+        msg = raw_result.message if raw_result.message is not None else (None if raw_result.valid else (rule_msg if rule_msg is not None else "Validation failed."))
+        code = raw_result.code if raw_result.code is not None else rule_code
+        return ValidationResult(
+            valid=raw_result.valid,
+            code=code,
+            message=msg,
+            severity=raw_result.severity,
+        )
 
     if isinstance(raw_result, bool):
         return ValidationResult(
             valid=raw_result,
-            code=rule.code if rule else None,
-            message=None
-            if raw_result
-            else (rule.message if rule and rule.message else "Validation failed."),
+            code=rule_code,
+            message=None if raw_result else (rule_msg if rule_msg is not None else "Validation failed."),
             severity="error",
         )
 
     if isinstance(raw_result, dict):
         valid = bool(raw_result.get("valid", False))
+        res_code = raw_result.get("code")
+        code = res_code if res_code is not None else rule_code
+        res_msg = raw_result.get("message")
+        msg = res_msg if res_msg is not None else (None if valid else (rule_msg if rule_msg is not None else "Validation failed."))
+        raw_sev = raw_result.get("severity")
+        severity: Literal["error", "warning", "info"] = raw_sev if raw_sev in ("error", "warning", "info") else "error"
         return ValidationResult(
             valid=valid,
-            code=raw_result.get("code") or (rule.code if rule else None),
-            message=raw_result.get("message")
-            or (
-                None
-                if valid
-                else (rule.message if rule and rule.message else "Validation failed.")
-            ),
-            severity=raw_result.get("severity", "error"),
+            code=code,
+            message=msg,
+            severity=severity,
         )
 
     return ValidationResult(
         valid=False,
-        code=rule.code if rule else None,
-        message=rule.message if rule and rule.message else "Validation failed.",
+        code=rule_code,
+        message=rule_msg if rule_msg is not None else "Validation failed.",
         severity="error",
     )

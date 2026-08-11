@@ -24,6 +24,11 @@ def test_index_function_non_integer_offset():
         evaluate_index_function(CollectionScopeContext(index=0), offset=1.5)
 
 
+def test_index_function_negative_result():
+    with pytest.raises(ExpressionEvaluationError, match="cannot be negative"):
+        evaluate_index_function(CollectionScopeContext(index=0), offset=-5)
+
+
 def test_index_function_out_of_scope():
     with pytest.raises(ExpressionEvaluationError, match="Collection Scope"):
         evaluate_index_function(None)

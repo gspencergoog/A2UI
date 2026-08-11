@@ -13,9 +13,7 @@ def test_normalize_boolean_result():
     assert pass_res.valid is True
     assert pass_res.message is None
 
-    fail_res = normalize_validation_result(
-        False, CheckRule(message="Required", code="REQ")
-    )
+    fail_res = normalize_validation_result(False, CheckRule(message="Required", code="REQ"))
     assert fail_res.valid is False
     assert fail_res.message == "Required"
     assert fail_res.code == "REQ"
@@ -34,10 +32,14 @@ def test_normalize_dict_result():
     assert res.severity == "warning"
 
 
-def test_normalize_dict_fallback_message():
-    res = normalize_validation_result(
-        {"valid": False}, CheckRule(message="Fallback message")
-    )
+def test_normalize_validation_result_instance():
+    v = ValidationResult(valid=False)
+    res = normalize_validation_result(v, CheckRule(message="Instance fallback"))
     assert res.valid is False
-    assert res.message == "Fallback message"
-    assert res.severity == "error"
+    assert res.message == "Instance fallback"
+
+
+def test_normalize_empty_string_message():
+    res = normalize_validation_result({"valid": False, "message": ""}, CheckRule(message="Should not overwrite"))
+    assert res.valid is False
+    assert res.message == ""

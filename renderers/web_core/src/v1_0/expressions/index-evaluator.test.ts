@@ -15,23 +15,22 @@ describe('@index Evaluator Tests (v1.0)', () => {
   });
 
   it('throws ExpressionEvaluationError when offset is non-integer', () => {
-    assert.throws(
-      () => evaluateIndexFunction({index: 0}, 1.5),
-      ExpressionEvaluationError
-    );
+    assert.throws(() => evaluateIndexFunction({index: 0}, 1.5), ExpressionEvaluationError);
+  });
+
+  it('throws ExpressionEvaluationError when resulting index is negative', () => {
+    assert.throws(() => evaluateIndexFunction({index: 0}, -5), ExpressionEvaluationError);
   });
 
   it('throws ExpressionEvaluationError when invoked outside Collection Scope', () => {
     assert.throws(
       () => evaluateIndexFunction(undefined),
-      (err: any) => err instanceof ExpressionEvaluationError && err.message.includes('Collection Scope')
+      (err: any) =>
+        err instanceof ExpressionEvaluationError && err.message.includes('Collection Scope'),
     );
   });
 
   it('throws ExpressionEvaluationError when index is negative or invalid', () => {
-    assert.throws(
-      () => evaluateIndexFunction({index: -1}),
-      ExpressionEvaluationError
-    );
+    assert.throws(() => evaluateIndexFunction({index: -1}), ExpressionEvaluationError);
   });
 });

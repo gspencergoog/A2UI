@@ -29,13 +29,16 @@ def evaluate_index_function(
         The calculated index integer.
 
     Raises:
-        ExpressionEvaluationError: If invoked outside a collection scope or offset is non-integer.
+        ExpressionEvaluationError: If invoked outside a collection scope, offset is non-integer, or result is negative.
     """
     if not isinstance(offset, int) or isinstance(offset, bool):
         raise ExpressionEvaluationError("@index() offset must be an integer.")
 
-    if scope is None or scope.index is None or scope.index < 0:
+    if scope is None or scope.index is None or isinstance(scope.index, bool) or scope.index < 0:
         raise ExpressionEvaluationError(
             "@index() function can only be invoked within a Collection Scope (template loop context)."
         )
-    return scope.index + offset
+    result = scope.index + offset
+    if result < 0:
+        raise ExpressionEvaluationError("@index() resulting index cannot be negative.")
+    return result
