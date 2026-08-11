@@ -58,6 +58,12 @@ class CreateSurfaceMessage(StrictBaseModel):
     version: SUPPORTED_VERSIONS = SPEC_VERSION
     create_surface: CreateSurface = Field(..., alias="createSurface")
 
+    @model_validator(mode="after")
+    def validate_catalog_id_for_version(self) -> "CreateSurfaceMessage":
+        if self.version in ("v0.9", "v0.9.1") and not self.create_surface.catalog_id:
+            raise ValueError("createSurface.catalogId is required in v0.9 and v0.9.1.")
+        return self
+
 
 class UpdateComponents(StrictBaseModel):
     surface_id: str = Field(

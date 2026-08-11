@@ -37,7 +37,7 @@ export const CreateSurfaceMessageSchema = z
       .object({
         surfaceId: z.string().describe('The unique identifier for the UI surface to be rendered.'),
         catalogId: z.string().optional().describe('Default catalog identifier.'),
-        theme: z.unknown().optional().describe('Theme parameters for the surface.'),
+        theme: z.record(z.unknown()).optional().describe('Theme parameters for the surface.'),
         sendDataModel: z.boolean().optional().describe('If true, client sends full data model.'),
         components: z.array(ComponentItemSchema).optional().describe('Initial component tree.'),
         dataModel: z.record(z.unknown()).optional().describe('Initial data model.'),

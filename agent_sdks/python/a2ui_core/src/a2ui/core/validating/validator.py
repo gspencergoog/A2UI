@@ -107,6 +107,24 @@ class A2uiValidator:
                             message="'version' is a required property",
                         )
                     )
+                elif MSG_TYPE_CREATE_SURFACE in msg:
+                    ver = msg.get("version")
+                    cs = msg[MSG_TYPE_CREATE_SURFACE]
+                    if (
+                        isinstance(cs, dict)
+                        and ver in ("v0.9", "v0.9.1")
+                        and "catalogId" not in cs
+                    ):
+                        details.append(
+                            A2uiErrorDetail(
+                                path=f"messages.{i}.createSurface.catalogId",
+                                code="missing_field",
+                                message=(
+                                    "'catalogId' is a required property in v0.9 and"
+                                    " v0.9.1"
+                                ),
+                            )
+                        )
 
         try:
             A2uiMessageListWrapper.model_validate(
