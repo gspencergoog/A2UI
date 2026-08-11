@@ -181,7 +181,7 @@ export class DataModel {
       );
     }
 
-    if (value === undefined) {
+    if (value === undefined || value === null) {
       if (Array.isArray(current)) {
         current[parseInt(lastSegment, 10)] = undefined;
       } else {

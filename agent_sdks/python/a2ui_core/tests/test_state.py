@@ -210,6 +210,13 @@ def test_data_model_cascade_and_bubble():
     assert child_updates == [30]
 
 
+def test_data_model_none_deletion():
+    dm = DataModel({"user": {"name": "Alice", "age": 30}})
+    dm.set("/user/name", None)
+    assert dm.get("/user/name") is None
+    assert "name" not in dm.get("/user")
+
+
 def copy_dict(d):
     import copy
 

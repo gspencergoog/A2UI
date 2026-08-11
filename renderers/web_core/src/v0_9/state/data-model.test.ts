@@ -93,6 +93,12 @@ describe('DataModel', () => {
     assert.strictEqual(Object.keys(model.get('/user')).includes('name'), false);
   });
 
+  it('removes keys when value is null (v1.0 spec deletion)', () => {
+    model.set('/user/name', null);
+    assert.strictEqual(model.get('/user/name'), undefined);
+    assert.strictEqual(Object.keys(model.get('/user')).includes('name'), false);
+  });
+
   // --- Array / List Handling (Flutter Parity) ---
 
   it('List: set and get', () => {
