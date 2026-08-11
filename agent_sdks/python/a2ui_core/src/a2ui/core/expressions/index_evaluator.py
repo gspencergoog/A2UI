@@ -34,9 +34,15 @@ def evaluate_index_function(
     if not isinstance(offset, int) or isinstance(offset, bool):
         raise ExpressionEvaluationError("@index() offset must be an integer.")
 
-    if scope is None or scope.index is None or isinstance(scope.index, bool) or scope.index < 0:
+    if (
+        scope is None
+        or scope.index is None
+        or isinstance(scope.index, bool)
+        or scope.index < 0
+    ):
         raise ExpressionEvaluationError(
-            "@index() function can only be invoked within a Collection Scope (template loop context)."
+            "@index() function can only be invoked within a Collection Scope (template"
+            " loop context)."
         )
     result = scope.index + offset
     if result < 0:

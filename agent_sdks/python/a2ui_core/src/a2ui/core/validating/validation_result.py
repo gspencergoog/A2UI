@@ -37,7 +37,15 @@ def normalize_validation_result(
     rule_msg = rule.message if rule else None
 
     if isinstance(raw_result, ValidationResult):
-        msg = raw_result.message if raw_result.message is not None else (None if raw_result.valid else (rule_msg if rule_msg is not None else "Validation failed."))
+        msg = (
+            raw_result.message
+            if raw_result.message is not None
+            else (
+                None
+                if raw_result.valid
+                else (rule_msg if rule_msg is not None else "Validation failed.")
+            )
+        )
         code = raw_result.code if raw_result.code is not None else rule_code
         return ValidationResult(
             valid=raw_result.valid,
@@ -50,7 +58,9 @@ def normalize_validation_result(
         return ValidationResult(
             valid=raw_result,
             code=rule_code,
-            message=None if raw_result else (rule_msg if rule_msg is not None else "Validation failed."),
+            message=None
+            if raw_result
+            else (rule_msg if rule_msg is not None else "Validation failed."),
             severity="error",
         )
 
@@ -59,9 +69,19 @@ def normalize_validation_result(
         res_code = raw_result.get("code")
         code = res_code if res_code is not None else rule_code
         res_msg = raw_result.get("message")
-        msg = res_msg if res_msg is not None else (None if valid else (rule_msg if rule_msg is not None else "Validation failed."))
+        msg = (
+            res_msg
+            if res_msg is not None
+            else (
+                None
+                if valid
+                else (rule_msg if rule_msg is not None else "Validation failed.")
+            )
+        )
         raw_sev = raw_result.get("severity")
-        severity: Literal["error", "warning", "info"] = raw_sev if raw_sev in ("error", "warning", "info") else "error"
+        severity: Literal["error", "warning", "info"] = (
+            raw_sev if raw_sev in ("error", "warning", "info") else "error"
+        )
         return ValidationResult(
             valid=valid,
             code=code,

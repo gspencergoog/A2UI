@@ -13,7 +13,9 @@ def test_normalize_boolean_result():
     assert pass_res.valid is True
     assert pass_res.message is None
 
-    fail_res = normalize_validation_result(False, CheckRule(message="Required", code="REQ"))
+    fail_res = normalize_validation_result(
+        False, CheckRule(message="Required", code="REQ")
+    )
     assert fail_res.valid is False
     assert fail_res.message == "Required"
     assert fail_res.code == "REQ"
@@ -40,6 +42,8 @@ def test_normalize_validation_result_instance():
 
 
 def test_normalize_empty_string_message():
-    res = normalize_validation_result({"valid": False, "message": ""}, CheckRule(message="Should not overwrite"))
+    res = normalize_validation_result(
+        {"valid": False, "message": ""}, CheckRule(message="Should not overwrite")
+    )
     assert res.valid is False
     assert res.message == ""
