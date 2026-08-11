@@ -49,7 +49,10 @@ def validate_composition(
         errors.append(
             CompositionValidationError(
                 component_id=root_component_id,
-                message=f"Surface root component must be of type 'Surface', got '{root_comp.type}'.",
+                message=(
+                    "Surface root component must be of type 'Surface', got"
+                    f" '{root_comp.type}'."
+                ),
                 rule="surface_root",
             )
         )
@@ -70,7 +73,10 @@ def validate_composition(
                     errors.append(
                         CompositionValidationError(
                             component_id=comp.id,
-                            message=f"Component '{comp.id}' references parent '{comp.parent_id}' which does not exist.",
+                            message=(
+                                f"Component '{comp.id}' references parent"
+                                f" '{comp.parent_id}' which does not exist."
+                            ),
                             rule="allowed_parents",
                         )
                     )
@@ -80,8 +86,9 @@ def validate_composition(
                             CompositionValidationError(
                                 component_id=comp.id,
                                 message=(
-                                    f"Component '{comp.id}' of type '{comp.type}' is not allowed under "
-                                    f"parent '{parent_comp.id}' of type '{parent_comp.type}'."
+                                    f"Component '{comp.id}' of type '{comp.type}' is"
+                                    f" not allowed under parent '{parent_comp.id}' of"
+                                    f" type '{parent_comp.type}'."
                                 ),
                                 rule="allowed_parents",
                             )
@@ -95,7 +102,10 @@ def validate_composition(
                         errors.append(
                             CompositionValidationError(
                                 component_id=comp.id,
-                                message=f"Container '{comp.id}' references child '{child_id}' which does not exist.",
+                                message=(
+                                    f"Container '{comp.id}' references child"
+                                    f" '{child_id}' which does not exist."
+                                ),
                                 rule="allowed_children",
                             )
                         )
@@ -104,8 +114,9 @@ def validate_composition(
                             CompositionValidationError(
                                 component_id=comp.id,
                                 message=(
-                                    f"Container '{comp.id}' of type '{comp.type}' does not allow child "
-                                    f"'{child_id}' of type '{child_comp.type}'."
+                                    f"Container '{comp.id}' of type '{comp.type}' does"
+                                    f" not allow child '{child_id}' of type"
+                                    f" '{child_comp.type}'."
                                 ),
                                 rule="allowed_children",
                             )

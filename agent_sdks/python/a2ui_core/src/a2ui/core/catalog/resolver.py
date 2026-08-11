@@ -19,7 +19,9 @@ class CatalogResolver:
         default_catalog_id: Optional[str] = None,
     ) -> None:
         """Initializes resolver with optional catalogs dictionary and default ID."""
-        self._catalogs: Dict[str, CatalogDefinition] = catalogs.copy() if catalogs else {}
+        self._catalogs: Dict[str, CatalogDefinition] = (
+            catalogs.copy() if catalogs else {}
+        )
         self._default_catalog_id: Optional[str] = default_catalog_id
 
     def register_catalog(self, catalog: CatalogDefinition) -> None:

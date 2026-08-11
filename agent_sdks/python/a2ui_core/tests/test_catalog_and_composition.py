@@ -123,11 +123,15 @@ def test_validate_composition_edge_cases():
     # Empty allowedChildren disallows any child
     comps = [
         ComponentInstance(id="root", type="Surface", children=["leaf1"]),
-        ComponentInstance(id="leaf1", type="LeafContainer", parentId="root", children=["text1"]),
+        ComponentInstance(
+            id="leaf1", type="LeafContainer", parentId="root", children=["text1"]
+        ),
         ComponentInstance(id="text1", type="Text", parentId="leaf1"),
     ]
     errors = validate_composition(comps, "root", catalog)
-    assert len(errors) == 2  # Triggers allowed_children on leaf1 AND allowed_parents on text1
+    assert (
+        len(errors) == 2
+    )  # Triggers allowed_children on leaf1 AND allowed_parents on text1
 
     # Dangling parent reference
     comps = [
@@ -141,7 +145,9 @@ def test_validate_composition_edge_cases():
     # Dangling child reference
     comps = [
         ComponentInstance(id="root", type="Surface", children=["card1"]),
-        ComponentInstance(id="card1", type="Card", parentId="root", children=["non_existent"]),
+        ComponentInstance(
+            id="card1", type="Card", parentId="root", children=["non_existent"]
+        ),
     ]
     errors = validate_composition(comps, "root", catalog)
     assert len(errors) == 1
