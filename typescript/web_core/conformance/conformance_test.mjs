@@ -17,7 +17,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert';
-import { fileURLToPath } from 'node:url';
+import {fileURLToPath} from 'node:url';
 import yaml from 'js-yaml';
 
 import {
@@ -49,8 +49,8 @@ function runValidatorTests() {
   console.log(`\nRunning Validator Conformance (${cases.length} cases)...`);
 
   for (const testCase of cases) {
-    const { name, catalog: catalogConfig, expect_error, payload, steps } = testCase;
-    const testSteps = steps || (payload ? [{ payload, expect_error }] : []);
+    const {name, catalog: catalogConfig, expect_error, payload, steps} = testCase;
+    const testSteps = steps || (payload ? [{payload, expect_error}] : []);
 
     let caseFailed = false;
     for (const step of testSteps) {
@@ -58,7 +58,7 @@ function runValidatorTests() {
       const expectedError = step.expect_error || expect_error;
 
       try {
-        const result = A2uiMessageListWrapperSchema.safeParse({ messages: stepPayload });
+        const result = A2uiMessageListWrapperSchema.safeParse({messages: stepPayload});
         let procError = false;
         try {
           for (const msg of stepPayload || []) {
@@ -69,7 +69,7 @@ function runValidatorTests() {
               }
               const visited = new Set();
               const recStack = new Set();
-              const dfs = (id) => {
+              const dfs = id => {
                 if (recStack.has(id)) return true;
                 if (visited.has(id)) return false;
                 visited.add(id);
@@ -99,7 +99,9 @@ function runValidatorTests() {
             }
           }
 
-          const catNames = catalogConfig?.catalog_schema?.catalogId ? [catalogConfig.catalog_schema.catalogId] : ['test_catalog'];
+          const catNames = catalogConfig?.catalog_schema?.catalogId
+            ? [catalogConfig.catalog_schema.catalogId]
+            : ['test_catalog'];
           const proc = new MessageProcessor(catNames.map(n => new Catalog(n, [])));
           proc.processMessages(stepPayload);
         } catch {
@@ -144,7 +146,7 @@ function runCatalogTests() {
   console.log(`\nRunning Catalog Conformance (${cases.length} cases)...`);
 
   for (const testCase of cases) {
-    const { name, action, catalog: catalogConfig } = testCase;
+    const {name, action, catalog: catalogConfig} = testCase;
     try {
       if (action === 'prune') {
         const cat = new Catalog(catalogConfig.name || 'test_catalog', []);
@@ -171,7 +173,7 @@ function runAccessibilityTests() {
   console.log(`\nRunning Accessibility Conformance (${cases.length} cases)...`);
 
   for (const testCase of cases) {
-    const { name, action, surface, assertions } = testCase;
+    const {name, action, surface, assertions} = testCase;
     try {
       if (action === 'accessibility_check' && assertions?.accessibility_tree) {
         const components = surface?.components || {};
