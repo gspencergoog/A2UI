@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {createFunctionImplementation} from '../../catalog/types.js';
-import {A2uiExpressionError} from '../../errors.js';
+import {createFunctionImplementation} from '../../../catalog/types.js';
+import {A2uiExpressionError} from '../../../errors.js';
 import {
   RequiredV1_0Api,
   RegexV1_0Api,
@@ -23,7 +23,7 @@ import {
   NumericV1_0Api,
   EmailV1_0Api,
 } from './validation_functions_api.js';
-import {ValidationResultInput as ValidationResult} from '../schema/catalog-definition.js';
+import {ValidationResultInput as ValidationResult} from '../../schema/catalog-definition.js';
 
 /**
  * Implementation of v1.0 required validation function.
