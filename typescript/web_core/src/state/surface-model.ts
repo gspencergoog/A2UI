@@ -72,6 +72,8 @@ export class SurfaceModel<T extends ComponentApi = ComponentApi> {
    * @param catalog The component catalog used by this surface.
    * @param theme The theme to apply to this surface.
    * @param sendDataModel If true, the renderer will send the full data model.
+   * @param dataModel Optional custom DataModel instance. If provided, the SurfaceModel assumes
+   *   full ownership of its lifecycle and will dispose it when dispose() is called.
    */
   constructor(
     readonly id: string,
@@ -114,12 +116,18 @@ export class SurfaceModel<T extends ComponentApi = ComponentApi> {
         return;
       }
 
+      const rawContext = eventPayload.context ?? eventPayload.args;
+      const context =
+        rawContext && typeof rawContext === 'object' && !Array.isArray(rawContext)
+          ? (rawContext as Record<string, unknown>)
+          : {};
+
       const actionToDispatch: ActionPayload = {
         name,
         surfaceId: this.id,
         sourceComponentId,
         timestamp: new Date().toISOString(),
-        context: eventPayload.context || eventPayload.args || {},
+        context,
       };
 
       await this._onAction.emit(actionToDispatch);
