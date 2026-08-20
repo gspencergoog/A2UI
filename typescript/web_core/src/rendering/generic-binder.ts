@@ -55,6 +55,53 @@ export function scrapeSchemaBehavior(schema: z.ZodTypeAny): BehaviorNode {
   return getFieldBehavior(schema);
 }
 
+function isCheckableField(type: z.ZodTypeAny, propertyName?: string): boolean {
+  if (
+    propertyName === 'checks' ||
+    propertyName === 'validation' ||
+    (propertyName && propertyName.endsWith('Checks'))
+  ) {
+    return true;
+  }
+
+  let current = type;
+  while (
+    current._def.typeName === 'ZodOptional' ||
+    current._def.typeName === 'ZodNullable' ||
+    current._def.typeName === 'ZodDefault'
+  ) {
+    current = current._def.innerType;
+  }
+
+  const desc: string = current.description ?? current._def.description ?? '';
+  if (desc.includes('Check') || desc.includes('Validation')) {
+    return true;
+  }
+
+  if (current._def.typeName === 'ZodArray') {
+    let elem = current._def.type;
+    while (
+      elem._def.typeName === 'ZodOptional' ||
+      elem._def.typeName === 'ZodNullable' ||
+      elem._def.typeName === 'ZodDefault'
+    ) {
+      elem = elem._def.innerType;
+    }
+    const elemDesc: string = elem.description ?? elem._def.description ?? '';
+    if (elemDesc.includes('Check') || elemDesc.includes('ValidationRule')) {
+      return true;
+    }
+    if (elem._def.typeName === 'ZodObject' && typeof elem._def.shape === 'function') {
+      const shape = elem._def.shape();
+      if (shape.condition || shape.valid || shape.validator) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 function getFieldBehavior(type: z.ZodTypeAny, propertyName?: string): BehaviorNode {
   let current = type;
 
@@ -67,7 +114,7 @@ function getFieldBehavior(type: z.ZodTypeAny, propertyName?: string): BehaviorNo
     current = current._def.innerType;
   }
 
-  if (propertyName === 'checks') {
+  if (isCheckableField(current, propertyName)) {
     return {type: 'CHECKABLE'};
   }
 
@@ -303,12 +350,23 @@ export class GenericBinder<T> {
         };
 
         rules.forEach((rule: any, index: number) => {
-          const condition = rule.condition || rule; // Support both {condition, message} and direct logic expr if message is missing
-          const message = rule.message || 'Validation failed';
-          ruleResults[index].message = message;
+          const condition = rule.condition !== undefined ? rule.condition : rule;
+          const defaultMessage = rule.message || 'Validation failed';
+          ruleResults[index].message = defaultMessage;
+
+          const extractResult = (val: unknown) => {
+            if (typeof val === 'object' && val !== null && 'valid' in val) {
+              ruleResults[index].valid = Boolean((val as {valid: unknown}).valid);
+              if ((val as {message?: unknown}).message) {
+                ruleResults[index].message = String((val as {message?: unknown}).message);
+              }
+            } else {
+              ruleResults[index].valid = Boolean(val);
+            }
+          };
 
           const bound = this.context.dataContext.subscribeDynamicValue(condition, newVal => {
-            ruleResults[index].valid = !!newVal;
+            extractResult(newVal);
             updateValidationState();
           });
 
@@ -317,7 +375,7 @@ export class GenericBinder<T> {
           } else {
             bound.unsubscribe();
           }
-          ruleResults[index].valid = !!bound.value;
+          extractResult(bound.value);
         });
 
         // Set initial state
@@ -325,7 +383,7 @@ export class GenericBinder<T> {
         this.updateDeepValue([...parentPath, 'isValid' as any], initialErrors.length === 0);
         this.updateDeepValue([...parentPath, 'validationErrors' as any], initialErrors);
 
-        return value; // The 'checks' property itself remains as the original rules array
+        return value;
       }
 
       case 'STATIC':
