@@ -21,7 +21,6 @@ import '../primitives/errors.dart';
 /// digits (`5`, `5.`, `5.25`), or a decimal point followed by digits (`.5`).
 /// Every client implementation accepts a trailing point (`1.`) and none
 /// accepts a second point (`1.2.3`), so the grammar is written to keep that.
-/// It matches the pattern used by the TypeScript, Python and Swift parsers.
 final RegExp _numberLiteral = RegExp(
   r'^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$',
 );
@@ -269,6 +268,8 @@ class ExpressionParser {
     if (scanner.peek() == '-' || scanner.peek() == '+') {
       scanner.advance();
     }
+    // Consume every dot, so `_numberLiteral` reports `1.2.3` as an invalid
+    // number literal rather than leaving `.3` as trailing characters.
     while (_isDigit(scanner.peek()) || scanner.peek() == '.') {
       scanner.advance();
     }

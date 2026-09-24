@@ -130,11 +130,13 @@ class DataModel {
           }
           // A delete of an index that does not exist leaves the list
           // unchanged. Only a write may extend a list.
-          if (value != null || index < current.length) {
+          if (value != null) {
             while (current.length <= index) {
               current.add(null);
             }
             current[index] = value;
+          } else if (index < current.length) {
+            current[index] = null;
           }
         } else {
           // The parent resolved to a primitive, so there is nothing to
