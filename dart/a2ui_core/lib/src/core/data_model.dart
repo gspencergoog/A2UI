@@ -128,10 +128,14 @@ class DataModel {
               path: path,
             );
           }
-          while (current.length <= index) {
-            current.add(null);
+          // A delete of an index that does not exist leaves the list
+          // unchanged. Only a write may extend a list.
+          if (value != null || index < current.length) {
+            while (current.length <= index) {
+              current.add(null);
+            }
+            current[index] = value;
           }
-          current[index] = value;
         } else {
           // The parent resolved to a primitive, so there is nothing to
           // write into. Dropping the write would hide a malformed path.
