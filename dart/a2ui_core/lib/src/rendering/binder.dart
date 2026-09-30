@@ -242,9 +242,12 @@ class GenericBinder {
             final String key = entry.key;
             final setterName = 'set${key[0].toUpperCase()}${key.substring(1)}';
             final Object? rawValue = value[key];
-            if (rawValue is Map && rawValue.containsKey('path')) {
+            if (rawValue is Map &&
+                (rawValue.containsKey('@path') ||
+                    rawValue.containsKey('path'))) {
+              final pathStr = (rawValue['@path'] ?? rawValue['path']) as String;
               result[setterName] = (Object? newValue) {
-                context.dataContext.set(rawValue['path'] as String, newValue);
+                context.dataContext.set(pathStr, newValue);
               };
             }
           }

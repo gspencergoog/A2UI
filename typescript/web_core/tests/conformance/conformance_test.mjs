@@ -137,7 +137,7 @@ const SKIP_TEST_NAMES = new Set([
  *
  * 'builder.yaml' covers the agent-side typesafe builder API, which web_core does not implement.
  */
-const SKIP_TEST_SUITES = new Set(['accessibility.yaml', 'builder.yaml', 'reserved_keys.yaml']);
+const SKIP_TEST_SUITES = new Set(['accessibility.yaml', 'builder.yaml']);
 
 /**
  * Action types the web_core runner deliberately does not implement, and why.
@@ -498,10 +498,11 @@ async function validateRpcTestCase(testCase) {
     const correlatedId = expect.correlatedCallId;
     assert.strictEqual(inboundResponse.agentFunctionResponse.functionCallId, correlatedId);
 
+    const callName = outboundCall.callFunction['@call'] ?? outboundCall.callFunction.call;
     const outboundPromise = processor.callAgentFunction(
       outboundCall.surfaceId,
       {
-        call: outboundCall.callFunction.call,
+        call: callName,
         catalogId: outboundCall.callFunction.catalogId,
         args: outboundCall.callFunction.args,
       },
@@ -512,21 +513,22 @@ async function validateRpcTestCase(testCase) {
 
     assert.ok(sentOutboundMsg, 'Expected outbound message to be dispatched to outbound listener');
     assert.strictEqual(sentOutboundMsg.callAgentFunction.functionCallId, correlatedId);
-    assert.strictEqual(
-      sentOutboundMsg.callAgentFunction.callFunction.call,
-      outboundCall.callFunction.call,
-    );
+    const sentCallName =
+      sentOutboundMsg.callAgentFunction.callFunction['@call'] ??
+      sentOutboundMsg.callAgentFunction.callFunction.call;
+    assert.strictEqual(sentCallName, callName);
 
     processor.processMessages(inboundResponse);
     const result = await outboundPromise;
     assert.deepStrictEqual(result, expect.result);
   } else if (outboundCall && (expect?.error || expectError)) {
     const expectedErr = expect?.error || expectError;
+    const callName = outboundCall.callFunction['@call'] ?? outboundCall.callFunction.call;
     if (args.secondOutboundCall) {
       processor.callAgentFunction(
         outboundCall.surfaceId,
         {
-          call: outboundCall.callFunction.call,
+          call: callName,
           catalogId: outboundCall.callFunction.catalogId,
           args: outboundCall.callFunction.args,
         },
@@ -536,10 +538,13 @@ async function validateRpcTestCase(testCase) {
       );
       await assert.rejects(
         async () => {
+          const secondCallName =
+            args.secondOutboundCall.callFunction['@call'] ??
+            args.secondOutboundCall.callFunction.call;
           await processor.callAgentFunction(
             args.secondOutboundCall.surfaceId,
             {
-              call: args.secondOutboundCall.callFunction.call,
+              call: secondCallName,
               catalogId: args.secondOutboundCall.callFunction.catalogId,
               args: args.secondOutboundCall.callFunction.args,
             },
@@ -564,7 +569,7 @@ async function validateRpcTestCase(testCase) {
           await processor.callAgentFunction(
             outboundCall.surfaceId,
             {
-              call: outboundCall.callFunction.call,
+              call: callName,
               catalogId: outboundCall.callFunction.catalogId,
               args: outboundCall.callFunction.args,
             },
@@ -776,7 +781,8 @@ function validateSelectCatalogTestCase(testCase) {
 }
 
 function validateValidateTestCase(testCase) {
-  const {steps, payload, messages, expect, expectError, expectValid} = testCase;
+  const expectError = testCase.expectError || testCase.expect_error;
+  const {steps, payload, messages, expect, expectValid} = testCase;
   if (!steps && !payload && !messages) {
     throw new Error('validate test case requires "steps", "messages", or "payload" input.');
   }
@@ -1387,15 +1393,21 @@ function getCatalogsForTestCase(testCase) {
   const rawVersion = resolveProtocolVersion(testCase);
   const version = toCanonicalVersion(rawVersion) || rawVersion;
   const catalogsMap = new Map();
-  catalogsMap.set('v0.8:basic', v0_8Catalog);
-  catalogsMap.set('v0.9:basic', v0_9Catalog);
-  catalogsMap.set('v1.0:basic', v1_0Catalog);
   if (version === '1.0') {
     catalogsMap.set('basic', v1_0BasicCatalog);
+    catalogsMap.set('v1.0:basic', v1_0Catalog);
+    catalogsMap.set('v0.9:basic', v0_9Catalog);
+    catalogsMap.set('v0.8:basic', v0_8Catalog);
   } else if (version === '0.8') {
     catalogsMap.set('basic', v0_8BasicCatalog);
+    catalogsMap.set('v0.8:basic', v0_8Catalog);
+    catalogsMap.set('v0.9:basic', v0_9Catalog);
+    catalogsMap.set('v1.0:basic', v1_0Catalog);
   } else {
     catalogsMap.set('basic', v0_9BasicCatalog);
+    catalogsMap.set('v0.9:basic', v0_9Catalog);
+    catalogsMap.set('v1.0:basic', v1_0Catalog);
+    catalogsMap.set('v0.8:basic', v0_8Catalog);
   }
 
   // Catalogs a case names explicitly. These are returned ahead of the built-in

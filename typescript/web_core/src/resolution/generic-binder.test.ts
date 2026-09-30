@@ -49,7 +49,7 @@ describe('GenericBinder Checkable Trait', () => {
           args.value.length >= args.min,
       },
     ];
-    const mockCatalog = new Catalog('test', '1.0', [], mockFunctions);
+    const mockCatalog = new Catalog('test', '0.9', [], mockFunctions);
     const surface = new SurfaceModel('s1', mockCatalog);
 
     const schema = z.object({
@@ -307,7 +307,7 @@ describe('GenericBinder Checkable Trait', () => {
         },
       },
     ];
-    const mockCatalog = new Catalog('test', '1.0', [], mockFunctions);
+    const mockCatalog = new Catalog('test', '0.9', [], mockFunctions);
     const surface = new SurfaceModel('s1', mockCatalog);
     surface.dataModel.set('/order/id', 'ORD-987');
     surface.dataModel.set('/order/total', 49.99);
@@ -368,7 +368,7 @@ describe('GenericBinder Checkable Trait', () => {
         },
       },
     ];
-    const mockCatalog = new Catalog('test', '1.0', [], mockFunctions);
+    const mockCatalog = new Catalog('test', '0.9', [], mockFunctions);
     const surface = new SurfaceModel('s1', mockCatalog);
 
     const actionSchema = z.object({
@@ -420,7 +420,7 @@ describe('GenericBinder Checkable Trait', () => {
         },
       },
     ];
-    const mockCatalog = new Catalog('test', '1.0', [], mockFunctions);
+    const mockCatalog = new Catalog('test', '0.9', [], mockFunctions);
     const surface = new SurfaceModel('s1', mockCatalog);
 
     const actionSchema = z.object({
@@ -782,12 +782,12 @@ describe('GenericBinder Checkable Trait', () => {
       'c_val',
       'EmailInput',
       {
-        email: {path: '/email'},
+        email: {'@path': '/email'},
         validationRules: [
           {
             condition: {
-              call: 'validate_email',
-              args: {val: {path: '/email'}},
+              '@call': 'validate_email',
+              args: {val: {'@path': '/email'}},
             },
           },
         ],
@@ -852,8 +852,8 @@ describe('GenericBinder Checkable Trait', () => {
         checks: [
           {
             condition: {
-              call: 'dynamic_validator',
-              args: {mode: {path: '/mode'}},
+              '@call': 'dynamic_validator',
+              args: {mode: {'@path': '/mode'}},
             },
             message: 'Default rule failure message',
           },

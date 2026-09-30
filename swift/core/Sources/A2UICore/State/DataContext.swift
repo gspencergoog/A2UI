@@ -61,10 +61,10 @@ public final class DataContext {
   public func resolveDynamicValue(_ value: JSONValue) -> JSONValue {
     switch value {
     case .object(let dict):
-      if let pathStr = dict["path"]?.stringValue {
+      if let pathStr = (dict["@path"] ?? dict["path"])?.stringValue {
         let absPath = JSONValue.absolutePath(for: pathStr, in: self.path)
         return dataModel.get(absPath) ?? .null
-      } else if let callName = dict["call"]?.stringValue {
+      } else if let callName = (dict["@call"] ?? dict["call"])?.stringValue {
         let catalogID = dict["catalogId"]?.stringValue
         guard let function = functionHandler?.function(named: callName, catalogID: catalogID) else {
           return .null
@@ -84,7 +84,12 @@ public final class DataContext {
         }
       }
 
-      return value
+      var resultDict: [String: JSONValue] = [:]
+      for (k, v) in dict {
+        let unescapedKey = k.hasPrefix("@@") ? String(k.dropFirst()) : k
+        resultDict[unescapedKey] = resolveDynamicValue(v)
+      }
+      return .object(resultDict)
     default:
       return value
     }

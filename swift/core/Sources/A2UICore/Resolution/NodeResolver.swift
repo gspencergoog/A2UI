@@ -409,7 +409,9 @@ public final class NodeResolver: Sendable {
             let nestedPropSchema = objProps[k] ?? .boolean(true)
             let classified = classifySchema(nestedPropSchema)
             let nestedPropType: PropertyType
-            if classified == .standard, v.objectValue?["path"] != nil {
+            if classified == .standard,
+              (v.objectValue?["@path"] != nil || v.objectValue?["path"] != nil)
+            {
               nestedPropType = .dynamicValue
             } else {
               nestedPropType = classified
@@ -490,7 +492,9 @@ public final class NodeResolver: Sendable {
     basePath: String?,
     data: JSONValue
   ) -> DataBinding<Bool> {
-    if let dict = value.dictionaryValue, let pathStr = dict["path"]?.stringValue {
+    if let dict = value.dictionaryValue,
+      let pathStr = (dict["@path"] ?? dict["path"])?.stringValue
+    {
       let absPath = JSONValue.absolutePath(for: pathStr, in: basePath)
       let resolvedValue = data[absPath]?.boolValue
       return DataBinding<Bool>(
@@ -514,7 +518,9 @@ public final class NodeResolver: Sendable {
     basePath: String?,
     data: JSONValue
   ) -> DataBinding<String> {
-    if let dict = value.dictionaryValue, let pathStr = dict["path"]?.stringValue {
+    if let dict = value.dictionaryValue,
+      let pathStr = (dict["@path"] ?? dict["path"])?.stringValue
+    {
       let absPath = JSONValue.absolutePath(for: pathStr, in: basePath)
       let resolvedValue = coerceToString(data[absPath])
       return DataBinding<String>(
@@ -539,7 +545,9 @@ public final class NodeResolver: Sendable {
     basePath: String?,
     data: JSONValue
   ) -> DataBinding<Double> {
-    if let dict = value.dictionaryValue, let pathStr = dict["path"]?.stringValue {
+    if let dict = value.dictionaryValue,
+      let pathStr = (dict["@path"] ?? dict["path"])?.stringValue
+    {
       let absPath = JSONValue.absolutePath(for: pathStr, in: basePath)
       let resolvedValue = data[absPath]?.doubleValue
       return DataBinding<Double>(
@@ -563,7 +571,9 @@ public final class NodeResolver: Sendable {
     basePath: String?,
     data: JSONValue
   ) -> DataBinding<JSONValue> {
-    if let dict = value.dictionaryValue, let pathStr = dict["path"]?.stringValue {
+    if let dict = value.dictionaryValue,
+      let pathStr = (dict["@path"] ?? dict["path"])?.stringValue
+    {
       let absPath = JSONValue.absolutePath(for: pathStr, in: basePath)
       let resolvedValue = data[absPath]
       return DataBinding<JSONValue>(
@@ -587,7 +597,9 @@ public final class NodeResolver: Sendable {
     basePath: String?,
     data: JSONValue
   ) -> DataBinding<[String]> {
-    if let dict = value.dictionaryValue, let pathStr = dict["path"]?.stringValue {
+    if let dict = value.dictionaryValue,
+      let pathStr = (dict["@path"] ?? dict["path"])?.stringValue
+    {
       let absPath = JSONValue.absolutePath(for: pathStr, in: basePath)
       let resolvedValue = data[absPath]?.arrayValue?.compactMap { self.coerceToString($0) }
       return DataBinding<[String]>(

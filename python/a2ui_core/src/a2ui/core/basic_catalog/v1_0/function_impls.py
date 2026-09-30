@@ -199,6 +199,20 @@ def _index_execute(
 IndexImplementation = create_function_implementation(IndexApi, _index_execute)
 
 
+def _adapt_ast_part_for_v10(part: Any) -> Any:
+    if not isinstance(part, dict):
+        return part
+    if "path" in part and "componentId" not in part and "@path" not in part:
+        return {"@path": part["path"]}
+    if "call" in part and "@call" not in part:
+        res = {"@call": part["call"]}
+        for k, v in part.items():
+            if k != "call":
+                res[k] = _adapt_ast_part_for_v10(v)
+        return res
+    return {k: _adapt_ast_part_for_v10(v) for k, v in part.items()}
+
+
 # Formatting
 def _format_string(
     args: dict[str, Any],
@@ -218,7 +232,12 @@ def _format_string(
     resolved_parts = []
     for part in parts:
         if context and hasattr(context, "resolve_dynamic_value"):
-            resolved = context.resolve_dynamic_value(part)
+            dyn_part = (
+                _adapt_ast_part_for_v10(part)
+                if getattr(context, "is_v10", False)
+                else part
+            )
+            resolved = context.resolve_dynamic_value(dyn_part)
         else:
             resolved = part
         resolved_parts.append(_to_str(resolved))

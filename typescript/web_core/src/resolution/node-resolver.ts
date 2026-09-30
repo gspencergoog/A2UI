@@ -751,11 +751,12 @@ function wrapDynamicValues(
   switch (behavior.type) {
     case 'DYNAMIC': {
       const path =
-        raw &&
-        typeof raw === 'object' &&
-        !Array.isArray(raw) &&
-        typeof (raw as {path?: unknown}).path === 'string'
-          ? (raw as {path: string}).path
+        raw && typeof raw === 'object' && !Array.isArray(raw)
+          ? typeof (raw as {'@path'?: unknown})['@path'] === 'string'
+            ? (raw as {'@path': string})['@path']
+            : typeof (raw as {path?: unknown}).path === 'string'
+              ? (raw as {path: string}).path
+              : undefined
           : undefined;
       if (path === undefined) {
         return new ResolvedBinding(value);

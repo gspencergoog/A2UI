@@ -52,10 +52,13 @@ class DataContext {
   /// Returns the evaluated result of a dynamic value (literal, data binding,
   /// or function call) at the current moment. Does not create subscriptions.
   Object? resolveSync(Object? value) {
-    if (value is Map && value.containsKey('path')) {
-      return dataModel.get(resolvePath(value['path'] as String));
+    if (value is Map &&
+        (value.containsKey('@path') || value.containsKey('path'))) {
+      final pathVal = (value['@path'] ?? value['path']) as String;
+      return dataModel.get(resolvePath(pathVal));
     }
-    if (value is Map && value.containsKey('call')) {
+    if (value is Map &&
+        (value.containsKey('@call') || value.containsKey('call'))) {
       final call = FunctionCall.fromJson(Map<String, dynamic>.from(value));
       final args = <String, dynamic>{};
       for (final MapEntry<String, dynamic> entry in call.args.entries) {
@@ -70,7 +73,10 @@ class DataContext {
     if (value is Map) {
       final result = <String, dynamic>{};
       for (final MapEntry<Object?, Object?> entry in value.entries) {
-        result[entry.key as String] = resolveSync(entry.value);
+        final keyStr = entry.key as String;
+        final unescapedKey =
+            keyStr.startsWith('@@') ? keyStr.substring(1) : keyStr;
+        result[unescapedKey] = resolveSync(entry.value);
       }
       return result;
     }
@@ -83,10 +89,13 @@ class DataContext {
   /// Returns a reactive signal that re-evaluates a dynamic value
   /// whenever its underlying data dependencies change.
   ReadonlySignal<Object?> resolveListenable(Object? value) {
-    if (value is Map && value.containsKey('path')) {
-      return dataModel.watch(resolvePath(value['path'] as String));
+    if (value is Map &&
+        (value.containsKey('@path') || value.containsKey('path'))) {
+      final pathVal = (value['@path'] ?? value['path']) as String;
+      return dataModel.watch(resolvePath(pathVal));
     }
-    if (value is Map && value.containsKey('call')) {
+    if (value is Map &&
+        (value.containsKey('@call') || value.containsKey('call'))) {
       final call = FunctionCall.fromJson(Map<String, dynamic>.from(value));
       return computed(() {
         final args = <String, dynamic>{};
@@ -98,7 +107,7 @@ class DataContext {
         }
         final Object? result = _invoke(call.call, args, this);
         if (result is ReadonlySignal) {
-          return result.value;
+          return (result as ReadonlySignal<Object?>).value;
         }
         return result;
       });

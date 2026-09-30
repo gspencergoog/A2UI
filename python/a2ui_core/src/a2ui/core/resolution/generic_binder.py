@@ -287,8 +287,10 @@ class GenericBinder:
 
     def _create_setter(self, raw_val: Any) -> Callable[[Any], None]:
         def setter(new_value: Any) -> None:
-            if isinstance(raw_val, dict) and "path" in raw_val:
-                path_val = raw_val["path"]
+            if isinstance(raw_val, dict):
+                path_val = (
+                    raw_val.get("@path") if "@path" in raw_val else raw_val.get("path")
+                )
                 if isinstance(path_val, str):
                     self.context.data_context.set(path_val, new_value)
 
@@ -384,7 +386,8 @@ class GenericBinder:
                     if isinstance(value.get("functionCall"), dict)
                     else value
                 )
-                if isinstance(fc.get("call"), str):
+                call_name = fc.get("@call") or fc.get("call")
+                if isinstance(call_name, str):
                     self.context.data_context.resolve_dynamic_value(fc)
                     return
             resolved = self.context.data_context.resolve_action(value)
