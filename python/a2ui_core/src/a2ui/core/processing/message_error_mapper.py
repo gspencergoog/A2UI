@@ -20,6 +20,7 @@ from typing import Any, TypeGuard
 
 from pydantic import BaseModel
 
+from a2ui.core.common.semver import to_canonical_version
 from a2ui.core.exceptions import (
     A2uiCatalogError,
     A2uiDataError,
@@ -43,27 +44,40 @@ class ErrorEnvelopeContext:
     function_call_id: str | None = None
 
 
+_V08_ACTION_KEYS = (
+    "beginRendering",
+    "surfaceUpdate",
+    "dataModelUpdate",
+)
+
 _ACTION_KEYS = (
     "createSurface",
     "updateComponents",
     "updateDataModel",
     "deleteSurface",
     "callRendererFunction",
-    "beginRendering",
-    "surfaceUpdate",
-    "dataModelUpdate",
+    *_V08_ACTION_KEYS,
 )
+
+_SUPPORTED_CANONICAL_VERSIONS = ("0.8", "0.9", "0.9.1", "1.0")
 
 
 def _extract_dict_context(msg: Mapping[str, Any]) -> ErrorEnvelopeContext:
     """Extracts envelope context from a mapping."""
-    raw_ver = msg.get("version")
-    version = raw_ver if raw_ver in ("v0.8", "v0.9", "v1.0") else "v1.0"
     action: str | None = None
     for key in _ACTION_KEYS:
         if key in msg:
             action = key
             break
+
+    raw_ver = msg.get("version")
+    canonical = to_canonical_version(raw_ver) if isinstance(raw_ver, str) else None
+    if canonical in _SUPPORTED_CANONICAL_VERSIONS:
+        version = f"v{canonical}"
+    elif action in _V08_ACTION_KEYS:
+        version = "v0.8"
+    else:
+        version = "v1.0"
 
     inner = msg.get(action) if action else None
     surface_id: str | None = None

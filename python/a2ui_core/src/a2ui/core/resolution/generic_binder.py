@@ -19,9 +19,11 @@ from dataclasses import dataclass
 from enum import Enum
 from functools import cache
 from typing import Any, Callable, Final
+
 from ..common import Subscription
 from ..schema._dynamic_types import dynamic_literal_kinds
 from ..schema.common_types_schema import get_all_dynamic_type_names
+from ..schema.v1_0 import ValidationResult
 from .component_context import ComponentContext
 
 
@@ -604,8 +606,6 @@ class GenericBinder:
 
     @staticmethod
     def _process_rule_val(val: Any, fallback_msg: str | None) -> dict[str, Any]:
-        from ..schema.v1_0.catalog_definition import ValidationResult
-
         is_obj = False
         if isinstance(val, dict):
             is_obj = "severity" in val or "code" in val
