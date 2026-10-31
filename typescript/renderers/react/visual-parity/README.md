@@ -1,5 +1,8 @@
 # Visual Parity Tests
 
+> **Note:** Manual only. Not run in CI. Compares v0.8 React and Lit by pixels;
+> cross-renderer behavior is checked by `conformance/core/adapter_conformance.yaml`.
+
 Visual parity tests ensure the React renderer produces pixel-identical output to
 the Lit renderer (the reference implementation).
 
@@ -54,13 +57,13 @@ Tests pass when the pixel difference is ≤1%.
 
 ```bash
 # Run all visual parity tests
-yarn test
+yarn test:visual
 
 # Run tests for a specific component
-yarn test --grep "button"
+yarn test:visual --grep "button"
 
 # Run tests for a specific theme
-yarn test --grep "Theme: lit"
+yarn test:visual --grep "Theme: lit"
 
 # Run with UI mode (interactive)
 yarn test:ui
