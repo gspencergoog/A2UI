@@ -15,9 +15,18 @@
 import A2UICore
 import A2UIJSON
 import A2UISwiftUI
+import BasicCatalog
+import BasicCatalogSwiftUI
 import JSONSchema
+import OrderedJSON
 import SwiftUI
 import Testing
+
+#if canImport(AppKit)
+  import AppKit
+#elseif canImport(UIKit)
+  import UIKit
+#endif
 
 private func makeTestSurfaceCatalogForRendering() throws -> AnyCatalog {
   let textSchema = try Schema(
@@ -112,5 +121,63 @@ struct SurfaceTests {
     viewModel.removeExtension("surfaceTheme")
     viewModel.removeExtension("mode")
     #expect(viewModel.metadata == nil)
+  }
+
+  @Test func swappingSurfaceViewModelsDisposesOldResolverAndRendersNewSurface() throws {
+    let coreCatalog = BasicCatalog.makeCatalog(version: .v091)
+    let swiftUICatalog = BasicCatalogImplementation.makeCatalog(version: .v091)
+
+    let firstViewModel = SurfaceViewModel(surfaceID: "surface-a", catalog: coreCatalog)
+    firstViewModel.componentsModel.addComponent(
+      ComponentModel(
+        id: "root",
+        type: "Text",
+        properties: ["text": .string("Surface A")]
+      )
+    )
+    let secondViewModel = SurfaceViewModel(surfaceID: "surface-b", catalog: coreCatalog)
+    secondViewModel.componentsModel.addComponent(
+      ComponentModel(
+        id: "root",
+        type: "Text",
+        properties: ["text": .string("Surface B")]
+      )
+    )
+
+    let firstSurface = Surface(viewModel: firstViewModel, catalog: swiftUICatalog)
+    #if canImport(AppKit)
+      let hostingView = NSHostingView(rootView: firstSurface)
+      hostingView.frame = NSRect(x: 0, y: 0, width: 320, height: 120)
+      hostingView.layoutSubtreeIfNeeded()
+    #elseif canImport(UIKit)
+      let hostingController = UIHostingController(rootView: firstSurface)
+      hostingController.view.frame = CGRect(x: 0, y: 0, width: 320, height: 120)
+      hostingController.view.layoutIfNeeded()
+    #endif
+
+    #expect(firstViewModel.rootNode?.string(for: "text") == "Surface A")
+
+    // Swap to the second surface model and dispose the first surface model.
+    firstViewModel.dispose()
+    let secondSurface = Surface(viewModel: secondViewModel, catalog: swiftUICatalog)
+    #if canImport(AppKit)
+      hostingView.rootView = secondSurface
+      hostingView.layoutSubtreeIfNeeded()
+    #elseif canImport(UIKit)
+      hostingController.rootView = secondSurface
+      hostingController.view.layoutIfNeeded()
+    #endif
+
+    // Mutations to the disposed first surface no longer resolve new nodes.
+    firstViewModel.componentsModel.addComponent(
+      ComponentModel(
+        id: "root",
+        type: "Text",
+        properties: ["text": .string("Stale Update")]
+      )
+    )
+    #expect(firstViewModel.rootNode?.string(for: "text") == "Surface A")
+    #expect(secondSurface.surfaceID == "surface-b")
+    #expect(secondViewModel.rootNode?.string(for: "text") == "Surface B")
   }
 }
