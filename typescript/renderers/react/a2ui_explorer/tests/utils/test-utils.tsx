@@ -54,12 +54,10 @@ export async function loadExample(
       : typeof versionOrOnAction === 'string'
         ? versionOrOnAction
         : undefined;
-  const initialVersion =
-    rawVersion === '1.0' || rawVersion === 'v1.0'
-      ? 'v1.0'
-      : rawVersion === '0.9' || rawVersion === 'v0.9'
-        ? 'v0.9'
-        : undefined;
+  // Always pass an explicit version: the explorer writes the selected version
+  // into the URL, so relying on its URL fallback would leak a previous test's
+  // version into the next one.
+  const initialVersion = rawVersion === '1.0' || rawVersion === 'v1.0' ? 'v1.0' : 'v0.9';
 
   const container = document.createElement('div');
   container.id = TEST_CONTAINER_ID;
