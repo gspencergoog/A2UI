@@ -24,19 +24,42 @@ let activeRoot: Root | null = null;
 
 const TEST_CONTAINER_ID = 'test-container';
 
+export type SpecVersionInput = '0.9' | '1.0' | 'v0.9' | 'v1.0';
+
 /**
  * Mounts the <App> component preloaded with the specified example.
  *
  * @param filename The exact filename of the A2UI JSON example (e.g., "02_email-compose.json").
- * @param onAction Optional callback to capture action dispatch events.
+ * @param onActionOrVersion Optional callback to capture action dispatch events, or protocol version.
+ * @param versionOrOnAction Optional protocol version, or callback to capture action dispatch events.
  * @returns A promise that resolves to the container element.
  */
 export async function loadExample(
   filename: string,
-  onAction?: (action: A2uiClientAction) => void,
+  onActionOrVersion?: ((action: A2uiClientAction) => void) | SpecVersionInput,
+  versionOrOnAction?: SpecVersionInput | ((action: A2uiClientAction) => void),
 ): Promise<HTMLDivElement> {
   // Clean up previous runs
   await cleanup();
+
+  const onAction =
+    typeof onActionOrVersion === 'function'
+      ? onActionOrVersion
+      : typeof versionOrOnAction === 'function'
+        ? versionOrOnAction
+        : undefined;
+  const rawVersion =
+    typeof onActionOrVersion === 'string'
+      ? onActionOrVersion
+      : typeof versionOrOnAction === 'string'
+        ? versionOrOnAction
+        : undefined;
+  const initialVersion =
+    rawVersion === '1.0' || rawVersion === 'v1.0'
+      ? 'v1.0'
+      : rawVersion === '0.9' || rawVersion === 'v0.9'
+        ? 'v0.9'
+        : undefined;
 
   const container = document.createElement('div');
   container.id = TEST_CONTAINER_ID;
@@ -49,7 +72,7 @@ export async function loadExample(
   activeRoot = root;
 
   await act(async () => {
-    root.render(<App initialExampleId={id} onAction={onAction} />);
+    root.render(<App initialExampleId={id} initialVersion={initialVersion} onAction={onAction} />);
     await whenSettled();
   });
 
