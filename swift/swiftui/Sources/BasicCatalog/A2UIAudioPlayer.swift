@@ -34,17 +34,19 @@ extension BasicCatalogImplementation {
 
 /// Observable controller managing native audio playback, scrubbing, and time synchronization.
 @MainActor
-final class AudioPlayerModel: ObservableObject {
+public final class AudioPlayerModel: ObservableObject {
   @Published var isPlaying = false
   @Published var currentTime: Double = 0
   @Published var duration: Double = 0
   @Published var isScrubbing = false
   @Published var scrubValue: Double = 0
 
-  private var player: AVPlayer?
+  public private(set) var player: AVPlayer?
   private var timeObserverToken: Any?
   private var itemEndObserver: (any NSObjectProtocol)?
   private var currentURLString: String = ""
+
+  public init() {}
 
   func load(urlString: String) {
     guard urlString != currentURLString else { return }
@@ -153,10 +155,11 @@ final class AudioPlayerModel: ObservableObject {
 /// SwiftUI component view for the A2UI Basic Catalog `AudioPlayer` component.
 public struct A2UIAudioPlayer: View {
   public let node: Node
-  @StateObject private var model = AudioPlayerModel()
+  @StateObject private var model: AudioPlayerModel
 
-  public init(node: Node) {
+  public init(node: Node, model: AudioPlayerModel = AudioPlayerModel()) {
     self.node = node
+    self._model = StateObject(wrappedValue: model)
   }
 
   private var urlString: String {
