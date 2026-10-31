@@ -17,15 +17,14 @@ import 'package:test/test.dart';
 
 void main() {
   group('MessageErrorMapper', () {
-    test(
-        'maps A2uiCatalogError and A2uiCatalogResolutionError to CATALOG_NOT_FOUND',
-        () {
+    test('maps catalog errors to CATALOG_NOT_FOUND', () {
       final catalogErr = A2uiCatalogError(
         'Catalog not registered',
         catalogId: 'https://example.com/cat.json',
         surfaceId: 'surf-cat',
       );
-      final mapped = MessageErrorMapper.map(catalogErr, defaultVersion: '1.0');
+      final ErrorMessage mapped =
+          MessageErrorMapper.map(catalogErr, defaultVersion: '1.0');
 
       expect(mapped.version, '1.0');
       expect(mapped.error.code, 'CATALOG_NOT_FOUND');
@@ -40,7 +39,7 @@ void main() {
         functionName: 'formatCurrency',
         surfaceId: 'surf-res',
       );
-      final mappedResolution = MessageErrorMapper.map(
+      final ErrorMessage mappedResolution = MessageErrorMapper.map(
         resolutionErr,
         defaultVersion: '1.0',
       );
@@ -50,16 +49,14 @@ void main() {
       expect(mappedResolution.error.path, isNull);
     });
 
-    test(
-        'maps A2uiRecursionError and circular A2uiIntegrityError to RECURSION_LIMIT_EXCEEDED',
-        () {
+    test('maps recursion and cycle errors to RECURSION_LIMIT_EXCEEDED', () {
       final recursionErr = A2uiRecursionError(
         'Depth exceeded',
         cycle: const ['a', 'b', 'a'],
         path: '/components/0',
         surfaceId: 'surf-rec',
       );
-      final mappedRecursion = MessageErrorMapper.map(
+      final ErrorMessage mappedRecursion = MessageErrorMapper.map(
         recursionErr,
         defaultVersion: '1.0',
       );
@@ -72,7 +69,7 @@ void main() {
         'Circular reference detected in component graph',
         surfaceId: 'surf-circ',
       );
-      final mappedCircular = MessageErrorMapper.map(
+      final ErrorMessage mappedCircular = MessageErrorMapper.map(
         circularIntegrity,
         defaultVersion: '1.0',
       );
@@ -85,7 +82,7 @@ void main() {
         'Self-reference on component c1',
         surfaceId: 'surf-self',
       );
-      final mappedSelfRef = MessageErrorMapper.map(
+      final ErrorMessage mappedSelfRef = MessageErrorMapper.map(
         selfRefIntegrity,
         defaultVersion: '1.0',
       );
@@ -98,7 +95,7 @@ void main() {
         componentIds: const ['c2'],
         surfaceId: 'surf-int',
       );
-      final mapped = MessageErrorMapper.map(
+      final ErrorMessage mapped = MessageErrorMapper.map(
         integrityErr,
         defaultVersion: '1.0',
       );
@@ -110,14 +107,12 @@ void main() {
       expect(mapped.error.message, 'Orphan component c2');
     });
 
-    test(
-        'maps A2uiStateError to STATE_ERROR and A2uiExpressionError to EXECUTION_ERROR',
-        () {
+    test('maps state and expression errors to their wire codes', () {
       final stateErr = A2uiStateError(
         'Surface does not exist',
         surfaceId: 'surf-state',
       );
-      final mappedState = MessageErrorMapper.map(
+      final ErrorMessage mappedState = MessageErrorMapper.map(
         stateErr,
         defaultVersion: '1.0',
       );
@@ -131,7 +126,8 @@ void main() {
         expression: '@index',
         surfaceId: 'surf-expr',
       );
-      final mappedExpr = MessageErrorMapper.map(exprErr, defaultVersion: '1.0');
+      final ErrorMessage mappedExpr =
+          MessageErrorMapper.map(exprErr, defaultVersion: '1.0');
       expect(mappedExpr.error.code, 'EXECUTION_ERROR');
       expect(mappedExpr.error.surfaceId, 'surf-expr');
       expect(mappedExpr.error.functionCallId, isNull);
@@ -144,7 +140,8 @@ void main() {
         path: '/items/bad',
         surfaceId: 'surf-data',
       );
-      final mappedData = MessageErrorMapper.map(dataErr, defaultVersion: '1.0');
+      final ErrorMessage mappedData =
+          MessageErrorMapper.map(dataErr, defaultVersion: '1.0');
       expect(mappedData.error.code, 'DATA_ERROR');
       expect(mappedData.error.surfaceId, 'surf-data');
       expect(mappedData.error.functionCallId, isNull);
@@ -155,7 +152,7 @@ void main() {
         rawContent: '{bad',
         surfaceId: 'surf-parse',
       );
-      final mappedParse = MessageErrorMapper.map(
+      final ErrorMessage mappedParse = MessageErrorMapper.map(
         parseErr,
         defaultVersion: '1.0',
       );
@@ -165,15 +162,13 @@ void main() {
       expect(mappedParse.error.path, isNull);
     });
 
-    test(
-        'maps A2uiValidationError with and without path, and composition codes across versions',
-        () {
+    test('maps validation errors with and without path across versions', () {
       final withPath = A2uiValidationError(
         'Missing required text field',
         path: '/components/0/text',
         surfaceId: 'surf-val',
       );
-      final mappedWithPath = MessageErrorMapper.map(
+      final ErrorMessage mappedWithPath = MessageErrorMapper.map(
         withPath,
         defaultVersion: '1.0',
       );
@@ -186,7 +181,7 @@ void main() {
         'Envelope missing action key',
         surfaceId: 'surf-schema',
       );
-      final mappedWithoutPath = MessageErrorMapper.map(
+      final ErrorMessage mappedWithoutPath = MessageErrorMapper.map(
         withoutPath,
         defaultVersion: '1.0',
       );
@@ -200,7 +195,7 @@ void main() {
         path: '/components/1',
         surfaceId: 'surf-comp',
       );
-      final mappedV10 = MessageErrorMapper.map(
+      final ErrorMessage mappedV10 = MessageErrorMapper.map(
         unallowedParent,
         defaultVersion: '1.0',
       );
@@ -208,7 +203,7 @@ void main() {
       expect(mappedV10.error.code, 'UNALLOWED_PARENT');
       expect(mappedV10.error.path, '/components/1');
 
-      final mappedV09 = MessageErrorMapper.map(
+      final ErrorMessage mappedV09 = MessageErrorMapper.map(
         unallowedParent,
         defaultVersion: 'v0.9',
       );
@@ -217,16 +212,14 @@ void main() {
       expect(mappedV09.error.path, '/components/1');
     });
 
-    test(
-        'enforces surfaceId XOR functionCallId for callRendererFunction vs surface errors',
-        () {
+    test('sets either surfaceId or functionCallId, never both', () {
       final rpcErr = A2uiRpcError(
         'Function threw an error',
         RpcErrorCode.executionError,
         functionCallId: 'fn-call-42',
         surfaceId: 'surf-ignored-when-fn-id-present',
       );
-      final mappedRpc = MessageErrorMapper.map(
+      final ErrorMessage mappedRpc = MessageErrorMapper.map(
         rpcErr,
         rawMessage: {
           'version': '1.0',
@@ -241,9 +234,10 @@ void main() {
       expect(mappedRpc.error.functionCallId, 'fn-call-42');
       expect(mappedRpc.error.surfaceId, isNull);
 
-      // Non-A2uiRpcError during callRendererFunction maps to INVALID_FUNCTION_CALL with functionCallId.
+      // A non-RPC error during callRendererFunction maps to
+      // INVALID_FUNCTION_CALL with functionCallId.
       final valDuringCall = A2uiValidationError('Bad call arguments');
-      final mappedCallVal = MessageErrorMapper.map(
+      final ErrorMessage mappedCallVal = MessageErrorMapper.map(
         valDuringCall,
         rawMessage: {
           'version': 'v1.0',
@@ -258,9 +252,10 @@ void main() {
       expect(mappedCallVal.error.functionCallId, 'fn-call-99');
       expect(mappedCallVal.error.surfaceId, isNull);
 
-      // Surface message extracts surfaceId from raw envelope body and leaves functionCallId null.
+      // A surface message takes surfaceId from the raw envelope body and
+      // leaves functionCallId null.
       final surfaceErr = A2uiStateError('Missing surface');
-      final mappedSurface = MessageErrorMapper.map(
+      final ErrorMessage mappedSurface = MessageErrorMapper.map(
         surfaceErr,
         rawMessage: {
           'version': 'v0.9.1',

@@ -90,7 +90,8 @@ void main() {
           },
         });
 
-        final validator = PayloadValidator(catalog: catalog);
+        final PayloadValidator<ComponentApi, FunctionApi> validator =
+            PayloadValidator(catalog: catalog);
 
         validator.validateComponent({
           'id': 'input_1',
@@ -146,7 +147,8 @@ void main() {
           },
         }, protocolVersion: A2uiProtocolVersion.v0_9);
 
-        final validator = PayloadValidator(catalog: catalog);
+        final PayloadValidator<ComponentApi, FunctionApi> validator =
+            PayloadValidator(catalog: catalog);
 
         validator.validateComponent({
           'id': 'card_1',
